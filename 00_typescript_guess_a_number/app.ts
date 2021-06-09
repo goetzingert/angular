@@ -13,6 +13,7 @@ window.onload = () => {
     button.addEventListener("click", (event)=>{
         console.log("button geklicked");
 
+        let currentNumber : number = parseInt("22");
         //2. Entscheidung zu klein oder zu groß oder richtig
         //if else 
         //innerHtml mit der richtigen Ausgabe
