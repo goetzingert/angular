@@ -1,15 +1,14 @@
 "use strict";
-var Student = /** @class */ (function () {
-    function Student() {
+class Student {
+    constructor() {
         this.label = 0;
     }
-    Student.prototype.getLabel = function (label) {
+    getLabel(label) {
         if (label)
             this.label = label;
         return "Matrikelnummer " + this.label;
-    };
-    return Student;
-}());
-var s = new Student();
-var label = s.getLabel(12345);
+    }
+}
+let s = new Student();
+let label = s.getLabel();
 console.log(label);
