@@ -1,0 +1,8 @@
+<div>
+    <ul>
+        <li (click)="listItemClicked($event, training) "*ngFor="let training of trainings">
+            <span>{{training.name}}</span>
+            <span *ngIf="training.description">:{{training.description}}</span>
+        </li>
+    </ul>
+</div>
