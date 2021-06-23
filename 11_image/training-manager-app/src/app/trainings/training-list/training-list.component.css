@@ -2,3 +2,6 @@ li.discontinued{
     color: gray;
     
 }
+li.selected{
+    background-color: khaki;
+}

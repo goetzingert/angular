@@ -1,6 +1,6 @@
 "use strict";
 class Student {
-    constructor(private studentNumber : number) {
+    constructor() {
     }
     getLabel(label) {
         if (label)

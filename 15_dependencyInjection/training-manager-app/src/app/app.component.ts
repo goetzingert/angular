@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Training } from './trainings/training.model';
+import { TrainingService } from './trainings/training.service';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +12,8 @@ export class AppComponent {
 
   public trainingsMockList : Training[];
   public selectedTraining: Training | undefined;
-  constructor(){
-    this.trainingsMockList = [new Training("Angular Grundkurs", "assets/images/")
-      ,
-      new Training("Angular Fortgeschrittene", "Mehr als im Grundkurs")];
-
+  constructor(private readonly trainingService : TrainingService){
+    this.trainingsMockList = trainingService.getAll();
   }
 
   newTrainingSelected(selectedTraining : Training){
