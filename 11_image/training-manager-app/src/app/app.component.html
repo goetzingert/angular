@@ -1,0 +1,3 @@
+<h1>Training Manager App</h1>
+<training-list [trainings] = "trainingsMockList" (trainingSelected)="newTrainingSelected($event)"></training-list>
+<training-details [training]="selectedTraining"></training-details>
