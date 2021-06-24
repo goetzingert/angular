@@ -11,10 +11,10 @@ import { TrainingService } from './trainings/training.service';
 export class AppComponent implements OnInit{
   title = 'training-manager-app';
 
-  public trainingsMockList$ : Observable<Training[]>;
+  public trainingsMockList$ : Observable<Training[]> | undefined;
   public selectedTraining: Training | undefined;
   constructor(private readonly trainingService : TrainingService){
-    this.trainingsMockList$ = this.trainingService.getAll();
+   
 
   }
 
@@ -24,6 +24,8 @@ export class AppComponent implements OnInit{
     
   }
   public ngOnInit(){
-   
+    this.trainingsMockList$ = this.trainingService.getAll();
+    this.trainingsMockList$.subscribe(data =>
+      console.log(data));
   }
 }
