@@ -1,0 +1,12 @@
+li.discontinued{
+    text-decoration: line-through;   
+}
+
+#listOfTrainings{
+    font-weight: bolder;
+}
+
+
+li.selected{
+    background-color: khaki;
+}
