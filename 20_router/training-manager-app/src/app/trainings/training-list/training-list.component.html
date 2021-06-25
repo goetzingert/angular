@@ -1,0 +1,9 @@
+<div>
+    <ul *ngIf="trainings">
+        <li [class.discontinued]="training.discontinued" [class.selected]="isSelectedTraining(training)"  (click)="listItemClicked($event, training) "*ngFor="let training of trainings">
+            <span>{{training.name}}</span>
+            <span *ngIf="training.description">:{{training.description}}</span>
+        </li>
+    </ul>
+    <p *ngIf="!trainings">Keine Trainigs im Angebot</p>
+</div>
