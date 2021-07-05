@@ -11,6 +11,9 @@ interface ResponseArray {
 interface SingleResponse {
   data:Training;
 }
+interface Response{
+  data : any;
+}
 @Injectable()
 export class TrainingService {
   
@@ -27,8 +30,8 @@ export class TrainingService {
   }
 
   getById(id: number): Observable<Training>{
-    return this.httpClient.get<SingleResponse>("api/training/"+id)
-    .pipe(map(object => this.mapNextRun(object.data)));
+    return this.httpClient.get<Response>("api/training/"+id)
+    .pipe(map(object => this.mapNextRun(<Training>object.data)));
   }
 
   insert(training: Training){

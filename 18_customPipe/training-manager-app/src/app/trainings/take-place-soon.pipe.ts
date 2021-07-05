@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-const oneDay = 1000 * 60 * 60 * 24;
+const oneDayInMillis = 1000 * 60 * 60 * 24;
 
 @Pipe({
   name: 'takePlaceSoon'
@@ -12,7 +12,7 @@ export class TakePlaceSoonPipe implements PipeTransform {
       return false;
     const timeTo = date.getTime() - Date.now();
     
-    const soonInMilliSeconds = soon * oneDay;
+    const soonInMilliSeconds = soon * oneDayInMillis;
     return timeTo > 0 && timeTo < soonInMilliSeconds;
   }
 

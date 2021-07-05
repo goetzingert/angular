@@ -27,4 +27,5 @@ export class TrainingListComponent implements OnInit {
     return this.selectedTraining === training;
   }
 
+
 }
