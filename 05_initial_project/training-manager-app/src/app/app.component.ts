@@ -8,8 +8,8 @@ import { Training } from './trainings/training.model';
 })
 export class AppComponent {
   title = 'training-manager-app';
-  trainings : Training[];
+  trainings : Training[]= [new Training("Angular Grundkurs")];;
   constructor(){
-    this.trainings = [new Training("Angular Grundkurs")];
+    
   }
 }
