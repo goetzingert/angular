@@ -1,0 +1,9 @@
+<div>
+    <ul *ngIf="trainings">
+        <li [class.discontinued]="training.discontinued" *ngFor="let training of trainings">
+            <a [routerLink]="[training.id]"><span>{{training.name}}</span>
+            <span *ngIf="training.description">:{{training.description}}</span></a>
+        </li>
+    </ul>
+    <p *ngIf="!trainings">Keine Trainigs im Angebot</p>
+</div>
