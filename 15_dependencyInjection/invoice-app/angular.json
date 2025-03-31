@@ -68,10 +68,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "invoice-app:build:production"
+              "buildTarget": "invoice-app:build:production"
             },
             "development": {
-              "browserTarget": "invoice-app:build:development"
+              "buildTarget": "invoice-app:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -79,7 +79,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "invoice-app:build"
+            "buildTarget": "invoice-app:build"
           }
         },
         "test": {
@@ -101,6 +101,5 @@
         }
       }
     }
-  },
-  "defaultProject": "invoice-app"
+  }
 }
