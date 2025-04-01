@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, FormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Training } from '../training.model';
@@ -14,11 +14,11 @@ export class TrainingDetailsComponent implements OnInit {
 
   public training: Training | undefined;
   public training$: Observable<Training> | undefined;
-  public trainingForm: FormGroup;
+  public trainingForm: UntypedFormGroup;
 
   constructor(private activatedRoute: ActivatedRoute,
     private trainingService: TrainingService,
-    private fb: FormBuilder) {
+    private fb: UntypedFormBuilder) {
     this.trainingForm = this.fb.group({
       name:[''],
       description: ['']

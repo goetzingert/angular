@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
 import { TRAININGS1, TRAININGS2, TRAININGS3} from './training.mock';
 import { Training } from './training.model';
-import {HttpClient, HttpResponse} from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import {map} from "rxjs/operators";
 
 interface ResponseArray {
