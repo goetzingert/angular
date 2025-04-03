@@ -1,0 +1,8 @@
+<div>
+    <ul>
+        <li (click)="listItemClicked($event, customer)" *ngFor="let customer of customers">
+            <span>{{customer.firstname}}</span>
+            <span *ngIf="customer.city"> : {{customer.city}}</span>
+        </li>
+    </ul>
+</div>

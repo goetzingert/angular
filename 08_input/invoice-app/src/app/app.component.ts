@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Training } from './trainings/training.model';
+import { Customer } from './customer/customer.model';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +9,8 @@ import { Training } from './trainings/training.model';
 export class AppComponent {
   title = 'invoice-app';
 
-  public trainingsMockList : Training[];
-  constructor(){
-    this.trainingsMockList = [new Training("Angular Grundkurs")
-      ,
-      new Training("Angular Fortgeschrittene", "Mehr als im Grundkurs")];
-
+  public customersList: Customer[];
+  constructor() {
+    this.customersList = [new Customer("Silke", "Mueller"), new Customer("Hans", "Meyer", "Hauptstraße 21", "11111", "Teststadt")];
   }
 }

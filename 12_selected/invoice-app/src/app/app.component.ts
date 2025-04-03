@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Training } from './trainings/training.model';
+import { Customer } from './customer/customer.model';
 
 @Component({
   selector: 'app-root',
@@ -9,18 +9,16 @@ import { Training } from './trainings/training.model';
 export class AppComponent {
   title = 'invoice-app';
 
-  public trainingsMockList : Training[];
-  public selectedTraining: Training | undefined;
+  public selectedCustomer: Customer | undefined;
+  
+  public customerMockList : Customer[];
   constructor(){
-    this.trainingsMockList = [new Training("Angular Grundkurs", undefined, "assets/images/trainings/angularjs-shield.svg",true)
-      ,
-      new Training("Angular Fortgeschrittene", "Mehr als im Grundkurs", "assets/images/trainings/angular2-shield.svg",false),
-      new Training("Typescript", "Javascript nur Besser", "assets/images/trainings/typescript-logo.svg",false)];
+    this.customerMockList =[new Customer("Silke", "Mueller",undefined,undefined, undefined, "/assets/images/customer/marge.jpg"), new Customer("Hans", "Meyer", "Hauptstraße 21", "11111", "Teststadt","/assets/images/customer/homer.jpg", true)];
 
   }
 
-  newTrainingSelected(selectedTraining : Training){
-    this.selectedTraining = selectedTraining;
-    console.log(selectedTraining);
+  newCustomerSelected(selectedCustomer : Customer){
+    this.selectedCustomer = selectedCustomer;
+    console.log(selectedCustomer);
   }
 }
