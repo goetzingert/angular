@@ -1,3 +1,6 @@
-<h1>Training Manager App</h1>
-<training-list [trainings] = "trainingsMockList" (trainingSelected)="newTrainingSelected($event)"></training-list>
-<training-details [training]="selectedTraining"></training-details>
+<h1>Invoice Manager App</h1>
+<div class="diff-container">
+    <customer-list class="diff-left" [customers]="customerMockList"
+        (customerSelected)="newCustomerSelected($event)"></customer-list>
+    <customer-details class="diff-right" [customer]="selectedCustomer"></customer-details>
+</div>

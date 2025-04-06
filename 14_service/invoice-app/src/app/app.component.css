@@ -1,0 +1,18 @@
+.diff-container {
+	display: flex;
+	justify-content: space-between;
+}
+
+.diff-left {
+	width: 18%;
+	border: 1px solid #ccc;
+	padding: 10px;
+	box-sizing: border-box;
+}
+
+.diff-right {
+	width: 78%;
+	border: 1px solid #ccc;
+	padding: 10px;
+	box-sizing: border-box;
+}
