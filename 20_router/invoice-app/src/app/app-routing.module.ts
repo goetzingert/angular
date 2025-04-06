@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TrainingListComponent } from './trainings/training-list/training-list.component';
 import { RouterModule, Routes } from '@angular/router';
+import { CustomerListComponent } from './customer/customer-list/customer-list.component';
 
 
 export const routes : Routes = [
-  {path:"trainings" , component:TrainingListComponent},//localhost../trainings
-  {path:"**", redirectTo:"/trainings"}//localhost:4200/ --> localhost:4200/trainings
+  {path:"customer" , component:CustomerListComponent},//localhost../customer
+  {path:"**", redirectTo:"/customer"}//localhost:4200/ --> localhost:4200/customer
 ]
 
 @NgModule({

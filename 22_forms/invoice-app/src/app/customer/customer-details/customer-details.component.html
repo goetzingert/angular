@@ -1,0 +1,20 @@
+<form [formGroup]="customerForm" *ngIf="customer; else loadingProgress">
+    <div>
+        <div style="margin-right: 10px; ">
+            <img class="logo" [src]="customer?.imageUrl"> <!-- <img src="assets/"-->
+        </div>
+        <p>Vorname:<input type="text" formControlName="firstname"></p>
+        <p>Nachname:<input type="text" formControlName="lastname"></p>
+        <p>Straße:<input type="text" formControlName="street"></p>
+        <p>PLZ:<input  type="text" formControlName="zip"></p>
+        <p>Stadt:<input  type="text" formControlName="city"></p>
+        <p>Letzes Bestelldatum:<input  type="date" formControlName="lastOrderDate"></p>
+
+
+        <button (click)="goBack()">Zurück zur Liste</button>
+    </div>
+</form>
+
+<ng-template #loadingProgress>
+    Loading Customer...
+</ng-template>

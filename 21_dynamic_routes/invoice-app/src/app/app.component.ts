@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Training } from './trainings/training.model';
-import { TrainingService } from './trainings/training.service';
+import { Component } from '@angular/core';
+import { Customer } from './customer/customer.model';
+import { CustomerService } from './customer/customer.service';
+import { EMPTY, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
