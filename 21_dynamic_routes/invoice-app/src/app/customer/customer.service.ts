@@ -3,12 +3,14 @@ import { CUSTOMER1, CUSTOMER2, CUSTOMER3 } from './customer.mock';
 import { Customer } from './customer.model';
 import { Observable, ReplaySubject } from 'rxjs';
 
-@Injectable()
+@Injectable(
+  {providedIn: 'root'}
+)
 export class CustomerService {
 
   customerSubject : ReplaySubject<Customer[]> ;
 
-  constructor() { 
+  constructor() {
     this.customerSubject = new ReplaySubject<Customer[]>()
   }
 
@@ -28,6 +30,6 @@ export class CustomerService {
 
     getById(id: string): Customer | undefined {
       return [CUSTOMER1, CUSTOMER2, CUSTOMER3].find(cust => cust.id === id );
-     
+
   }
 }

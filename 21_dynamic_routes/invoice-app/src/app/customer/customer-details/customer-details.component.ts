@@ -1,32 +1,38 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, effect, inject, input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Customer } from '../customer.model';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { CustomerService } from '../customer.service';
 
 @Component({
   selector: 'customer-details',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './customer-details.component.html',
   styleUrls: ['./customer-details.component.css']
 })
 export class CustomerDetailsComponent implements OnInit {
 
-  @Input() public customer : Customer | undefined;
+  id = input<string>();
+  customer : Customer | undefined;
 
-  constructor(private readonly activatedRoute: ActivatedRoute, private readonly customerService: CustomerService, private readonly router: Router) { }
+  private readonly customerService = inject(CustomerService);
+  private readonly router = inject(Router);
+
+  constructor() {
+    effect(() => {
+      const currentId = this.id();
+      if (currentId) {
+        this.customer = this.customerService.getById(currentId);
+      }
+    });
+  }
 
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe(
-      params => {
-        this.getCustomerById(params['id']);
-      }
-    )
-  }
-  getCustomerById(id:string) {
-    this.customer = this.customerService.getById(id);
   }
 
-  goBack() : void{
+  goBack(): void {
     this.router.navigate(['/customer']);
   }
 

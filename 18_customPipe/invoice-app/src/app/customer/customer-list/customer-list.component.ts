@@ -1,18 +1,20 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, input, OnInit, output } from '@angular/core';
 import { Customer } from '../customer.model';
+import { CurrentActiveCustomersPipe } from '../current-active-customers-pipe';
 
 @Component({
   selector: 'customer-list',
+  standalone: true,
+  imports: [CurrentActiveCustomersPipe],
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css']
 })
 export class CustomerListComponent implements OnInit {
 
 
-  @Input()
-  customers: Customer[] = [];
+  customers = input<Customer[]>([]);
 
-  @Output() customerSelected: EventEmitter<Customer> = new EventEmitter<Customer>();
+  customerSelected = output<Customer>();
   selectedCustomer: Customer | undefined;
 
 

@@ -3,7 +3,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 const oneDayInMillis = 1000 * 60 * 60 * 24;
 
 @Pipe({
-  name: 'currentActiveCustomers'
+  name: 'currentActiveCustomers',
+  standalone: true
 })
 export class CurrentActiveCustomersPipe implements PipeTransform {
 

@@ -1,38 +1,29 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, output } from '@angular/core';
 import { Customer } from '../customer.model';
-import { Observable, Subscription } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomerService } from '../customer.service';
 
 @Component({
   selector: 'customer-list',
+  standalone: true,
+  imports: [],
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css']
 })
 export class CustomerListComponent implements OnInit {
 
 
-  @Input()
-  customers: Customer[] | null = [];
+  private readonly customerService = inject(CustomerService);
+  customers = toSignal(this.customerService.getAll(), { initialValue: [] });
 
-  @Output() customerSelected: EventEmitter<Customer> = new EventEmitter<Customer>();
+  customerSelected = output<Customer>();
   selectedCustomer: Customer | undefined;
-  customerSubscription: Subscription | undefined;
-  customerObservable: Observable<Customer[]> | undefined;
 
 
-  constructor(private readonly customerService: CustomerService) {
+  constructor() {
   }
 
   ngOnInit(): void {
-    this.customerObservable = this.customerService.getAll();
-    this.customerSubscription = this.customerObservable?.subscribe((data) => {
-      this.customers = data;
-    });
-
-  }
-
-  ngOnDestroy(): void {
-    this.customerSubscription?.unsubscribe();
   }
 
   listItemClicked(event: MouseEvent, cust: Customer) {

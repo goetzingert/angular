@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Customer } from './customer/customer.model';
 import { CustomerService } from './customer/customer.service';
-import { EMPTY, Observable } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { CustomerListComponent } from './customer/customer-list/customer-list.component';
+import { CustomerDetailsComponent } from './customer/customer-details/customer-details.component';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [CustomerListComponent, CustomerDetailsComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -12,10 +16,10 @@ export class AppComponent {
   title = 'invoice-app';
 
   public selectedCustomer: Customer | undefined;
-  customerMockList: Observable<Customer[]> = EMPTY
+  private customerService = inject(CustomerService);
+  public customerMockList = toSignal(this.customerService.getAll(), { initialValue: [] as Customer[] });
   
-  constructor(private readonly customerService: CustomerService){
-    this.customerMockList = this.customerService.getAll();}
+  constructor(){}
 
   newCustomerSelected(selectedCustomer : Customer){
     this.selectedCustomer = selectedCustomer;

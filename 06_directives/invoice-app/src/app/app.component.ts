@@ -3,6 +3,8 @@ import { Customer } from './customer/customer.model';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

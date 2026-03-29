@@ -1,8 +1,12 @@
 import { Component } from '@angular/core';
 import { Customer } from './customer/customer.model';
+import { CustomerListComponent } from './customer/customer-list/customer-list.component';
+import { CustomerDetailsComponent } from './customer/customer-details/customer-details.component';
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [CustomerListComponent, CustomerDetailsComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

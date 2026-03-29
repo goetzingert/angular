@@ -1,13 +1,10 @@
-<div>
-    <div style="margin-right: 10px; ">
-        <img class="logo" [src]="customer?.imageUrl"> <!-- <img src="assets/"-->
+@if (customer) {
+    <div>
+        <div style="margin-right: 10px; ">
+            <img class="logo" [src]="customer.imageUrl">
+        </div>
+        <p>Vorname: {{customer.firstname}}</p>
+        <p>Stadt: {{customer.city}}</p>
+        <button (click)="goBack()">Zurück zur Liste</button>
     </div>
-    <p>Vorname: {{customer?.firstname}}</p>
-    <p>Stadt: {{customer?.city}}</p>
-    <div [class.active]="customer?.lastOrderDate | currentActiveCustomers:5">
-        Letze Bestellung: {{ customer?.lastOrderDate | date:'mediumDate' }}
-      </div>
-
-
-      <button (click)="goBack()">Zurück zur Liste</button>
-</div>
+}

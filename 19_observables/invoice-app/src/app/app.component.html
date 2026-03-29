@@ -1,6 +1,6 @@
 <h1>Invoice Manager App</h1>
 <div class="diff-container">
-    <customer-list class="diff-left" [customers]="customerMockList | async"
+    <customer-list class="diff-left" [customers]="customerMockList()"
         (customerSelected)="newCustomerSelected($event)"></customer-list>
     <customer-details class="diff-right" [customer]="selectedCustomer"></customer-details>
 </div>

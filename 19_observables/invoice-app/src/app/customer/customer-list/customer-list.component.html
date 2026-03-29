@@ -1,8 +1,12 @@
 <div>
     <ul>
-        <li [class.discontinued]="customer.discontinued" [class.selected]="isSelectedCustomer(customer)"  (click)="listItemClicked($event, customer)" *ngFor="let customer of customers">
-            <span>{{customer.firstname}}</span>
-            <span *ngIf="customer.city"> : {{customer.city}}</span>
-        </li>
+        @for (customer of customers(); track customer) {
+            <li [class.discontinued]="customer.discontinued" [class.selected]="isSelectedCustomer(customer)"  (click)="listItemClicked($event, customer)">
+                <span>{{customer.firstname}}</span>
+                @if (customer.city) {
+                    <span> : {{customer.city}}</span>
+                }
+            </li>
+        }
     </ul>
 </div>

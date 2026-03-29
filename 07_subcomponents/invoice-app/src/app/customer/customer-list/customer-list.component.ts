@@ -3,6 +3,8 @@ import { Customer } from '../customer.model';
 
 @Component({
   selector : 'customer-list',
+  standalone: true,
+  imports: [],
   templateUrl: './customer-list.component.html',
   styleUrls: ['./customer-list.component.css']
 })
