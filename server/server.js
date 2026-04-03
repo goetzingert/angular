@@ -7,50 +7,16 @@ var app = express();
 
 app.use(bodyParser.json())
 
-var counter = 0;
+var counter = 3;
 
-var counterBookings = 0;
-
-var bookings = {
-};
-app.post('/api/booking', function (req, res) {
-  var id = counterBookings++;
-  var booking = req.body;
-
-  booking.id = id;
-
-  console.log('Adding booking to collection: %j', booking);
-  bookings[booking.id] = booking;
-
-  res.send({ data: booking });
-});
-
-app.get('/api/booking', function(req, res){
-  var bookingsArray = _.values(bookings);
-  res.send({ data: bookingsArray});
-});
+var bookings = {};
 
 
-app.get('/api/booking/:id', function (req, res) {
-  var id = req.param('id');
 
-  if (bookings[id]) {
-    var booking = bookings[id];
-    res.send({ data: booking });
-  }
-  else {
-    res.status(404);
-    res.send();
-  }
-});
-
-
-var trainings = {
-  0: {id: 0, name: "AngularJS Basics", description: "The Basic Knowledge you know to develop your SinglePageApplication", nextRun: nowPlusDays(24), discontinued: false, imageUrl: "assets/images/trainings/angularjs-shield.svg"},
-  1: {id: 1, name: "AngularJS Advanced", description: "Great Advanced course about the superheroic Framework", nextRun: nowPlusDays(12), discontinued: false, imageUrl: "assets/images/trainings/angularjs-shield.svg"},
-  2: {id: 2, name: "Angular2 & TypeScript", description: "Awesome course about the brand new Angular 2", nextRun: nowPlusDays(3), discontinued: false, imageUrl: "assets/images/trainings/angular2-shield.svg"},
-  3: {id: 3, name: "TypeScript", description: "The right way to understand how to bring JavaScript to another Level", nextRun: nowPlusDays(6), discontinued: false, imageUrl: "assets/images/trainings/typescript-logo.svg"},
-  4: {id: 4, name: "Eclipse RCP", description: "Old School", nextRun: new Date(2015, 11, 2), discontinued: true}
+var customers = {
+  0: {id: 0, firstname: "Hans", lastname: "Maulwurf", street: "Evergreen Terrace 742", zip: "12345", city: "Springfield", imageUrl: "assets/images/customers/customer1.png", discontinued: false, lastOrderDate: nowPlusDays(-10)},
+  1: {id: 1, firstname: "Lisa", lastname: "Simpson", street: "Evergreen Terrace 742", zip: "12345", city: "Springfield", imageUrl: "assets/images/customers/customer2.png", discontinued: false, lastOrderDate: nowPlusDays(-2)},
+  2: {id: 2, firstname: "C. Montgomery", lastname: "Burns", street: "Nuclear Plant", zip: "54321", city: "Springfield", imageUrl: "assets/images/customers/customer3.png", discontinued: true, lastOrderDate: nowPlusDays(-365)}
 };
 
 
@@ -71,29 +37,29 @@ app.get('/api/pigs', function(req, res){
   res.send({ data: pigArray});
 });
 
-app.get('/api/training', function(req, res){
-  var trainingArray = _.values(trainings);
-  res.send({ data: trainingArray});
+app.get('/api/customer', function(req, res){
+  var customerArray = _.values(customers);
+  res.send({ data: customerArray});
 });
 
-app.post('/api/training', function (req, res) {
+app.post('/api/customer', function (req, res) {
   var id = counter++;
-  var training = req.body;
+  var customer = req.body;
 
-  training.id = id;
+  customer.id = id;
 
-  console.log('Adding training to collection: %j', training);
-  trainings[training.id] = training;
+  console.log('Adding customer to collection: %j', customer);
+  customers[customer.id] = customer;
 
-  res.send({ data: training });
+  res.send({ data: customer });
 });
 
-app.get('/api/training/:id', function (req, res) {
+app.get('/api/customer/:id', function (req, res) {
   var id = req.param('id');
 
-  if (trainings[id]) {
-    var training = trainings[id];
-    res.send({ data: training });
+  if (customers[id]) {
+    var customer = customers[id];
+    res.send({ data: customer });
   }
   else {
     res.status(404);
@@ -101,16 +67,16 @@ app.get('/api/training/:id', function (req, res) {
   }
 });
 
-app.put('/api/training/:id', function (req, res) {
+app.put('/api/customer/:id', function (req, res) {
   var id = req.param('id');
-  var training = req.body;
-  training.id = +id;
+  var customer = req.body;
+  customer.id = +id;
 
-  console.log('Updating training in collection: %j', training);
+  console.log('Updating customer in collection: %j', customer);
 
-  if (trainings[id]) {
-    trainings[id] = training;
-    res.send({ data: training });
+  if (customers[id]) {
+    customers[id] = customer;
+    res.send({ data: customer });
   }
   else {
     res.status(404);
@@ -118,17 +84,17 @@ app.put('/api/training/:id', function (req, res) {
   }
 });
 
-app.patch('/api/training/:id', function (req, res) {
+app.patch('/api/customer/:id', function (req, res) {
   var id = +req.param('id');
-  var training = trainings[id];
+  var customer = customers[id];
   var patch = req.body;
 
-  console.log('Updating training in collection: %j', training);
+  console.log('Updating customer in collection: %j', customer);
 
-  if (training) {
+  if (customer) {
     delete patch.id;
-    Object.assign(training, patch);
-    res.send({ data: training });
+    Object.assign(customer, patch);
+    res.send({ data: customer });
   }
   else {
     res.status(404);
@@ -136,13 +102,13 @@ app.patch('/api/training/:id', function (req, res) {
   }
 });
 
-app.delete('/api/training/:id', function (req, res) {
+app.delete('/api/customer/:id', function (req, res) {
   var id = req.param('id');
   
-  if (trainings[id]) {
-    console.log('Removing training from collection: %j', trainings[id]);
+  if (customers[id]) {
+    console.log('Removing customer from collection: %j', customers[id]);
 
-    delete trainings[id];
+    delete customers[id];
     res.status(200);
   }
   else {
@@ -158,7 +124,7 @@ app.post('/api/booking', function (req, res) {
 
   booking.id = id;
 
-  console.log('Adding training to collection: %j', training);
+  console.log('Adding booking to collection: %j', booking);
   bookings[booking.id] = booking;
 
   res.send({ data: booking });

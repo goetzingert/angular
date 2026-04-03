@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Observable, ReplaySubject } from 'rxjs';
-import { TRAININGS1, TRAININGS2, TRAININGS3} from './training.mock';
 import { Training } from './training.model';
 import {HttpClient, HttpResponse} from "@angular/common/http";
 import {map} from "rxjs/operators";
@@ -16,11 +15,11 @@ interface Response{
 }
 @Injectable()
 export class TrainingService {
-  
+
   trainingsSubject : ReplaySubject<Training[]>;
-  constructor(private httpClient : HttpClient) { 
+  constructor(private httpClient : HttpClient) {
     this.trainingsSubject = new ReplaySubject<Training[]>()
-    
+
   }
 
   public getAll() : Observable<Training[]> {
@@ -39,8 +38,8 @@ export class TrainingService {
   }
   /**
    * Next Run from server is a string --> Map it to Date
-   * @param training 
-   * @returns 
+   * @param training
+   * @returns
    */
   mapNextRun(training: Training): Training {
     console.log("Map it")

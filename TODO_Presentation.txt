@@ -1,0 +1,82 @@
+   Basierend auf der Analyse der presentation.pdf und der bereits durchgeführten Modernisierung der Übungen Kapitel @04 bis @22 habe ich die relevanten Seiten
+   identifiziert, die umgestaltet werden müssen.
+
+   Da die Schulung nun auf Standalone Components, Signals und den neuen Control Flow setzt, sind folgende Anpassungen in der Präsentation notwendig, um sie mit den
+   Übungen synchron zu halten:
+
+   1. Sektion: Angular Module ab S. 755
+   Die gesamte Sektion über NgModule ist in der modernen Angular-Welt seit v17 optional bzw. für neue Projekte veraltet.
+
+   • Alte Folie: "Ein Angular Module" / "Was ist ein Modul"
+   • Neuer Vorschlag: "Standalone Components"
+     • Inhalt: Erklären, dass Komponenten nun eigenständig standalone: true sind.
+     • Grundgedanke: Wegfall der Notwendigkeit, Komponenten in einem NgModule zu deklarieren.
+     • Imports: Direktes Importieren von Abhängigkeiten andere Komponenten, CommonModule-Ersatz wie @if/@for in der @Component-Annotation.
+     • Bezug zur Übung: Entspricht den Änderungen ab Kapitel @04 und @05.
+
+   2. Sektion: Bootstrapping S. 864, S. 936
+   Der Startvorgang der App hat sich grundlegend vereinfacht.
+
+   • Alte Folie: "Angular-Module: Module-Deklaration" / "Ablauf bis hier her" mit bootstrapModule
+   • Neuer Vorschlag: "Bootstrapping einer Standalone App"
+     • Code-Beispiel: bootstrapApplication(AppComponent, { providers: [...] }) in der main.ts.
+     • Vorteil: Weniger Boilerplate-Code, kein AppModule mehr nötig.
+     • Bezug zur Übung: Siehe main.ts in allen modernisierten Kapiteln ab @04.
+
+   3. Sektion: Direktiven & Control Flow S. 1012, S. 1025
+   Die strukturellen Direktiven *ngIf und *ngFor sind zwar noch vorhanden, der neue "Built-in Control Flow" ist jedoch der aktuelle Standard.
+
+   • Alte Folie: "Direktiven des Angular-Frameworks" / "Structural Directives" *ngIf, *ngFor
+   • Neuer Vorschlag: "Moderner Control Flow @if, @for"
+     • Code-Beispiel:
+     @for (customer of customers; track customer.id) {
+       <li>{{ customer.name }}</li>
+     } @empty {
+       <p>Keine Kunden gefunden.</p>
+     }
+     • Vorteile: Bessere Performance kein IterableDiffers, kein Import von CommonModule nötig, sauberere Syntax.
+     • Bezug zur Übung: Kapitel @06 zeigt diesen neuen Flow.
+
+   4. Sektion: Data Binding & Kommunikation ab S. 1142
+   Hier sollten die neuen Signal-basierten APIs eingeführt werden.
+
+   • Alte Folie: "Input-Parameter" / "Output -- Events"
+   • Neuer Vorschlag: "Reaktive Komponenten mit Signals"
+     • Input: customer = input<Customer>(); statt @Input()
+     • Output: selected = output<Customer>(); statt @Output() / EventEmitter
+     • Vorteil: Inputs sind jetzt schreibgeschützte Signals, was die reaktive Programmierung z.B. mit computed() erheblich vereinfacht.
+     • Bezug zur Übung: Kapitel @08 Input und @10 Output.
+
+   5. Sektion: Dependency Injection S. 1441, S. 1540
+   Die Constructor Injection wird zunehmend durch die flexiblere inject()-Funktion ergänzt oder ersetzt.
+
+   • Alte Folie: "Ein simpler Service" / "Wie geht DI in Angular"
+   • Neuer Vorschlag: "Moderne Dependency Injection mit inject"
+     • Code-Beispiel: private service = inject(CustomerService); statt constructor(private service: CustomerService) {}.
+     • Vorteile: Bessere Typisierung in komplexen Szenarien, funktioniert auch in Functions z.B. Route Guards, übersichtlicherer Code bei vielen Abhängigkeiten.
+     • Bezug zur Übung: Kapitel @14 und @15.
+
+   6. Sektion: Routing ab S. 1926
+   Die Konfiguration des Routings erfolgt nun über Providers statt Module.
+
+   • Alte Folie: "Routing & Navigation" mit RouterModule.forRoot()
+   • Neuer Vorschlag: "Functional Router Configuration"
+     • Inhalt: Verwendung von provideRouter(routes, withComponentInputBinding()) in der main.ts.
+     • Feature-Highlight: withComponentInputBinding() ermöglicht es, Routen-Parameter IDs direkt als Signal-Inputs in der Komponente zu empfangen.
+     • Bezug zur Übung: Kapitel @20 und @21.
+
+   7. Sektion: Observables & Signals Interop Neu, nach S. 1903
+   Es sollte eine Folie zur Brücke zwischen RxJS und Signals hinzugefügt werden.
+
+   • Vorschlag Titel: "RxJS Interop: toSignal"
+     • Inhalt: Zeigen, wie ein Observable z.B. vom HttpClient mit toSignal() in ein Signal umgewandelt wird.
+     • Vorteil: Kein async-Pipe mehr im Template nötig, einfachere Handhabung asynchroner Daten.
+     • Bezug zur Übung: Kapitel @19.
+
+   Zusammenfassung der empfohlenen Strukturänderung:
+   1. Entfernen: Alle Folien, die das AppModule oder NgModule als zentrales Element erklären.
+   2. Ersetzen: *ngIf/*ngFor Folien durch @if/@for.
+   3. Ergänzen: input(), output() und inject() als moderne Alternativen zu den Dekoratoren und der Constructor Injection.
+   4. Aktualisieren: Alle Code-Beispiele auf den Stand der Übungen bringen Standalone: true.
+
+   Diese Änderungen stellen sicher, dass die Teilnehmer der Schulung genau das in der Theorie sehen, was sie in den Übungen praktisch umsetzen.
