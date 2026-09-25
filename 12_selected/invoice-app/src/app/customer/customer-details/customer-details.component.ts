@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, input, OnInit } from '@angular/core';
 import { Customer } from '../customer.model';
 
 @Component({
@@ -9,7 +9,7 @@ import { Customer } from '../customer.model';
 })
 export class CustomerDetailsComponent implements OnInit {
 
-  @Input() public customer : Customer | undefined;
+  customer = input<Customer | undefined>();
 
   constructor() { }
 

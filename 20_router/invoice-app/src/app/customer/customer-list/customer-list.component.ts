@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, output, signal } from '@angular/core';
 import { Customer } from '../customer.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CustomerService } from '../customer.service';
@@ -17,7 +17,7 @@ export class CustomerListComponent implements OnInit {
   customers = toSignal(this.customerService.getAll(), { initialValue: [] });
 
   customerSelected = output<Customer>();
-  selectedCustomer: Customer | undefined;
+  selectedCustomer = signal<Customer | undefined>(undefined);
 
 
   constructor() {
@@ -27,11 +27,11 @@ export class CustomerListComponent implements OnInit {
   }
 
   listItemClicked(event: MouseEvent, cust: Customer) {
-    this.selectedCustomer = cust;
-    this.customerSelected.emit(this.selectedCustomer);
+    this.selectedCustomer.set(cust);
+    this.customerSelected.emit(cust);
   }
   isSelectedCustomer(cust: Customer) {
-    return cust === this.selectedCustomer;
+    return cust === this.selectedCustomer();
   }
 
 }

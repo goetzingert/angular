@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Customer } from './customer/customer.model';
 import { CustomerService } from './customer/customer.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,14 +15,14 @@ import { CustomerDetailsComponent } from './customer/customer-details/customer-d
 export class AppComponent {
   title = 'invoice-app';
 
-  public selectedCustomer: Customer | undefined;
+  public selectedCustomer = signal<Customer | undefined>(undefined);
   private customerService = inject(CustomerService);
   public customerMockList = toSignal(this.customerService.getAll(), { initialValue: [] as Customer[] });
   
   constructor(){}
 
   newCustomerSelected(selectedCustomer : Customer){
-    this.selectedCustomer = selectedCustomer;
+    this.selectedCustomer.set(selectedCustomer);
     console.log(selectedCustomer);
   }
 }

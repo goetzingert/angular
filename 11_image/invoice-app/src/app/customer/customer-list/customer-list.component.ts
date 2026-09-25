@@ -1,4 +1,4 @@
-import { Component, input, OnInit, output } from '@angular/core';
+import { Component, input, OnInit, output, signal } from '@angular/core';
 import { Customer } from '../customer.model';
 
 @Component({
@@ -13,7 +13,7 @@ export class CustomerListComponent implements OnInit {
   customers = input<Customer[]>([]);
 
   customerSelected = output<Customer>();
-  selectedCustomer: Customer | undefined;
+  selectedCustomer = signal<Customer | undefined>(undefined);
 
 
   constructor() {
@@ -24,8 +24,8 @@ export class CustomerListComponent implements OnInit {
   }
 
   listItemClicked(event: MouseEvent, cust: Customer) {
-    this.selectedCustomer = cust;
-    this.customerSelected.emit(this.selectedCustomer);
+    this.selectedCustomer.set(cust);
+    this.customerSelected.emit(cust);
   }
 
 }

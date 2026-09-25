@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { Customer } from './customer/customer.model';
 import { CustomerService } from './customer/customer.service';
 import { CustomerListComponent } from './customer/customer-list/customer-list.component';
@@ -14,7 +14,7 @@ import { CustomerDetailsComponent } from './customer/customer-details/customer-d
 export class AppComponent {
   title = 'invoice-app';
 
-  public selectedCustomer: Customer | undefined;
+  public selectedCustomer = signal<Customer | undefined>(undefined);
   customerMockList: Customer[] = [];
 
   private readonly customerService = inject(CustomerService);
@@ -24,7 +24,7 @@ export class AppComponent {
   }
 
   newCustomerSelected(selectedCustomer : Customer){
-    this.selectedCustomer = selectedCustomer;
+    this.selectedCustomer.set(selectedCustomer);
     console.log(selectedCustomer);
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { Customer } from './customer/customer.model';
 import { CustomerListComponent } from './customer/customer-list/customer-list.component';
 import { CustomerDetailsComponent } from './customer/customer-details/customer-details.component';
@@ -13,7 +13,7 @@ import { CustomerDetailsComponent } from './customer/customer-details/customer-d
 export class AppComponent {
   title = 'invoice-app';
 
-  public selectedCustomer: Customer | undefined;
+  public selectedCustomer = signal<Customer | undefined>(undefined);
   
   public customerMockList : Customer[];
   constructor(){
@@ -22,7 +22,7 @@ export class AppComponent {
   }
 
   newCustomerSelected(selectedCustomer : Customer){
-    this.selectedCustomer = selectedCustomer;
+    this.selectedCustomer.set(selectedCustomer);
     console.log(selectedCustomer);
   }
 }

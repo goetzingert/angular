@@ -1,0 +1,12 @@
+<div>
+    <ul>
+        @for (customer of customers(); track customer) {
+            <li [class.discontinued]="customer.discontinued" [class.selected]="isSelectedCustomer(customer)" (click)="listItemClicked($event, customer)">
+                <span>{{customer.firstname}}</span>
+                @if (customer.city) {
+                    <span> : {{customer.city}}</span>
+                }
+            </li>
+        }
+    </ul>
+</div>

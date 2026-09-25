@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Customer } from './customer.model';
 import { Observable, ReplaySubject } from 'rxjs';
 import { HttpClient } from "@angular/common/http";
@@ -17,9 +17,10 @@ interface Response {
 })
 export class CustomerService {
 
+  private readonly httpClient = inject(HttpClient);
   customerSubject: ReplaySubject<Customer[]>;
 
-  constructor(private httpClient: HttpClient) {
+  constructor() {
     this.customerSubject = new ReplaySubject<Customer[]>();
     this.reloadData();
   }

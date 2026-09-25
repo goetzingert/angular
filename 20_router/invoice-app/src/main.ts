@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { AppComponent } from './app/app.component';
-import { routes } from './app/app-routing.module';
+import { routes } from './app/app.routes';
 import { environment } from './environments/environment';
 
 if (environment.production) {

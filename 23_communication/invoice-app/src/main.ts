@@ -5,7 +5,7 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 
 import { AppComponent } from './app/app.component';
-import { routes } from './app/app-routing.module';
+import { routes } from './app/app.routes';
 import { environment } from './environments/environment';
 
 if (environment.production) {
