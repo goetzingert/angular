@@ -29,3 +29,4 @@ Teil 2 (Übung 24 – HTTP-Anbindung, im Hinweis-Abschnitt gelöst):
 - Für Teil 1 reicht es, im Mock-Array das Element mit passender ID zu finden und durch das neue Objekt zu ersetzen (z. B. per `map`).
 - Für Teil 2: Die REST-Endpunkte des Beispiel-Servers lauten u. a. `GET api/customer`, `GET api/customer/:id`, `POST api/customer`, `PUT/PATCH/DELETE api/customer/:id`.
 - Diese Projektstufe (`23_communication`) enthält bereits die vollständige, funktionierende HTTP-Anbindung als Musterlösung für Übung 24 – es gibt dafür keinen eigenen Ordner „24“.
+- Weiterführend: Übung 25 (`25_httpInterceptorGuard`) baut direkt auf diesem Stand auf und ergänzt einen funktionalen Route Guard sowie einen funktionalen HTTP-Interceptor.

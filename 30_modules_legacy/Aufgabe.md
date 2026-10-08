@@ -1,10 +1,10 @@
-# Übung 25: Legacy – Angular Module (NgModule)
+# Übung 30: Legacy – Angular Module (NgModule)
 
 ## Aufgabe
 
 Lerne den klassischen, Modul-basierten Aufbau einer Angular-Anwendung kennen, wie er in vielen Bestandsprojekten noch verwendet wird.
 
-1. Öffne das Projekt `25_modules_legacy` (NgModule-basierte Variante).
+1. Öffne das Projekt `30_modules_legacy` (NgModule-basierte Variante).
 2. Starte das Backend (`server`-Ordner: `npm install`, dann `node server.js`).
 3. Starte die App mit `ng serve --proxy-config dev.proxy.json`.
 4. Analysiere den Aufbau: `main.ts` mit `platformBrowserDynamic().bootstrapModule(AppModule)`, die `AppModule`-Klasse mit `declarations`, `imports`, `providers` und `bootstrap`, sowie das zugehörige `AppRoutingModule` mit `RouterModule.forRoot(...)`.

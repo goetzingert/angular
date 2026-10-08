@@ -1,0 +1,25 @@
+<div>
+    @if (isLoading()) {
+        <p>Lade Kunden...</p>
+    }
+    @if (error()) {
+        <p class="error">Fehler beim Laden der Kunden.</p>
+    }
+    <div>
+        <input #searchInput type="text" placeholder="Nach Vorname filtern..."
+               [value]="filterText()" (input)="onFilterInput($event)">
+        <button (click)="clearFilter()">Filter leeren &amp; fokussieren</button>
+    </div>
+    <ul>
+        @for (customer of filteredCustomers(); track customer) {
+            <li [class.discontinued]="customer.discontinued" [class.selected]="isSelectedCustomer(customer)" (click)="listItemClicked($event, customer)">
+                <a [routerLink]="[customer.id]">
+                    <span>{{customer.firstname}}</span>
+                    @if (customer.city) {
+                        <span> : {{customer.city}}</span>
+                    }
+                </a>
+            </li>
+        }
+    </ul>
+</div>

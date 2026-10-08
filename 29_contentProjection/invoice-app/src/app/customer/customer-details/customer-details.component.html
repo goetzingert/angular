@@ -1,0 +1,32 @@
+@if (isLoading()) {
+    <p>Loading Customer...</p>
+} @else if (customer()) {
+    <app-card>
+        <span card-header>
+            Kundendetails: {{ customer()?.firstname }} {{ customer()?.lastname }}
+        </span>
+
+        <form [formGroup]="customerForm">
+            <div>
+                <div style="margin-right: 10px; ">
+                    @if (customer()?.imageUrl) {
+                        <img class="logo" [ngSrc]="customer()!.imageUrl!" width="200" height="200" priority>
+                    }
+                </div>
+                <p>Vorname:<input type="text" formControlName="firstname"></p>
+                <p>Nachname:<input type="text" formControlName="lastname"></p>
+                <p>Straße:<input type="text" formControlName="street"></p>
+                <p>PLZ:<input type="text" formControlName="zip"></p>
+                <p>Stadt:<input type="text" formControlName="city"></p>
+                <p>Letzes Bestelldatum:<input type="date" formControlName="lastOrderDate"></p>
+            </div>
+        </form>
+
+        <div card-footer>
+            <button (click)="onSubmit()">Speichern</button>
+            <button (click)="goBack()">Zurück zur Liste</button>
+        </div>
+    </app-card>
+} @else {
+    <p>Kunde nicht gefunden.</p>
+}
