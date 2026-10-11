@@ -1,5 +1,7 @@
 # Übung 33: CustomerStore einführen
 
+**Zeitrichtwert:** ca. 45 Minuten
+
 Basis: Ergebnis von Übung 32 (`32_reaktivitaet`). Die Zustandslogik wandert aus der Komponente in einen Store.
 
 ## Aufgabe

@@ -1,5 +1,7 @@
 # Übung 38: Abschlussprojekt „Kunden-Dashboard“
 
+**Zeitrichtwert:** ca. 60 Minuten (Gruppenarbeit)
+
 Basis: Ergebnis von Übung 37 (`37_ki_review`).
 
 ## Aufgabe

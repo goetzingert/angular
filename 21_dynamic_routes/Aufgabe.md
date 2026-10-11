@@ -1,5 +1,7 @@
 # Übung 21: Routing mit Parametern
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Erstelle eine Route für die Detailansicht eines einzelnen Kunden, inklusive dynamischem Pfadparameter.

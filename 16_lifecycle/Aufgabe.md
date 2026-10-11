@@ -1,5 +1,7 @@
 # Übung 16: OnInit
 
+**Zeitrichtwert:** ca. 10 Minuten
+
 ## Aufgabe
 
 Initialisiere die Daten in `AppComponent` im `ngOnInit`-Hook statt im Konstruktor.

@@ -1,5 +1,7 @@
 # Übung 5: Erstelle ein eigenes Datenmodell (Databinding)
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Lege dein erstes eigenes Datenmodell an, das später als Basis für die Kundenliste der App dient.

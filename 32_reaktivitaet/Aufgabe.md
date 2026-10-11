@@ -1,5 +1,7 @@
 # Übung 32: Reaktivitäts-Fallen finden
 
+**Zeitrichtwert:** ca. 45 Minuten
+
 Basis: Ergebnis von Übung 31 (`31_komponenten_aufteilen`). In Teil C fügst du einen Patch mit **absichtlichen Fehlern** in `CustomerListComponent` ein und suchst sie.
 
 ## Aufgabe

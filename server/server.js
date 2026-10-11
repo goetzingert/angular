@@ -55,7 +55,7 @@ app.post('/api/customer', function (req, res) {
 });
 
 app.get('/api/customer/:id', function (req, res) {
-  var id = req.param('id');
+  var id = req.params.id;
 
   if (customers[id]) {
     var customer = customers[id];
@@ -68,7 +68,7 @@ app.get('/api/customer/:id', function (req, res) {
 });
 
 app.put('/api/customer/:id', function (req, res) {
-  var id = req.param('id');
+  var id = req.params.id;
   var customer = req.body;
   customer.id = +id;
 
@@ -85,7 +85,7 @@ app.put('/api/customer/:id', function (req, res) {
 });
 
 app.patch('/api/customer/:id', function (req, res) {
-  var id = +req.param('id');
+  var id = +req.params.id;
   var customer = customers[id];
   var patch = req.body;
 
@@ -103,7 +103,7 @@ app.patch('/api/customer/:id', function (req, res) {
 });
 
 app.delete('/api/customer/:id', function (req, res) {
-  var id = req.param('id');
+  var id = req.params.id;
   
   if (customers[id]) {
     console.log('Removing customer from collection: %j', customers[id]);
@@ -137,7 +137,7 @@ app.get('/api/booking', function(req, res){
 
 
 app.get('/api/booking/:id', function (req, res) {
-  var id = req.param('id');
+  var id = req.params.id;
 
   if (bookings[id]) {
     var booking = bookings[id];

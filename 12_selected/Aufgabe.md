@@ -1,5 +1,7 @@
 # Übung 12: Class Binding
 
+**Zeitrichtwert:** ca. 10 Minuten
+
 ## Aufgabe
 
 Markiere abgemeldete bzw. inaktive Kunden visuell in der Liste.

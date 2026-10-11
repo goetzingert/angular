@@ -1,5 +1,7 @@
 # Wahlübung Z1: Reactive Forms mit FormBuilder und Validierung
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 ## Aufgabe
 
 Biete in der Detail-Ansicht die Möglichkeit, Kundendaten über ein Formular zu bearbeiten und zu validieren.

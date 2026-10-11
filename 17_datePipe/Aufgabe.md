@@ -1,5 +1,7 @@
 # Übung 17: Pipe
 
+**Zeitrichtwert:** ca. 10 Minuten
+
 ## Aufgabe
 
 Erweitere das Datenmodell und stelle ein Datum formatiert im Template dar.

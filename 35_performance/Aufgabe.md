@@ -1,5 +1,7 @@
 # Übung 35: „Langsame Liste“
 
+**Zeitrichtwert:** ca. 45 Minuten
+
 Basis: Ergebnis von Übung 34 (`34_tests`). Du erzeugst künstlich Last, misst und optimierst Schritt für Schritt. Dafür brauchst du das Paket `@angular/cdk` (`npm install @angular/cdk`, in dieser Lösung bereits in `package.json` eingetragen).
 
 ## Aufgabe

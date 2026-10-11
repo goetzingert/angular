@@ -1,5 +1,7 @@
 # Übung 31: Kundenliste in Komponenten aufteilen
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 Basis: Ergebnis von Übung 29 (`29_contentProjection`). Das Verhalten der App darf sich durch die Übung **nicht** ändern.
 
 ## Aufgabe

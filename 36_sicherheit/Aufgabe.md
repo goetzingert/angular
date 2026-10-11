@@ -1,5 +1,7 @@
 # Übung 36: XSS erleben und beheben
 
+**Zeitrichtwert:** ca. 40 Minuten
+
 Basis: Ergebnis von Übung 35 (`35_performance`). Das Backend bleibt unverändert; die Notiz wird **clientseitig** ergänzt. Die Review-Checkliste für Schritt 8 liegt in `material/review-checkliste.md`.
 
 ## Aufgabe

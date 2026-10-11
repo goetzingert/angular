@@ -1,5 +1,7 @@
 # Übung 28: viewChild()
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Ergänze in `CustomerListComponent` ein Filterfeld und greife per `viewChild()` direkt auf das native Input-Element zu.

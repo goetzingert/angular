@@ -1,5 +1,7 @@
 # Übung 10: Output
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Melde den in `CustomerListComponent` angeklickten Kunden nach außen an `AppComponent`.

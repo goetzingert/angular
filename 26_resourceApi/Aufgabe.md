@@ -1,5 +1,7 @@
 # Übung 26: Resource API (httpResource / rxResource)
 
+**Zeitrichtwert:** ca. 25 Minuten
+
 ## Aufgabe
 
 Stelle die Datenbeschaffung von RxJS-Subscriptions auf die neue signal-basierte Resource API um.

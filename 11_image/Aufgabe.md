@@ -1,5 +1,7 @@
 # Übung 11: Bindings auf Images und mehr
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Erweitere das Datenmodell und zeige zusätzlich ein Bild pro Kunde an.

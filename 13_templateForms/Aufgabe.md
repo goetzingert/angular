@@ -1,5 +1,7 @@
 # Übung 13: Formulare
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Biete in der Detail-Ansicht die Möglichkeit an, den Namen eines Customers zu verändern.

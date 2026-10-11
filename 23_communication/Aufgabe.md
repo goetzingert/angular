@@ -1,5 +1,7 @@
 # Übung 23 & 24: Speichern über den Service und Anbindung ans Backend
 
+**Zeitrichtwert:** ca. 45 Minuten (Teil 1: ca. 20, Teil 2: ca. 25)
+
 ## Aufgabe
 
 Speichere bearbeitete Kundendaten über den Service und binde den Service anschließend an ein echtes Backend an.

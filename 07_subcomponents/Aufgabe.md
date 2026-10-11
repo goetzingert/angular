@@ -1,5 +1,7 @@
 # Übung 7: Komponenten schachteln
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Lagere die Darstellung der Kundenliste in eine eigene, wiederverwendbare Komponente aus.
