@@ -35,7 +35,7 @@ Je Ordner geändert:
 - Asynchrone Store-Methoden (`await firstValueFrom(...)`) setzen ihre Signals erst nach der Promise-Kette. Die Specs warten dafür ein `setTimeout(0)` ab, bevor sie das DOM prüfen.
 - Effects in Tests: `TestBed.tick()` führt anstehende Effects aus.
 - `30_modules_legacy` (NgModule + Zone.js): geht mit Vitest. `AppComponent` ist nicht standalone und im AOT-Build der Tests nur über `AppModule` erreichbar, daher importiert die Spec das `AppModule`. Außerdem löst `training-details` den Request doppelt aus (Komponente und `async`-Pipe abonnieren beide); die Spec hält das fest.
-- Weil Angular 21 zoneless testet (ohne `zone.js/testing`), ist `zone.js` in den zoneless Projekten nur noch ein unbenutzter Eintrag in `dependencies`. Er wurde nicht entfernt, um die Ordner nicht weiter zu verändern.
+- Weil Angular 21 zoneless testet (ohne `zone.js/testing`), war `zone.js` in den zoneless Projekten nur noch ein unbenutzter Eintrag in `dependencies`. Er wurde danach aus allen Projekten außer `30_modules_legacy` (NgModule, läuft mit Zone.js) entfernt; Build und Test laufen ohne.
 
 ## 4. Forms Option A (22, 23, 25–29)
 

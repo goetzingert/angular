@@ -1,0 +1,82 @@
+name: CI
+
+# Baut und testet jede Übung (Ordner NN_*/invoice-app) und prüft den Lehrserver.
+# Neue Übungsordner werden automatisch erkannt (Ordner mit invoice-app/package.json).
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    name: Übungen finden
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.list.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: list
+        run: |
+          projects=$(find . -mindepth 3 -maxdepth 3 -path './*/invoice-app/package.json' \
+            | sed 's#^\./##; s#/package.json$##' | sort | jq -R -s -c 'split("\n")[:-1]')
+          echo "Gefunden: $projects"
+          echo "projects=$projects" >> "$GITHUB_OUTPUT"
+
+  exercises:
+    name: ${{ matrix.project }}
+    needs: discover
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.discover.outputs.projects) }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22   # Angular 21 braucht Node ^20.19 || ^22.12 || >=24
+          cache: npm
+          cache-dependency-path: ${{ matrix.project }}/package-lock.json
+      - name: Abhängigkeiten installieren
+        run: npm ci --no-audit --no-fund
+      - name: Build
+        run: npx ng build
+      - name: Tests (Vitest)
+        run: npx ng test --watch=false
+
+  server:
+    name: Lehrserver (server/)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --no-fund
+      - name: Sicherheitsprüfung (hohe Schwachstellen brechen ab)
+        run: npm audit --audit-level=high
+      - name: Smoke-Test der REST-Schnittstelle
+        run: |
+          node server.js &
+          pid=$!
+          for i in $(seq 1 20); do curl -fs localhost:3000/api/customer >/dev/null && break; sleep 0.5; done
+          curl -fs localhost:3000/api/customer | jq -e '.data | length > 0'
+          curl -fs localhost:3000/api/customer/1 | jq -e '.data.id == 1'
+          kill $pid
