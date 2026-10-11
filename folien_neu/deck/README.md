@@ -64,3 +64,11 @@ git show baf0614:presentation_angular21.pptx > /tmp/original.pptx
 python3 -I folien_neu/deck/build_deck.py /tmp/original.pptx /tmp/neu.pptx
 ```
 Das Ergebnis ersetzt danach `presentation_angular21.pptx`. Änderungen, die direkt in PowerPoint am neuen Deck gemacht wurden, gehen dabei verloren.
+
+## Testing-Deck (Vitest)
+`testing_deck_vitest.py` stellt `Testing_angular21.pptx` von Karma/Jasmine auf Vitest um (Texte, SmartArt-Diagramme, Screenshot `testing_ng_test_ausgabe.png`, neue Folie „Umstieg von Jasmine auf Vitest“, Sprechtexte für die geänderten Folien). Eingabe ist wie beim Hauptdeck das **Original** aus der Git-Historie:
+
+```
+git show baf0614:Testing_angular21.pptx > /tmp/testing_original.pptx
+python3 -I folien_neu/deck/testing_deck_vitest.py /tmp/testing_original.pptx Testing_angular21.pptx folien_neu/deck/testing_ng_test_ausgabe.png
+```
