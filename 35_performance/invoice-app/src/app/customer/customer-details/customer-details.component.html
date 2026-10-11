@@ -1,0 +1,43 @@
+@if (isLoading()) {
+    <p>Loading Customer...</p>
+} @else if (draft(); as c) {
+    <app-card>
+        <span card-header>
+            Kundendetails: {{ customer()?.firstname }} {{ customer()?.lastname }}
+        </span>
+
+        <form id="customer-form" #customerForm="ngForm" (ngSubmit)="onSubmit(customerForm)">
+            <div>
+                <div style="margin-right: 10px; ">
+                    @if (c.imageUrl) {
+                        <img class="logo" [ngSrc]="c.imageUrl" width="200" height="200" priority>
+                    }
+                </div>
+                <p>Vorname:<input type="text" name="firstname" [(ngModel)]="c.firstname" required #firstname="ngModel"></p>
+                @if (firstname.invalid && firstname.dirty) {
+                    <p class="error">Bitte einen Vornamen eingeben.</p>
+                }
+                <p>Nachname:<input type="text" name="lastname" [(ngModel)]="c.lastname" required #lastname="ngModel"></p>
+                @if (lastname.invalid && lastname.dirty) {
+                    <p class="error">Bitte einen Nachnamen eingeben.</p>
+                }
+                <p>Straße:<input type="text" name="street" [(ngModel)]="c.street"></p>
+                <p>PLZ:<input type="text" name="zip" [(ngModel)]="c.zip" pattern="[0-9]*" #zip="ngModel"></p>
+                @if (zip.invalid && zip.dirty) {
+                    <p class="error">Die PLZ darf nur aus Ziffern bestehen.</p>
+                }
+                <p>Stadt:<input type="text" name="city" [(ngModel)]="c.city"></p>
+                <p>Letzes Bestelldatum:<input type="date" name="lastOrderDate"
+                        [ngModel]="c.lastOrderDate | date:'yyyy-MM-dd':'UTC'"
+                        (ngModelChange)="setLastOrderDate(c, $event)"></p>
+            </div>
+        </form>
+
+        <div card-footer>
+            <button type="submit" form="customer-form" [disabled]="customerForm.invalid">Speichern</button>
+            <button type="button" (click)="goBack()">Zurück zur Liste</button>
+        </div>
+    </app-card>
+} @else {
+    <p>Kunde nicht gefunden.</p>
+}

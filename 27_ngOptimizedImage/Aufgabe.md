@@ -5,7 +5,7 @@
 Stelle die Bilddarstellung von einem normalen `<img [src]>` auf die eingebaute Performance-Direktive `NgOptimizedImage` um.
 
 1. Importiere `NgOptimizedImage` aus `@angular/common` im `imports`-Array von `CustomerDetailsComponent`.
-2. Ersetze `[src]="customer()?.imageUrl"` durch `[ngSrc]="customer()!.imageUrl!"`.
+2. Ersetze `[src]="c.imageUrl"` (`c` ist die bearbeitbare Kopie aus dem `@if (draft(); as c)`) durch `[ngSrc]="c.imageUrl"`. Da `ngSrc` einen String erwartet, setzt du das Bild in ein `@if (c.imageUrl) { ... }`.
 3. Ergänze die Pflichtangaben `width` und `height` (oder alternativ `fill` mit einem positionierten Elternelement), damit der Browser schon vor dem Laden des Bildes den passenden Platz reservieren kann (verhindert Layout-Verschiebungen, sog. "Cumulative Layout Shift").
 4. Teste im Browser, dass die Bilder weiterhin korrekt angezeigt werden.
 5. Optional: Setze `priority` auf ein Bild, das "above the fold" (sofort sichtbar) ist, um dem Browser eine höhere Ladepriorität zu signalisieren.

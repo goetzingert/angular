@@ -1,0 +1,23 @@
+img.logo {
+  max-width: 400px;
+  max-height: 200px;
+}
+
+.container {
+  display: flex;
+}
+
+img.logo {
+  max-width: 400px;
+  max-height: 200px;
+}
+
+.active {
+  color: red;
+}
+
+.error {
+  color: red;
+  font-size: smaller;
+  margin: 0 0 8px;
+}

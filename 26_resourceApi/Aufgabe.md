@@ -6,8 +6,9 @@ Stelle die Datenbeschaffung von RxJS-Subscriptions auf die neue signal-basierte 
 
 1. Ersetze in `CustomerListComponent` den bisherigen `toSignal(customerService.getAll())`-Ansatz durch `httpResource()`, das direkt per HTTP GET die Kundenliste lädt.
 2. Nutze die vom Resource zurückgegebenen Signals `value()`, `isLoading()` und `error()`, um in der Liste einen Ladehinweis bzw. eine Fehlermeldung anzuzeigen.
-3. Ersetze in `CustomerDetailsComponent` den bisherigen `effect()` + manuellen `getCustomerById()`-Aufruf durch `rxResource()`, das reaktiv auf Änderungen des `id()`-Inputs reagiert und automatisch neu lädt.
-4. Das Speichern (`update()`) bleibt weiterhin eine klassische, einmalige Mutation über `CustomerService` – die Resource API ist primär für das (mehrfach wiederholte) Lesen von Daten gedacht.
+3. Ersetze in `CustomerDetailsComponent` den bisherigen `effect()` + manuelles `customerService.getById(...).subscribe(...)` durch `rxResource()`, das reaktiv auf Änderungen des `id()`-Inputs reagiert und automatisch neu lädt.
+4. Das Formular aus Übung 22 hängt weiter an der bearbeitbaren Kopie `draft`, die ein `linkedSignal` aus `customer()` erzeugt. Da `customer` jetzt das `value`-Signal der Resource ist, ändert sich am Template nur der Ladehinweis (`isLoading()`).
+5. Das Speichern (`update()`) bleibt weiterhin eine klassische, einmalige Mutation über `CustomerService` – die Resource API ist primär für das (mehrfach wiederholte) Lesen von Daten gedacht.
 
 ## Lernziele
 

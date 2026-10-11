@@ -1,0 +1,7 @@
+:host(.discontinued) {
+    text-decoration: line-through;
+}
+
+:host(.selected) {
+    background-color: khaki;
+}

@@ -1,9 +1,16 @@
-Der Fehler lag im html file der details Compoenent. 
-Da hab ich bei den input Feldern formGroupName statt formControlName geschrieben.
+Übung 22: Kunde bearbeiten (Template-Driven Form)
 
-Daher das Problem. 
+Dieser Stand arbeitet noch mit Mock-Daten (CustomerService). Ein Backend wird erst ab Übung 23 benötigt.
 
-Ich hab noch ein paar Sachen umgebaut, und http hinterlegt. 
+Starten (im Ordner invoice-app):
+  npm install
+  ng serve
+  ng test          (Vitest)
 
-Anstarten bitte mit:  ng serve --proxy-config dev.proxy.json
-Vorher im server Verzeichnis npm install und danach node server.js
+Ab Übung 23 (HTTP-Anbindung) zusätzlich:
+  1. Backend im Ordner server/ (Repo-Wurzel) starten:
+       cd server
+       npm install
+       node server.js       (läuft auf http://localhost:3000)
+  2. App mit Proxy starten:
+       ng serve --proxy-config dev.proxy.json

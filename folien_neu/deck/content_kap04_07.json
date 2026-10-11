@@ -1,0 +1,871 @@
+{
+ "blocks": [
+  {
+   "after": 267,
+   "order": 40,
+   "slides": [
+    {
+     "type": "divider",
+     "title": "Qualitätssicherung: Testbarkeit und Tests",
+     "notes": "Kapitelübergangsfolie „Qualitätssicherung: Testbarkeit und Tests“ – hier beginnt das Kapitel über Tests. Es geht darum, warum man Tests schreibt, wie die Struktur einer Anwendung bestimmt, wie leicht sie sich testen lässt, und wie man automatisch erzeugte Tests kritisch prüft. Als Test-Werkzeug wird in diesem Kurs „Vitest“ verwendet. Am Ende des Kapitels steht Übung 34."
+    },
+    {
+     "type": "content",
+     "title": "Wofür Tests?",
+     "bullets": [
+      "Sicherheitsnetz für Änderungen: Man kann umbauen, ohne Angst vor versteckten Fehlern",
+      "Dokumentation: Ein Test beschreibt, wie sich der Code verhalten soll",
+      "Frühes Feedback: Fehler fallen beim Entwickeln und in der Pipeline auf",
+      "Tests sind Code und kosten Pflege: Schlechte Tests bremsen mehr, als sie helfen"
+     ],
+     "notes": "Folie: „Wofür Tests?“.\n\nTests haben drei Aufgaben. Erstens sind sie ein Sicherheitsnetz. Wenn man Code umbaut, zeigen die Tests sofort, ob sich das Verhalten geändert hat. Zweitens beschreiben sie, wie sich der Code verhalten soll. Drittens geben sie früh Rückmeldung, auch in der „Pipeline“. Die „Pipeline“ ist der automatische Ablauf, der bei jeder Änderung den Code baut und prüft.\n\nTests sind aber selbst Code, der gepflegt werden muss. Ein schlechter Test verursacht Arbeit und gibt falsche Sicherheit."
+    },
+    {
+     "type": "content",
+     "title": "Testpyramide mit Angular-Bezug",
+     "bullets": [
+      "Unten, viele: Unit-Tests für Services, Stores und reine Funktionen",
+      "In der Mitte, mittel viele: Komponententests mit Template und Klasse (TestBed)",
+      "Oben, wenige: End-to-End-Tests für kritische Abläufe (z. B. mit Playwright oder Cypress)",
+      "Je mehr Logik außerhalb der Komponenten liegt, desto mehr schnelle Unit-Tests sind möglich"
+     ],
+     "notes": "Folie: „Testpyramide mit Angular-Bezug“.\n\nDie „Testpyramide“ ist ein Bild für das Verhältnis der Testarten. Unten stehen viele kleine, schnelle Tests für einzelne Bausteine wie Services oder reine Funktionen. Ein „Unit-Test“ prüft genau einen kleinen Baustein.\n\nIn der Mitte stehen Komponententests. Dabei wird eine Komponente mit ihrem Template geprüft. „TestBed“ ist das Angular-Werkzeug, das eine kleine Testumgebung aufbaut. Oben stehen wenige „End-to-End-Tests“. Sie bedienen die fertige Anwendung wie ein Nutzer im Browser. Sie sind langsam und sollten nur kritische Abläufe prüfen.\n\nDie Folge für die Praxis: Wer Logik aus den Komponenten in Services und Stores verlagert, kann mehr schnelle Tests schreiben."
+    },
+    {
+     "type": "content",
+     "title": "Struktur bestimmt Testbarkeit",
+     "bullets": [
+      "Reine Funktion oder Pipe: trivial zu testen, Eingabe hinein, Ausgabe prüfen",
+      "Store oder Service mit Signals: einfach, Methode aufrufen und das Signal lesen",
+      "Darstellungskomponente mit input und output: einfach, Input setzen und Output prüfen",
+      "Container mit mehreren Services: aufwendig, es werden Ersatzobjekte (Mocks) nötig",
+      "Komponente mit DOM- oder window-Zugriff und Singletons: schwer",
+      "Vorher: Komponente ruft HttpClient selbst auf und filtert, nötig sind HTTP-Mocks und DOM",
+      "Nachher: dieselbe Logik im Store, der Test hat etwa fünf Zeilen und braucht kein TestBed"
+     ],
+     "notes": "Folie: „Struktur bestimmt Testbarkeit“.\n\nWie leicht sich Code testen lässt, hängt von seiner Struktur ab. Eine „reine Funktion“ liefert zu gleichen Eingaben immer die gleiche Ausgabe. Sie ist am einfachsten zu testen. Ein Store mit Signals ist ebenfalls einfach: Man ruft eine Methode auf und liest danach das Signal.\n\nEine Darstellungskomponente bekommt Daten über „input“ und meldet Ereignisse über „output“. Auch sie lässt sich leicht prüfen. Schwer wird es bei Komponenten, die viele Services brauchen oder direkt auf den Browser zugreifen.\n\nDas Beispiel am Ende zeigt den Unterschied. Filtert eine Komponente selbst und lädt selbst Daten, braucht der Test viel Aufbau. Liegt dieselbe Logik im Store, genügen wenige Zeilen."
+    },
+    {
+     "type": "code",
+     "title": "Vitest-Grundlagen",
+     "code": "import { describe, it, expect, vi, beforeEach } from 'vitest';\n\ndescribe('CustomerStore', () => {\n  let store: CustomerStore;\n  beforeEach(() => { store = TestBed.inject(CustomerStore); });\n\n  it('filtert nach Vornamen (Groß-/Kleinschreibung egal)', () => {\n    store.setCustomers([new Customer('Hans', 'M'), new Customer('Lisa', 'S')]);\n    store.setFilter('LI');\n    expect(store.filtered().map(c => c.firstname)).toEqual(['Lisa']);\n  });\n});",
+     "notes": "Codefolie „Vitest-Grundlagen“.\n\nDas Beispiel zeigt einen Test mit „Vitest“. „describe“ fasst zusammen, was getestet wird, hier den „CustomerStore“. „beforeEach“ läuft vor jedem Test und holt einen frischen Store. „it“ beschreibt einen einzelnen Test, und sein Name nennt das erwartete Verhalten.\n\nIm Test werden zwei Kunden gesetzt und der Filter „LI“ eingestellt. Mit „expect“ wird geprüft, dass nur der Kunde „Lisa“ übrig bleibt. Die Groß- und Kleinschreibung spielt dabei keine Rolle."
+    },
+    {
+     "type": "content",
+     "title": "Vitest: Werkzeuge und Aufbau",
+     "bullets": [
+      "vi.fn() erzeugt eine Mock-Funktion, die ihre Aufrufe aufzeichnet",
+      "vi.spyOn() beobachtet eine echte Methode, ohne sie zu ersetzen",
+      "vi.useFakeTimers() ersetzt echte Zeit durch steuerbare Zeit",
+      "Aufbau: Arrange (vorbereiten), Act (ausführen), Assert (prüfen)",
+      "Ein Test prüft ein Verhalten",
+      "Testnamen beschreiben Verhalten („filtert …“), nicht Methodennamen"
+     ],
+     "notes": "Folie: „Vitest: Werkzeuge und Aufbau“.\n\nVitest bringt Hilfsfunktionen mit. „vi.fn“ erzeugt eine Mock-Funktion. Das ist eine Attrappe, die sich merkt, wie oft und womit sie aufgerufen wurde. „vi.spyOn“ beobachtet eine echte Methode, ohne sie zu ersetzen. „vi.useFakeTimers“ lässt Tests mit einer künstlichen Uhr laufen, damit sie nicht auf echte Zeit warten.\n\nEin guter Test hat drei Schritte: vorbereiten, ausführen, prüfen. Im Englischen heißt das „Arrange, Act, Assert“. Jeder Test prüft nur ein Verhalten. Der Name sollte beschreiben, was passieren soll, und nicht, wie die Methode heißt."
+    },
+    {
+     "type": "content",
+     "title": "Abhängigkeiten isolieren",
+     "bullets": [
+      "Stub oder Fake: einfache Ersatzimplementierung, z. B. ein Service mit festen Daten",
+      "Mock (vi.fn): prüft Aufrufe, z. B. „wurde update mit diesem Wert aufgerufen?“",
+      "Spy: echtes Objekt wird beobachtet, selten nötig, eher bei Altcode",
+      "Echte Abhängigkeit: kein Ersatz bei reinen Funktionen und billigen Hilfsklassen",
+      "Over-Mocking vermeiden: Wer alles ersetzt, testet nur die Ersatzobjekte"
+     ],
+     "notes": "Folie: „Abhängigkeiten isolieren“.\n\nBeim isolierten Testen ersetzt man Abhängigkeiten durch Ersatzobjekte. Ein „Stub“ oder „Fake“ ist eine einfache Nachbildung, die feste Daten liefert. Ein „Mock“ merkt sich zusätzlich die Aufrufe, sodass man prüfen kann, ob eine Methode mit dem richtigen Wert aufgerufen wurde. Ein „Spy“ beobachtet ein echtes Objekt.\n\nNicht alles muss ersetzt werden. Reine Funktionen und einfache Hilfsklassen nimmt man besser echt. Wer zu viel ersetzt, hat am Ende nur noch die Ersatzobjekte getestet. Das nennt man „Over-Mocking“."
+    },
+    {
+     "type": "code",
+     "title": "Abhängigkeiten per Dependency Injection ersetzen",
+     "code": "TestBed.configureTestingModule({\n  providers: [\n    { provide: CustomerService, useValue: { getAll: () => of([hans, lisa]) } },\n  ],\n});\n\nconst store = TestBed.inject(CustomerStore);\n\n// Der Store bekommt jetzt den Ersatz statt des echten CustomerService.\n// Kein Code im Store muss dafür geändert werden.",
+     "notes": "Codefolie „Abhängigkeiten per Dependency Injection ersetzen“.\n\nDank „Dependency Injection“ lassen sich Abhängigkeiten leicht austauschen. Das ist das Verfahren, bei dem Angular einer Klasse die benötigten Objekte übergibt. Im Beispiel wird bei den „providers“ festgelegt: Wenn jemand „CustomerService“ anfordert, bekommt er ein einfaches Ersatzobjekt. Dessen Methode „getAll“ liefert direkt zwei Kunden.\n\nDer Store erhält dann diesen Ersatz. Am Store selbst muss dafür nichts geändert werden."
+    },
+    {
+     "type": "code",
+     "title": "HTTP-Aufrufe testen",
+     "code": "TestBed.configureTestingModule({\n  providers: [provideHttpClient(), provideHttpClientTesting()],\n});\nconst http = TestBed.inject(HttpTestingController);\n\nservice.getAll().subscribe(r => result = r);\nhttp.expectOne('api/customer').flush({ data: [hans] });\nhttp.verify();            // keine unerwarteten Requests\nexpect(result).toEqual([hans]);",
+     "notes": "Codefolie „HTTP-Aufrufe testen“.\n\nFür HTTP-Aufrufe gibt es eine Testhilfe. Mit „provideHttpClientTesting“ wird kein echtes Netzwerk benutzt. Stattdessen kann der Test über den „HttpTestingController“ steuern, was zurückkommt.\n\nIm Beispiel ruft der Service seine Methode auf. Der Test prüft mit „expectOne“, dass genau eine Anfrage an „api/customer“ gesendet wurde, und antwortet mit „flush“ mit einer festgelegten Antwort. „verify“ stellt sicher, dass keine weiteren, unerwarteten Anfragen offen sind. Zum Schluss wird das Ergebnis geprüft."
+    },
+    {
+     "type": "code",
+     "title": "Komponenten mit Signal-Inputs testen",
+     "code": "const fixture = TestBed.createComponent(CustomerListItemComponent);\nfixture.componentRef.setInput('customer', hans);   // Signal-Input setzen\nawait fixture.whenStable();                         // Rendering abwarten\nexpect(fixture.nativeElement.textContent).toContain('Hans');\n\nconst spy = vi.fn();\nfixture.componentInstance.chosen.subscribe(spy);\nfixture.nativeElement.querySelector('li').click();\nexpect(spy).toHaveBeenCalledWith(hans);",
+     "notes": "Codefolie „Komponenten mit Signal-Inputs testen“.\n\nDas Beispiel testet eine Darstellungskomponente. Zuerst wird die Komponente erzeugt. Den Eingabewert „customer“ setzt man mit „setInput“. Dann wartet der Test mit „whenStable“, bis die Anzeige aktualisiert ist, und prüft, dass der Name „Hans“ im Text vorkommt.\n\nDanach wird eine Mock-Funktion an den Ausgang „chosen“ gehängt. Der Test klickt auf das Listenelement und prüft, dass der Ausgang mit dem Kunden „Hans“ ausgelöst wurde."
+    },
+    {
+     "type": "content",
+     "title": "Komponententests: wichtige Regeln",
+     "bullets": [
+      "Signal-Inputs nie direkt zuweisen (component.customer = …), das funktioniert nicht",
+      "Stattdessen fixture.componentRef.setInput('name', wert) verwenden",
+      "Die Anwendung läuft zoneless: nicht auf automatische Change Detection verlassen",
+      "Nach Änderungen await fixture.whenStable() aufrufen, bevor das DOM geprüft wird",
+      "Ausgänge (output) prüft man, indem man sich mit subscribe anhängt"
+     ],
+     "notes": "Folie: „Komponententests: wichtige Regeln“.\n\nBei Komponententests gibt es zwei wichtige Regeln. Erstens: Ein Signal-Input darf man nicht einfach wie eine normale Variable überschreiben. Das funktioniert nicht. Man setzt ihn mit der Methode „setInput“ der Test-Komponente.\n\nZweitens: Die Anwendung arbeitet „zoneless“. Das heißt, Angular erkennt Änderungen nicht mehr über die Bibliothek „Zone.js“, sondern über Signals. Deshalb darf der Test nicht darauf warten, dass die Anzeige von selbst aktuell wird. Er ruft „await fixture.whenStable()“ auf. Das wartet, bis Angular fertig gerendert hat."
+    },
+    {
+     "type": "code",
+     "title": "Signals und Effects testen",
+     "code": "// signal und computed: direkt testen, ohne TestBed\n\n// effect: braucht einen Injection Context und einen \"Tick\"\nTestBed.runInInjectionContext(() => { store = new CustomerStore(); });\nstore.setFilter('x');\nTestBed.tick();                 // führt anstehende Effects aus\nexpect(localStorage.getItem('customerFilter')).toBe('x');",
+     "notes": "Codefolie „Signals und Effects testen“.\n\n„signal“ und „computed“ kann man direkt testen. Man setzt einen Wert und liest das Ergebnis. Ein „TestBed“ ist dafür nicht nötig.\n\nEin „effect“ ist etwas anderes. Er braucht einen „Injection Context“. Das ist der Rahmen, in dem Angular Abhängigkeiten bereitstellen kann. Das Beispiel erzeugt den Store deshalb mit „runInInjectionContext“. Nach dem Setzen des Filters führt „TestBed.tick“ die anstehenden Effects aus. Erst danach prüft der Test, ob der Filterwert im „localStorage“ des Browsers gespeichert wurde."
+    },
+    {
+     "type": "content",
+     "title": "Was macht einen guten Test aus?",
+     "bullets": [
+      "Er schlägt fehl, wenn das Verhalten kaputt ist, und nur dann",
+      "Er ist unabhängig von Reihenfolge und anderen Tests",
+      "Er ist schnell und deterministisch: keine echten Timer, kein Netz",
+      "Er ist lesbar: Arrange, Act, Assert, sprechende Namen, kleine Testdaten",
+      "Er prüft Verhalten, nicht Implementierungsdetails (private Felder, CSS-Klassen)",
+      "Coverage ist ein Hinweis, kein Ziel: 100 % ohne Prüfungen beweisen nichts"
+     ],
+     "notes": "Folie: „Was macht einen guten Test aus?“.\n\nEin guter Test schlägt nur dann fehl, wenn das Verhalten wirklich kaputt ist. Er hängt nicht von anderen Tests ab und liefert immer dasselbe Ergebnis. Dafür vermeidet man echte Zeit und echtes Netzwerk.\n\nEr prüft, was die Komponente tut, und nicht, wie sie es intern macht. Sonst muss man ihn bei jedem Umbau ändern. „Coverage“ ist die Testabdeckung, also der Anteil des Codes, der beim Testen ausgeführt wird. Sie ist nur ein Hinweis. Ein Test ohne echte Prüfung erhöht die Abdeckung, beweist aber nichts."
+    },
+    {
+     "type": "content",
+     "title": "Automatisch erzeugte Tests richtig einordnen",
+     "bullets": [
+      "Quellen: ng generate (Gerüste), Assistenten in der Entwicklungsumgebung, KI-Werkzeuge",
+      "should create mit toBeTruthy: prüft nur, dass die Instanz entsteht",
+      "Test wiederholt die Implementierung: Tautologie, Fehler fallen nicht auf",
+      "Alles gemockt, nur Aufrufe geprüft: testet nicht das echte Verhalten",
+      "Nur der Normalfall: leere Listen, null, Fehler und Grenzwerte fehlen",
+      "Snapshots großer Templates: brechen oft und werden blind aktualisiert",
+      "Test passt sich dem Fehler an: bestätigt falsches Verhalten"
+     ],
+     "notes": "Folie: „Automatisch erzeugte Tests richtig einordnen“.\n\nTests können automatisch entstehen, zum Beispiel durch „ng generate“, durch Assistenten in der Entwicklungsumgebung oder durch KI-Werkzeuge. „KI“ steht für künstliche Intelligenz. Solche Tests haben oft typische Schwächen.\n\nEin Test mit „toBeTruthy“ prüft nur, dass die Komponente erzeugt wird. Eine „Tautologie“ ist ein Test, der nur wiederholt, was der Code ohnehin tut. Ändert man beides gleichzeitig, fällt nichts auf. Oft fehlen auch Randfälle wie eine leere Liste oder ein Fehler. Schlimm ist ein Test, der einen vorhandenen Fehler als richtig bestätigt."
+    },
+    {
+     "type": "content",
+     "title": "Prüfverfahren für generierte Tests",
+     "bullets": [
+      "1. Lesen: Was behauptet der Test? Passt das zur Anforderung?",
+      "2. Kaputtmachen: Produktivcode absichtlich ändern, wird der Test rot? Sonst ist er wertlos",
+      "3. Randfälle ergänzen: leer, sehr groß, Fehlerfall, Sonderzeichen",
+      "4. Vereinfachen: Mocks reduzieren, Namen verbessern",
+      "5. Verantwortung: Wer den Test committet, haftet dafür, nicht das Werkzeug"
+     ],
+     "notes": "Folie: „Prüfverfahren für generierte Tests“.\n\nEs gibt fünf Schritte, um erzeugte Tests zu prüfen. Zuerst liest man den Test und fragt, ob er zur Anforderung passt. Dann kommt der wichtigste Schritt: Man ändert den Produktivcode absichtlich falsch. Wird kein Test rot, sind die Tests wertlos. Das ist ein „Mutationstest von Hand“.\n\nDanach ergänzt man Randfälle und vereinfacht den Test. Zum Schluss gilt: Wer einen Test in das gemeinsame Projekt übernimmt, ist dafür verantwortlich. „Committen“ heißt, die Änderung in der Versionsverwaltung festzuhalten."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 34: Tests schreiben und bewerten",
+     "bullets": [
+      "Öffne das Projekt 34_tests (Test-Runner: Vitest)",
+      "Teil A: Schreibe Tests für CustomerStore, ohne Oberfläche",
+      [
+       "Filter (Groß-/Kleinschreibung), Auswahl, leere Liste, Filter ohne Treffer",
+       1
+      ],
+      [
+       "Ersetze CustomerService per providers durch ein Ersatzobjekt",
+       1
+      ],
+      "Teil B: Teste CustomerListItemComponent: Name wird angezeigt, Klick löst chosen aus",
+      "Teil C: Bewerte die mitgelieferte, generierte Spec für CustomerStore (5 Schwächen)",
+      [
+       "Ändere in filtered includes zu startsWith: Welche Tests werden nicht rot?",
+       1
+      ],
+      [
+       "Verbessere die Spec",
+       1
+      ],
+      "Musterlösung: 34_tests (baut auf 33_state_store auf)"
+     ],
+     "notes": "Folie: „Übung 34: Tests schreiben und bewerten“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 34 im Ordner 34_tests. Alle Projekte nutzen jetzt „Vitest“ als Test-Werkzeug.\n\nIn Teil A schreiben die Teilnehmer Tests für den „CustomerStore“, ohne die Oberfläche. Dabei ersetzen sie die Schnittstelle zum Server durch ein Ersatzobjekt. In Teil B testen sie die kleine Listenkomponente: Der Name erscheint, und ein Klick löst das Ereignis „chosen“ aus.\n\nIn Teil C bekommen sie eine automatisch erzeugte Testdatei mit fünf versteckten Schwächen. Sie sollen die Schwächen finden, den Programmcode gezielt kaputt machen und sehen, welche Tests das nicht bemerken. Danach verbessern sie die Testdatei."
+    }
+   ]
+  },
+  {
+   "after": 267,
+   "order": 50,
+   "slides": [
+    {
+     "type": "divider",
+     "title": "Performance und Laufzeitverhalten",
+     "notes": "Kapitelübergangsfolie „Performance und Laufzeitverhalten“ – hier beginnt das Kapitel über Geschwindigkeit. Es geht darum, wie man Performance misst, wie die Struktur der Anwendung die Laufzeit beeinflusst und welche typischen Ursachen für Langsamkeit es gibt. Am Ende steht Übung 35 mit einer absichtlich langsamen Liste."
+    },
+    {
+     "type": "content",
+     "title": "Performance im Anwendungskontext",
+     "bullets": [
+      "Performance ist kein Selbstzweck, sondern Nutzererlebnis: Fühlt sich die App schnell an?",
+      "Ladezeit: Wie schnell ist etwas sichtbar und bedienbar?",
+      [
+       "Einflüsse: Bundle-Größe, Netzwerk, Rendering",
+       1
+      ],
+      "Laufzeit: Wie flüssig reagiert die App?",
+      [
+       "Einflüsse: Change Detection, große Listen, Berechnungen",
+       1
+      ],
+      "Regel Nr. 1: Erst messen, dann optimieren",
+      "Vorzeitige Optimierung macht Code komplizierter, ohne zu wirken"
+     ],
+     "notes": "Folie: „Performance im Anwendungskontext“.\n\nPerformance bedeutet nicht, möglichst schnellen Code zu schreiben. Es geht darum, wie sich die Anwendung für die Nutzer anfühlt. Man unterscheidet zwei Seiten.\n\nDie Ladezeit sagt, wie schnell etwas sichtbar und bedienbar ist. Die Laufzeit sagt, wie flüssig die Anwendung auf Eingaben reagiert. Die wichtigste Regel lautet: Erst messen, dann optimieren. Wer ohne Messung optimiert, macht den Code oft nur komplizierter."
+    },
+    {
+     "type": "content",
+     "title": "Messen: Kennzahlen",
+     "bullets": [
+      "LCP (Largest Contentful Paint): Wann ist der Hauptinhalt sichtbar?",
+      "INP (Interaction to Next Paint): Wie schnell reagiert die App auf Eingaben?",
+      "CLS (Cumulative Layout Shift): Springt das Layout beim Laden?",
+      "Bundle-Größe: Wie viel Code muss der Browser laden?"
+     ],
+     "notes": "Folie: „Messen: Kennzahlen“.\n\nEs gibt feste Kennzahlen, mit denen man Performance beschreibt. „LCP“ steht für „Largest Contentful Paint“. Sie misst, wann der größte Inhalt der Seite sichtbar wird. „INP“ steht für „Interaction to Next Paint“. Sie misst, wie schnell die Seite nach einer Eingabe wie einem Klick reagiert.\n\n„CLS“ steht für „Cumulative Layout Shift“. Sie misst, wie stark Elemente beim Laden verrutschen. Die „Bundle-Größe“ ist die Menge an Programmcode, die der Browser herunterladen muss."
+    },
+    {
+     "type": "content",
+     "title": "Messen: Werkzeuge",
+     "bullets": [
+      "Chrome DevTools, Bereich Performance: Flamegraph und lange Aufgaben (Long Tasks)",
+      "Lighthouse: Ladeverhalten und Kennzahlen (Core Web Vitals)",
+      "Angular DevTools, Profiler: Welche Komponente wird wie oft geprüft?",
+      "ng build --stats-json mit einem Analyse-Werkzeug: Was steckt im Bundle?",
+      "Budgets in angular.json: Der Build schlägt bei zu großem Bundle fehl"
+     ],
+     "notes": "Folie: „Messen: Werkzeuge“.\n\nFür das Messen gibt es mehrere Werkzeuge. Die „Chrome DevTools“ sind die Entwicklerwerkzeuge des Browsers. Im Bereich „Performance“ kann man aufzeichnen, was der Browser wann tut. Ein „Flamegraph“ ist eine Grafik, die zeigt, welche Funktion wie lange gelaufen ist.\n\n„Lighthouse“ prüft eine Seite und gibt Kennzahlen aus. Der „Profiler“ der Angular DevTools zeigt, welche Komponenten wie oft geprüft werden. Mit „Budgets“ in der Datei „angular.json“ legt man Größengrenzen fest. Wird eine Grenze überschritten, schlägt der Build fehl."
+    },
+    {
+     "type": "content",
+     "title": "Wie Angular rendert",
+     "bullets": [
+      "Früher mit Zone.js: Jedes Ereignis, jeder Timer, jede HTTP-Antwort prüft den ganzen Baum",
+      "Heute zoneless mit Signals: Ändert sich ein Signal, werden nur betroffene Komponenten geprüft",
+      "OnPush: Prüfung nur bei geänderten Inputs, Ereignissen im Template oder geänderten Signals",
+      "Empfehlung: changeDetection: ChangeDetectionStrategy.OnPush für alle neuen Komponenten",
+      "Das Startprojekt läuft bereits mit provideZonelessChangeDetection()"
+     ],
+     "notes": "Folie: „Wie Angular rendert“.\n\nHier geht es um die Frage, wann Angular die Anzeige aktualisiert. Früher benutzte Angular dafür die Bibliothek „Zone.js“. Bei jedem Ereignis, jedem Timer und jeder Serverantwort wurde der ganze Komponentenbaum geprüft.\n\nHeute läuft die Anwendung „zoneless“, also ohne diese Bibliothek. Ändert sich ein Signal, markiert Angular nur die Komponenten, die dieses Signal lesen. Nur sie werden neu geprüft. Zusätzlich gibt es die Einstellung „OnPush“. Dann prüft Angular eine Komponente nur, wenn sich eine Eingabe, ein Ereignis aus dem eigenen Template oder ein gelesenes Signal geändert hat. Das wird für alle neuen Komponenten empfohlen. Das Startprojekt nutzt zoneless bereits in der Datei „main.ts“."
+    },
+    {
+     "type": "content",
+     "title": "Struktur beeinflusst die Laufzeit",
+     "bullets": [
+      "Kleine Komponenten mit eigenen Signals ergeben kleine Aktualisierungsbereiche",
+      "Eine große Komponente, die alles liest, wird bei jeder Änderung komplett neu bewertet",
+      "Beispiel Invoice-App: Der Filtertext darf nur die Liste neu rendern, nicht den Kopfbereich",
+      "Ein weiterer Grund für die Aufteilung in kleine Komponenten aus dem Kapitel zur Wartbarkeit"
+     ],
+     "notes": "Folie: „Struktur beeinflusst die Laufzeit“.\n\nDie Aufteilung in Komponenten wirkt sich direkt auf die Geschwindigkeit aus. Hat eine Komponente nur wenige Signals, wird bei einer Änderung auch nur wenig neu berechnet. Liest eine große Komponente dagegen alles, wird bei jeder kleinen Änderung alles neu bewertet.\n\nIn der Invoice-App soll zum Beispiel eine Eingabe im Filterfeld nur die Liste aktualisieren. Der Kopfbereich bleibt unverändert. Das ist ein weiterer Grund für die Aufteilung in kleine Komponenten, die schon im ersten Kapitel erklärt wurde."
+    },
+    {
+     "type": "code",
+     "title": "Zustandsstruktur und Rendering",
+     "code": "// Schlecht: ein grobes Objekt-Signal, jede Änderung betrifft alle Leser\nstate = signal({ customers: [], filter: '', selectedId: null });\n\n// Besser: feine Signals und computed, nur betroffene Leser werden aktualisiert\ncustomers  = signal<Customer[]>([]);\nfilter     = signal('');\nselectedId = signal<string | null>(null);\nselected   = computed(() => this.customers().find(c => c.id === this.selectedId()));\n\n// computed liefert bei gleichem Ergebnis dieselbe Referenz,\n// nachfolgende Leser rechnen dann nicht neu.",
+     "notes": "Codefolie „Zustandsstruktur und Rendering“.\n\nDas Beispiel zeigt zwei Arten, Zustand abzulegen. Im ersten Fall liegt alles in einem einzigen Signal mit einem Objekt. Ändert sich nur der Filter, gilt trotzdem das ganze Objekt als geändert. Alle, die es lesen, müssen neu rechnen.\n\nIm zweiten Fall hat jeder Wert sein eigenes Signal. „computed“ ist ein berechneter Wert. Er rechnet sich automatisch neu, sobald sich ein Wert ändert, den er liest. Liefert er danach dasselbe Ergebnis wie vorher, müssen auch die nachfolgenden Leser nicht neu rechnen."
+    },
+    {
+     "type": "code",
+     "title": "@for und track",
+     "code": "<!-- Schlecht: Objektidentität (so im Startprojekt) -->\n@for (c of filteredCustomers(); track c) {\n  <app-customer-list-item [customer]=\"c\" />\n}\n\n<!-- Besser: stabile, eindeutige ID -->\n@for (c of filteredCustomers(); track c.id) {\n  <app-customer-list-item [customer]=\"c\" />\n}",
+     "notes": "Codefolie „@for und track“.\n\nDie Schleife „@for“ braucht die Angabe „track“. Damit erkennt Angular, welches Element der Liste zu welchem Eintrag auf der Seite gehört. Im Startprojekt steht „track c“, also das ganze Objekt. Wird die Liste neu vom Server geladen, sind es neue Objekte. Angular hält dann alle Einträge für neu und baut alle Elemente der Seite neu auf.\n\nMit „track c.id“ erkennt Angular dieselben Kunden wieder und ändert nur, was sich wirklich geändert hat."
+    },
+    {
+     "type": "content",
+     "title": "track: Regeln",
+     "bullets": [
+      "Mit track c entstehen bei neu geladenen Objekten alle DOM-Elemente neu",
+      "Zustand der Zeilen (Fokus, Animation) geht dabei verloren",
+      "track $index nur verwenden, wenn die Liste statisch ist",
+      "Faustregel: Eine stabile, eindeutige ID verwenden"
+     ],
+     "notes": "Folie: „track: Regeln“.\n\nWenn man die ganze Seite neu aufbaut, geht der Zustand der einzelnen Zeilen verloren. Zum Beispiel verliert ein Eingabefeld den Fokus, oder eine laufende Animation beginnt von vorn. „DOM“ bedeutet hier die Elemente der Seite im Browser.\n\n„track $index“ benutzt die Position in der Liste. Das ist nur sinnvoll, wenn sich die Liste nie ändert. Die einfache Regel lautet: Immer eine feste, eindeutige Kennung wie die ID nehmen."
+    },
+    {
+     "type": "code",
+     "title": "Berechnungen im Template",
+     "code": "{{ expensiveSum() }}      <!-- Methode: wird bei jeder Change Detection aufgerufen -->\n\n{{ total() }}             <!-- computed: gecacht, rechnet nur bei geänderten Eingaben -->\n\n{{ customer.lastOrderDate | daysAgo }}   <!-- reine Pipe: gecacht je Eingabe -->\n\n<!-- Vorsicht bei unreinen Pipes (pure: false) und async-Pipe in Schleifen -->",
+     "notes": "Codefolie „Berechnungen im Template“.\n\nIm Template sollte keine teure Berechnung über eine normale Methode stehen. Eine Methode wird bei jeder Prüfung durch Angular neu aufgerufen, auch wenn sich nichts geändert hat.\n\nEin „computed“ merkt sich sein Ergebnis und rechnet nur dann neu, wenn sich ein gelesener Wert ändert. Eine „reine Pipe“ verhält sich ähnlich. Sie rechnet nur neu, wenn sich ihre Eingabe ändert. Eine „Pipe“ ist ein kleiner Baustein, der einen Wert für die Anzeige umwandelt. Vorsicht ist bei unreinen Pipes geboten, die bei jeder Prüfung laufen, und bei der „async-Pipe“ innerhalb von Schleifen."
+    },
+    {
+     "type": "content",
+     "title": "Große Listen",
+     "bullets": [
+      "track mit ID: weniger Neuaufbau der DOM-Elemente",
+      "Virtual Scrolling (@angular/cdk/scrolling): nur sichtbare Zeilen sind im DOM",
+      "Paginierung oder serverseitiges Filtern: weniger Daten werden übertragen",
+      "Debounce für Filtereingaben: weniger Neuberechnungen",
+      "Leichte Zeilenkomponenten mit OnPush: günstigeres Prüfen"
+     ],
+     "notes": "Folie: „Große Listen“.\n\nBei sehr großen Listen gibt es mehrere Maßnahmen. Mit einer eindeutigen Kennung bei „track“ wird weniger neu aufgebaut. Beim „Virtual Scrolling“ stellt Angular nur die Zeilen dar, die gerade im sichtbaren Bereich liegen. Es gehört zur Bibliothek „Angular CDK“.\n\nMit „Paginierung“ lädt man die Daten seitenweise. Mit „Debounce“ wartet man bei einer Eingabe kurz ab, bevor man filtert. So rechnet die Anwendung nicht bei jedem einzelnen Tastendruck. Außerdem helfen leichte Zeilenkomponenten mit „OnPush“."
+    },
+    {
+     "type": "code",
+     "title": "Debounce für den Filter",
+     "code": "// filterText ist ein Signal, das an das Eingabefeld gebunden ist\ndebouncedFilter = toSignal(\n  toObservable(this.filterText).pipe(debounceTime(250)),\n  { initialValue: '' }\n);\n\n// Die Liste liest debouncedFilter() statt filterText():\n// Gefiltert wird erst, wenn 250 ms keine neue Eingabe kam.",
+     "notes": "Codefolie „Debounce für den Filter“.\n\nDieses Beispiel verzögert den Filter. „toObservable“ macht aus dem Signal einen Datenstrom. „debounceTime(250)“ gibt einen Wert erst weiter, wenn 250 Millisekunden lang kein neuer Wert kam. „toSignal“ macht daraus wieder ein Signal, mit dem Startwert leerer Text.\n\nDie Liste liest dann dieses verzögerte Signal. So wird nicht bei jedem Tastendruck gefiltert, sondern erst, wenn der Nutzer kurz aufhört zu tippen."
+    },
+    {
+     "type": "content",
+     "title": "Ladezeit: nur laden, was gebraucht wird",
+     "bullets": [
+      "Lazy Routes: loadComponent: () => import('./customer-details/…').then(…)",
+      "@defer: schwere Teile erst bei Bedarf laden (on viewport, on interaction, on idle, when)",
+      [
+       "Mit @placeholder und @loading für die Übergangszeit",
+       1
+      ],
+      "NgOptimizedImage (Übung 27): priority für das Hauptbild, width und height gegen Layout-Sprünge",
+      "Bundle-Hygiene: nur importieren, was man nutzt; Tree-Shaking; Budgets"
+     ],
+     "notes": "Folie: „Ladezeit: nur laden, was gebraucht wird“.\n\nFür eine kurze Ladezeit soll der Browser anfangs nur laden, was gebraucht wird. Bei „Lazy Routes“ wird eine Seite erst geladen, wenn der Nutzer sie öffnet. Mit „@defer“ lädt man schwere Teile einer Seite erst bei Bedarf, zum Beispiel wenn sie sichtbar werden oder wenn der Nutzer sie anklickt.\n\n„NgOptimizedImage“ aus Übung 27 hilft bei Bildern: Das Hauptbild wird bevorzugt geladen, und feste Größen verhindern, dass die Seite beim Laden springt. „Tree-Shaking“ bedeutet, dass nicht benutzter Code aus dem fertigen Paket entfernt wird."
+    },
+    {
+     "type": "content",
+     "title": "Rendering-Strategien im Überblick",
+     "bullets": [
+      "CSR (Client-Side Rendering): Der Browser baut alles, einfach, aber erster Inhalt kommt später",
+      "SSR mit Hydration: Server liefert HTML, Browser aktiviert es, schnellerer erster Inhalt",
+      "Prerendering (SSG): HTML entsteht beim Build, schnell für statische Seiten",
+      "Interne Fachanwendungen: oft reicht CSR",
+      "Öffentliche Seiten: SSR prüfen, siehe die Folie „Server-Side Rendering (SSR) & Hydration“"
+     ],
+     "notes": "Folie: „Rendering-Strategien im Überblick“.\n\nEs gibt drei Wege, wie eine Seite ihren Inhalt bekommt. Beim „Client-Side Rendering“ baut der Browser alles selbst auf. Das ist einfach, aber der erste Inhalt erscheint später. Beim „Server-Side Rendering“ liefert der Server schon fertiges HTML. „Hydration“ heißt, dass der Browser dieses HTML danach interaktiv macht. Beim „Prerendering“ wird das HTML schon beim Bauen der Anwendung erzeugt.\n\nFür interne Fachanwendungen reicht oft das Rendern im Browser. Für öffentliche Seiten lohnt es sich, Server-Side Rendering zu prüfen. Dazu folgt nach diesem Kapitel die Folie „Server-Side Rendering (SSR) & Hydration“."
+    },
+    {
+     "type": "content",
+     "title": "Typische Ursachen für Laufzeitprobleme",
+     "bullets": [
+      "1. Methodenaufrufe im Template mit teurer Berechnung",
+      "2. @for ohne oder mit ungeeignetem track",
+      "3. Sehr große Listen ohne Virtualisierung oder Paginierung",
+      "4. Grobes Objekt-Signal, das alles ungültig macht",
+      "5. Zu viele Effects oder Effects, die Signals schreiben",
+      "6. Nicht abgemeldete Subscriptions, Timer und Event-Listener (Speicherlecks)",
+      "7. Zu große Bundles oder zu viele Bibliotheken beim Start",
+      "8. Ungeeignete Bildgrößen und -formate",
+      "9. Zu häufige HTTP-Aufrufe ohne Debounce oder Cache"
+     ],
+     "notes": "Folie: „Typische Ursachen für Laufzeitprobleme“.\n\nDiese Liste fasst die häufigsten Ursachen für Probleme zusammen. Man kann sie als Checkliste benutzen, wenn eine Anwendung langsam ist.\n\nEin „Speicherleck“ entsteht, wenn Programmteile nicht aufgeräumt werden, zum Beispiel ein Timer oder ein Abonnement, das weiterläuft. Der Speicherbedarf wächst dann ständig. Wichtig bleibt: Man prüft zuerst mit einer Messung, welche Ursache wirklich zutrifft, und beginnt dann mit der Maßnahme."
+    },
+    {
+     "type": "content",
+     "title": "Vorbereitung auf Skalierung",
+     "bullets": [
+      "Messbare Budgets (Bundle, LCP) in der Pipeline festlegen",
+      "Performance-Tests bei Releases, z. B. mit Lighthouse CI",
+      "Frühere Entscheidungen zahlen ein: kleine Komponenten, feine Signals, Lazy Loading",
+      "Wiederholbar messen und Ergebnisse dokumentieren"
+     ],
+     "notes": "Folie: „Vorbereitung auf Skalierung“.\n\nWächst eine Anwendung, sollte man Performance dauerhaft im Blick behalten. Dazu legt man Grenzwerte fest, etwa für die Bundle-Größe, und prüft sie in der Pipeline automatisch. Auch bei neuen Versionen kann man Messungen durchführen.\n\nDie Entscheidungen aus den früheren Kapiteln helfen dabei: kleine Komponenten, ein feines Signal-Modell und Lazy Loading. Wichtig ist, immer gleich zu messen und die Ergebnisse aufzuschreiben, damit man Veränderungen vergleichen kann. Zum Thema Rendern auf dem Server folgt nach diesem Kapitel die Folie „Server-Side Rendering (SSR) & Hydration“."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 35: Langsame Liste",
+     "bullets": [
+      "Öffne das Projekt 35_performance (5000 Testkunden per Hilfscode, LOAD_TEST_SIZE: 0 = aus)",
+      "1. Messe: Chrome DevTools (Eingabe im Filter) und Angular DevTools Profiler",
+      [
+       "Notiere Dauer der Aktualisierung und Anzahl neu gerenderter Komponenten",
+       1
+      ],
+      "2. Optimiere Schritt für Schritt und miss jeweils neu:",
+      [
+       "a) track customer zu track customer.id    b) OnPush für Liste und Listenelement",
+       1
+      ],
+      [
+       "c) Debounce für den Filter (250 ms)    d) Virtual Scrolling mit cdk-virtual-scroll-viewport",
+       1
+      ],
+      [
+       "e) optional: CustomerDetailsComponent als Lazy Route (loadComponent)",
+       1
+      ],
+      "3. Fülle eine Tabelle: Maßnahme, Wert vorher, Wert nachher, Fazit",
+      "Musterlösung: 35_performance (baut auf 34_tests auf)"
+     ],
+     "notes": "Folie: „Übung 35: Langsame Liste“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 35 im Ordner 35_performance.\n\nDie Teilnehmer erzeugen zuerst mit einem Hilfscode 5000 Kunden, damit die Liste spürbar langsam wird. Dann messen sie mit den Entwicklerwerkzeugen des Browsers und mit den Angular DevTools, wie lange eine Eingabe im Filterfeld braucht. Danach verbessern sie die Anwendung in kleinen Schritten und messen nach jedem Schritt erneut. Die Schritte sind: eine eindeutige Kennung bei „track“, „OnPush“, Debounce, Virtual Scrolling und optional eine Lazy Route.\n\nDie Ergebnisse tragen sie in eine Tabelle ein und besprechen danach, welche Maßnahme am meisten gebracht hat. Nach dieser Übung folgt die Folie zum Server-Side Rendering."
+    }
+   ]
+  },
+  {
+   "after": 268,
+   "order": 10,
+   "slides": [
+    {
+     "type": "divider",
+     "title": "Sicherheit im Frontend",
+     "notes": "Kapitelübergangsfolie „Sicherheit im Frontend“ – hier beginnt das Kapitel über Sicherheit in der Oberfläche einer Anwendung. Es geht darum, welchen Daten man nicht vertrauen darf, wie Angular vor Schadcode schützt und wo dieser Schutz umgangen werden kann. Am Ende steht Übung 36."
+    },
+    {
+     "type": "content",
+     "title": "Grundsatz: Das Frontend ist nicht vertrauenswürdig",
+     "bullets": [
+      "Der Code läuft im Browser des Nutzers: Er kann ihn lesen, ändern und umgehen",
+      "Keine Geheimnisse im Frontend: keine API-Keys mit Rechten, Passwörter, Signierschlüssel",
+      "Berechtigungen werden im Backend durchgesetzt",
+      [
+       "Guards (Übung 25) verbessern die Bedienung, sie sind kein Schutz",
+       1
+      ],
+      "Validierung im Client ist Bedienkomfort, Validierung im Server ist Sicherheit"
+     ],
+     "notes": "Folie: „Grundsatz: Das Frontend ist nicht vertrauenswürdig“.\n\nDas „Frontend“ ist der Teil der Anwendung, der im Browser des Nutzers läuft. Der Nutzer hat darüber volle Kontrolle. Er kann den Code lesen, verändern und umgehen.\n\nDaraus folgen drei Regeln. Erstens: Geheimnisse wie Passwörter oder Schlüssel mit weitreichenden Rechten gehören nicht in den Browser-Code. Zweitens: Wer etwas sehen oder tun darf, muss der Server prüfen. Ein „Guard“ aus Übung 25 versteckt nur eine Seite und schützt keine Daten. Drittens: Die Prüfung von Eingaben im Browser dient der Bedienung. Die Prüfung im Server dient der Sicherheit."
+    },
+    {
+     "type": "content",
+     "title": "Vertrauensgrenzen",
+     "bullets": [
+      "Nicht vertrauenswürdig, immer prüfen oder escapen:",
+      [
+       "Eingaben im Formular; URL, Query- und Pfadparameter, Fragment",
+       1
+      ],
+      [
+       "Antworten von APIs, auch vom eigenen Backend; localStorage, Cookies, postMessage",
+       1
+      ],
+      [
+       "Daten von Drittanbietern und Dateiuploads",
+       1
+      ],
+      "Vertrauenswürdig: der Quelltext der eigenen App und fest einkompilierte Konstanten",
+      "Alles von außen ist Eingabe, auch Daten aus dem eigenen Backend",
+      "Angezeigte Daten müssen für ihren Kontext geschützt werden (HTML, URL, Style)"
+     ],
+     "notes": "Folie: „Vertrauensgrenzen“.\n\nEine „Vertrauensgrenze“ trennt, was man selbst kontrolliert, von dem, was von außen kommt. Selbst geschriebener Code und feste Werte in der Anwendung sind vertrauenswürdig. Alles andere kommt von außen und ist eine Eingabe.\n\nDazu gehören Formulareingaben, Teile der Internetadresse, Antworten von Schnittstellen, Browser-Speicher und Dateiuploads. Auch Daten aus dem eigenen Server zählen dazu, denn dort kann früher schon Schadcode gespeichert worden sein. „Escapen“ heißt, Sonderzeichen so umzuwandeln, dass sie als Text und nicht als Code gelten. Der Schutz muss zum Ort passen, an dem die Daten angezeigt werden."
+    },
+    {
+     "type": "content",
+     "title": "XSS: das Hauptrisiko",
+     "bullets": [
+      "Cross-Site Scripting (XSS): Ein Angreifer schleust Script in die Seite ein",
+      "Das Script läuft mit den Rechten des Nutzers: Es kann Token auslesen und Aktionen auslösen",
+      "Beispiel: Eine Kunden-Notiz enthält ein Bild mit Fehler-Ereignis:",
+      [
+       "<img src=x onerror=\"alert('XSS')\">",
+       1
+      ],
+      "Zeigt die Seite die Notiz ungeschützt als HTML an, läuft das Script im Browser des Betrachters",
+      "Hier genügt harmlos ein alert, in echten Fällen wäre der Schaden groß"
+     ],
+     "notes": "Folie: „XSS: das Hauptrisiko“.\n\n„XSS“ steht für „Cross-Site Scripting“. Dabei wird fremder Programmcode in eine Seite eingeschleust. Dieser Code läuft im Browser des Opfers mit dessen Rechten. Er könnte zum Beispiel gespeicherte Anmeldedaten auslesen.\n\nIm Beispiel steht in der Notiz eines Kunden ein Bild-Element mit einer ungültigen Quelle. Weil das Bild nicht geladen werden kann, löst es ein Fehler-Ereignis aus, und dabei läuft der angegebene Code. In der Übung zeigt der Code nur ein harmloses Meldungsfenster mit dem Wort „XSS“. Das Beispiel dient allein dem Lernen, um die Schutzmaßnahmen zu verstehen."
+    },
+    {
+     "type": "content",
+     "title": "Was Angular standardmäßig tut",
+     "bullets": [
+      "Interpolation {{ }}: Der Wert wird als Text ausgegeben (escaped)",
+      "[innerHTML]: Angular bereinigt das HTML (Sanitizing) und entfernt gefährliche Teile",
+      [
+       "Zum Beispiel script-Elemente und Event-Handler wie onerror",
+       1
+      ],
+      "[href] und [src]: gefährliche URLs wie javascript: werden entschärft (Präfix unsafe:)",
+      "Templates werden beim Build kompiliert, Nutzereingaben werden nicht als Template ausgewertet"
+     ],
+     "notes": "Folie: „Was Angular standardmäßig tut“.\n\nAngular schützt standardmäßig vor XSS. Bei der Schreibweise mit doppelten geschweiften Klammern wird der Wert immer als reiner Text ausgegeben. Enthaltene Zeichen wie spitze Klammern werden nicht als Code behandelt.\n\nBei „innerHTML“ erlaubt Angular HTML, aber es „bereinigt“ es. Das heißt, gefährliche Teile wie Script-Elemente und Event-Handler werden entfernt. Bei Links und Bildquellen werden gefährliche Adressen entschärft. Außerdem werden die Templates schon beim Build in Code umgewandelt, sodass Nutzereingaben nie als Template gelten."
+    },
+    {
+     "type": "code",
+     "title": "Interpolation und innerHTML im Vergleich",
+     "code": "<!-- Sicher: Ausgabe als Text, die Notiz erscheint mit allen Zeichen -->\n<p>{{ customer.note }}</p>\n\n<!-- Bereinigt: Formatierung wie <b> bleibt, gefährliche Teile werden entfernt -->\n<div [innerHTML]=\"customer.note\"></div>",
+     "notes": "Codefolie „Interpolation und innerHTML im Vergleich“.\n\nDas Beispiel zeigt zwei Wege, eine Notiz anzuzeigen. Im ersten Weg mit „{{ }}“ wird der Inhalt als Text gezeigt. Steht in der Notiz HTML, sieht der Nutzer die spitzen Klammern wörtlich, und es wird nichts ausgeführt.\n\nIm zweiten Weg mit „innerHTML“ wird das HTML dargestellt, zum Beispiel Fettdruck. Angular entfernt vorher gefährliche Teile wie den Event-Handler „onerror“. Das ist sicherer als ungeschütztes HTML, aber man sollte es nur nutzen, wenn Formatierung wirklich nötig ist."
+    },
+    {
+     "type": "content",
+     "title": "Wo Angulars Schutz ausgehebelt wird",
+     "bullets": [
+      "DomSanitizer: bypassSecurityTrustHtml/-Url/-Script/-ResourceUrl, Angular prüft nicht mehr",
+      "Nur für selbst kontrollierte Inhalte, nie für Nutzereingaben",
+      "Direkter DOM-Zugriff: nativeElement.innerHTML = …, document.write, eval, new Function",
+      "Templates zur Laufzeit aus Strings bauen, wenn Nutzertext enthalten ist",
+      "Drittbibliotheken, die HTML erzeugen (Markdown-Renderer, Editoren) ohne Sanitizing",
+      "Regel: bypassSecurityTrust* ist ein Review-Alarm, jeder Einsatz braucht eine Begründung im Code"
+     ],
+     "notes": "Folie: „Wo Angulars Schutz ausgehebelt wird“.\n\nDer Schutz von Angular gilt nur, solange man ihn nicht umgeht. Der „DomSanitizer“ bietet Methoden, die mit „bypassSecurityTrust“ beginnen. „Bypass“ bedeutet umgehen. Damit sagt man Angular: Dieser Inhalt ist sicher, prüfe ihn nicht. Das darf man nur bei Inhalten tun, die man selbst vollständig kontrolliert.\n\nAuch wer direkt auf die Elemente der Seite zugreift, etwa mit „nativeElement.innerHTML“, „document.write“ oder „eval“, verlässt den Schutz. Das Gleiche gilt für Bibliotheken, die HTML erzeugen. Deshalb gilt im Team: Jede Verwendung von „bypassSecurityTrust“ ist ein Warnsignal im Review und braucht eine Begründung."
+    },
+    {
+     "type": "content",
+     "title": "Authentifizierung und Token",
+     "bullets": [
+      "localStorage oder sessionStorage: bei XSS per Script auslesbar",
+      "Cookie ohne HttpOnly: ebenfalls per Script auslesbar",
+      "Cookie mit HttpOnly, Secure und SameSite: Script kommt nicht heran (CSRF beachten)",
+      "Variable im Speicher: geht beim Reload verloren, schwerer zu stehlen",
+      "Empfehlung: Sitzung über HttpOnly-Cookie, das das Backend setzt; Token mit kurzer Laufzeit",
+      "Login bevorzugt über etablierte Bibliotheken oder Identity Provider statt Eigenbau",
+      "Der AuthService aus Übung 25 (Signal isLoggedIn) ist nur eine Demo"
+     ],
+     "notes": "Folie: „Authentifizierung und Token“.\n\nHier geht es darum, wo man Anmeldeinformationen speichert. Was im „localStorage“ liegt, kann jedes Script auf der Seite lesen. Bei einer XSS-Lücke wäre das Token also gestohlen. Ein Cookie mit der Eigenschaft „HttpOnly“ kann dagegen von Scripts nicht gelesen werden.\n\n„Secure“ bedeutet, dass das Cookie nur über verschlüsselte Verbindungen gesendet wird. „SameSite“ begrenzt, wann das Cookie bei Anfragen von fremden Seiten mitgeschickt wird. Empfohlen wird ein solches Cookie, das der Server setzt. Den Login baut man nicht selbst, sondern nutzt bewährte Lösungen. Der „AuthService“ aus Übung 25 war nur ein Lehrbeispiel."
+    },
+    {
+     "type": "content",
+     "title": "CSRF und HTTP (1/2)",
+     "bullets": [
+      "CSRF: Eine fremde Seite löst mit dem Browser des Nutzers Aktionen im Backend aus",
+      [
+       "Der Browser sendet dabei die Cookies des Nutzers automatisch mit",
+       1
+      ],
+      "Gegenmaßnahmen: SameSite-Cookies und CSRF-Token",
+      "HttpClient liest das Cookie XSRF-TOKEN und sendet es als Header X-XSRF-TOKEN",
+      [
+       "Nur bei veränderten Anfragen (z. B. POST, PUT, DELETE) an relative URLs",
+       1
+      ],
+      [
+       "Das Backend muss das Cookie setzen und den Header prüfen",
+       1
+      ]
+     ],
+     "notes": "Folie: „CSRF und HTTP (1/2)“.\n\n„CSRF“ steht für „Cross-Site Request Forgery“. Eine fremde Webseite bringt den Browser dazu, eine Anfrage an die eigene Anwendung zu senden. Weil der Browser die Cookies automatisch mitsendet, hält der Server die Anfrage für echt.\n\nGegenmittel sind „SameSite“-Cookies und ein „CSRF-Token“. Das ist ein geheimer Wert, den eine fremde Seite nicht kennt. Angulars „HttpClient“ unterstützt das: Er liest das Cookie „XSRF-TOKEN“ und sendet den Wert im Header „X-XSRF-TOKEN“ mit. Das geschieht nur bei verändernden Anfragen an relative Adressen. Der Server muss das Cookie setzen und den Header prüfen."
+    },
+    {
+     "type": "code",
+     "title": "XSRF-Namen anpassen",
+     "code": "// Standard: Cookie \"XSRF-TOKEN\", Header \"X-XSRF-TOKEN\"\nprovideHttpClient(\n  withXsrfConfiguration({\n    cookieName: 'MY-XSRF-COOKIE',   // Name des Cookies, das das Backend setzt\n    headerName: 'X-MY-XSRF',        // Name des Headers, den das Backend erwartet\n  })\n);",
+     "notes": "Codefolie „XSRF-Namen anpassen“.\n\nStandardmäßig benutzt Angular die Namen „XSRF-TOKEN“ für das Cookie und „X-XSRF-TOKEN“ für den Header. Verwendet das Backend andere Namen, kann man sie anpassen. Das geschieht mit „withXsrfConfiguration“ als Angabe bei „provideHttpClient“.\n\nIm Beispiel sind die Namen frei gewählt. Wichtig ist nur, dass Cookie und Header zu dem passen, was der Server verwendet."
+    },
+    {
+     "type": "content",
+     "title": "CSRF und HTTP (2/2)",
+     "bullets": [
+      "CORS schützt nicht den Server",
+      [
+       "CORS regelt, welche Webseiten Antworten lesen dürfen",
+       1
+      ],
+      [
+       "Nicht mit Absicherung verwechseln",
+       1
+      ],
+      "Immer HTTPS verwenden",
+      "Keine sensiblen Daten in URLs (sie landen in Logs und im Referrer)"
+     ],
+     "notes": "Folie: „CSRF und HTTP (2/2)“.\n\n„CORS“ steht für „Cross-Origin Resource Sharing“. Es legt fest, welche fremden Webseiten die Antworten eines Servers im Browser lesen dürfen. Es ist kein Schutz für den Server selbst, denn die Anfrage kann trotzdem ankommen. Man darf CORS deshalb nicht mit einer Absicherung verwechseln.\n\nAußerdem gilt: Immer verschlüsselte Verbindungen mit „HTTPS“ nutzen. Sensible Daten gehören nicht in die Internetadresse, weil Adressen in Protokollen und in Verweisen an andere Seiten auftauchen können."
+    },
+    {
+     "type": "content",
+     "title": "Weitere typische Risikoquellen (1/2)",
+     "bullets": [
+      "Offene Weiterleitung: navigateByUrl mit ungeprüftem returnUrl-Parameter",
+      [
+       "Gegenmaßnahme: Ziel gegen eine Allowlist prüfen, nur interne Pfade",
+       1
+      ],
+      "Unsichere Abhängigkeiten: veraltete npm-Pakete mit Lücken",
+      [
+       "Gegenmaßnahme: npm audit, Updates, Lockfile, Werkzeuge für automatische Updates",
+       1
+      ],
+      "Geheimnisse im Bundle: API-Key in environment.ts",
+      [
+       "Gegenmaßnahme: Zugriff über das Backend, Keys mit minimalen Rechten",
+       1
+      ]
+     ],
+     "notes": "Folie: „Weitere typische Risikoquellen (1/2)“.\n\nBei einer „offenen Weiterleitung“ liest die Anwendung ein Ziel aus der Internetadresse und navigiert ohne Prüfung dorthin. Ein Angreifer kann so Nutzer auf eine fremde Seite lenken. Die Gegenmaßnahme ist eine „Allowlist“. Das ist eine Liste erlaubter Ziele, und alles andere wird abgelehnt.\n\nUnsichere Abhängigkeiten sind veraltete Pakete mit bekannten Lücken. Mit „npm audit“ lassen sie sich finden. Ein Schlüssel in der Datei „environment.ts“ landet im ausgelieferten Code und ist für jeden lesbar. Deshalb greift man über das Backend darauf zu."
+    },
+    {
+     "type": "content",
+     "title": "Weitere typische Risikoquellen (2/2)",
+     "bullets": [
+      "Zu viele Daten im Client: Das Backend soll nur erlaubte Felder liefern",
+      "Sensible Daten in Logs: nichts Sensibles per console.log oder Interceptor ausgeben (Übung 25)",
+      "Clickjacking: Seite in fremdem iframe, Schutz durch frame-ancestors oder X-Frame-Options",
+      "Drittanbieter-Skripte (Tracking, Widgets): Notwendigkeit prüfen, Subresource Integrity, CSP"
+     ],
+     "notes": "Folie: „Weitere typische Risikoquellen (2/2)“.\n\nWerden zu viele Daten an den Browser geschickt und nur ausgeblendet, kann der Nutzer sie in den Entwicklerwerkzeugen trotzdem sehen. Das Backend sollte deshalb nur liefern, was der Nutzer sehen darf.\n\nAuch in Protokollen sollten keine sensiblen Daten stehen. Der Interceptor aus Übung 25 darf zum Beispiel keine Anmelde-Header ausgeben. „Clickjacking“ bedeutet, dass die Seite unsichtbar in einer fremden Seite eingebettet wird. Dagegen schützen Header des Servers. Fremde Skripte sollte man nur einbinden, wenn sie wirklich nötig sind."
+    },
+    {
+     "type": "content",
+     "title": "Content Security Policy und Trusted Types",
+     "bullets": [
+      "CSP ist ein HTTP-Header des Servers",
+      [
+       "Er legt fest, woher Skripte und Styles geladen werden dürfen",
+       1
+      ],
+      [
+       "Er begrenzt den Schaden bei XSS",
+       1
+      ],
+      "Angular unterstützt strikte CSP (z. B. Nonce über CSP_NONCE) und Trusted Types",
+      "Einordnung: zusätzliche Verteidigungsschicht (Defense in Depth)",
+      "Sie ersetzt kein sauberes Escaping"
+     ],
+     "notes": "Folie: „Content Security Policy und Trusted Types“.\n\nEine „Content Security Policy“, kurz „CSP“, ist eine Regel des Servers an den Browser. Sie bestimmt, woher Skripte und Styles stammen dürfen. Wird trotzdem Schadcode eingeschleust, kann der Browser ihn dadurch oft blockieren.\n\nAngular kann mit strengen Regeln dieser Art arbeiten. Dafür gibt es zum Beispiel den Wert „CSP_NONCE“. Auch „Trusted Types“ werden unterstützt. Das ist ein weiterer Browser-Schutz gegen unsicher gesetztes HTML. Wichtig ist die Einordnung: Das ist eine zusätzliche Schicht. Sauberes Behandeln von Eingaben bleibt trotzdem nötig."
+    },
+    {
+     "type": "content",
+     "title": "Umgang mit Daten und Benutzerinteraktionen",
+     "bullets": [
+      "Datensparsamkeit: nur anzeigen und speichern, was gebraucht wird (DSGVO)",
+      "Kontextgerecht behandeln: Text per Interpolation, HTML per Sanitizing, URL durch Validieren",
+      "Nicht auf Client-Validierung verlassen: im Backend wiederholen",
+      "Dateiuploads: Typ und Größe prüfen, Inhalte nie ausführen",
+      "Fehlermeldungen nicht zu detailreich, keine Stacktraces für Endnutzer"
+     ],
+     "notes": "Folie: „Umgang mit Daten und Benutzerinteraktionen“.\n\n„Datensparsamkeit“ heißt, nur die Daten zu verarbeiten, die man wirklich braucht. Das ist auch ein Grundsatz der „DSGVO“, der Datenschutz-Grundverordnung der Europäischen Union.\n\nEingaben behandelt man passend zum Ziel: Text als Text, HTML mit Bereinigung und Adressen nach einer Prüfung. Die Prüfung im Formular wird im Server wiederholt, wie es schon bei den Formularen erklärt wurde. Hochgeladene Dateien prüft man auf Art und Größe und führt sie nie aus. Fehlermeldungen für Nutzer enthalten keine technischen Details."
+    },
+    {
+     "type": "content",
+     "title": "Verantwortungsvoller Einsatz im Team",
+     "bullets": [
+      "Sicherheit ist Teamaufgabe: Review-Checkliste und automatische Prüfungen (Lint, npm audit)",
+      "Updates zeitnah mit ng update: Sicherheitsfixes kommen über Minor- und Patch-Versionen",
+      "Dokumentierte Ausnahmen: Wo wird bypassSecurityTrust* oder innerHTML genutzt, und warum?",
+      "Vorfälle offen und lernorientiert behandeln"
+     ],
+     "notes": "Folie: „Verantwortungsvoller Einsatz im Team“.\n\nSicherheit ist keine Aufgabe einer einzelnen Person. Im Team hilft eine gemeinsame Checkliste für Reviews und eine automatische Prüfung in der Pipeline. Ein „Review“ ist die Durchsicht von Code durch eine andere Person.\n\nMit „ng update“ hält man Angular aktuell. Sicherheitskorrekturen kommen oft schon in kleinen Versionsschritten. Wenn man „bypassSecurityTrust“ oder „innerHTML“ bewusst einsetzt, dokumentiert man den Grund. Und wenn doch etwas passiert, spricht man offen darüber, um daraus zu lernen."
+    },
+    {
+     "type": "content",
+     "title": "Review-Checkliste Frontend-Sicherheit",
+     "bullets": [
+      "Wird bypassSecurityTrust* verwendet? Ist es begründet?",
+      "Gibt es innerHTML, nativeElement.innerHTML, document.write oder eval?",
+      "Werden URL-Parameter ungeprüft für Navigation oder Anzeige genutzt?",
+      "Werden Tokens oder personenbezogene Daten geloggt oder im localStorage abgelegt?",
+      "Stehen Geheimnisse in environment-Dateien oder im Bundle?",
+      "Verlässt sich eine Funktion nur auf einen Guard statt auf das Backend?",
+      "Wurden neue Abhängigkeiten geprüft (npm audit, Pflegezustand)?"
+     ],
+     "notes": "Folie: „Review-Checkliste Frontend-Sicherheit“.\n\nDiese Checkliste fasst das Kapitel für Code-Reviews zusammen. Man geht die Fragen nacheinander durch. Gibt es Stellen, an denen Angulars Schutz umgangen wird? Werden Teile der Internetadresse ungeprüft benutzt? Werden Tokens gespeichert oder protokolliert, wo sie lesbar wären?\n\nDie letzten Fragen betreffen Geheimnisse im Code, Zugriffsschutz nur über einen Guard und neue Pakete. Die Checkliste wird auch in Übung 36 und im Abschlussprojekt benutzt."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 36: XSS erleben und beheben",
+     "bullets": [
+      "Öffne das Projekt 36_sicherheit (Lastgenerator aus Ü35 aus; Notiz kommt aus dem CustomerService)",
+      "1. Customer erhält note?: string; Kunde 1: <b>wichtig</b> <img src=x onerror=\"alert('XSS')\">",
+      "2. Anzeige per Interpolation und per [innerHTML]: Ergebnis im Browser (Elements) prüfen",
+      "3. Gegenbeispiel mit bypassSecurityTrustHtml: Was passiert? Wann wäre das akzeptabel?",
+      "4. Login: returnUrl nur zulassen, wenn der Pfad mit /customer beginnt und nicht absolut ist",
+      [
+       "Tipp: new URL(value, window.location.origin) und origin sowie pathname prüfen",
+       1
+      ],
+      "5. loggingInterceptor darf Header wie Authorization nie ausgeben (Test oder Review-Kommentar)",
+      "6. Gehe die Review-Checkliste für die ganze App durch und dokumentiere Funde",
+      "Musterlösung: 36_sicherheit (baut auf 35_performance auf)"
+     ],
+     "notes": "Folie: „Übung 36: XSS erleben und beheben“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 36 im Ordner 36_sicherheit.\n\nDie Teilnehmer erleben zuerst, wie eine eingeschleuste Notiz wirkt. Sie geben sie auf drei Arten aus: als Text, als bereinigtes HTML und mit dem Umgehen des Schutzes. Dabei sehen sie, dass Angular im ersten und zweiten Fall schützt und im dritten ein harmloses Meldungsfenster erscheint. Der Code dient nur zum Lernen.\n\nDanach sichern sie eine Weiterleitung nach dem Login ab, sodass nur interne Seiten erlaubt sind. Sie prüfen, dass der Interceptor keine Anmeldedaten protokolliert, und gehen die Review-Checkliste für die ganze Anwendung durch."
+    }
+   ]
+  },
+  {
+   "after": 268,
+   "order": 20,
+   "slides": [
+    {
+     "type": "divider",
+     "title": "KI-gestützte Entwicklung",
+     "notes": "Kapitelübergangsfolie „KI-gestützte Entwicklung“ – hier beginnt das Kapitel über die Arbeit mit künstlicher Intelligenz beim Entwickeln. „KI“ steht für künstliche Intelligenz. Es geht um Arbeitsweisen und nicht um bestimmte Produkte, denn Werkzeuge ändern sich schnell. Am Ende stehen die Übung 37 und das Abschlussprojekt, Übung 38."
+    },
+    {
+     "type": "content",
+     "title": "Wofür KI in der Entwicklung?",
+     "bullets": [
+      "Sehr gut geeignet: Gerüste, Standardcode, Umbenennungen",
+      "Gut geeignet: fremden Code und Fehlermeldungen erklären lassen",
+      "Gut, aber mit Review: Tests vorschlagen, Randfälle sammeln",
+      "Gut, mit Tests: Umbauten in kleinen Schritten",
+      "Nur als Diskussionspartner: Architekturentscheidungen, Fachlogik, Sicherheit",
+      "Riskant: große Änderungen blind übernehmen",
+      "KI ist ein schneller Assistent ohne Verantwortung: Die Verantwortung bleibt beim Entwickler"
+     ],
+     "notes": "Folie: „Wofür KI in der Entwicklung?“.\n\nKI-Werkzeuge eignen sich unterschiedlich gut für verschiedene Aufgaben. Sehr gut klappt es bei Standardcode und Umbenennungen. Gut klappt es beim Erklären von fremdem Code. Tests und Umbauten kann die KI vorschlagen, aber ein Mensch muss sie prüfen.\n\nBei Architektur, Fachlogik und Sicherheit sollte man sie nur als Gesprächspartner nutzen und nicht als Entscheider. Große Änderungen ungeprüft zu übernehmen, ist riskant. Die KI ist ein schneller Assistent, aber sie trägt keine Verantwortung. Die trägt immer der Entwickler."
+    },
+    {
+     "type": "content",
+     "title": "Formen der Unterstützung",
+     "bullets": [
+      "Chat: Fragen stellen, Code erklären lassen",
+      "Vorschläge in der Entwicklungsumgebung: Ergänzung einzelner Zeilen oder Blöcke",
+      "Agentische Werkzeuge: lesen das Projekt, ändern mehrere Dateien, führen Befehle oder Tests aus",
+      "Je höher die Selbstständigkeit, desto höher der Prüfaufwand und der mögliche Schaden"
+     ],
+     "notes": "Folie: „Formen der Unterstützung“.\n\nEs gibt drei Formen der Unterstützung. Im Chat stellt man Fragen und bekommt Antworten. In der Entwicklungsumgebung erscheinen Vorschläge, die einzelne Zeilen oder Blöcke ergänzen. „Agentische Werkzeuge“ arbeiten selbstständiger. Sie lesen das Projekt, ändern mehrere Dateien und führen Befehle oder Tests aus.\n\nJe mehr ein Werkzeug selbstständig tut, desto genauer muss man seine Ergebnisse prüfen. Auch der mögliche Schaden bei Fehlern wird größer."
+    },
+    {
+     "type": "content",
+     "title": "Zusammenarbeit: Kontext ist alles",
+     "bullets": [
+      "Aufgabe klar und klein: „Erstelle eine Darstellungskomponente CustomerFilter mit input/output“",
+      "Nicht: „Baue die App um“",
+      "Projektregeln mitgeben: eine Datei im Repository mit Stil und Verboten (Name je nach Werkzeug)",
+      "Beispiele zeigen: „Mache es analog zu CustomerListComponent“",
+      "Aktuelle Angular-Konventionen angeben; Hinweise auf angular.dev prüfen"
+     ],
+     "notes": "Folie: „Zusammenarbeit: Kontext ist alles“.\n\nGute Ergebnisse brauchen guten Kontext. Der Auftrag sollte klein und klar sein. „Erstelle eine Darstellungskomponente mit Eingang und Ausgang“ ist besser als „Baue die App um“.\n\nZusätzlich kann man dem Werkzeug Projektregeln geben, in einer Datei im Repository. Das „Repository“ ist der Ordner mit dem Projekt und seiner Versionsverwaltung. Auch ein Verweis auf ein vorhandenes Beispiel im Projekt hilft. Außerdem sollte man die aktuellen Angular-Regeln nennen. Dazu bietet die Angular-Dokumentation auf angular.dev Hinweise, die man selbst nachlesen sollte."
+    },
+    {
+     "type": "code",
+     "title": "Beispiel: Projektregeln für Angular",
+     "code": "# Projektregeln\n- Angular 21, TypeScript strict, zoneless, OnPush.\n- Standalone-Komponenten (kein NgModule), inject() statt Konstruktor-Injection.\n- Control Flow @if/@for (mit track auf ID), keine *ngIf/*ngFor.\n- input()/output()/model(), keine Dekoratoren @Input/@Output.\n- Zustand: signal/computed; effect nur für Nebenwirkungen außerhalb von Angular.\n- Kein any, kein bypassSecurityTrust* ohne Rückfrage.\n- Tests mit Vitest; neue Logik immer mit Tests.",
+     "notes": "Codefolie „Beispiel: Projektregeln für Angular“.\n\nDas ist ein Auszug aus einer Datei mit Projektregeln. Sie sagt dem KI-Werkzeug, in welchem Stil gearbeitet wird. Zum Beispiel: Nur eigenständige Komponenten ohne NgModule, keine alten Schreibweisen wie „*ngIf“, sondern den neuen Kontrollfluss mit „@if“.\n\nAußerdem stehen dort Verbote, zum Beispiel kein „any“ und kein „bypassSecurityTrust“ ohne Rückfrage. Neue Logik soll immer mit Tests entstehen. Solche Regeln muss die KI nicht erraten, und sie machen die Ergebnisse besser vorhersagbar."
+    },
+    {
+     "type": "content",
+     "title": "Vorschläge bewerten: Review-Checkliste",
+     "bullets": [
+      "1. Läuft es? Build, Lint, Tests",
+      "2. Passt es zur Architektur? Abhängigkeitsrichtung, Feature-Struktur, keine neue Parallelwelt",
+      "3. Ist es modern? Keine veralteten APIs (*ngIf, @Input, NgModule), keine erfundenen Methoden",
+      "4. Ist es sicher? innerHTML, bypassSecurityTrust*, Tokens, Logging",
+      "5. Ist es reaktiv korrekt? Effects missbraucht? Werte verändert statt neu gesetzt?",
+      "6. Ist es getestet? Prüfen die Tests Verhalten oder nur toBeTruthy?",
+      "7. Verstehe ich es? Was ich nicht erklären kann, committe ich nicht"
+     ],
+     "notes": "Folie: „Vorschläge bewerten: Review-Checkliste“.\n\nJeden Vorschlag der KI prüft man mit sieben Fragen. Erstens: Läuft er, also bauen und testen alle Prüfungen durch? Zweitens: Passt er zur Struktur des Projekts? Drittens: Ist er modern, oder nutzt er alte oder sogar erfundene Funktionen?\n\nViertens: Ist er sicher, wie im Kapitel über Sicherheit erklärt? Fünftens: Ist er mit Signals richtig umgesetzt? Sechstens: Sind die Tests sinnvoll, wie im Kapitel über Tests erklärt? Die wichtigste Frage ist die letzte: Was man nicht erklären kann, übernimmt man nicht."
+    },
+    {
+     "type": "content",
+     "title": "Typische KI-Fehler bei Angular",
+     "bullets": [
+      "Veraltete Muster: *ngFor, @Input(), Konstruktor-Injection, NgModule",
+      "Erfundene oder falsche APIs: Methoden oder Optionen, die es nicht gibt",
+      "effect für alles: Zustand synchronisieren, statt computed zu nutzen",
+      "any und Typ-Casts: Fehler verschwinden, statt gelöst zu werden",
+      "Unnötige Komplexität: zusätzliche Abstraktionen, Wrapper, Hilfsklassen",
+      "Sicherheitsblindheit: innerHTML, Tokens im localStorage, ungeprüfte Weiterleitungen",
+      "Tests, die nichts prüfen: toBeTruthy, Spiegelung der Mocks",
+      "Stilbruch: andere Namens- und Ordnerkonventionen"
+     ],
+     "notes": "Folie: „Typische KI-Fehler bei Angular“.\n\nDiese Fehler treten bei KI-Vorschlägen für Angular häufig auf. Oft benutzt die KI veraltete Schreibweisen, weil sie davon viele Beispiele gesehen hat. Manchmal erfindet sie Funktionen, die es gar nicht gibt.\n\nAuch sollte man auf „effect“ achten. Er wird oft benutzt, wo ein „computed“ besser wäre. „any“ ist ein Typ, der keine Prüfung mehr erlaubt, und versteckt Fehler. Dazu kommen unnötig komplizierte Lösungen, Sicherheitslücken, wertlose Tests und ein Stil, der nicht zum Projekt passt."
+    },
+    {
+     "type": "content",
+     "title": "Mehrrunden-Zusammenarbeit",
+     "bullets": [
+      "Ablauf: Ziel, Plan prüfen, kleiner Schritt, Review und Tests, Korrektur, nächste Runde",
+      "Erst Plan, dann Code: Schritte besprechen, bevor Dateien geändert werden",
+      "Kleine, überprüfbare Schritte, ein Commit pro Schritt",
+      "Ergebnisse zurückspiegeln: Fehlermeldungen, Testausgaben und Befunde konkret nennen",
+      "Kontext pflegen: Bei langen Sitzungen Regeln wiederholen oder neu mit Zusammenfassung starten",
+      "Bei Abweichung vom Plan stoppen und korrigieren"
+     ],
+     "notes": "Folie: „Mehrrunden-Zusammenarbeit“.\n\nGute Zusammenarbeit mit der KI läuft in Runden. Zuerst nennt man Ziel und Kontext und lässt einen Plan erstellen. Diesen Plan prüft man, bevor Code entsteht. Dann setzt man einen kleinen Schritt um, prüft ihn mit Review und Tests, korrigiert und beginnt die nächste Runde.\n\nJeder Schritt bekommt einen eigenen „Commit“. Das ist ein gespeicherter Stand in der Versionsverwaltung. Fehlermeldungen und Befunde gibt man der KI konkret zurück. Bei langen Sitzungen kann die KI frühere Vorgaben vernachlässigen. Dann wiederholt man die Regeln oder beginnt neu mit einer Zusammenfassung."
+    },
+    {
+     "type": "code",
+     "title": "Gute Prompts: ein Muster",
+     "code": "Kontext:   Angular 21 App, Feature customer, siehe customer-list.component.ts\nAufgabe:   Extrahiere die Filter-UI in eine Darstellungskomponente\n           CustomerFilterComponent\nVorgaben:  input()/output(), OnPush, keine Services, kein neues Paket\nAbnahme:   Verhalten unverändert; Test für den Output vorhanden; ng build läuft durch\nFormat:    Zeige zuerst den Plan, dann die Änderungen als Diff\n\n// Merkregel: Kontext, Aufgabe, Vorgaben, Abnahmekriterien, Format",
+     "notes": "Codefolie „Gute Prompts: ein Muster“.\n\nEin „Prompt“ ist die Anweisung, die man der KI gibt. Das Muster hat fünf Teile. Der Kontext nennt die Anwendung und die betroffene Datei. Die Aufgabe beschreibt genau eine Änderung. Die Vorgaben legen fest, wie sie umgesetzt werden soll. Die Abnahmekriterien sagen, woran man ein fertiges Ergebnis erkennt. Das Format bestimmt, wie das Ergebnis dargestellt wird, hier zuerst ein Plan und dann ein „Diff“. Ein Diff zeigt nur die Unterschiede zum alten Stand.\n\nEs ist ein Beispiel für eine Arbeitsweise, keine feste Vorschrift."
+    },
+    {
+     "type": "content",
+     "title": "Grenzen und Fehlannahmen (1/2)",
+     "bullets": [
+      "Annahme: „Die KI weiß, wie unser Projekt aussieht.“",
+      [
+       "Realität: Nur das, was im Kontext steht",
+       1
+      ],
+      "Annahme: „Wenn sie selbstsicher klingt, stimmt es.“",
+      [
+       "Realität: Sie klingt immer überzeugend, auch bei Unsinn (Halluzination)",
+       1
+      ],
+      "Annahme: „Es kompiliert, also ist es richtig.“",
+      [
+       "Realität: Falsches Verhalten, Sicherheitslücken und Performance-Probleme bleiben möglich",
+       1
+      ]
+     ],
+     "notes": "Folie: „Grenzen und Fehlannahmen (1/2)“.\n\nHier stehen drei verbreitete Irrtümer. Die KI kennt das Projekt nicht, sondern nur das, was man ihr im Kontext zeigt.\n\nSie formuliert immer überzeugend, auch wenn die Antwort falsch ist. Wenn eine KI Dinge erfindet, nennt man das „Halluzination“. Und dass Code ohne Fehlermeldung übersetzt wird, heißt nicht, dass er das Richtige tut. Er kann trotzdem falsch, unsicher oder langsam sein."
+    },
+    {
+     "type": "content",
+     "title": "Grenzen und Fehlannahmen (2/2)",
+     "bullets": [
+      "Annahme: „Tests von der KI sind ein Qualitätsnachweis.“",
+      [
+       "Realität: Nur wenn sie Verhalten wirklich prüfen",
+       1
+      ],
+      "Annahme: „Die KI kennt die aktuelle Angular-Version.“",
+      [
+       "Realität: Ihr Wissensstand kann veraltet sein, deshalb die Dokumentation prüfen",
+       1
+      ],
+      "Annahme: „Die KI erspart mir das Lernen.“",
+      [
+       "Realität: Ohne Wissen kann ich Ergebnisse nicht beurteilen",
+       1
+      ]
+     ],
+     "notes": "Folie: „Grenzen und Fehlannahmen (2/2)“.\n\nAuch diese drei Irrtümer kommen oft vor. Tests, die die KI schreibt, sind nur dann ein Nachweis, wenn sie das Verhalten wirklich prüfen. Das haben wir im Kapitel über Tests gesehen.\n\nDer Wissensstand der KI endet irgendwann. Neue Angular-Versionen kennt sie deshalb nicht immer, und man liest in der Dokumentation nach. Der letzte Punkt ist besonders wichtig: Wer selbst nichts weiß, kann die Vorschläge der KI nicht beurteilen."
+    },
+    {
+     "type": "content",
+     "title": "Datenschutz, Lizenzen, Verantwortung",
+     "bullets": [
+      "Keine Geheimnisse, Zugangsdaten oder Kundendaten in Prompts oder Kontextdateien",
+      "Firmenrichtlinien beachten: erlaubte Werkzeuge, Datenablage, Nachweispflichten",
+      "Lizenzen: Herkunft generierten Codes kann unklar sein, bei längeren Übernahmen prüfen",
+      "Nachvollziehbarkeit: Verantwortlich ist der Entwickler, der den Code committet",
+      "Vorgeschlagene Pakete prüfen (Existenz, Pflege, Sicherheit): Namen werden manchmal erfunden"
+     ],
+     "notes": "Folie: „Datenschutz, Lizenzen, Verantwortung“.\n\nBeim Einsatz von KI sind einige Regeln wichtig. In Anweisungen und Kontextdateien stehen keine Zugangsdaten, Geheimnisse oder Kundendaten, denn diese Eingaben werden an ein fremdes System gesendet. Die Richtlinien der Firma sagen, welche Werkzeuge erlaubt sind.\n\nBei Lizenzen kann unklar sein, woher ein erzeugter Code stammt. Bei längeren Übernahmen sollte man das prüfen. Verantwortlich bleibt die Person, die den Code in das Projekt übernimmt. Vorgeschlagene Pakete müssen existieren und gepflegt sein, weil Namen manchmal erfunden werden."
+    },
+    {
+     "type": "content",
+     "title": "Was bleibt Entwicklerkompetenz?",
+     "bullets": [
+      "Anforderungen verstehen und präzisieren",
+      "Architektur und Abwägungen (Aufteilung, Reaktivität, Zustandsverwaltung)",
+      "Code lesen und beurteilen",
+      "Testen, Messen, Absichern (Tests, Performance, Sicherheit)",
+      "Verantwortung im Team und gegenüber den Nutzern"
+     ],
+     "notes": "Folie: „Was bleibt Entwicklerkompetenz?“.\n\nDiese Folie fasst zusammen, was auch mit KI die Aufgabe der Entwickler bleibt. Sie müssen die Anforderungen verstehen und klar formulieren. Sie entscheiden über Architektur, also über den Aufbau der Anwendung.\n\nSie müssen Code lesen und beurteilen können. Sie testen, messen und sichern die Anwendung ab, wie in den letzten Kapiteln gezeigt. Und sie tragen die Verantwortung im Team und gegenüber den Nutzern."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 37: KI-Ergebnis reviewen",
+     "bullets": [
+      "Öffne das Projekt 37_ki_review",
+      "Auftrag: „Ergänze Kunden-Export als CSV und eine Komponente CustomerExportButton“",
+      [
+       "Ohne erlaubtes Werkzeug: Datei ki-vorschlag.md aus der Aufgabe verwenden",
+       1
+      ],
+      "1. Prüfe das Ergebnis mit der Review-Checkliste und dokumentiere mindestens 5 Befunde",
+      [
+       "Absichtlich enthalten: *ngIf, any, effect schreibt Signal, innerHTML, toBeTruthy",
+       1
+      ],
+      "2. Gib die Befunde in einem zweiten Prompt zurück („Behebe: …“) und prüfe erneut",
+      "3. Auswertung: Welche Fehler hat die KI nicht selbst erkannt? Welche kamen neu hinzu?",
+      "Musterlösung: 37_ki_review (baut auf 36_sicherheit auf)"
+     ],
+     "notes": "Folie: „Übung 37: KI-Ergebnis reviewen“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 37 im Ordner 37_ki_review.\n\nDie Teilnehmer lassen entweder ein erlaubtes KI-Werkzeug eine Exportfunktion für Kunden schreiben, oder sie benutzen ein vorbereitetes Beispielergebnis. Das Beispiel enthält absichtlich Fehler, zum Beispiel veraltete Schreibweisen, einen unpassenden Einsatz von „effect“, unsicheres HTML und einen Test ohne echte Prüfung.\n\nSie prüfen das Ergebnis mit der Checkliste und geben ihre Befunde in einer zweiten Runde an die KI zurück. Danach vergleichen alle, welche Fehler die KI selbst nicht erkannt hat."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 38: Abschlussprojekt Kunden-Dashboard",
+     "bullets": [
+      "Öffne das Projekt 38_abschluss; Kleingruppen, KI-Unterstützung nach Wahl",
+      "Neues Feature: Seite /dashboard mit Kennzahlen",
+      [
+       "Anzahl Kunden, aktive Kunden der letzten 7 Tage, Kunden pro Stadt",
+       1
+      ],
+      "1. Plan mit 5 Schritten schreiben und im Team abstimmen",
+      "2. In kleinen Schritten umsetzen, je Schritt ein Commit",
+      "3. Anforderungen: computed für Kennzahlen, CustomerStore, Lazy Route, mindestens 3 Tests",
+      [
+       "Keine unsicheren Muster; Selbst-Review mit den Checklisten",
+       1
+      ],
+      "4. Kurzvorstellung (5 Minuten je Gruppe): Was war gut, was musste korrigiert werden?",
+      "Musterlösung: 38_abschluss (baut auf 37_ki_review auf)"
+     ],
+     "notes": "Folie: „Übung 38: Abschlussprojekt Kunden-Dashboard“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 38 im Ordner 38_abschluss. Das ist das Abschlussprojekt des Kurses.\n\nIn Kleingruppen bauen die Teilnehmer eine neue Seite mit Kennzahlen zu den Kunden: die Anzahl aller Kunden, die aktiven Kunden der letzten sieben Tage und die Kunden pro Stadt. Sie schreiben zuerst einen Plan, setzen ihn in kleinen Schritten um und nutzen dabei, wenn sie möchten, KI-Unterstützung. Dabei wenden sie an, was im Kurs vorkam: berechnete Werte, den gemeinsamen Store, eine Lazy Route, Tests und sichere Muster.\n\nAm Ende prüfen sie ihre Arbeit selbst mit den Checklisten und stellen sie in fünf Minuten vor. Bewertet werden Aufbau, Reaktivität, Tests, Sicherheit und die Nachvollziehbarkeit des Vorgehens."
+    }
+   ]
+  }
+ ]
+}

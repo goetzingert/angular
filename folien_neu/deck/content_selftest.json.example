@@ -1,0 +1,59 @@
+{
+  "blocks": [
+    {
+      "after": 267,
+      "order": 10,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Selbsttest: Neues Kapitel",
+          "notes": "Kapitelübergangsfolie „Selbsttest: Neues Kapitel“ – hier beginnt der Testabschnitt.\n\nDiese Folie dient nur zur Prüfung des Werkzeugs."
+        },
+        {
+          "type": "content",
+          "title": "Selbsttest: Inhaltsfolie mit Aufzählung",
+          "bullets": [
+            "Erster Punkt auf der obersten Ebene",
+            ["Unterpunkt mit „computed“ und signal()", 1],
+            ["Zweiter Unterpunkt", 1],
+            "Zweiter Punkt: ein etwas längerer Satz, der zeigt, wie der Zeilenumbruch auf der Folie aussieht",
+            "Dritter Punkt"
+          ],
+          "notes": "Folie: „Selbsttest: Inhaltsfolie mit Aufzählung“.\n\nDies ist ein Testtext in ganzen Sätzen. Er zeigt, wie Notizen aussehen."
+        },
+        {
+          "type": "code",
+          "title": "Selbsttest: Codefolie",
+          "code": "import { signal, computed } from '@angular/core';\n\nexport class Counter {\n  count = signal(0);\n  double = computed(() => this.count() * 2);\n\n  increment() {\n    this.count.update(c => c + 1);\n  }\n}",
+          "notes": "Codefolie „Selbsttest: Codefolie“.\n\nHier wird ein Zähler mit einem „signal“ gezeigt. Das ist ein Wert, der Änderungen meldet."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 99: Selbsttest",
+          "bullets": [
+            "Öffne das Projekt 99_selbsttest",
+            "1. Erste Aufgabe erledigen:",
+            ["Ergänze die Komponente um ein Signal", 1],
+            ["Zeige den Wert im Template an", 1],
+            "2. Zweite Aufgabe:",
+            ["Teste das Verhalten im Browser", 1],
+            "Musterlösung: 99_selbsttest (baut auf 26_resourceApi auf)"
+          ],
+          "notes": "Folie: „Übung 99: Selbsttest“.\n\nErklärung für die Dolmetscherin:\nDies ist eine Testübung. Die Teilnehmer lösen zwei kleine Aufgaben."
+        },
+        {
+          "type": "content",
+          "title": "Ein sehr langer Titel, der über mehrere Zeilen laufen soll, um das Verhalten zu prüfen",
+          "bullets": ["Nur ein Punkt"],
+          "notes": "Folie: „Langer Titel“.\n\nTest für lange Titel."
+        }
+      ]
+    }
+  ],
+  "ops": [
+    { "op": "move", "from": 217, "to": 219, "after": 291 },
+    { "op": "delete", "slides": [100, 101] },
+    { "op": "edit", "slide": 256, "title": "Resource API (bearbeitet)", "bullets": ["Neuer erster Punkt", ["Neuer Unterpunkt", 1]], "notes": "Folie: „Resource API (bearbeitet)“.\n\nNeue Notiz." },
+    { "op": "replace_text", "slide": 258, "old": "Übung 26", "new": "Übung 30", "include_notes": true }
+  ]
+}

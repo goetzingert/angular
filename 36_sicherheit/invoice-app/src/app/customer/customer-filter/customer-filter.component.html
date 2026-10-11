@@ -1,0 +1,5 @@
+<div>
+    <input #searchInput type="text" placeholder="Nach Vorname filtern..."
+           [value]="value()" (input)="onInput($event)">
+    <button (click)="clear()">Filter leeren &amp; fokussieren</button>
+</div>

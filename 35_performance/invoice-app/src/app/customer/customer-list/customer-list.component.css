@@ -1,0 +1,5 @@
+/* Der Viewport braucht eine feste Höhe, sonst kann er nicht scrollen. */
+.viewport {
+    height: 400px;
+    border: 1px solid #ccc;
+}

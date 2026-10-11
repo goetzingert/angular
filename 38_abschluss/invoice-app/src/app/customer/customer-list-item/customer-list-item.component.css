@@ -1,0 +1,13 @@
+:host {
+    display: block;
+    height: 32px;
+    line-height: 32px;
+}
+
+:host(.discontinued) {
+    text-decoration: line-through;
+}
+
+:host(.selected) {
+    background-color: khaki;
+}
