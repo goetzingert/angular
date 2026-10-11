@@ -1,0 +1,7 @@
+li.discontinued{
+    text-decoration: line-through;   
+}
+
+li.selected{
+    background-color: khaki;
+}

@@ -1,25 +1,39 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
 
+import { TrainingsModule } from '../trainings.module';
 import { TrainingDetailsComponent } from './training-details.component';
 
 describe('TrainingDetailsComponent', () => {
-  let component: TrainingDetailsComponent;
   let fixture: ComponentFixture<TrainingDetailsComponent>;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TrainingDetailsComponent ]
-    })
-    .compileComponents();
-  });
+      imports: [TrainingsModule],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: ActivatedRoute, useValue: { params: of({ id: '1' }) } }
+      ]
+    }).compileComponents();
 
-  beforeEach(() => {
+    httpMock = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(TrainingDetailsComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should patch the form with the loaded training', () => {
+    httpMock.expectOne('api/training').flush({ data: [] });
+    httpMock.expectOne('api/training/1').flush({ data: { id: 1, name: 'Angular', description: 'Kurs' } });
+
+    expect(fixture.componentInstance.trainingForm.value).toEqual({ name: 'Angular', description: 'Kurs' });
   });
 });
