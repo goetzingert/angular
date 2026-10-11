@@ -1,8 +1,10 @@
 # Kapitel 1 – Komponenten sinnvoll aufteilen und wartbar halten
 
-**Tag:** 3 (nach Content Projection, Ü29) bzw. Wiederholung am Anfang von Tag 4 · **Dauer:** ca. 60 min inkl. Übung
+**Tag:** 4 (nur Kompaktkurs, nach Ü25–29; Ü31 baut auf Ü29 auf) · **Dauer:** ca. 60 min inkl. Übung
 **Agenda:** „Zerlegung von UI in eigenständige Einheiten“ / „Schnittstellen zwischen Komponenten sauber gestalten“ / „Kriterien für sinnvolle Aufteilung“ / „Wartbarkeit im Kontext von Architekturentscheidungen“ / „Merkmale stabiler und nachvollziehbarer Codebasen“
 **Übung:** Ü31 `31_komponenten_aufteilen` (Basis: Ü29)
+
+> **Grundkurs (3 Tage, Übungen bis ca. Ü24):** Die Agenda nennt auch dort „Verantwortlichkeiten, Wiederverwendbarkeit und Komposition“. Für den Grundkurs nur die Folien 1.1–1.5 und 1.10 als **reine Theorie** zeigen, am besten direkt nach Ü10 (Komponenten, Inputs/Outputs, `CustomerListComponent`) an Tag 2, und mit den Übungen 7–10 (Komponenten schachteln, Inputs, Events, Outputs) als Praxis verbinden. Ü31 entfällt dort.
 
 ---
 

@@ -1,9 +1,9 @@
 # Kapitel 2 – Reaktivität und Datenfluss
 
-**Tag:** 4 (Vormittag) · **Dauer:** ca. 120 min inkl. Übung
+**Tag:** 4 (nach Kapitel 1) · **Dauer:** ca. 120 min inkl. Übung
 **Agenda:** „Einführung in moderne reaktive Konzepte“ / „Steuerung von Zustandsänderungen und UI-Reaktionen“ / „Konsistente und nachvollziehbare Datenflüsse“ / „Lokaler vs. abgeleiteter Zustand“ / „Nebenwirkungen in reaktiven Systemen einordnen“ / „Typische Stolperfallen bei wachsender Reaktivität“
 **Übung:** Ü32 `32_reaktivitaet` (Basis: Ü31)
-**Voraussetzung:** `signal`, `computed`, `input`, `output` aus Tag 2; `toSignal` aus Ü19.
+**Voraussetzung:** `signal`, `computed`, `input`, `output` aus Tag 2; `toSignal` aus Ü19; `httpResource`/`rxResource` aus Ü26 (Tag 4).
 
 ---
 

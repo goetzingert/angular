@@ -1,6 +1,6 @@
 # Kapitel 4 – Qualitätssicherung: Testbarkeit und automatisiert erzeugte Tests
 
-**Tag:** 4 (Ende) bis 5 (Vormittag) · **Dauer:** ca. 90 min inkl. Übung
+**Tag:** 5 (Beginn) · **Dauer:** ca. 90 min inkl. Übung
 **Agenda:** „Rolle von Tests in modernen Anwendungen“ / „Zusammenhang zwischen Struktur und Testbarkeit“ / „Umgang mit Abhängigkeiten beim isolierten Testen“ / „Automatisiert erzeugte Tests richtig einordnen“
 **Übung:** Ü34 `34_tests` (Basis: Ü33)
 **Verzahnung:** Ergänzt das Deck `Testing_angular21.pptx`. Empfehlung dort: Vitest als Hauptpfad, Karma/Jasmine nur als Hinweis für Bestandsprojekte, Cypress als Wahlthema.

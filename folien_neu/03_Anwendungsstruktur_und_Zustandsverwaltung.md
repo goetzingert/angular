@@ -1,6 +1,6 @@
 # Kapitel 3 – Anwendungsstruktur und Zustandsverwaltung
 
-**Tag:** 4 (Nachmittag) · **Dauer:** ca. 120 min inkl. Übung
+**Tag:** 4 (nach Kapitel 2, Ende des Tages) · **Dauer:** ca. 120 min inkl. Übung
 **Agenda:** „Strukturierung von Anwendungen mit wachsender Komplexität“ / „Organisation und Trennung von Zuständigkeiten“ / „Strukturierte Modelle für die Zustandsverwaltung“ / „Trennung von Zustand, Logik und Darstellung“ / „Kriterien für den Wechsel zu strukturiertem Zustand“ / „Umgang mit wachsender Zustandskomplexität“
 **Übung:** Ü33 `33_state_store` (Basis: Ü32)
 **Verzahnung:** Das bestehende Deck `State Management_angular21.pptx` (NgRx-Technik) folgt **nach** diesen Folien als Vertiefung.

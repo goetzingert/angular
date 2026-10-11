@@ -1,6 +1,6 @@
 # Kapitel 0 – Einordnung moderner Angular-Entwicklung
 
-**Tag:** 1 (Einstieg, vor „Typescript Primer“) · **Dauer:** ca. 30–40 min · **Übung:** Diskussion, kein Code
+**Tag:** 1 (Einstieg, vor „Typescript Primer“) · **Dauer:** ca. 30–40 min · **Übung:** Abfrage am Anfang, Rückblick-Diskussion am Kursende, kein Code
 **Agenda:** „Einordnung von Angular im aktuellen Frontend-Umfeld“ / „Architekturprinzipien und Positionierung im modernen Web-Stack“ / „Angular-Denkweise und zentrale Konzepte“
 
 ---
@@ -13,7 +13,7 @@
 - Angular ist ein **vollständiges Framework**: Router, Formulare, HTTP, DI, Testing-Setup, CLI, i18n aus einer Hand.
 - Konsequenz: weniger Auswahl- und Integrationsaufwand, dafür mehr Konvention.
 
-> **Trainer:** Frage ins Plenum: „Wer hat Erfahrung mit React/Vue? Was hat euch dort gefehlt oder gestört?“ – Antworten auf Flipchart sammeln, im Laufe des Kurses wieder aufgreifen.
+> **Trainer:** Keine Vorkenntnisse voraussetzen (Gruppen sind klein, manche Teilnehmende kennen Angular noch gar nicht). Statt einer Diskussion eine kurze **Abfrage** (5 min): „Womit haben Sie bisher Weboberflächen gebaut (nichts / JavaScript / jQuery / React / Vue / Angular)? Was erwarten Sie vom Kurs?“ Bei Gruppen ohne Frontend-Erfahrung: Folie 0.1 als kurze Erklärung durch den Trainer, Vergleich mit anderen Technologien nur als Ausblick. Erwartungen notieren und am Kursende abgleichen.
 
 ### Folie 0.2 – „Batteries included“: Was Angular mitbringt
 | Bedarf | Angular | Typisch bei Bibliotheken |
@@ -76,9 +76,16 @@
   4. Qualität, Tests, Wartbarkeit
   5. Performance, Sicherheit, KI-gestützte Entwicklung
 
-### Folie 0.9 – Diskussionsübung: Technologieentscheidung (10 min)
-- Szenario: „Ein Versicherer plant ein Kundenportal, 8 Entwickler, 10 Jahre Laufzeit, 3 bestehende Backend-Teams.“
-- Fragen: Framework oder Bibliothek? Meta-Framework nötig? Welche Risiken bei Angular?
-- Ergebnis: je Gruppe 3 Pro-/Contra-Argumente, kurze Präsentation.
+### Folie 0.9 – Erwartungen und Vorerfahrung (5–10 min, Tag 1)
+- Wer hat bisher Weboberflächen entwickelt, womit?
+- Welche Anwendung soll nach dem Kurs mit Angular entstehen oder gewartet werden?
+- Welche zwei Themen sind besonders wichtig?
+- Ergebnis auf Flipchart; wird am Kursende (Grundkurs: Ende Tag 3, Kompakt: Ende Tag 5) abgeglichen.
 
-> **Trainer:** Es gibt keine „richtige“ Antwort. Ziel ist, Entscheidungskriterien explizit zu machen (Skills, Lebensdauer, Teamgröße).
+### Folie 0.10 – Rückblick-Übung am Kursende: Technologieentscheidung (10 min, **nicht** am Tag 1)
+*Erst nach dem Kurs sinnvoll, weil jetzt das nötige Wissen vorhanden ist.*
+- Szenario: „Ein Versicherer plant ein Kundenportal, 8 Entwickler, 10 Jahre Laufzeit, 3 bestehende Backend-Teams.“
+- Fragen: Passt Angular? Welche Teile aus dem Kurs sprechen dafür, welche Risiken sehen Sie?
+- Ergebnis: je Gruppe (auch zu zweit oder allein möglich) 3 Argumente dafür und 3 Risiken.
+
+> **Trainer:** Es gibt keine „richtige“ Antwort. Ziel ist, Entscheidungskriterien explizit zu machen (Skills, Lebensdauer, Teamgröße). Bei sehr kleinen Gruppen als Gespräch statt Gruppenarbeit durchführen.

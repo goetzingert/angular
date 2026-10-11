@@ -136,20 +136,32 @@ Aktuell **nichts** im Material. Vorschlag für ein eigenes Kapitel (ca. 12 Folie
 
 ## 5. Vorschlag Tagesgliederung
 
+Der Grundkurs (3 Tage) reicht mit den Übungen nur bis ca. Ü24 (HTTP-Anbindung). Ü25–29 (Guards/Interceptors, Resource API, NgOptimizedImage, viewChild, Content Projection) gehören daher in den Kompaktkurs an Tag 4.
+
 **Angular Grundkurs (Tag 1–3)**
 
 | Tag | Themen | Material |
 |---|---|---|
-| 1 | Einordnung im Web-Stack (neu erweitert), CLI/Projekt, Standalone, Templates, Data Binding, Control Flow | Folien 1–110 (TS gekürzt), `00`–`06` |
-| 2 | Komponenten (Input/Output/Komposition, Aufteilungskriterien), Signals-Grundlagen, Services/DI, Lifecycle, Pipes | Folien 111–177, `07`–`18` |
-| 3 | Routing (inkl. Lazy), Services und externe Daten (HttpClient), Guards/Interceptors, Abschluss/Überleitung | Folien 194–212, 234–255, `20`, `21`, `25`, `26` |
+| 1 | Einordnung im Web-Stack (neu), TypeScript (gekürzt), CLI/Projekt, Standalone, Templates, Data Binding, Control Flow | Kapitel 0, Folien 1–110, `00`–`06` |
+| 2 | Komponenten (Input/Output, Aufteilungskriterien als Theorie), Signals-Grundlagen, Services/DI, Lifecycle, Pipes | Kapitel 1 (Theorie), Folien 111–177, `07`–`18` |
+| 3 | Observables/RxJS-Grundlagen, Routing, Services und externe Daten (HttpClient), Abschluss/Überleitung | Folien 178–212, 234–250, `19`–`21`, `23` (inkl. Ü24) |
 
-**Zusätzlich im Kompaktkurs (Tag 4–5)**
+**Zusätzlich im Kompaktkurs (Tag 4–5)** – Zeiten netto, ohne Pausen
 
-| Tag | Themen | Material |
-|---|---|---|
-| 4 | Reaktivität vertieft (`effect`, Stolperfallen), Zustandsverwaltung (Kriterien, Signal Store, NgRx), Testing (Vitest, Testbarkeit) | `State Management`, `Testing` (überarbeitet), **neu:** Reaktivitäts- und Store-Übung |
-| 5 | Performance (Change Detection, Rendering, `@defer`, SSR), Sicherheit, KI-gestützte Entwicklung, Abschlussprojekt | **neu:** Performance-, Sicherheits-, KI-Kapitel |
+| Tag | Block | Dauer | Material |
+|---|---|---|---|
+| 4 | Guards/Interceptors, Resource API, NgOptimizedImage, viewChild, Content Projection | ca. 150 min | Folien 253–267, `25`–`29` |
+| 4 | Komponenten aufteilen, Wartbarkeit | ca. 60 min | Kapitel 1, Ü31 |
+| 4 | Reaktivität und Datenfluss | ca. 120 min | Kapitel 2, Ü32 |
+| 4 | Zustandsverwaltung (+ Vertiefung NgRx-Deck) | ca. 120 min | Kapitel 3, Ü33, Deck `State Management` |
+| 5 | Testbarkeit und Tests | ca. 90 min | Kapitel 4, Ü34, Deck `Testing` |
+| 5 | Performance | ca. 90 min | Kapitel 5, Ü35 |
+| 5 | Sicherheit | ca. 75 min | Kapitel 6, Ü36 |
+| 5 | KI-gestützte Entwicklung + Abschlussprojekt | ca. 120 min | Kapitel 7, Ü37, Ü38 |
+
+Tag 4 ≈ 450 min, Tag 5 ≈ 375 min: Tag 4 ist knapp. Falls die Zeit nicht reicht, Ü27, Ü28 und Ü29 als Demo statt Übung durchführen oder das Abschlussprojekt kürzen.
+
+Bei Zeitnot: Cypress, klassisches NgRx (Details) und Legacy-NgModule in den Anhang oder als Wahlthema.
 
 ---
 
