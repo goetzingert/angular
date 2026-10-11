@@ -1,5 +1,7 @@
 # Übung 14: Erstelle einen CustomerService
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Lagere die Kundendaten aus der Komponente in einen eigenen Service aus.

@@ -1,5 +1,7 @@
 # Übung 22: Kunde bearbeiten (Template-Driven Form)
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 ## Aufgabe
 
 Biete in der Detail-Ansicht die Möglichkeit, die Kundendaten in einem Formular zu bearbeiten und einfach zu validieren. Das Speichern über den Service folgt erst in Übung 23, hier geht es nur um Anzeige und Bearbeiten im Formular.

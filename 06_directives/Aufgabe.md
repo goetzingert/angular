@@ -1,5 +1,7 @@
 # Übung 6: Zeige eine Liste aller Customer an
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Erweitere das Template von `AppComponent`, um eine Liste aller Customer-Objekte anzuzeigen.

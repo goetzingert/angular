@@ -1,5 +1,7 @@
 # Übung 34: Tests schreiben und bewerten
 
+**Zeitrichtwert:** ca. 45 Minuten
+
 Basis: Ergebnis von Übung 33 (`33_state_store`). Test-Runner ist Vitest (`ng test`, im Projekt bereits konfiguriert). Das Material für Teil C liegt in `material/generierter-store-test.spec.ts.txt` (neben dieser Datei).
 
 ## Aufgabe

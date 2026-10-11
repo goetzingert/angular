@@ -1,5 +1,7 @@
 # Übung 8: Inputs
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Erweitere `CustomerListComponent`, damit sie die Kundendaten von außen entgegennimmt statt sie selbst zu halten.

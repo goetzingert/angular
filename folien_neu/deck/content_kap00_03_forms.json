@@ -130,6 +130,7 @@
      "bullets": [
       "Alle Übungen entwickeln eine Anwendung weiter: Kundenverwaltung mit Liste, Details, Login",
       "Jede Übung startet mit dem Ergebnis der vorherigen (Ordner 04_… bis 38_…)",
+      "Wer eine Übung nicht schafft, startet die nächste im Lösungsordner der vorigen Übung",
       "Aufbau des Kurses:",
       [
        "1. Grundlagen: Komponenten, Templates, Services, Routing",
@@ -152,7 +153,7 @@
        1
       ]
      ],
-     "notes": "Folie: „Der rote Faden: die Invoice-App“.\n\nIn allen Übungen wird dieselbe Anwendung weiterentwickelt. Sie heißt „Invoice-App“ und ist eine Kundenverwaltung mit einer Liste, einer Detailansicht, einem Login und einer Anbindung an ein Backend.\n\nJede Übung beginnt mit dem Ergebnis der vorherigen Übung. Die Ordner im Kursmaterial sind deshalb durchnummeriert und bauen aufeinander auf.\n\nDer Kurs hat fünf Teile: Zuerst die Grundlagen mit Komponenten, Templates, Services und Navigation. Dann Reaktivität und Datenfluss. Dann der Aufbau der Anwendung und die Verwaltung von Zustand. Danach Qualität, Tests und Wartbarkeit. Zum Schluss Performance, Sicherheit und die Arbeit mit künstlicher Intelligenz."
+     "notes": "Folie: „Der rote Faden: die Invoice-App“.\n\nIn allen Übungen wird dieselbe Anwendung weiterentwickelt. Sie heißt „Invoice-App“ und ist eine Kundenverwaltung mit einer Liste, einer Detailansicht, einem Login und einer Anbindung an ein Backend.\n\nJede Übung beginnt mit dem Ergebnis der vorherigen Übung. Die Ordner im Kursmaterial sind deshalb durchnummeriert und bauen aufeinander auf.\n\nWer eine Übung nicht geschafft hat oder an einem Tag gefehlt hat, hat keinen Nachteil. Jeder Ordner enthält den fertigen Stand der Übung. Die nächste Übung kann deshalb immer im Ordner der vorigen Übung sauber beginnen. Jede Aufgabe nennt außerdem einen Zeitrichtwert, damit man die Zeit besser einteilen kann.\n\nDer Kurs hat fünf Teile: Zuerst die Grundlagen mit Komponenten, Templates, Services und Navigation. Dann Reaktivität und Datenfluss. Dann der Aufbau der Anwendung und die Verwaltung von Zustand. Danach Qualität, Tests und Wartbarkeit. Zum Schluss Performance, Sicherheit und die Arbeit mit künstlicher Intelligenz."
     },
     {
      "type": "content",

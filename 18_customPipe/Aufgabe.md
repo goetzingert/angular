@@ -1,5 +1,7 @@
 # Übung 18: Schreibe eine eigene Pipe
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Erstelle eine eigene Pipe, die aus der Kundenliste nur aktive Kunden filtert.

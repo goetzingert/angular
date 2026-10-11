@@ -1,5 +1,7 @@
 # Übung 29: Content Projection (<ng-content>)
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Erstelle eine wiederverwendbare Card-Komponente (`CardComponent`), die Inhalte von außen über `<ng-content>` aufnimmt und strukturiert darstellt.

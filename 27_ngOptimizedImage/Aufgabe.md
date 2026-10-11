@@ -1,5 +1,7 @@
 # Übung 27: NgOptimizedImage
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Stelle die Bilddarstellung von einem normalen `<img [src]>` auf die eingebaute Performance-Direktive `NgOptimizedImage` um.

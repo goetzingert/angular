@@ -1,5 +1,7 @@
 # Übung 19: Async CustomerService
 
+**Zeitrichtwert:** ca. 20 Minuten
+
 ## Aufgabe
 
 Verpasse `CustomerService` eine Observable-basierte API statt einfacher, synchroner Rückgabewerte.

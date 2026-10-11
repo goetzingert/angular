@@ -1,5 +1,7 @@
 # Übung 37: KI-Ergebnis reviewen
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 Basis: Ergebnis von Übung 36 (`36_sicherheit`). Du arbeitest wahlweise mit deinem eigenen KI-Werkzeug (sofern erlaubt) oder mit dem **vorbereiteten Beispielergebnis** in `material/ki-vorschlag.md`.
 
 ## Aufgabe

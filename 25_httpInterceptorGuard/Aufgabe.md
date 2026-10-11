@@ -1,5 +1,7 @@
 # Übung 25: Funktionale Guards & Interceptors
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 ## Aufgabe
 
 Schütze die Kundenrouten mit einem Login und protokolliere alle HTTP-Aufrufe.

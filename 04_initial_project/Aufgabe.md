@@ -1,5 +1,7 @@
 # Übung 4: Erstelle das initiale Projekt
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Lege mit dem Angular CLI ein komplett neues Angular-Projekt an und bringe es zum Laufen.

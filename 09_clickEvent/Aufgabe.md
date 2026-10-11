@@ -1,5 +1,7 @@
 # Übung 9: Events
 
+**Zeitrichtwert:** ca. 10 Minuten
+
 ## Aufgabe
 
 Reagiere in `CustomerListComponent` auf Klicks auf die einzelnen Listen-Elemente.

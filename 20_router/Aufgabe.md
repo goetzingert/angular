@@ -1,5 +1,7 @@
 # Übung 20: Routen für Listenansicht
 
+**Zeitrichtwert:** ca. 15 Minuten
+
 ## Aufgabe
 
 Bereite die Anwendung auf Routing vor, um zwischen mehreren Ansichten navigieren zu können.

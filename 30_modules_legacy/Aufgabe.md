@@ -1,5 +1,7 @@
 # Übung 30: Legacy – Angular Module (NgModule)
 
+**Zeitrichtwert:** ca. 30 Minuten
+
 ## Aufgabe
 
 Lerne den klassischen, Modul-basierten Aufbau einer Angular-Anwendung kennen, wie er in vielen Bestandsprojekten noch verwendet wird.

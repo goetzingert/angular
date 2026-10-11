@@ -1,5 +1,7 @@
 # Übung 15: Injiziere den CustomerService
 
+**Zeitrichtwert:** ca. 10 Minuten
+
 ## Aufgabe
 
 Nutze den zuvor erstellten `CustomerService` tatsächlich in `AppComponent`.
