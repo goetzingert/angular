@@ -1,17 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
-import { TrainingsModule } from './trainings/trainings.module';
+import { AppModule } from './app.module';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
-    // NgModule-Stil: AppComponent ist NICHT standalone und wird deklariert, nicht importiert.
+    // NgModule-Stil: AppComponent ist NICHT standalone, sondern im AppModule deklariert.
+    // Deshalb wird das ganze Modul importiert (inkl. Routing und HttpClient); nur das Backend wird ersetzt.
     await TestBed.configureTestingModule({
-      declarations: [AppComponent],
-      imports: [RouterModule.forRoot([]), TrainingsModule],
-      providers: [provideHttpClient(), provideHttpClientTesting()]
+      imports: [AppModule],
+      providers: [provideHttpClientTesting()]
     }).compileComponents();
   });
 

@@ -1,16 +1,16 @@
-import { Component, effect, inject, input } from '@angular/core';
+import { Component, inject, input, linkedSignal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Customer } from '../customer.model';
+import { DatePipe, NgOptimizedImage } from '@angular/common';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Customer } from '../customer.model';
 import { CustomerService } from '../customer.service';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { CardComponent } from '../../shared/card/card.component';
 
 @Component({
   selector: 'customer-details',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, NgOptimizedImage, CardComponent],
+  imports: [DatePipe, FormsModule, NgOptimizedImage, CardComponent],
   templateUrl: './customer-details.component.html',
   styleUrls: ['./customer-details.component.css']
 })
@@ -20,10 +20,9 @@ export class CustomerDetailsComponent {
 
   private readonly customerService = inject(CustomerService);
   private readonly router = inject(Router);
-  private readonly fb = inject(FormBuilder);
 
   // rxResource lädt den Kunden reaktiv neu, sobald sich id() ändert.
-  // Das ersetzt den bisherigen effect() + getCustomerById()-Aufruf.
+  // Das ersetzt den bisherigen effect() + subscribe()-Aufruf.
   private readonly customerResource = rxResource<Customer | undefined, string | undefined>({
     params: () => this.id(),
     stream: ({ params }) => {
@@ -34,41 +33,26 @@ export class CustomerDetailsComponent {
     }
   });
 
+  // Der geladene Kunde (nur lesen!)
   customer = this.customerResource.value;
   isLoading = this.customerResource.isLoading;
 
-  public customerForm = this.fb.group({
-    firstname: [''],
-    lastname: [''],
-    street: [''],
-    city: [''],
-    zip: [''],
-    lastOrderDate: [new Date().toISOString().substring(0, 10)],
+  // Bearbeitbare Kopie für das Formular. Ändert sich der geladene Kunde, wird die Kopie neu erzeugt.
+  // So bearbeitet ngModel nie direkt das geladene Objekt.
+  draft = linkedSignal(() => {
+    const customer = this.customer();
+    return customer ? { ...customer } : undefined;
   });
 
-  constructor() {
-    effect(() => {
-      const currentCustomer = this.customer();
-      if (currentCustomer) {
-        this.customerForm.patchValue(currentCustomer as any);
-        this.customerForm.patchValue({ lastOrderDate: currentCustomer.lastOrderDate?.toISOString().substring(0, 10) });
-      }
-    });
+  // <input type="date"> liefert einen String ('yyyy-MM-dd'), das Modell hält ein Date.
+  setLastOrderDate(customer: Customer, value: string): void {
+    customer.lastOrderDate = value ? new Date(value) : undefined;
   }
 
-  onSubmit(): void {
-    const currentCustomer = this.customer();
-    if (currentCustomer && this.customerForm.valid) {
-      const updatedCustomer: Customer = {
-        ...currentCustomer,
-        ...this.customerForm.value
-      } as Customer;
-
-      if (this.customerForm.value.lastOrderDate) {
-        updatedCustomer.lastOrderDate = new Date(this.customerForm.value.lastOrderDate);
-      }
-
-      this.customerService.update(updatedCustomer).subscribe(() => {
+  onSubmit(form: NgForm): void {
+    const customer = this.draft();
+    if (customer && form.valid) {
+      this.customerService.update(customer).subscribe(() => {
         this.goBack();
       });
     }

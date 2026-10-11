@@ -10,7 +10,7 @@ Erstelle eine wiederverwendbare Card-Komponente (`CardComponent`), die Inhalte v
    - `<ng-content></ng-content>` (Default-Slot) für den Hauptinhalt.
    - `<ng-content select="[card-footer]"></ng-content>` für Aktionsbuttons im Fußbereich.
 3. Gib der Card ein ansprechendes Styling mit Rahmen, Schatten und getrennten Bereichen für Header, Body und Footer.
-4. Binde `CardComponent` in `CustomerDetailsComponent` ein und platziere das Formular sowie die Buttons in die entsprechenden Slots.
+4. Binde `CardComponent` in `CustomerDetailsComponent` ein und platziere den Kundennamen im Header-Slot (`card-header`), das Template-Driven Form aus Übung 22 im Default-Slot und die Buttons „Speichern“ und „Zurück zur Liste“ im Footer-Slot (`card-footer`).
 
 ## Lernziele
 
@@ -26,4 +26,5 @@ Erstelle eine wiederverwendbare Card-Komponente (`CardComponent`), die Inhalte v
 
 - Der CSS-Attribut-Selektor `select="[card-header]"` matched auf jedes HTML-Element mit dem Attribut `card-header` (z. B. `<span card-header>...</span>` oder `<h3 card-header>...</h3>`).
 - Der Slot ohne `select`-Attribut (`<ng-content></ng-content>`) fängt alle Inhalte auf, die zu keinem anderen Selektor passen.
+- Die Buttons im Footer-Slot liegen außerhalb des `<form>`-Elements. Damit „Speichern“ trotzdem das Formular abschickt, gib dem Formular eine `id` und dem Button `type="submit" form="customer-form"`. Die Template-Referenz `#customerForm="ngForm"` ist auch im Footer sichtbar (gleiches Template), dort steuert sie `[disabled]="customerForm.invalid"`.
 - Vergiss nicht, `CardComponent` im `imports`-Array von `CustomerDetailsComponent` zu deklarieren.

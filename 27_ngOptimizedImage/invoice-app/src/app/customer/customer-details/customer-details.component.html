@@ -1,22 +1,33 @@
 @if (isLoading()) {
     Loading Customer...
-} @else if (customer()) {
-    <form [formGroup]="customerForm">
+} @else if (draft(); as c) {
+    <form #customerForm="ngForm" (ngSubmit)="onSubmit(customerForm)">
         <div>
             <div style="margin-right: 10px; ">
-                @if (customer()?.imageUrl) {
-                    <img class="logo" [ngSrc]="customer()!.imageUrl!" width="200" height="200" priority>
+                @if (c.imageUrl) {
+                    <img class="logo" [ngSrc]="c.imageUrl" width="200" height="200" priority>
                 }
             </div>
-            <p>Vorname:<input type="text" formControlName="firstname"></p>
-            <p>Nachname:<input type="text" formControlName="lastname"></p>
-            <p>Straße:<input type="text" formControlName="street"></p>
-            <p>PLZ:<input type="text" formControlName="zip"></p>
-            <p>Stadt:<input type="text" formControlName="city"></p>
-            <p>Letzes Bestelldatum:<input type="date" formControlName="lastOrderDate"></p>
+            <p>Vorname:<input type="text" name="firstname" [(ngModel)]="c.firstname" required #firstname="ngModel"></p>
+            @if (firstname.invalid && firstname.dirty) {
+                <p class="error">Bitte einen Vornamen eingeben.</p>
+            }
+            <p>Nachname:<input type="text" name="lastname" [(ngModel)]="c.lastname" required #lastname="ngModel"></p>
+            @if (lastname.invalid && lastname.dirty) {
+                <p class="error">Bitte einen Nachnamen eingeben.</p>
+            }
+            <p>Straße:<input type="text" name="street" [(ngModel)]="c.street"></p>
+            <p>PLZ:<input type="text" name="zip" [(ngModel)]="c.zip" pattern="[0-9]*" #zip="ngModel"></p>
+            @if (zip.invalid && zip.dirty) {
+                <p class="error">Die PLZ darf nur aus Ziffern bestehen.</p>
+            }
+            <p>Stadt:<input type="text" name="city" [(ngModel)]="c.city"></p>
+            <p>Letzes Bestelldatum:<input type="date" name="lastOrderDate"
+                    [ngModel]="c.lastOrderDate | date:'yyyy-MM-dd':'UTC'"
+                    (ngModelChange)="setLastOrderDate(c, $event)"></p>
 
-            <button (click)="onSubmit()">Speichern</button>
-            <button (click)="goBack()">Zurück zur Liste</button>
+            <button type="submit" [disabled]="customerForm.invalid">Speichern</button>
+            <button type="button" (click)="goBack()">Zurück zur Liste</button>
         </div>
     </form>
 } @else {

@@ -15,3 +15,9 @@ img.logo {
 .active {
   color: red;
 }
+
+.error {
+  color: red;
+  font-size: smaller;
+  margin: 0 0 8px;
+}

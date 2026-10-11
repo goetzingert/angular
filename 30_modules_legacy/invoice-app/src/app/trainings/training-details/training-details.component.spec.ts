@@ -32,7 +32,10 @@ describe('TrainingDetailsComponent', () => {
 
   it('should patch the form with the loaded training', () => {
     httpMock.expectOne('api/training').flush({ data: [] });
-    httpMock.expectOne('api/training/1').flush({ data: { id: 1, name: 'Angular', description: 'Kurs' } });
+    // Beachte: Die Komponente und die async-Pipe abonnieren beide training$, daher gehen zwei Requests raus.
+    const requests = httpMock.match('api/training/1');
+    expect(requests.length).toBe(2);
+    requests.forEach(request => request.flush({ data: { id: 1, name: 'Angular', description: 'Kurs' } }));
 
     expect(fixture.componentInstance.trainingForm.value).toEqual({ name: 'Angular', description: 'Kurs' });
   });

@@ -1,0 +1,19 @@
+<div>
+    @if (isLoading()) {
+        <p>Lade Kunden...</p>
+    }
+    @if (error()) {
+        <p class="error">Fehler beim Laden der Kunden.</p>
+    }
+    <customer-filter [value]="filterText()"
+                     (changed)="onFilterChanged($event)"
+                     (cleared)="onFilterCleared()" />
+    <ul>
+        @for (customer of filteredCustomers(); track customer) {
+            <li customer-list-item
+                [customer]="customer"
+                [selected]="isSelectedCustomer(customer)"
+                (chosen)="listItemClicked($event)"></li>
+        }
+    </ul>
+</div>

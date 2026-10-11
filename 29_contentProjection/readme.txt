@@ -1,9 +1,14 @@
-Der Fehler lag im html file der details Compoenent. 
-Da hab ich bei den input Feldern formGroupName statt formControlName geschrieben.
+Startanleitung
 
-Daher das Problem. 
+1. Backend starten (Ordner server/ im Repo-Wurzelverzeichnis, einmalig npm install):
+     cd server
+     npm install
+     node server.js          (läuft auf http://localhost:3000)
 
-Ich hab noch ein paar Sachen umgebaut, und http hinterlegt. 
+2. App starten (im Ordner invoice-app):
+     npm install
+     ng serve --proxy-config dev.proxy.json
+   Aufruf im Browser: http://localhost:4200
 
-Anstarten bitte mit:  ng serve --proxy-config dev.proxy.json
-Vorher im server Verzeichnis npm install und danach node server.js
+3. Tests ausführen (Vitest):
+     ng test
