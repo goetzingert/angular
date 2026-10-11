@@ -1,0 +1,73 @@
+// ---------------------------------------------------------------------------------
+// "Automatisch generierte" Spec für den CustomerStore (Material für Übung 34, Teil C).
+// Die Datei hat absichtlich die Endung .txt, damit sie nicht mit ausgeführt wird.
+// Zum Ausprobieren: als src/app/customer/customer.store.generated.spec.ts speichern.
+// Aufgabe: Bewerte die Tests. Was prüfen sie wirklich? Was fehlt?
+// ---------------------------------------------------------------------------------
+import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+
+import { Customer } from './customer.model';
+import { CustomerService } from './customer.service';
+import { CustomerStore } from './customer.store';
+
+describe('CustomerStore', () => {
+  let store: CustomerStore;
+  let customerService: { getAll: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    localStorage.clear();
+    customerService = {
+      getAll: vi.fn().mockReturnValue(of([new Customer('Hans', 'Meyer'), new Customer('Lisa', 'Simpson')]))
+    };
+
+    TestBed.configureTestingModule({
+      providers: [{ provide: CustomerService, useValue: customerService }]
+    });
+
+    store = TestBed.inject(CustomerStore);
+  });
+
+  it('should create', () => {
+    expect(store).toBeTruthy();
+  });
+
+  it('should load customers', async () => {
+    await store.load();
+
+    expect(customerService.getAll).toHaveBeenCalled();
+    expect(store.customers().length).toBe(2);
+  });
+
+  it('should filter customers', async () => {
+    await store.load();
+
+    store.setFilter('li');
+
+    const expected = store.customers().filter(c => c.firstname.toLowerCase().includes('li'));
+    expect(store.filtered()).toEqual(expected);
+  });
+
+  it('should call setFilter', () => {
+    const spy = vi.spyOn(store, 'setFilter');
+
+    store.setFilter('hans');
+
+    expect(spy).toHaveBeenCalledWith('hans');
+  });
+
+  it('should select a customer', async () => {
+    await store.load();
+    const first = store.customers()[0];
+
+    store.select(first.id);
+
+    expect(store.selected()).toBeTruthy();
+  });
+
+  it('should have a total', async () => {
+    await store.load();
+
+    expect(store.total()).toBeTruthy();
+  });
+});

@@ -79,8 +79,8 @@
     {
      "type": "code",
      "title": "Abhängigkeiten per Dependency Injection ersetzen",
-     "code": "TestBed.configureTestingModule({\n  providers: [\n    { provide: CustomerApi, useValue: { getAll: () => of([hans, lisa]) } },\n  ],\n});\n\nconst store = TestBed.inject(CustomerStore);\n\n// Der Store bekommt jetzt den Ersatz statt des echten CustomerApi.\n// Kein Code im Store muss dafür geändert werden.",
-     "notes": "Codefolie „Abhängigkeiten per Dependency Injection ersetzen“.\n\nDank „Dependency Injection“ lassen sich Abhängigkeiten leicht austauschen. Das ist das Verfahren, bei dem Angular einer Klasse die benötigten Objekte übergibt. Im Beispiel wird bei den „providers“ festgelegt: Wenn jemand „CustomerApi“ anfordert, bekommt er ein einfaches Ersatzobjekt. Dessen Methode „getAll“ liefert direkt zwei Kunden.\n\nDer Store erhält dann diesen Ersatz. Am Store selbst muss dafür nichts geändert werden."
+     "code": "TestBed.configureTestingModule({\n  providers: [\n    { provide: CustomerService, useValue: { getAll: () => of([hans, lisa]) } },\n  ],\n});\n\nconst store = TestBed.inject(CustomerStore);\n\n// Der Store bekommt jetzt den Ersatz statt des echten CustomerService.\n// Kein Code im Store muss dafür geändert werden.",
+     "notes": "Codefolie „Abhängigkeiten per Dependency Injection ersetzen“.\n\nDank „Dependency Injection“ lassen sich Abhängigkeiten leicht austauschen. Das ist das Verfahren, bei dem Angular einer Klasse die benötigten Objekte übergibt. Im Beispiel wird bei den „providers“ festgelegt: Wenn jemand „CustomerService“ anfordert, bekommt er ein einfaches Ersatzobjekt. Dessen Methode „getAll“ liefert direkt zwei Kunden.\n\nDer Store erhält dann diesen Ersatz. Am Store selbst muss dafür nichts geändert werden."
     },
     {
      "type": "code",
@@ -162,7 +162,7 @@
        1
       ],
       [
-       "Ersetze CustomerApi per providers durch ein Ersatzobjekt",
+       "Ersetze CustomerService per providers durch ein Ersatzobjekt",
        1
       ],
       "Teil B: Teste CustomerListItemComponent: Name wird angezeigt, Klick löst chosen aus",
@@ -361,7 +361,7 @@
      "type": "exercise",
      "title": "Übung 35: Langsame Liste",
      "bullets": [
-      "Öffne das Projekt 35_performance (5000 Kunden per Hilfscode, abschaltbar per Flag)",
+      "Öffne das Projekt 35_performance (5000 Testkunden per Hilfscode, LOAD_TEST_SIZE: 0 = aus)",
       "1. Messe: Chrome DevTools (Eingabe im Filter) und Angular DevTools Profiler",
       [
        "Notiere Dauer der Aktualisierung und Anzahl neu gerenderter Komponenten",
@@ -637,7 +637,7 @@
      "type": "exercise",
      "title": "Übung 36: XSS erleben und beheben",
      "bullets": [
-      "Öffne das Projekt 36_sicherheit (die Notiz wird client-seitig ergänzt)",
+      "Öffne das Projekt 36_sicherheit (Lastgenerator aus Ü35 aus; Notiz kommt aus dem CustomerService)",
       "1. Customer erhält note?: string; Kunde 1: <b>wichtig</b> <img src=x onerror=\"alert('XSS')\">",
       "2. Anzeige per Interpolation und per [innerHTML]: Ergebnis im Browser (Elements) prüfen",
       "3. Gegenbeispiel mit bypassSecurityTrustHtml: Was passiert? Wann wäre das akzeptabel?",

@@ -45,7 +45,7 @@ src/app/
 ```ts
 @Injectable({ providedIn: 'root' })
 export class CustomerStore {
-  private readonly api = inject(CustomerApi);
+  private readonly api = inject(CustomerService);
 
   // privat schreibbar, öffentlich nur lesbar
   private readonly _customers = signal<Customer[]>([]);
@@ -106,7 +106,7 @@ export const CustomerStore = signalStore(
     filtered: computed(() => customers().filter(c =>
       c.firstname.toLowerCase().includes(filter().toLowerCase()))),
   })),
-  withMethods((store, api = inject(CustomerApi)) => ({
+  withMethods((store, api = inject(CustomerService)) => ({
     setFilter(filter: string) { patchState(store, { filter }); },
     async load() { patchState(store, { customers: await firstValueFrom(api.getAll()) }); },
   })),

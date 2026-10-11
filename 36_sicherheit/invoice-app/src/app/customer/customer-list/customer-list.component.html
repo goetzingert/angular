@@ -1,0 +1,22 @@
+<div>
+    @if (store.loading()) {
+        <p>Lade Kunden...</p>
+    }
+    @if (store.error()) {
+        <p class="error">{{ store.error() }}</p>
+    }
+    <customer-filter [value]="typedFilter()"
+                     (changed)="onFilterChanged($event)"
+                     (cleared)="onFilterCleared()" />
+    <!-- Virtual Scrolling: nur die sichtbaren Zeilen (plus Puffer) sind im DOM.
+         itemSize muss zur Zeilenhöhe (32px, siehe CustomerListItemComponent) passen. -->
+    <cdk-virtual-scroll-viewport class="viewport" itemSize="32" role="list">
+        <div *cdkVirtualFor="let customer of store.filtered(); trackBy: trackById"
+             customer-list-item
+             [customer]="customer"
+             [selected]="isSelectedCustomer(customer)"
+             (chosen)="listItemClicked($event)"></div>
+    </cdk-virtual-scroll-viewport>
+    <p>Treffer: {{ store.total() }} · Ausgewählt: {{ store.selected()?.firstname || '-' }}</p>
+    <button (click)="addDemo()">Demo-Kunde hinzufügen</button>
+</div>

@@ -307,14 +307,14 @@
     {
      "type": "code",
      "title": "Template-Driven Form: Aufbau im Template",
-     "code": "<form #form=\"ngForm\" (ngSubmit)=\"save()\">\n  <label for=\"firstname\">Vorname</label>\n  <input id=\"firstname\" name=\"firstname\"\n         [ngModel]=\"draft().firstname\"\n         (ngModelChange)=\"setField('firstname', $event)\">\n\n  <label for=\"city\">Stadt</label>\n  <input id=\"city\" name=\"city\"\n         [ngModel]=\"draft().city\"\n         (ngModelChange)=\"setField('city', $event)\">\n\n  <button type=\"submit\">Speichern</button>\n</form>\n<!-- #form=\"ngForm\": Zugriff auf das ganze Formular, z. B. form.invalid -->\n<!-- (ngSubmit): wird beim Absenden aufgerufen, ohne die Seite neu zu laden -->",
-     "notes": "Codefolie „Template-Driven Form: Aufbau im Template“.\n\nDas Beispiel zeigt ein kleines Formular im Template. Das „form“-Tag bekommt eine Template-Referenz „#form=\"ngForm\"“. Damit kann man später auf den Zustand des ganzen Formulars zugreifen. Das Ereignis „ngSubmit“ ruft die Methode „save“ auf, wenn das Formular abgeschickt wird. Die Seite wird dabei nicht neu geladen.\n\nJedes Feld hat ein „name“-Attribut und eine Bindung an „ngModel“, in zwei Teilen: Mit „[ngModel]“ wird der aktuelle Wert aus „draft()“ in das Feld geschrieben. Mit „(ngModelChange)“ wird bei jeder Eingabe die Methode „setField“ aufgerufen, die den neuen Wert in „draft“ speichert. Die Bearbeitungskopie „draft“ wird auf der nächsten Folie erklärt."
+     "code": "@if (draft(); as c) {\n  <form #customerForm=\"ngForm\">\n    <input name=\"firstname\" [(ngModel)]=\"c.firstname\">\n    <input name=\"city\" [(ngModel)]=\"c.city\">\n\n    <p>Formular: {{ customerForm.valid ? 'gültig' : 'ungültig' }}</p>\n  </form>\n}\n<!-- c: bearbeitbare Kopie des Kunden, das Original bleibt unverändert -->\n<!-- #customerForm=\"ngForm\": Zugriff auf das ganze Formular, z. B. .valid -->",
+     "notes": "Codefolie „Template-Driven Form: Aufbau im Template“.\n\nDas Beispiel zeigt ein kleines Formular im Template. Zuerst prüft ein „@if“-Block, ob eine bearbeitbare Kopie des Kunden vorhanden ist, und gibt ihr den Namen „c“. Das „form“-Tag bekommt eine Template-Referenz „#customerForm=\"ngForm\"“. Damit kann man auf den Zustand des ganzen Formulars zugreifen, zum Beispiel ob es gültig ist.\n\nJedes Feld hat ein „name“-Attribut und eine zweiseitige Bindung mit „[(ngModel)]“. Zweiseitig heißt: Der Wert der Kopie erscheint im Feld, und was der Benutzer tippt, wird sofort in die Kopie geschrieben. Das Original des Kunden bleibt dabei unverändert. Wie die Kopie entsteht, erklärt die nächste Folie."
     },
     {
      "type": "code",
      "title": "Bearbeitungskopie mit linkedSignal",
-     "code": "// customer: Signal mit dem Original (per ID vom Service geladen)\ncustomer = signal<Customer | undefined>(undefined);\n\n// Bearbeitbare Kopie: folgt dem Original, kann aber überschrieben werden\ndraft = linkedSignal(() => ({ ...this.customer() }));\n\nsetField(field: 'firstname' | 'lastname' | 'zip', value: string) {\n  // neues Objekt erzeugen, das Original bleibt unverändert\n  this.draft.update(d => ({ ...d, [field]: value }));\n}\n// Wechselt customer (z. B. andere ID), entsteht draft neu aus dem Original",
-     "notes": "Codefolie „Bearbeitungskopie mit linkedSignal“.\n\nBeim Bearbeiten eines Kunden soll das Original erst verändert werden, wenn der Benutzer speichert. Deshalb arbeitet das Formular mit einer Kopie. Diese heißt hier „draft“, auf Deutsch Entwurf.\n\n„linkedSignal“ ist ein abgeleiteter Wert, der trotzdem beschrieben werden kann. Am Anfang und immer dann, wenn sich das Original „customer“ ändert, wird „draft“ neu als Kopie des Originals berechnet. Dazwischen kann man den Entwurf mit „update“ oder „set“ überschreiben. Wechselt der Benutzer zu einem anderen Kunden, ist der Entwurf also automatisch wieder frisch.\n\nDie Methode „setField“ ändert genau ein Feld. Sie erzeugt dabei ein neues Objekt mit allen alten Werten und dem einen neuen Wert. Das ist wichtig, weil Signals nur Änderungen bemerken, wenn es ein neues Objekt gibt."
+     "code": "// Der geladene Kunde (nur lesen!)\ncustomer = computed(() => {\n  const id = this.id();\n  return id ? this.customerService.getById(id) : undefined;\n});\n\n// Bearbeitbare Kopie: folgt dem Original, kann aber überschrieben werden\ndraft = linkedSignal(() => {\n  const customer = this.customer();\n  return customer ? { ...customer } : undefined;\n});\n// Wechselt customer (z. B. andere ID), entsteht draft neu aus dem Original",
+     "notes": "Codefolie „Bearbeitungskopie mit linkedSignal“.\n\nBeim Bearbeiten eines Kunden soll das geladene Original nicht verändert werden, während der Benutzer tippt. Deshalb arbeitet das Formular mit einer Kopie. Diese heißt hier „draft“, auf Deutsch Entwurf.\n\n„customer“ ist ein berechneter Wert. Er holt den Kunden zur aktuellen Kennung vom Service. „linkedSignal“ ist ein abgeleiteter Wert, der trotzdem beschrieben werden kann. Am Anfang und immer dann, wenn sich das Original „customer“ ändert, wird „draft“ neu als Kopie des Originals berechnet. Dabei steht „{ ...customer }“ für eine flache Kopie mit allen Feldern. Wechselt der Benutzer zu einem anderen Kunden, ist der Entwurf also automatisch wieder frisch."
     },
     {
      "type": "content",
@@ -342,14 +342,14 @@
      "bullets": [
       "Template-Driven Forms prüfen Eingaben über HTML-Attribute am Feld",
       "required: Pflichtfeld",
-      "pattern=\"[0-9]{5}\": Eingabe muss zum regulären Ausdruck passen (z. B. fünfstellige PLZ)",
+      "pattern=\"[0-9]*\": Eingabe muss zum regulären Ausdruck passen (z. B. nur Ziffern für eine PLZ)",
       "minlength und maxlength: Mindest- und Höchstlänge",
       "email: Eingabe muss wie eine E-Mail-Adresse aussehen",
       "Angular wertet diese Attribute mit eingebauten Validator-Direktiven aus",
       "Eigene Prüfregeln (Custom Validators) sind möglich und werden als Direktive angelegt",
       "Die Prüfung im Client verbessert die Bedienung, die Prüfung im Server bleibt Pflicht"
      ],
-     "notes": "Folie: „Validierung mit HTML-Attributen“.\n\nBei „Template-Driven Forms“ legt man die Prüfregeln als normale HTML-Attribute an das Eingabefeld. „required“ macht ein Feld zum Pflichtfeld. „pattern“ verlangt, dass die Eingabe zu einem „regulären Ausdruck“ passt. Das ist ein Muster für erlaubte Zeichen. Zum Beispiel erlaubt „[0-9]{5}“ genau fünf Ziffern, also eine deutsche Postleitzahl. „minlength“ und „maxlength“ legen die kleinste und die größte Länge fest, und „email“ prüft das Aussehen einer E-Mail-Adresse.\n\nAngular erkennt diese Attribute und prüft die Eingabe automatisch. Das Ergebnis steht im Zustand des Feldes.\n\nWichtig bleibt, was wir vorher besprochen haben: Die Prüfung im Browser dient der Bedienung, die Prüfung im Server dient der Sicherheit. Beide sind nötig."
+     "notes": "Folie: „Validierung mit HTML-Attributen“.\n\nBei „Template-Driven Forms“ legt man die Prüfregeln als normale HTML-Attribute an das Eingabefeld. „required“ macht ein Feld zum Pflichtfeld. „pattern“ verlangt, dass die Eingabe zu einem „regulären Ausdruck“ passt. Das ist ein Muster für erlaubte Zeichen. Zum Beispiel erlaubt „[0-9]*“ nur aus Ziffern, also eine deutsche Postleitzahl. „minlength“ und „maxlength“ legen die kleinste und die größte Länge fest, und „email“ prüft das Aussehen einer E-Mail-Adresse.\n\nAngular erkennt diese Attribute und prüft die Eingabe automatisch. Das Ergebnis steht im Zustand des Feldes.\n\nWichtig bleibt, was wir vorher besprochen haben: Die Prüfung im Browser dient der Bedienung, die Prüfung im Server dient der Sicherheit. Beide sind nötig."
     },
     {
      "type": "content",
@@ -377,28 +377,24 @@
     },
     {
      "type": "code",
-     "title": "Fehlermeldung und Speichern-Button",
-     "code": "<form #form=\"ngForm\" (ngSubmit)=\"save()\">\n  <input name=\"firstname\" required #firstname=\"ngModel\"\n         [ngModel]=\"draft().firstname\"\n         (ngModelChange)=\"setField('firstname', $event)\">\n  @if (firstname.invalid && firstname.dirty) {\n    <small class=\"error\">Der Vorname ist ein Pflichtfeld.</small>\n  }\n\n  <input name=\"zip\" pattern=\"[0-9]{5}\" #zip=\"ngModel\"\n         [ngModel]=\"draft().zip\"\n         (ngModelChange)=\"setField('zip', $event)\">\n  @if (zip.invalid && zip.dirty) {\n    <small class=\"error\">Die PLZ besteht aus genau 5 Ziffern.</small>\n  }\n\n  <button type=\"submit\" [disabled]=\"form.invalid\">Speichern</button>\n</form>",
-     "notes": "Codefolie „Fehlermeldung und Speichern-Button“.\n\nDas Beispiel erweitert das Formular um Prüfregeln. Das erste Feld hat das Attribut „required“. Mit „#firstname=\"ngModel\"“ bekommt das Template Zugriff auf den Zustand dieses Feldes. Darunter steht ein „@if“-Block. Er zeigt die Fehlermeldung nur, wenn das Feld ungültig ist und der Benutzer es bereits verändert hat.\n\nDas zweite Feld hat das Attribut „pattern“ mit dem Muster für genau fünf Ziffern. Auch hier gibt es eine Fehlermeldung unter denselben Bedingungen.\n\nDer Speichern-Button ist mit „[disabled]=\"form.invalid\"“ verbunden. Solange das Formular ungültig ist, kann man also nicht speichern. Die Referenz „form“ zeigt auf das ganze Formular."
+     "title": "Fehlermeldung und Formularzustand",
+     "code": "<input name=\"firstname\" [(ngModel)]=\"c.firstname\" required #firstname=\"ngModel\">\n@if (firstname.invalid && firstname.dirty) {\n  <p class=\"error\">Bitte einen Vornamen eingeben.</p>\n}\n\n<input name=\"zip\" [(ngModel)]=\"c.zip\" pattern=\"[0-9]*\" #zip=\"ngModel\">\n@if (zip.invalid && zip.dirty) {\n  <p class=\"error\">Die PLZ darf nur aus Ziffern bestehen.</p>\n}\n\n<p>Formular: {{ customerForm.valid ? 'gültig' : 'ungültig' }}</p>\n<!-- Übung 23: <button type=\"submit\" [disabled]=\"customerForm.invalid\"> -->",
+     "notes": "Codefolie „Fehlermeldung und Formularzustand“.\n\nDas Beispiel erweitert das Formular um Prüfregeln. Das erste Feld hat das Attribut „required“, es ist also ein Pflichtfeld. Mit „#firstname=\"ngModel\"“ bekommt das Template Zugriff auf den Zustand dieses Feldes. Darunter steht ein „@if“-Block. Er zeigt die Fehlermeldung nur, wenn das Feld ungültig ist und der Benutzer es bereits verändert hat.\n\nDas zweite Feld hat das Attribut „pattern“ mit dem Muster „[0-9]*“. Das bedeutet: Es sind nur Ziffern erlaubt. Auch hier gibt es eine Fehlermeldung unter denselben Bedingungen.\n\nZum Schluss gibt eine Zeile den Zustand des ganzen Formulars aus, „gültig“ oder „ungültig“. In Übung 23 kommt der Speichern-Button dazu. Er wird mit „[disabled]=\"customerForm.invalid\"“ deaktiviert, solange das Formular ungültig ist."
     },
     {
      "type": "exercise",
      "title": "Übung 22: Kunde bearbeiten (Template-Driven Form)",
      "bullets": [
       "Öffne das Projekt 22_forms und arbeite in CustomerDetailsComponent",
-      "1. FormsModule im imports-Array importieren",
-      "2. Bearbeitbare Kopie als linkedSignal anlegen: draft = linkedSignal(() => ({ ...customer() }))",
-      "3. Felder (Vorname, Nachname, Straße, PLZ, Stadt) mit [ngModel] und (ngModelChange) binden",
-      [
-       "Jedes Feld braucht ein name-Attribut",
-       1
-      ],
-      "4. Validierung per HTML-Attribut: Vor- und Nachname required, PLZ pattern=\"[0-9]{5}\"",
+      "1. FormsModule im imports-Array importieren (für das Datumsfeld auch DatePipe)",
+      "2. Bearbeitbare Kopie als linkedSignal anlegen: draft = linkedSignal(() => ({ ...customer }))",
+      "3. Felder mit name-Attribut und [(ngModel)] an die Kopie binden",
+      "4. Validierung per HTML-Attribut: Vor- und Nachname required, PLZ pattern=\"[0-9]*\"",
       "5. Fehlermeldung je Feld mit @if (feld.invalid && feld.dirty)",
-      "6. Speichern-Button deaktivieren, solange das Formular ungültig ist",
+      "6. Formularzustand ausgeben: #customerForm=\"ngForm\" und customerForm.valid",
       "Musterlösung: 22_forms (baut auf 21_dynamic_routes auf)"
      ],
-     "notes": "Folie: „Übung 22: Kunde bearbeiten (Template-Driven Form)“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 22 im Ordner 22_forms. Die Teilnehmer bauen in der Detailansicht ein Formular, mit dem ein Kunde bearbeitet werden kann.\n\nZuerst importieren sie das „FormsModule“. Dann legen sie mit „linkedSignal“ eine bearbeitbare Kopie des Kunden an. Anschließend binden sie die Felder Vorname, Nachname, Straße, Postleitzahl und Stadt an diese Kopie. Jedes Feld braucht ein „name“-Attribut.\n\nDanach fügen sie Prüfregeln als HTML-Attribute hinzu: Vor- und Nachname sind Pflichtfelder, die Postleitzahl muss aus fünf Ziffern bestehen. Für jedes ungültige Feld erscheint eine Fehlermeldung, aber erst, wenn der Benutzer das Feld verändert hat. Zum Schluss wird der Speichern-Button deaktiviert, solange das Formular ungültig ist. Das eigentliche Speichern über den Service folgt in Übung 23."
+     "notes": "Folie: „Übung 22: Kunde bearbeiten (Template-Driven Form)“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 22 im Ordner 22_forms. Die Teilnehmer bauen in der Detailansicht ein Formular, mit dem ein Kunde bearbeitet werden kann.\n\nZuerst importieren sie das „FormsModule“. Dann legen sie mit „linkedSignal“ eine bearbeitbare Kopie des Kunden an. Anschließend binden sie die Felder Vorname, Nachname, Straße, Postleitzahl und Stadt mit „ngModel“ an diese Kopie. Jedes Feld braucht ein „name“-Attribut.\n\nDanach fügen sie Prüfregeln als HTML-Attribute hinzu: Vor- und Nachname sind Pflichtfelder, die Postleitzahl darf nur aus Ziffern bestehen. Für jedes ungültige Feld erscheint eine Fehlermeldung, aber erst, wenn der Benutzer das Feld verändert hat. Zum Schluss geben sie den Zustand des ganzen Formulars aus, gültig oder ungültig, und prüfen im Browser, dass er sich richtig ändert. Der Speichern-Button und das Speichern über den Service folgen in Übung 23."
     }
    ]
   },
@@ -785,7 +781,7 @@
     {
      "type": "code",
      "title": "Service mit Signals als einfacher Store",
-     "code": "@Injectable({ providedIn: 'root' })\nexport class CustomerStore {\n  private readonly api = inject(CustomerApi);\n  // privat schreibbar, öffentlich nur lesbar\n  private readonly _customers = signal<Customer[]>([]);\n  private readonly _filter = signal('');\n  readonly customers = this._customers.asReadonly();\n  readonly filter = this._filter.asReadonly();\n  readonly filtered = computed(() => {\n    const f = this._filter().toLowerCase();\n    return this._customers().filter(c => c.firstname.toLowerCase().includes(f));\n  });\n\n  setFilter(text: string) { this._filter.set(text); }\n  async load() { this._customers.set(await firstValueFrom(this.api.getAll())); }\n}",
+     "code": "@Injectable({ providedIn: 'root' })\nexport class CustomerStore {\n  private readonly api = inject(CustomerService);\n  // privat schreibbar, öffentlich nur lesbar\n  private readonly _customers = signal<Customer[]>([]);\n  private readonly _filter = signal('');\n  readonly customers = this._customers.asReadonly();\n  readonly filter = this._filter.asReadonly();\n  readonly filtered = computed(() => {\n    const f = this._filter().toLowerCase();\n    return this._customers().filter(c => c.firstname.toLowerCase().includes(f));\n  });\n\n  setFilter(text: string) { this._filter.set(text); }\n  async load() { this._customers.set(await firstValueFrom(this.api.getAll())); }\n}",
      "notes": "Codefolie „Service mit Signals als einfacher Store“.\n\nDas Beispiel zeigt einen einfachen Store als Service mit Signals. Die Daten und der Filtertext liegen in privaten Signals mit einem Unterstrich im Namen. Nach außen gibt der Store nur lesbare Versionen heraus, die man mit „asReadonly“ erzeugt. Von außen kann man die Werte also nicht direkt ändern.\n\nDie gefilterte Liste ist ein „computed“. Sie rechnet sich automatisch neu, wenn sich die Kunden oder der Filter ändern. Geändert wird der Zustand nur über Methoden: „setFilter“ setzt den Filtertext, „load“ lädt die Kunden vom Server. Diese Methoden heißen auch „Aktionen“.\n\nDas ist übersichtlicher als eine Lösung mit RxJS-Subjects im Service. Der Zustand ist sofort lesbar, und es gibt keine Anmeldungen, die man verwalten muss."
     },
     {
@@ -835,7 +831,7 @@
     {
      "type": "code",
      "title": "NgRx Signal Store: Muster als Bibliothek",
-     "code": "export const CustomerStore = signalStore(\n  { providedIn: 'root' },\n  withState({ customers: [] as Customer[], filter: '' }),\n  withComputed(({ customers, filter }) => ({\n    filtered: computed(() => customers().filter(\n      c => c.firstname.toLowerCase().includes(filter().toLowerCase()))),\n  })),\n  withMethods((store, api = inject(CustomerApi)) => ({\n    setFilter(filter: string) { patchState(store, { filter }); },\n    async load() {\n      patchState(store, { customers: await firstValueFrom(api.getAll()) });\n    },\n  })),\n);\n\n// In der Komponente:\n// store = inject(CustomerStore);   -> store.filtered(), store.setFilter(...)",
+     "code": "export const CustomerStore = signalStore(\n  { providedIn: 'root' },\n  withState({ customers: [] as Customer[], filter: '' }),\n  withComputed(({ customers, filter }) => ({\n    filtered: computed(() => customers().filter(\n      c => c.firstname.toLowerCase().includes(filter().toLowerCase()))),\n  })),\n  withMethods((store, api = inject(CustomerService)) => ({\n    setFilter(filter: string) { patchState(store, { filter }); },\n    async load() {\n      patchState(store, { customers: await firstValueFrom(api.getAll()) });\n    },\n  })),\n);\n\n// In der Komponente:\n// store = inject(CustomerStore);   -> store.filtered(), store.setFilter(...)",
      "notes": "Codefolie „NgRx Signal Store: Muster als Bibliothek“.\n\nDer „Signal Store“ aus dem Paket „@ngrx/signals“ bietet dasselbe Muster wie der selbst geschriebene Store, aber als fertige, standardisierte Bibliothek. Der Aufbau ist fast gleich wie auf der Folie zuvor.\n\n„withState“ legt den Zustand fest, hier Kunden und Filter. „withComputed“ definiert abgeleitete Werte, hier die gefilterte Liste. „withMethods“ definiert die Aktionen. „patchState“ ändert den Zustand, indem es einzelne Teile ersetzt.\n\nDer Vorteil ist, dass alle Stores gleich aufgebaut sind und man sie mit weiteren Bausteinen erweitern kann, zum Beispiel für Listen von Entitäten oder für RxJS. Die Komponente holt sich den Store mit „inject“ und liest Werte wie „store.filtered()“. Sie ruft Methoden wie „store.setFilter“ auf."
     },
     {
@@ -884,7 +880,7 @@
      "type": "exercise",
      "title": "Übung 33: CustomerStore einführen",
      "bullets": [
-      "1. customer/customer.store.ts anlegen (Service mit Signals, wie im Beispiel davor)",
+      "1. CustomerService zur reinen API-Schicht machen, dann customer.store.ts anlegen",
       [
        "Zustand: customers, filter, selectedId; abgeleitet: filtered, selected",
        1
@@ -899,7 +895,7 @@
       "5. Reflexion: War der Store hier nach den Kriterien nötig? Begründung in 3 Sätzen",
       "Musterlösung: 33_state_store (baut auf 32_reaktivitaet auf)"
      ],
-     "notes": "Folie: „Übung 33: CustomerStore einführen“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 33 im Ordner 33_state_store. Sie baut auf dem Ergebnis von Übung 32 auf.\n\nDie Teilnehmer verlagern die Zustandslogik in einen Store. Sie legen die Datei „customer.store.ts“ als Service mit Signals an. Der Zustand besteht aus Kunden, Filter und der Kennung des ausgewählten Kunden. Abgeleitet werden die gefilterte Liste und der ausgewählte Kunde, beide als „computed“. Dazu kommen die Methoden Laden, Filter setzen und Auswählen. Nach außen gibt der Store mit „asReadonly“ nur lesbare Signals heraus.\n\nDie Kundenliste benutzt danach nur noch den Store. Auch der „effect“ aus Übung 32 zieht um. Leistungsstarke Gruppen bauen zusätzlich eine Variante mit „signalStore“. Zum Schluss begründen alle in drei Sätzen, ob der Store hier schon nötig war."
+     "notes": "Folie: „Übung 33: CustomerStore einführen“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 33 im Ordner 33_state_store. Sie baut auf dem Ergebnis von Übung 32 auf.\n\nDie Teilnehmer verlagern die Zustandslogik in einen Store. Zuerst machen sie den vorhandenen „CustomerService“ zu einer reinen Schicht für den Zugriff auf den Server. Dann legen sie die Datei „customer.store.ts“ als Service mit Signals an. Der Zustand besteht aus Kunden, Filter und der Kennung des ausgewählten Kunden. Abgeleitet werden die gefilterte Liste und der ausgewählte Kunde, beide als „computed“. Dazu kommen die Methoden Laden, Filter setzen und Auswählen. Nach außen gibt der Store mit „asReadonly“ nur lesbare Signals heraus.\n\nDie Kundenliste benutzt danach nur noch den Store. Auch der „effect“ aus Übung 32 zieht um. Leistungsstarke Gruppen bauen zusätzlich eine Variante mit „signalStore“. Zum Schluss begründen alle in drei Sätzen, ob der Store hier schon nötig war."
     }
    ]
   },
@@ -975,6 +971,7 @@
    "op": "edit",
    "slide": 221,
    "bullets": [
+    "2-fache Validierung ist nicht redundant",
     "Client-seitig Validierung für User Experience",
     "Server-seitig Validierung für Sicherheit",
     "Validatoren",

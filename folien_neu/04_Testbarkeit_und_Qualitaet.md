@@ -61,7 +61,7 @@ describe('CustomerStore', () => {
 
 ```ts
 TestBed.configureTestingModule({
-  providers: [{ provide: CustomerApi, useValue: { getAll: () => of([hans, lisa]) } }],
+  providers: [{ provide: CustomerService, useValue: { getAll: () => of([hans, lisa]) } }],
 });
 ```
 - DI macht das einfach: Ersatz über `providers` statt Code ändern.
@@ -140,7 +140,7 @@ Quellen: `ng generate` (Spec-Gerüste), IDE-Assistenten, KI-Werkzeuge.
 
 **Teil A – Store testen (ohne UI):**
 1. Schreibe Tests für `CustomerStore`: Filter (Groß-/Kleinschreibung), Auswahl, leere Liste, Filter ohne Treffer.
-2. Mocke `CustomerApi` per `providers`.
+2. Mocke `CustomerService` per `providers`.
 
 **Teil B – Darstellungskomponente testen:**
 3. Teste `CustomerListItemComponent`: Name wird angezeigt, Klick löst `chosen` mit dem Kunden aus.

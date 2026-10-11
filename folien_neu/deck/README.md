@@ -55,3 +55,12 @@ Selbsttest: `cp content_selftest.json.example /tmp/t/content_selftest.json` und 
 - Überlaufprüfung ist eine Schätzung (Zeichenbreite), kein echtes Rendering; im Zweifel PDF prüfen (`soffice --headless --convert-to pdf`).
 - Abschnitte (`sectionLst`) werden nicht gepflegt (das Deck hat keine; sonst Warnung).
 - Gelöschte Folien verschwinden samt Notizen aus der Datei; Querverweise/Hyperlinks auf Folien werden nicht angepasst.
+
+## Wichtig: Eingabedatei ist das Original-Deck
+Alle Folienverweise (`after`, `move`, `edit`) beziehen sich auf die ursprüngliche Nummerierung mit **309 Folien**. Die Datei `presentation_angular21.pptx` im Repo enthält nach dem Einbau bereits die neuen Folien (444). Wird das Werkzeug erneut benötigt (z. B. nach Änderung einer `content_*.json`), das Original aus der Git-Historie holen und als Eingabe verwenden:
+
+```
+git show baf0614:presentation_angular21.pptx > /tmp/original.pptx
+python3 -I folien_neu/deck/build_deck.py /tmp/original.pptx /tmp/neu.pptx
+```
+Das Ergebnis ersetzt danach `presentation_angular21.pptx`. Änderungen, die direkt in PowerPoint am neuen Deck gemacht wurden, gehen dabei verloren.

@@ -1,0 +1,4 @@
+<button (click)="export()" [disabled]="customers().length === 0">CSV exportieren</button>
+@if (exportedCount() !== undefined) {
+    <span class="export-info"><strong>{{ exportedCount() }}</strong> Kunden exportiert</span>
+}

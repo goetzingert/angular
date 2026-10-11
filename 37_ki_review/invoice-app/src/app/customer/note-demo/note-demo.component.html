@@ -1,0 +1,25 @@
+<div class="note-demo">
+    <h4>Notiz anzeigen: drei Varianten</h4>
+
+    <p>
+        <strong>1. Interpolation</strong> (sicher, es wird Text angezeigt):
+        <span class="note-text">{{ note() }}</span>
+    </p>
+
+    <p>
+        <strong>2. [innerHTML]</strong> (Angular bereinigt das HTML):
+        <span class="note-sanitized" [innerHTML]="note()"></span>
+    </p>
+
+    <p>
+        <label>
+            <input type="checkbox" [checked]="showUnsafe()" (change)="toggleUnsafe($event)">
+            <strong>3. bypassSecurityTrustHtml</strong> anzeigen (UNSICHER, kann Skripte ausführen!)
+        </label>
+    </p>
+    @if (showUnsafe()) {
+        <!-- BEWUSST UNSICHER: Gegenbeispiel, keine Empfehlung. Siehe Kommentar in der Komponente. -->
+        <p class="warning">Achtung: Angulars Schutz ist hier abgeschaltet.</p>
+        <span class="note-unsafe" [innerHTML]="unsafeNote()"></span>
+    }
+</div>

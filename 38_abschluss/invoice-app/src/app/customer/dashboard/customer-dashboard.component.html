@@ -1,0 +1,37 @@
+<h2>Kunden-Dashboard</h2>
+
+@if (store.loading()) {
+    <p>Lade Kunden...</p>
+}
+@if (store.error()) {
+    <p class="error">{{ store.error() }}</p>
+}
+
+<section class="kpis">
+    <div class="kpi">
+        <span class="kpi-value" data-kpi="total">{{ total() }}</span>
+        <span class="kpi-label">Kunden gesamt</span>
+    </div>
+    <div class="kpi">
+        <span class="kpi-value" data-kpi="active">{{ activeLast7Days() }}</span>
+        <span class="kpi-label">Aktive Kunden (letzte 7 Tage)</span>
+    </div>
+</section>
+
+<h3>Kunden pro Stadt</h3>
+@if (customersPerCity().length === 0) {
+    <p>Keine Kunden vorhanden.</p>
+} @else {
+    <table>
+        <thead>
+            <tr><th>Stadt</th><th>Anzahl</th></tr>
+        </thead>
+        <tbody>
+            @for (row of customersPerCity(); track row.city) {
+                <tr><td>{{ row.city }}</td><td>{{ row.count }}</td></tr>
+            }
+        </tbody>
+    </table>
+}
+
+<p><a routerLink="/customer">Zurück zur Liste</a></p>
