@@ -490,6 +490,108 @@ def main(src, dst, terminal_png):
                  'werden nicht mehr gebraucht.')
     set_notes(new, notes_new)
 
+
+    # Sprechtexte fuer die uebrigen (inhaltlich unveraenderten) Folien
+    notes.update({
+        2: ('Folie: „Testpyramide“.\n\n'
+            'Die Pyramide zeigt, wie viele Tests es von welcher Art geben sollte. Unten stehen die „Unit Tests“. Das sind '
+            'kleine, schnelle Tests für einzelne Bausteine, zum Beispiel einen Service oder eine Pipe. Davon gibt es viele. '
+            'In der Mitte stehen die „Integrationstests“. Sie prüfen, ob mehrere Bausteine zusammen richtig arbeiten, zum '
+            'Beispiel eine Komponente mit ihrem Template.\n\n'
+            'Oben stehen die „Akzeptanztests“, auch „End-to-End-Tests“ genannt. Sie spielen die ganze Anwendung im Browser '
+            'durch, so wie ein Benutzer. Sie sind langsam und aufwendig, deshalb gibt es nur wenige. Je weiter oben, desto '
+            'weniger Tests, desto länger dauern sie.'),
+        10: ('Folie: „Einfaches Beispiel – Testsubjekt ExampleService“.\n\n'
+             'Das ist ein vollständiges, kleines Beispiel für eine Testdatei. Das „Testsubjekt“ ist die Klasse, die getestet '
+             'wird, hier der „ExampleService“. Die Beschriftungen am Rand benennen die Bausteine. „describe“ bildet die '
+             '„Suite“, also die Gruppe der Tests. „beforeEach“ ist das „Setup“, die Vorbereitung, die vor jedem einzelnen '
+             'Test läuft. Hier wird der Service über „TestBed.inject“ bereitgestellt.\n\n'
+             'Der Test selbst steht in „it“. Er enthält eine „Expectation“, auf Deutsch Erwartung: „expect(service)“ nimmt den '
+             'Wert, und „toBeTruthy“ ist der „Matcher“, also die Prüfung. Er bedeutet: Der Service existiert. Dieser Test '
+             'ist bei jedem neuen Service automatisch vorhanden.'),
+        11: ('Kapitelfolie: „Setup, Teardown“.\n\n'
+             '„Setup“ heißt Vorbereitung, „Teardown“ heißt Aufräumen. Die Folie zeigt, wann Vorbereitung und Aufräumen laufen. '
+             '„beforeEach“ und „afterEach“ laufen vor und nach jedem einzelnen Test. „beforeAll“ und „afterAll“ laufen nur '
+             'einmal für die ganze Suite, also einmal vor dem ersten und einmal nach dem letzten Test der Gruppe.'),
+        12: ('Folie: „Setup initialisiere Testwelt“.\n\n'
+             'In „beforeEach“ baut man vor jedem Test die „Testwelt“ auf, also eine saubere Umgebung. „TestBed.configureTestingModule“ '
+             'richtet diese Umgebung ein. Man übergibt ein Objekt mit den Einstellungen, zum Beispiel welche Komponenten '
+             'und Dienste gebraucht werden. Danach holt „TestBed.inject“ den Service aus dieser Umgebung. Weil das vor jedem '
+             'Test neu passiert, beeinflussen sich die Tests nicht gegenseitig.'),
+        13: ('Folie: „Expectation“.\n\n'
+             'Ein Test hat zwei Teile. Mit „it“ beschreibt man in einem Satz, was der Test prüft, zum Beispiel „should be created“. '
+             'Danach folgt der Testcode. Darin steht die „Expectation“: „expect“ nimmt den tatsächlichen Wert, und ein Matcher wie '
+             '„toBeTruthy“ prüft ihn. Ist die Prüfung nicht erfüllt, schlägt der Test fehl, und Vitest meldet das in der Konsole.'),
+        14: ('Folie: „UnitTest Component“.\n\n'
+             'Hier wird das Beispiel für den Test einer Komponente vorgestellt. Links steht die „GreeterComponent“. Sie hat einen '
+             'Namen als „Signal“ und ein Template. Rechts steht das Template. Es zeigt die Überschrift „Hello“ und den aktuellen Namen. '
+             'Der Test soll prüfen, dass sich die Überschrift ändert, wenn der Name gesetzt wird.'),
+        15: ('Codefolie „UnitTests Component – Setup“.\n\n'
+             'Für Komponenten sieht die Vorbereitung ähnlich aus wie bei Services. Eine Standalone-Komponente wird bei „imports“ '
+             'angegeben. Dann erzeugt „TestBed.createComponent“ die Komponente. Das Ergebnis ist ein „fixture“, das ist ein Steuerobjekt '
+             'für den Test. Darüber erreicht man die Komponenteninstanz, ihr HTML-Element und das „debugElement“, mit dem man '
+             'im HTML suchen kann. „fixture.detectChanges()“ löst das erste Zeichnen der Oberfläche aus.'),
+        16: ('Codefolie „UnitTests Component – Set“.\n\n'
+             'Der Test setzt zuerst den Namen im Signal auf „Tester“. Dann sorgt „detectChanges“ dafür, dass die Anzeige '
+             'aktualisiert wird, und „await fixture.whenStable()“ wartet, bis alle laufenden Vorgänge beendet sind. Danach prüft der Test, '
+             'dass in der Überschrift „Hello Tester“ steht. Es gibt zwei Wege, die Überschrift zu finden: über das HTML-Element mit '
+             '„querySelector“ oder über das „debugElement“ mit „By.css“.'),
+        17: ('Folie: „Dependency Injection“.\n\n'
+             'Jetzt bekommt die Komponente ihren Namen von einem Service. Links holt sich die „GreeterComponent“ den „GreeterService“ mit '
+             '„inject“ und setzt den Namen in „ngOnInit“. Rechts steht der Service. Er gibt aktuell immer „some example name“ zurück. '
+             'Beim Testen soll nicht der echte Service laufen, sondern ein Ersatz. Wie das geht, zeigt die nächste Folie.'),
+        19: ('Folie: „Async result“.\n\n'
+             'Dieses Beispiel zeigt eine Abfrage, deren Ergebnis erst später ankommt. Links liefert der Service ein „Observable“, hier '
+             'wäre ein Aufruf an den Server. Rechts steht die Komponente: Die Methode „requestNames“ abonniert das Ergebnis und '
+             'speichert die Namen im Signal. Das Template zeigt jeden Namen mit „@for“ als Absatz an. Am Anfang ist die Liste leer.'),
+        22: ('Folie: „Trigger Eventhandling“.\n\n'
+             'Hier wird getestet, ob ein Klick richtig verarbeitet wird. Links hat jeder Name einen Klick-Handler. Er ruft '
+             '„setSelectedName“ auf, und die Komponente sendet den Namen über „selected“ nach außen. Rechts steht der Test: Er '
+             'merkt sich den gesendeten Namen, sucht alle Absätze, löst beim ersten Absatz mit „triggerEventHandler“ einen Klick aus '
+             'und prüft, dass „Tester1“ gesendet wurde.'),
+        24: ('Kapitelfolie: „Cypress“ – „End2End Tests“.\n\n'
+             'Ab hier geht es um End-to-End-Tests, also Tests der ganzen Anwendung im Browser. „Cypress“ ist ein Werkzeug dafür. '
+             'Es öffnet einen echten Browser, ruft die Anwendung auf und bedient sie wie ein Benutzer.'),
+        25: ('Folie: „Installation Cypress“.\n\n'
+             'Der Befehl „ng e2e“ startet die End-to-End-Tests. Angular bringt dafür kein Werkzeug mit. Deshalb meldet die '
+             'Konsole, dass kein „e2e“-Ziel vorhanden ist, und schlägt mehrere Pakete vor, zum Beispiel Cypress, Playwright oder '
+             'WebdriverIO. Die Frage, ob man ein Paket hinzufügen möchte, beantwortet man hier mit Cypress. Danach richtet '
+             'Angular das Paket ein.'),
+        26: ('Folie: „Konfig“.\n\n'
+             'Das Bild zeigt die Dateien, die nach der Installation von Cypress im Projekt entstehen. Im neuen Ordner „cypress“ liegt '
+             'unter „e2e“ die Testdatei „spec.cy.ts“. Weitere Ordner enthalten Beispieldaten („fixtures“) und Hilfsdateien („support“). '
+             'Die Datei „tsconfig.json“ gehört zu den Cypress-Tests. Mit der Datei „spec.cy.ts“ arbeitet die folgende Übung.'),
+        27: ('Codefolie „Bestandteile eines Tests“.\n\n'
+             'Ein Cypress-Test ist ähnlich aufgebaut wie ein Unit Test. „describe“ ist die „Suite“, „it“ ist ein einzelner Test, die '
+             '„Spec“. Der Test ruft mit „cy.visit“ die Startseite auf. „cy.pause“ hält den Test an, damit man im Browser zusehen kann. '
+             'Danach sucht „cy.get“ das erste Listenelement und prüft mit „should“, dass es die Klasse „selected“ hat. Dieser Teil ist '
+             'die Erwartung mit dem Matcher.'),
+        28: ('Folie: „Übung 2“.\n\n'
+             'Erklärung für die Dolmetscherin:\n'
+             'Die Teilnehmer installieren Cypress mit dem Befehl „ng e2e“. Dann öffnen sie die erzeugte Testdatei „spec.cy.ts“ und ändern '
+             'die erwartete Überschrift von „app is running“ in „Invoice Manager App“, denn so heißt die Überschrift in der Anwendung. '
+             'Zum Schluss starten sie „ng e2e“ erneut und öffnen im Cypress-Fenster die Datei „spec.cy.ts“, um den Test laufen zu sehen.'),
+        29: ('Folie: „Cypress Elements – DSL“.\n\n'
+             'Eine Webseite besteht aus Elementen. Mit Cypress wählt man Elemente aus und bedient sie, und so schreibt man '
+             'Tests für die Funktion. Man kann Elemente auf drei Arten finden: über eine eindeutige Kennung mit „#“, über ein Attribut in '
+             'eckigen Klammern oder über den Namen des Elements, zum Beispiel „ul“. Mit „type“ trägt man Text in ein Feld ein, '
+             'hier Benutzername und Passwort. „DSL“ bedeutet: Die Befehle lesen sich fast wie ein Satz.'),
+        30: ('Folie: „Cypress Elements – Element API“.\n\n'
+             'Die Tabelle zeigt wichtige Befehle für ein ausgewähltes Element. „type“ füllt ein Textfeld aus. „click“ klickt auf das '
+             'Element oder wählt es aus. „first“ gibt das erste Element zurück, wenn es mehrere gibt. „focus“ setzt den Fokus auf das '
+             'Element. „should“ leitet eine Prüfung ein. Dazu gibt es mehr auf der nächsten Folie.'),
+        31: ('Folie: „Assertions und Matchers“.\n\n'
+             'Eine „Assertion“ ist eine Prüfung. In Cypress beginnt sie mit „should“. Die Beispiele prüfen, ob ein Element existiert '
+             'oder nicht existiert, ob es sichtbar ist oder eine bestimmte Klasse hat, ob ein Wert nicht einem bestimmten Text '
+             'entspricht und ob die Adresse im Browser einen bestimmten Text enthält. Die Wörter in Anführungszeichen, zum Beispiel '
+             '„be.visible“, sind die „Matcher“.'),
+        32: ('Folie: „Übung 3“.\n\n'
+             'Erklärung für die Dolmetscherin:\n'
+             'Die Teilnehmer schreiben einen neuen Test mit dem Namen „navigation_works“. Er soll den ersten Eintrag der Kundenliste '
+             'anklicken. Danach soll der Test prüfen, dass die Anwendung auf der Detailseite ist, und zwar mit einer Prüfung der Adresse. '
+             'Außerdem soll er prüfen, dass das Datum der letzten Bestellung angezeigt wird.'),
+    })
+
     for n, t in notes.items():
         set_notes(S[n], t)
 
