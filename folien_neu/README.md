@@ -4,7 +4,7 @@ Entwürfe als Markdown (Folientitel, Inhalt, Trainernotizen, Übung). Abgeleitet
 
 | Datei | Kapitel | Tag | Kurs | Übung |
 |---|---|---|---|---|
-| `00_Einordnung_Angular.md` | Einordnung im Frontend-Umfeld | 1 | Grundkurs + Kompakt | Diskussion |
+| `00_Einordnung_Angular.md` | Einordnung im Frontend-Umfeld | 1 | Grundkurs + Kompakt | Abfrage, Rückblick am Kursende |
 | `01_Komponenten_Aufteilung_Wartbarkeit.md` | Komponenten aufteilen, Wartbarkeit | 4 (Kompakt), Theorie-Teil auch Tag 2 Grundkurs | beide | Ü31 (nur Kompakt) |
 | `02_Reaktivitaet_und_Datenfluss.md` | Reaktivität, `effect`, Stolperfallen | 4 | Kompakt | Ü32 |
 | `03_Anwendungsstruktur_und_Zustandsverwaltung.md` | Struktur, Zustandsverwaltung, Wechselkriterien | 4 | Kompakt | Ü33 |
