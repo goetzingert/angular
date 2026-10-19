@@ -40,10 +40,10 @@ Jeder Ordner enthält eine `Aufgabe.md` (Aufgabe, Lernziele, Lösungshinweise un
 
 | Ordner | Übung | Richtwert |
 |---|---|---|
-| `00_typescript_guess_a_number` | TypeScript-Übung (siehe Folien) | – |
-| `01_simple_class` | TypeScript-Übung (siehe Folien) | – |
-| `02_constructor` | TypeScript-Übung (siehe Folien) | – |
-| `03_modules` | TypeScript-Übung (siehe Folien) | – |
+| `00_typescript_guess_a_number` | Übung 0: Zahlenraten (TypeScript im Browser) | 30 Minuten |
+| `01_simple_class` | Übung 1: Die Klasse Student | 10 Minuten |
+| `02_constructor` | Übung 2: Ein Konstruktor für Student | 10 Minuten |
+| `03_modules` | Übung 3: Module | 15 Minuten |
 
 **Grundlagen (Grundkurs, Tag 1–3)**
 

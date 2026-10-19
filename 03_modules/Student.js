@@ -3,13 +3,12 @@ define(["require", "exports"], function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Student = void 0;
     var Student = /** @class */ (function () {
-        function Student() {
-            this.label = 0;
+        function Student(name, studentNumber) {
+            this.name = name;
+            this.studentNumber = studentNumber;
         }
-        Student.prototype.getLabel = function (label) {
-            if (label)
-                this.label = label;
-            return "Matrikelnummer " + this.label;
+        Student.prototype.getLabel = function () {
+            return "Student " + this.name + " mit Matrikelnummer: " + this.studentNumber;
         };
         return Student;
     }());

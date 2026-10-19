@@ -10,12 +10,12 @@ window.onload = () => {
 
     //1. aus dem document das inputElement holen. input.value --> Number
 
-    let numberInput: HTMLInputElement = <HTMLInputElement> document.getElementById("numberInput");
+    let numberInput: HTMLInputElement = document.getElementById("numberInput") as HTMLInputElement;
 
-    let helpSpan: HTMLElement = <HTMLElement> document.getElementById("hint");
+    let helpSpan: HTMLElement = document.getElementById("hint") as HTMLElement;
 
     //DOM Button mit der id check
-    let button : HTMLButtonElement  = <HTMLButtonElement>document.getElementById("check");
+    let button : HTMLButtonElement  = document.getElementById("check") as HTMLButtonElement;
     button.addEventListener("click", (event)=>{
         console.log("button geklicked");
         
@@ -41,7 +41,7 @@ window.onload = () => {
             helpSpan.innerHTML = "RICHTIG!";
         
     });
-    let resetButton : HTMLButtonElement  = <HTMLButtonElement>document.getElementById("reset");
+    let resetButton : HTMLButtonElement  = document.getElementById("reset") as HTMLButtonElement;
     resetButton.addEventListener("click", (event)=>
     {
         randomNumber = guessNumber();

@@ -1,14 +1,9 @@
 "use strict";
 class Student {
-    constructor() {
-        this.label = 0;
-    }
-    getLabel(label) {
-        if (label)
-            this.label = label;
-        return "Matrikelnummer " + this.label;
+    getLabel(studentNumber) {
+        return "Student mit Matrikelnummer: " + studentNumber;
     }
 }
 let s = new Student();
-let label = s.getLabel();
-console.log(label);
+let label = s.getLabel(123456);
+console.log(label); // "Student mit Matrikelnummer: 123456"

@@ -31,7 +31,7 @@ window.onload = function () {
         else
             helpSpan.innerHTML = "RICHTIG!";
     });
-    var resetButton : HTMLButtonElement = <HTMLButtonElement>document.getElementById("reset");
+    var resetButton = document.getElementById("reset");
     resetButton.addEventListener("click", function (event) {
         randomNumber = guessNumber();
         helpSpan.innerHTML = "";
