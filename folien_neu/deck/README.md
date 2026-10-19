@@ -82,3 +82,13 @@ python3 -I folien_neu/deck/ts_korrekturen.py /tmp/original.pptx /tmp/original_ko
 python3 -I folien_neu/deck/build_deck.py /tmp/original_korrigiert.pptx /tmp/neu.pptx
 ```
 Das Ergebnis ersetzt danach `presentation_angular21.pptx`. Die Korrekturen sind im Kopf des Skripts aufgelistet. Alle Code-Beispiele wurden mit dem TypeScript-Compiler (strict, 5.9) geprüft.
+
+## Umbau des TypeScript Primers (`content_tsprimer_*.json`)
+Der Primer besteht nur noch aus den Originalfolien 1, 7, 8, 9 plus 45 neuen Folien (Abschnitte A–G, Plan in `TS_PRIMER_PLAN.md`). `content_tsprimer_00_ops.json` löscht die alten Folien 2–6 und 10–69, die Dateien `content_tsprimer_a_c.json`, `_d_e.json`, `_f_g.json` fügen die neuen Folien ein. Die Übungen dazu liegen in `01_typescript_primer/`.
+
+Alle Code-Folien der neuen Dateien werden mit dem echten Compiler geprüft (Felder `_verify`/`_prelude` ignoriert `build_deck.py`):
+```
+cd 01_typescript_primer && npm install && cd ..
+python3 -I folien_neu/deck/verify_ts_snippets.py
+```
+Die Pipeline (`ts_korrekturen.py` → `build_deck.py`) bleibt wie oben beschrieben.
