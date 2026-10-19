@@ -56,6 +56,28 @@ jobs:
       - name: Tests (Vitest)
         run: npx ng test --watch=false
 
+  typescript-uebungen:
+    name: TypeScript-Übungen (00-03)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Kompilieren und mit den eingecheckten .js-Dateien vergleichen
+        run: |
+          status=0
+          for d in 00_typescript_guess_a_number 01_simple_class 02_constructor 03_modules; do
+            echo "== $d"
+            out="$RUNNER_TEMP/out_$d"
+            npx -y -p typescript@5.9 tsc -p "$d" --outDir "$out" || status=1
+            for f in "$out"/*.js; do
+              node --check "$f" || status=1
+              diff -u "$d/$(basename "$f")" "$f" || { echo "::error::$d/$(basename "$f") passt nicht zum .ts (bitte mit tsc neu erzeugen)"; status=1; }
+            done
+          done
+          exit $status
+
   server:
     name: Lehrserver (server/)
     runs-on: ubuntu-latest

@@ -72,3 +72,13 @@ Das Ergebnis ersetzt danach `presentation_angular21.pptx`. Änderungen, die dire
 git show baf0614:Testing_angular21.pptx > /tmp/testing_original.pptx
 python3 -I folien_neu/deck/testing_deck_vitest.py /tmp/testing_original.pptx Testing_angular21.pptx folien_neu/deck/testing_ng_test_ausgabe.png
 ```
+
+## Korrekturen am TypeScript Primer (`ts_korrekturen.py`)
+`ts_korrekturen.py` korrigiert die Originalfolien 1–69 (TypeScript Primer) und läuft als **Vorverarbeitung vor `build_deck.py`**, ebenfalls auf dem Original:
+
+```
+git show baf0614:presentation_angular21.pptx > /tmp/original.pptx
+python3 -I folien_neu/deck/ts_korrekturen.py /tmp/original.pptx /tmp/original_korrigiert.pptx
+python3 -I folien_neu/deck/build_deck.py /tmp/original_korrigiert.pptx /tmp/neu.pptx
+```
+Das Ergebnis ersetzt danach `presentation_angular21.pptx`. Die Korrekturen sind im Kopf des Skripts aufgelistet. Alle Code-Beispiele wurden mit dem TypeScript-Compiler (strict, 5.9) geprüft.

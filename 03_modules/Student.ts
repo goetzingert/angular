@@ -1,11 +1,9 @@
 export class Student{
-    private label: number = 0;
 
-    getLabel(label?: number) : string{
-        if(label)
-            this.label = label;
-        return "Matrikelnummer " + this.label;
+    constructor(private name: string, private studentNumber: number){
+    }
+
+    getLabel() : string{
+        return "Student " + this.name + " mit Matrikelnummer: " + this.studentNumber;
     }
 }
-
-
