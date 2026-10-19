@@ -56,27 +56,48 @@ jobs:
       - name: Tests (Vitest)
         run: npx ng test --watch=false
 
-  typescript-uebungen:
-    name: TypeScript-Übungen (00-03)
+  typescript-zahlenraten:
+    name: TypeScript Zusatzübung (00)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Kompilieren und mit den eingecheckten .js-Dateien vergleichen
+      - name: Kompilieren und mit der eingecheckten app.js vergleichen
         run: |
-          status=0
-          for d in 00_typescript_guess_a_number 01_simple_class 02_constructor 03_modules; do
-            echo "== $d"
-            out="$RUNNER_TEMP/out_$d"
-            npx -y -p typescript@5.9 tsc -p "$d" --outDir "$out" || status=1
-            for f in "$out"/*.js; do
-              node --check "$f" || status=1
-              diff -u "$d/$(basename "$f")" "$f" || { echo "::error::$d/$(basename "$f") passt nicht zum .ts (bitte mit tsc neu erzeugen)"; status=1; }
-            done
-          done
-          exit $status
+          d=00_typescript_guess_a_number
+          out="$RUNNER_TEMP/out_$d"
+          npx -y -p typescript@5.9 tsc -p "$d" --outDir "$out"
+          node --check "$out/app.js"
+          diff -u "$d/app.js" "$out/app.js" || { echo "::error::$d/app.js passt nicht zu app.ts (bitte mit tsc neu erzeugen)"; exit 1; }
+
+  typescript-primer:
+    name: TypeScript Primer (01)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 01_typescript_primer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: 01_typescript_primer/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Typen der Musterlösungen prüfen
+        run: npm run check:loesung
+      - name: Musterlösungen ausführen und Ausgabe vergleichen
+        run: npm run pruefe-loesungen
+      - name: Aufgaben-Dateien (src) dürfen nur die beabsichtigten Fehler haben
+        run: |
+          npx tsc --noEmit > "$RUNNER_TEMP/src-fehler.txt" || true
+          cat "$RUNNER_TEMP/src-fehler.txt"
+          # Übung 1: genau 6 beabsichtigte Fehler, Übung 2: 2 Fehler bis die Parameter ergänzt sind
+          test "$(grep -c 'src/uebung-1-typfehler.ts.*error TS' "$RUNNER_TEMP/src-fehler.txt")" = "6"
+          test "$(grep -c 'src/uebung-2-funktionen.ts.*error TS' "$RUNNER_TEMP/src-fehler.txt")" = "2"
+          test "$(grep 'error TS' "$RUNNER_TEMP/src-fehler.txt" | grep -vc 'uebung-1-typfehler\|uebung-2-funktionen')" = "0"
 
   server:
     name: Lehrserver (server/)

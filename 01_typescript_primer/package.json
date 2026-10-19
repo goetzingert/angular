@@ -1,0 +1,17 @@
+{
+  "name": "typescript-primer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Übungen zum TypeScript Primer (Angular-Schulung)",
+  "scripts": {
+    "start": "tsx",
+    "check": "tsc --noEmit",
+    "check:loesung": "tsc --noEmit -p tsconfig.loesung.json",
+    "watch": "tsc --noEmit --watch",
+    "pruefe-loesungen": "node pruefe-loesungen.mjs"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.0"
+  }
+}

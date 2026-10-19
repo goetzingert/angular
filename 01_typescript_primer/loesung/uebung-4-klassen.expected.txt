@@ -1,0 +1,4 @@
+Lisa Simpson
+Kunde: Lisa Simpson (Springfield)
+Kunde: Ned Flanders (unbekannt) - VIP -10%
+false

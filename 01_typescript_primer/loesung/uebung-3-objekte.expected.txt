@@ -1,0 +1,7 @@
+Hans Ned
+2 3
+[
+  'Simpson, Lisa (Springfield)',
+  'Maulwurf, Ned (unbekannt)',
+  'Flanders, Lisa (unbekannt)'
+]
