@@ -41,9 +41,7 @@ Jeder Ordner enthält eine `Aufgabe.md` (Aufgabe, Lernziele, Lösungshinweise un
 | Ordner | Übung | Richtwert |
 |---|---|---|
 | `00_typescript_guess_a_number` | Übung 0: Zahlenraten (TypeScript im Browser) | 30 Minuten |
-| `01_simple_class` | Übung 1: Die Klasse Student | 10 Minuten |
-| `02_constructor` | Übung 2: Ein Konstruktor für Student | 10 Minuten |
-| `03_modules` | Übung 3: Module | 15 Minuten |
+| `01_typescript_primer` | TS-Übungen 1–5: Typfehler, Funktionen, Objekte, Klasse `Customer`, Module (`npm install`, `npm run check`) | 60 Minuten |
 
 **Grundlagen (Grundkurs, Tag 1–3)**
 

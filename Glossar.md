@@ -5,12 +5,23 @@
 | Konzept | Bildhafte Metapher für DGS | Technische Bedeutung |
 |---|---|---|
 | **Component (Komponente)** | **LEGO-Baustein / Box** | Ein sichtbarer, in sich geschlossener Teil der Webseite (z. B. Header, Kundenliste, Kundenkarte). Besteht aus Aussehen (HTML), Verhalten (TypeScript) und Design (CSS). |
+| **Dekorator** | *Deko-ra-tor* | Funktion mit `@`, die eine Klasse beschreibt, z. B. `@Component`. |
+| **Destructuring** | *Di-strak-tscha-ring* | Objekte oder Listen direkt in einzelne Variablen zerlegen. |
+| **Generics** | *Dsche-ne-riks* | Typen mit Platzhalter, z. B. `Array<T>` oder `signal<T>()`. |
+| **Literal-Typ** | *Li-te-ral-Tüp* | Typ, der nur bestimmte Werte erlaubt, z. B. `"active" \| "discontinued"`. |
+| **Modul (TypeScript)** | *Mo-dul* | Eine Datei, die mit `export` etwas anbietet und mit `import` etwas holt. |
+| **Narrowing** | *Nä-ro-ing* | Typ im Code durch eine Prüfung auf einen Fall eingrenzen. |
+| **Parameter Property** | *Pa-ra-me-ter Pro-per-ti* | `constructor(public x: string)` legt das Feld gleich mit an. |
 | **Signal (Reaktiver Zustand)** | **Lämpchen / Sensor / Automatische Glocke** | Ein Datenbehälter. Sobald sich der Inhalt ändert, „leuchtet“ er auf und die HTML-Seite aktualisiert den Text an dieser Stelle vollautomatisch, ohne die ganze Seite neu zu laden. |
 | **Service & Dependency Injection** | **Spezialwerkzeug / Fachabteilung auf Abruf** | Eine Hilfsklasse für Geschäftslogik (z. B. Daten vom Server holen). Komponenten müssen das Rad nicht neu erfinden, sondern „bestellen“ den Service per `inject()`. |
 | **Routing** | **Wegweiser / Umschalten der Bühne** | Die Webseite bleibt immer dieselbe (kein Browser-Reload), aber je nach URL (z. B. `/customer/5`) wird ein anderer Baustein auf die Bühne geholt. |
 | **Observable / Stream** | **Fließband / Daten-Strom** | Daten, die mit zeitlicher Verzögerung nacheinander eintreffen (z. B. Antworten vom Webserver oder Klicks des Nutzers). |
+| **Spread** | *Sprädd* | `...` kopiert Eigenschaften oder Elemente in ein neues Objekt bzw. eine neue Liste. |
 | **Store (Zustandsspeicher)** | **Zentrale Lagerhalle** | Ein einziger Ort, an dem die Daten einer Funktion (z. B. Kundenliste, Filter, Auswahl) liegen. Alle Komponenten holen sich dort Ware und melden Änderungen über feste Methoden. |
 | **effect (Nebenwirkung)** | **Klingel / Signal nach draußen** | Wenn sich ein Signal ändert, „klingelt“ es draußen: etwas außerhalb von Angular wird ausgelöst (z. B. Speichern im Browser-Speicher, Logging). Nicht zum Rechnen gedacht. |
+| **Typableitung** | *Tüp-Ab-lei-tung* | TypeScript erkennt den Typ selbst aus dem Wert. |
+| **Union Type** | *Juh-ni-on Tüp* | `string \| number`: einer von mehreren erlaubten Typen. |
+| **unknown** | *An-noun* | Typ „noch nicht bekannt“; muss vor Benutzung geprüft werden. |
 | **Vertrauensgrenze (Sicherheit)** | **Grenzkontrolle am Zoll** | Alles, was von außen kommt (Eingaben, URL, Server-Antworten), wird geprüft, bevor es durchgelassen wird. Das Frontend selbst ist nie ein sicherer Ort. |
 | **KI-Assistent** | **Schneller Assistent ohne Verantwortung** | Die KI schreibt schnell Vorschläge, kann aber irren und klingt trotzdem sicher. Prüfen und Verantworten bleibt beim Menschen. |
 
@@ -53,6 +64,21 @@ Themenschwerpunkt: *Einordnung von Angular, TypeScript, Projektstruktur, Kompone
   * `isActive: boolean` = Nur `true` (wahr) oder `false` (falsch).
 * **Interface / Modell (`interface Customer { ... }`):** Ein Bauplan für Datenobjekte. Definiert, welche Felder ein Kunde haben muss (z. B. Vorname, Nachname, ID).
 * **CLI (Command Line Interface / Terminal):** Das Text-Befehlswerkzeug. Mit Befehlen wie `ng serve` (Entwicklungsserver starten) oder `ng build` (fertige App bauen) wird Angular gesteuert.
+* **Typableitung (Type Inference):** TypeScript erkennt den Typ oft selbst aus dem Wert. `const age = 42` ist automatisch eine Zahl. Man schreibt den Typ nur dazu, wenn er nicht klar ist.
+* **`const` und `let`:** `const` ist der Standard: Die Variable kann nicht neu zugewiesen werden. `let` nur, wenn sich der Wert ändert. `var` wird nicht mehr benutzt.
+* **`any`, `unknown`, `never`:** `any` schaltet die Typprüfung ab (vermeiden). `unknown` ist „Typ noch nicht bekannt“ und muss vor der Benutzung geprüft werden. `never` = „kehrt nie zurück“.
+* **Strikter Modus (`strict`):** Compiler-Einstellung, die besonders streng prüft, z. B. dass fehlende Werte (`undefined`) nicht übersehen werden.
+* **Union Type & Narrowing:** `string | number` = entweder oder. Mit einer Prüfung (`typeof`, `if`) wird der Typ im Code auf einen Fall eingegrenzt („Narrowing“).
+* **Literal-Typ & `type`-Alias:** Ein Typ, der nur bestimmte Werte erlaubt (`"active" | "discontinued"`). `type` gibt einem Typ einen eigenen Namen.
+* **Generics (`Array<T>`, `signal<T>()`):** Typen mit einem Platzhalter in spitzen Klammern. `Array<string>` = Liste von Text. So ist eine Funktion für viele Typen nutzbar und trotzdem sicher.
+* **Destructuring:** Werte aus Objekt oder Liste direkt in Variablen zerlegen: `const { firstname, city } = customer`.
+* **Spread (`...`):** Kopiert Eigenschaften oder Elemente in ein neues Objekt bzw. eine neue Liste: `{ ...customer, city: "Ogdenville" }`. Das Original bleibt unverändert (flache Kopie).
+* **Optional Chaining `?.` und `??`:** `customer?.city` stoppt bei fehlendem Wert. `a ?? b` nimmt `b`, wenn `a` fehlt (`null` oder `undefined`).
+* **Klasse, Konstruktor, Parameter Property:** Eine Klasse ist ein Bauplan mit Daten und Methoden. Der Konstruktor legt neue Objekte an. `constructor(public firstname: string)` erzeugt gleich das Feld dazu.
+* **`implements` / `extends` / `super`:** `implements` = die Klasse erfüllt ein Interface. `extends` = Erbt von einer anderen Klasse. `super(...)` ruft deren Konstruktor auf.
+* **Getter / Setter, `readonly`, `private`:** Berechnete bzw. geprüfte Eigenschaften (`get fullName()`), nur lesbare Felder und Felder, die nur die Klasse selbst benutzen darf.
+* **Dekorator (`@Component`):** Eine Funktion, die eine Klasse oder ein Feld beschreibt. In Angular macht `@Component` aus einer Klasse eine Komponente.
+* **Modul (`import` / `export`):** Jede TypeScript-Datei ist ein Modul. Mit `export` gibt sie etwas frei, mit `import` holt eine andere Datei es sich.
 * **Node.js & npm:** Die Ausführungsumgebung auf dem Entwicklerrechner und der Paketmanager, der benötigte Bibliotheken aus dem Internet lädt.
 
 ### 1.2 Standalone Components & Bootstrapping
