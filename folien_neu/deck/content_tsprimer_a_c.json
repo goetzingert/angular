@@ -1,159 +1,170 @@
 {
- "blocks": [
-  {
-   "after": 9,
-   "order": 10,
-   "slides": [
+  "blocks": [
     {
-     "type": "content",
-     "title": "Vom Quelltext zum Browser",
-     "bullets": [
-      "Wir schreiben TypeScript-Dateien mit der Endung .ts",
-      "Der Compiler „tsc“ übersetzt sie in JavaScript-Dateien (.js)",
-      "Browser und Node.js verstehen nur JavaScript, kein TypeScript",
-      "Beim Übersetzen verschwinden alle Typen: Im fertigen Programm gibt es sie nicht mehr",
-      "Die Angular CLI übernimmt das Übersetzen für uns",
-      "Typen prüfen ist nicht dasselbe wie das Programm ausführen"
-     ],
-     "notes": "Folie: „Vom Quelltext zum Browser“.\n\nErklärung für die Dolmetscherin:\nTypeScript ist eine Programmiersprache, die auf JavaScript aufbaut. Wir schreiben Dateien mit der Endung „.ts“. Ein Browser kann diese Dateien aber nicht lesen, denn er versteht nur JavaScript. Deshalb gibt es den „Compiler“. Das ist ein Übersetzungsprogramm. Es heißt „tsc“ und macht aus einer TypeScript-Datei eine JavaScript-Datei mit der Endung „.js“.\n\nBeim Übersetzen werden alle Typen entfernt. Ein „Typ“ ist die Angabe, welche Art von Wert eine Variable hat, zum Beispiel Text oder Zahl. Die Typen helfen nur uns beim Schreiben, im fertigen Programm sind sie nicht mehr vorhanden. Im Angular-Projekt führt die Angular CLI, das Kommandozeilenwerkzeug von Angular, dieses Übersetzen automatisch aus.\n\nWichtig ist der Unterschied: Das Prüfen der Typen sucht nur nach Fehlern. Das Ausführen des Programms ist ein eigener Schritt."
+      "after": 9,
+      "order": 10,
+      "slides": [
+        {
+          "type": "content",
+          "title": "Vom Quelltext zum Browser",
+          "bullets": [
+            "Wir schreiben TypeScript-Dateien mit der Endung .ts",
+            "Der Compiler „tsc“ übersetzt sie in JavaScript-Dateien (.js)",
+            "Browser und Node.js verstehen nur JavaScript, kein TypeScript",
+            "Beim Übersetzen verschwinden alle Typen: Im fertigen Programm gibt es sie nicht mehr",
+            "Die Angular CLI übernimmt das Übersetzen für uns",
+            "Typen prüfen ist nicht dasselbe wie das Programm ausführen"
+          ],
+          "notes": "Folie: „Vom Quelltext zum Browser“.\n\nErklärung für die Dolmetscherin:\nTypeScript ist eine Programmiersprache, die auf JavaScript aufbaut. Wir schreiben Dateien mit der Endung „.ts“. Ein Browser kann diese Dateien aber nicht lesen, denn er versteht nur JavaScript. Deshalb gibt es den „Compiler“. Das ist ein Übersetzungsprogramm. Es heißt „tsc“ und macht aus einer TypeScript-Datei eine JavaScript-Datei mit der Endung „.js“.\n\nBeim Übersetzen werden alle Typen entfernt. Ein „Typ“ ist die Angabe, welche Art von Wert eine Variable hat, zum Beispiel Text oder Zahl. Die Typen helfen nur uns beim Schreiben, im fertigen Programm sind sie nicht mehr vorhanden. Im Angular-Projekt führt die Angular CLI, das Kommandozeilenwerkzeug von Angular, dieses Übersetzen automatisch aus.\n\nWichtig ist der Unterschied: Das Prüfen der Typen sucht nur nach Fehlern. Das Ausführen des Programms ist ein eigener Schritt.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "customer.ts (mit Typen)",
+              "tsc oder Angular CLI",
+              "customer.js (ohne Typen)",
+              "Browser oder Node.js"
+            ],
+            "highlight_last": true,
+            "note": "Typen gibt es nur beim Entwickeln"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Der Kursordner und die Befehle",
+          "bullets": [
+            "Ordner: 01_typescript_primer, darin einmalig: npm install",
+            "npm run check: prüft alle Typen in src/ und meldet Fehler",
+            "npm run watch: wie check, prüft bei jeder Änderung neu",
+            "npm start -- src/<datei>.ts: führt eine Datei aus",
+            "Achtung: npm start prüft die Typen NICHT",
+            "Fehler zeigen der Editor (rote Wellenlinien) und npm run check",
+            "Aufgaben liegen in src/, Musterlösungen in loesung/"
+          ],
+          "notes": "Folie: „Der Kursordner und die Befehle“.\n\nErklärung für die Dolmetscherin:\nFür die kleinen Übungen im TypeScript-Teil gibt es einen eigenen Ordner mit dem Namen „01_typescript_primer“. Dort führen wir einmal den Befehl „npm install“ aus. „npm“ ist das Programm, das Zusatzpakete für JavaScript-Projekte installiert.\n\nMit „npm run check“ prüfen wir alle Typen. Es wird dabei nichts ausgeführt, wir bekommen nur eine Liste der Fehler. „npm run watch“ macht dasselbe und wiederholt die Prüfung automatisch, sobald wir eine Datei speichern. Mit „npm start“ und dem Dateinamen führen wir eine Datei aus.\n\nSehr wichtig: „npm start“ führt das Programm aus, ohne die Typen zu prüfen. Typfehler sehen wir also nur im Editor an den roten Wellenlinien und bei „npm run check“. Beides gehört zur Arbeit dazu. Die Aufgaben stehen im Unterordner „src“, die Musterlösungen im Unterordner „loesung“."
+        },
+        {
+          "type": "code",
+          "title": "tsconfig.json der Invoice-App",
+          "code": "{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"noImplicitReturns\": true,\n    \"noFallthroughCasesInSwitch\": true,\n    \"target\": \"ES2022\",\n    \"experimentalDecorators\": true\n  },\n  \"angularCompilerOptions\": {\n    \"strictTemplates\": true\n  }\n}",
+          "notes": "Codefolie „tsconfig.json der Invoice-App“.\n\nDie Datei „tsconfig.json“ ist die Einstellungsdatei für den TypeScript-Compiler. Hier sehen wir die wichtigsten Optionen aus der Invoice-App, dem Beispielprojekt dieses Kurses.\n\n„strict“ bedeutet: Der Compiler prüft besonders streng. Zum Beispiel muss ausdrücklich erlaubt sein, dass ein Wert fehlen darf, und Parameter ohne Typ sind verboten. „noImplicitReturns“ meldet einen Fehler, wenn eine Funktion nicht in jedem Fall einen Wert zurückgibt. „noFallthroughCasesInSwitch“ verhindert vergessene Abbrüche in einer Mehrfachauswahl.\n\n„target“ mit dem Wert „ES2022“ legt fest, welche JavaScript-Version erzeugt wird. „experimentalDecorators“ erlaubt Dekoratoren, das sind die Markierungen mit einem At-Zeichen wie „@Component“. Die Option „strictTemplates“ gehört zu Angular und prüft auch die Typen in den HTML-Vorlagen.",
+          "_verify": "skip"
+        },
+        {
+          "type": "code",
+          "title": "Ein erster Typfehler",
+          "code": "function greet(firstname: string, lastname: string): string {\n  return `Hallo ${firstname} ${lastname}`;\n}\n\ngreet(\"Lisa\", \"Simpson\");   // richtig\n\ngreet(\"Lisa\", 42);\n// Fehler TS2345: Argument of type 'number' is not\n// assignable to parameter of type 'string'.",
+          "notes": "Codefolie „Ein erster Typfehler“.\n\nDie Funktion „greet“ begrüßt einen Kunden. Sie hat zwei Parameter, also Eingabewerte: den Vornamen und den Nachnamen. Beide sind mit dem Typ „string“ angegeben. Ein „string“ ist ein Text. Auch der Rückgabewert der Funktion ist ein Text.\n\nDer erste Aufruf mit „Lisa“ und „Simpson“ ist richtig. Beim zweiten Aufruf übergeben wir als Nachnamen die Zahl 42. Der Compiler meldet sofort den Fehler mit der Nummer „TS2345“: Eine Zahl passt nicht zu einem Parameter vom Typ Text. Dieser Fehler erscheint schon beim Schreiben im Editor, nicht erst, wenn das Programm läuft. Genau dafür benutzen wir TypeScript.",
+          "_verify": "error:TS2345"
+        }
+      ]
     },
     {
-     "type": "content",
-     "title": "Der Kursordner und die Befehle",
-     "bullets": [
-      "Ordner: 01_typescript_primer, darin einmalig: npm install",
-      "npm run check: prüft alle Typen in src/ und meldet Fehler",
-      "npm run watch: wie check, prüft bei jeder Änderung neu",
-      "npm start -- src/<datei>.ts: führt eine Datei aus",
-      "Achtung: npm start prüft die Typen NICHT",
-      "Fehler zeigen der Editor (rote Wellenlinien) und npm run check",
-      "Aufgaben liegen in src/, Musterlösungen in loesung/"
-     ],
-     "notes": "Folie: „Der Kursordner und die Befehle“.\n\nErklärung für die Dolmetscherin:\nFür die kleinen Übungen im TypeScript-Teil gibt es einen eigenen Ordner mit dem Namen „01_typescript_primer“. Dort führen wir einmal den Befehl „npm install“ aus. „npm“ ist das Programm, das Zusatzpakete für JavaScript-Projekte installiert.\n\nMit „npm run check“ prüfen wir alle Typen. Es wird dabei nichts ausgeführt, wir bekommen nur eine Liste der Fehler. „npm run watch“ macht dasselbe und wiederholt die Prüfung automatisch, sobald wir eine Datei speichern. Mit „npm start“ und dem Dateinamen führen wir eine Datei aus.\n\nSehr wichtig: „npm start“ führt das Programm aus, ohne die Typen zu prüfen. Typfehler sehen wir also nur im Editor an den roten Wellenlinien und bei „npm run check“. Beides gehört zur Arbeit dazu. Die Aufgaben stehen im Unterordner „src“, die Musterlösungen im Unterordner „loesung“."
+      "after": 9,
+      "order": 20,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Typen",
+          "notes": "Kapitelübergangsfolie „Typen“ – Jetzt lernen wir die wichtigsten Typen kennen: Text, Zahl, Ja-Nein-Wert und Datum. Danach sehen wir, wie TypeScript mit fehlenden Werten umgeht."
+        },
+        {
+          "type": "code",
+          "title": "Typen und Typableitung",
+          "code": "const firstname: string = \"Lisa\";\nconst age: number = 42;\nconst active: boolean = true;\nconst since: Date = new Date(2024, 0, 15);\nconst names: string[] = [\"Lisa\", \"Hans\", \"Ned\"];\n\n// Typableitung: Der Compiler erkennt den Typ selbst\nconst city = \"Springfield\";   // string\nconst count = names.length;   // number\nconst ids = [1, 2, 3];        // number[]",
+          "notes": "Codefolie „Typen und Typableitung“.\n\nDie Grundtypen sind „string“ für Text, „number“ für Zahlen, „boolean“ für Ja-Nein-Werte und „Date“ für ein Datum. Mit eckigen Klammern hinter dem Typ beschreiben wir eine Liste. „string[]“ heißt zum Beispiel: eine Liste von Texten. Den Typ schreiben wir mit einem Doppelpunkt hinter den Namen der Variablen.\n\nIm unteren Teil sehen wir die „Typableitung“, auf Englisch „Inference“. Das heißt: Der Compiler erkennt den Typ selbst aus dem Wert, der gleich zugewiesen wird. Bei „city“ ist es ein Text, bei „count“ eine Zahl und bei „ids“ eine Liste von Zahlen. Die Faustregel lautet: Den Typ weglassen, wenn der Wert ihn klar macht. Den Typ schreiben wir bei Parametern von Funktionen und überall, wo der Compiler ihn nicht erraten kann."
+        },
+        {
+          "type": "code",
+          "title": "const und let",
+          "code": "const company = \"Simpson GmbH\";   // Standard: const\nlet counter = 0;                 // let nur, wenn sich der Wert ändert\ncounter = counter + 1;           // erlaubt\n\n// company = \"Andere GmbH\";      // Fehler: const nicht neu zuweisbar\n\nconst names: string[] = [\"Lisa\"];\nnames.push(\"Hans\");              // erlaubt: der Inhalt ändert sich\n// names = [];                   // Fehler: die Variable bleibt fest",
+          "notes": "Codefolie „const und let“.\n\nEs gibt zwei Arten, eine Variable anzulegen. „const“ steht für eine Konstante: Der Variablen kann später kein neuer Wert zugewiesen werden. „let“ benutzen wir nur, wenn sich der Wert wirklich ändern soll, zum Beispiel bei einem Zähler. Im Kurs gilt: Wir schreiben immer „const“, außer es geht nicht anders.\n\nWichtig bei Listen und Objekten: „const“ schützt nur die Variable, nicht den Inhalt. Wir können mit „push“ ein Element an die Liste anhängen, das ist erlaubt. Wir können der Variablen aber keine ganz neue Liste zuweisen. Die beiden Zeilen mit den zwei Schrägstrichen davor sind Kommentare und zeigen Fehler, die der Compiler melden würde."
+        },
+        {
+          "type": "code",
+          "title": "Warum nicht mehr var",
+          "code": "for (var i = 0; i < 10; i++) {\n  setTimeout(() => console.log(\"var:\", i), 0);\n}\n// Ausgabe: zehnmal \"var: 10\"\n\nfor (let j = 0; j < 10; j++) {\n  setTimeout(() => console.log(\"let:\", j), 0);\n}\n// Ausgabe: \"let: 0\" bis \"let: 9\"",
+          "notes": "Codefolie „Warum nicht mehr var“.\n\nFrüher wurde in JavaScript das Schlüsselwort „var“ benutzt. Heute verwenden wir es nicht mehr, und diese Folie zeigt den Grund. Die Funktion „setTimeout“ führt eine andere Funktion etwas später aus. Hier läuft die Schleife schon zu Ende, bevor die Ausgaben passieren.\n\nBei „var“ gibt es nur eine einzige Variable „i“ für die ganze Schleife. Wenn die Ausgaben später kommen, hat „i“ schon den Endwert 10. Deshalb steht zehnmal die 10 auf dem Bildschirm. Bei „let“ bekommt jeder Durchlauf der Schleife seine eigene Variable. Deshalb erscheinen die Zahlen 0 bis 9. Wegen solcher überraschenden Fehler benutzen wir „const“ und „let“ und nie „var“."
+        },
+        {
+          "type": "code",
+          "title": "any, unknown und never",
+          "code": "let anything: any = \"Lisa\";\nanything.toUpperCase();     // kein Fehler, auch wenn es knallen kann\n\nfunction show(value: unknown): string {\n  if (typeof value === \"string\") {\n    return value.toUpperCase();   // hier ist value ein string\n  }\n  return String(value);\n}\n\nfunction fail(message: string): never {\n  throw new Error(message);       // kehrt nie zurück\n}",
+          "notes": "Codefolie „any, unknown und never“.\n\nMit dem Typ „any“ schalten wir die Typprüfung für diese Variable ab. Der Compiler erlaubt dann alles, auch Fehler, die erst beim Ausführen auffallen. Deshalb vermeiden wir „any“.\n\nDer Typ „unknown“ bedeutet: Der Typ ist nicht bekannt. Der Unterschied zu „any“ ist, dass wir den Wert erst benutzen dürfen, wenn wir ihn geprüft haben. In der Funktion „show“ fragen wir mit „typeof“, ob der Wert ein Text ist. Nur innerhalb dieser Bedingung darf die Funktion „toUpperCase“ für Großbuchstaben aufgerufen werden.\n\nDer Typ „never“ bedeutet „niemals“. Er steht bei Funktionen, die nie normal zu Ende kommen. Die Funktion „fail“ wirft immer einen Fehler, also kehrt sie nie mit einem Ergebnis zurück."
+        },
+        {
+          "type": "code",
+          "title": "null und undefined im strikten Modus",
+          "code": "function cityLabel(city: string | undefined): string {\n  return city.toUpperCase();\n  // Fehler TS18048: 'city' is possibly 'undefined'.\n}\n\nfunction safeCityLabel(city: string | undefined): string {\n  if (city === undefined) {\n    return \"unbekannt\";\n  }\n  return city.toUpperCase();   // hier ist city sicher ein string\n}",
+          "notes": "Codefolie „null und undefined im strikten Modus“.\n\n„undefined“ bedeutet: Es gibt keinen Wert. Im strikten Modus „strict“ darf eine Variable vom Typ Text nicht einfach keinen Wert haben. Wenn ein Wert fehlen darf, schreiben wir das ausdrücklich in den Typ. Das senkrechte Zeichen bedeutet „oder“. „string | undefined“ heißt: ein Text oder kein Wert.\n\nIn der ersten Funktion rufen wir „toUpperCase“ auf, ohne zu prüfen. Der Compiler meldet den Fehler „TS18048“: Der Wert könnte fehlen. Das schützt uns vor Abstürzen im laufenden Programm.\n\nIn der zweiten Funktion prüfen wir mit „if“, ob der Wert fehlt. Danach weiß der Compiler, dass es ein Text sein muss, und lässt den Aufruf zu. Man nennt das „Narrowing“, auf Deutsch Eingrenzen des Typs.",
+          "_verify": "error:TS18048"
+        },
+        {
+          "type": "code",
+          "title": "Sicher mit fehlenden Werten: ?., ?? und !",
+          "code": "const customer = customers.find(c => c.id === \"3\");  // Customer | undefined\n\nconst city = customer?.city;                  // ?. : stoppt bei fehlendem Wert\nconst label = customer?.city ?? \"unbekannt\";  // ?? : Ersatzwert\n\nconst lisa = customers.find(c => c.id === \"1\")!;  // ! : \"ich weiß es sicher\"\nconsole.log(lisa.firstname);\n\n// Im Kurs:  customer()?.firstname\n//           customer()!.imageUrl!",
+          "notes": "Codefolie „Sicher mit fehlenden Werten“.\n\nHier sehen wir drei Werkzeuge. Zuerst die Methode „find“. Sie sucht in der Liste einen Kunden und liefert entweder den Kunden oder „undefined“, wenn keiner passt.\n\nDas Zeichen „?.“ heißt „optional chaining“. Es greift nur dann auf eine Eigenschaft zu, wenn der Wert davor existiert. Fehlt er, ist das Ergebnis einfach „undefined“, und es gibt keinen Absturz. Das Zeichen „??“ heißt „nullish coalescing“. Es liefert einen Ersatzwert, wenn links nichts steht. Hier ist das der Text „unbekannt“.\n\nDas Ausrufezeichen am Ende heißt „Non-null-Assertion“. Wir versprechen damit dem Compiler: Dieser Wert fehlt ganz sicher nicht. Der Compiler prüft das Versprechen nicht. Deshalb benutzen wir es nur, wenn wir uns wirklich sicher sind. Im Kurs begegnen uns später „customer()?.firstname“ und „customer()!.imageUrl!“ in den Angular-Vorlagen.",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "exercise",
+          "title": "TS-Übung 1: Typfehler beheben",
+          "bullets": [
+            "Öffne 01_typescript_primer, Datei src/uebung-1-typfehler.ts",
+            "1. Führe npm run check aus und lies die 6 Fehlermeldungen",
+            "2. Behebe jeden Fehler, ohne any zu benutzen",
+            "3. Manche Fehler behebst du im Code, bei anderen musst du den Typ anpassen",
+            "4. Starte das Programm: npm start -- src/uebung-1-typfehler.ts",
+            "Tipp: string | undefined, customer.city?.toUpperCase() ?? \"UNBEKANNT\"",
+            "Musterlösung: loesung/uebung-1-typfehler.ts"
+          ],
+          "notes": "Folie: „TS-Übung 1: Typfehler beheben“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung öffnen die Teilnehmenden die Datei „uebung-1-typfehler.ts“ im Ordner „01_typescript_primer“. Das Programm enthält absichtlich sechs Fehler. Mit dem Befehl „npm run check“ werden die Fehlermeldungen angezeigt, und die Teilnehmenden lernen, sie zu lesen.\n\nDie Aufgabe ist, alle Fehler zu beheben, ohne den Typ „any“ zu benutzen. Manchmal ist der Code falsch, zum Beispiel bei einer „const“-Variablen, die neu belegt wird. Manchmal muss der Typ angepasst werden, damit auch „kein Wert“ erlaubt ist. Am Ende wird das Programm mit „npm start“ ausgeführt. Die Übung dauert etwa zehn Minuten, die Musterlösung liegt im Ordner „loesung“."
+        }
+      ]
     },
     {
-     "type": "code",
-     "title": "tsconfig.json der Invoice-App",
-     "code": "{\n  \"compilerOptions\": {\n    \"strict\": true,\n    \"noImplicitReturns\": true,\n    \"noFallthroughCasesInSwitch\": true,\n    \"target\": \"ES2022\",\n    \"experimentalDecorators\": true\n  },\n  \"angularCompilerOptions\": {\n    \"strictTemplates\": true\n  }\n}",
-     "notes": "Codefolie „tsconfig.json der Invoice-App“.\n\nDie Datei „tsconfig.json“ ist die Einstellungsdatei für den TypeScript-Compiler. Hier sehen wir die wichtigsten Optionen aus der Invoice-App, dem Beispielprojekt dieses Kurses.\n\n„strict“ bedeutet: Der Compiler prüft besonders streng. Zum Beispiel muss ausdrücklich erlaubt sein, dass ein Wert fehlen darf, und Parameter ohne Typ sind verboten. „noImplicitReturns“ meldet einen Fehler, wenn eine Funktion nicht in jedem Fall einen Wert zurückgibt. „noFallthroughCasesInSwitch“ verhindert vergessene Abbrüche in einer Mehrfachauswahl.\n\n„target“ mit dem Wert „ES2022“ legt fest, welche JavaScript-Version erzeugt wird. „experimentalDecorators“ erlaubt Dekoratoren, das sind die Markierungen mit einem At-Zeichen wie „@Component“. Die Option „strictTemplates“ gehört zu Angular und prüft auch die Typen in den HTML-Vorlagen.",
-     "_verify": "skip"
-    },
-    {
-     "type": "code",
-     "title": "Ein erster Typfehler",
-     "code": "function greet(firstname: string, lastname: string): string {\n  return `Hallo ${firstname} ${lastname}`;\n}\n\ngreet(\"Lisa\", \"Simpson\");   // richtig\n\ngreet(\"Lisa\", 42);\n// Fehler TS2345: Argument of type 'number' is not\n// assignable to parameter of type 'string'.",
-     "notes": "Codefolie „Ein erster Typfehler“.\n\nDie Funktion „greet“ begrüßt einen Kunden. Sie hat zwei Parameter, also Eingabewerte: den Vornamen und den Nachnamen. Beide sind mit dem Typ „string“ angegeben. Ein „string“ ist ein Text. Auch der Rückgabewert der Funktion ist ein Text.\n\nDer erste Aufruf mit „Lisa“ und „Simpson“ ist richtig. Beim zweiten Aufruf übergeben wir als Nachnamen die Zahl 42. Der Compiler meldet sofort den Fehler mit der Nummer „TS2345“: Eine Zahl passt nicht zu einem Parameter vom Typ Text. Dieser Fehler erscheint schon beim Schreiben im Editor, nicht erst, wenn das Programm läuft. Genau dafür benutzen wir TypeScript.",
-     "_verify": "error:TS2345"
+      "after": 9,
+      "order": 30,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Funktionen",
+          "notes": "Kapitelübergangsfolie „Funktionen“ – Jetzt geht es um Funktionen. Wir sehen, wie man Eingaben und Ergebnisse mit Typen beschreibt, wie Pfeilfunktionen aussehen und wie man Listen von Kunden verarbeitet."
+        },
+        {
+          "type": "code",
+          "title": "Funktionen typisieren",
+          "code": "function cityOf(customer: Customer, fallback = \"unbekannt\"): string {\n  return customer.city ?? fallback;\n}\n\nfunction greet(name: string, greeting?: string): string {\n  return `${greeting ?? \"Hallo\"} ${name}`;\n}\n\nfunction logMessage(message: string): void {\n  console.log(message);\n}\n\ncityOf(customers[2]);                  // \"unbekannt\"\ncityOf(customers[2], \"Ogdenville\");    // \"Ogdenville\"",
+          "notes": "Codefolie „Funktionen typisieren“.\n\nBei einer Funktion geben wir jedem Parameter einen Typ und schreiben hinter die Klammern den Typ des Ergebnisses, den „Rückgabetyp“. Bei „cityOf“ bekommt die Funktion einen Kunden und liefert einen Text.\n\nDer zweite Parameter „fallback“ hat einen Standardwert, nämlich „unbekannt“. Wenn der Aufrufer ihn weglässt, wird der Standardwert benutzt. Der Typ wird dabei vom Standardwert abgeleitet.\n\nBei der Funktion „greet“ steht hinter dem Parameter ein Fragezeichen. Das bedeutet: Der Parameter ist optional und darf beim Aufruf fehlen. Innerhalb der Funktion kann er dann „undefined“ sein. Die Funktion „logMessage“ gibt nichts zurück. Dafür steht der Typ „void“, das heißt „leer“.",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "code",
+          "title": "Rest-Parameter und Arrow-Funktionen",
+          "code": "function sum(...nums: number[]): number {\n  return nums.reduce((a, b) => a + b, 0);\n}\nsum(1, 2, 3);                // 6\n\nconst double = (n: number): number => n * 2;\nconst add = (a: number, b: number) => a + b;\n\nfunction applyTwice(value: number, fn: (n: number) => number): number {\n  return fn(fn(value));\n}\napplyTwice(3, double);       // 12\napplyTwice(3, n => n + 10);  // 23",
+          "notes": "Codefolie „Rest-Parameter und Arrow-Funktionen“.\n\nEin „Rest-Parameter“ steht am Ende der Parameterliste und beginnt mit drei Punkten. Er sammelt beliebig viele Argumente in einer Liste. Die Funktion „sum“ kann also mit zwei, drei oder zehn Zahlen aufgerufen werden. Die Methode „reduce“ addiert alle Zahlen der Liste, beginnend bei null.\n\nEine „Arrow-Funktion“, auf Deutsch Pfeilfunktion, ist eine kurze Schreibweise für eine Funktion. Links vom Pfeil stehen die Parameter, rechts steht das Ergebnis. „double“ verdoppelt eine Zahl, „add“ addiert zwei Zahlen.\n\nFunktionen können auch als Argument übergeben werden. Man nennt sie dann „Callback“. Bei „applyTwice“ wird die übergebene Funktion zweimal angewendet. Der Typ „(n: number) => number“ beschreibt eine solche Funktion. Im Angular-Kurs benutzen wir Pfeilfunktionen sehr oft."
+        },
+        {
+          "type": "code",
+          "title": "Listen verarbeiten: filter, map, find",
+          "code": "const springfield = customers.filter(c => c.city === \"Springfield\");\n// zwei Kunden\n\nconst names = customers.map(c => `${c.firstname} ${c.lastname}`);\n// [\"Lisa Simpson\", \"Hans Maulwurf\", \"Ned Flanders\"]\n\nconst ned = customers.find(c => c.id === \"3\");   // Customer | undefined\nconsole.log(ned?.firstname ?? \"nicht gefunden\");\n\nconst active = customers\n  .filter(c => !c.discontinued)\n  .map(c => c.lastname);                         // [\"Simpson\", \"Flanders\"]",
+          "notes": "Codefolie „Listen verarbeiten: filter, map, find“.\n\nFür Listen gibt es drei wichtige Methoden. Alle bekommen eine Pfeilfunktion als Argument, die für jedes Element der Liste aufgerufen wird. Die Variable „c“ steht dabei für den jeweiligen Kunden.\n\n„filter“ behält nur die Elemente, bei denen die Pfeilfunktion „wahr“ liefert. Hier bleiben die Kunden aus Springfield übrig, das Ergebnis ist eine neue Liste. „map“ wandelt jedes Element in etwas anderes um. Hier entsteht aus jedem Kunden ein Text mit Vorname und Nachname. „find“ liefert das erste passende Element oder „undefined“, wenn keines passt. Darum benutzen wir danach das Fragezeichen und den Ersatzwert.\n\nDie Methoden lassen sich hintereinander schreiben. Unten werden zuerst die beendeten Kunden herausgefiltert, dann bleiben die Nachnamen übrig. Die ursprüngliche Liste ändert sich dabei nie.",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "exercise",
+          "title": "TS-Übung 2: Funktionen typisieren",
+          "bullets": [
+            "Öffne 01_typescript_primer, Datei src/uebung-2-funktionen.ts",
+            "1. Schreibe fullName und filterCustomers (Tipp: filter, includes, toLowerCase)",
+            "2. Schreibe cityOf mit einem Standardwert für den zweiten Parameter",
+            "3. Schreibe joinNames mit einem Rest-Parameter (...customers), map und join",
+            "4. Bis Aufgabe 3 und 4 gelöst sind, meldet npm run check zwei Fehler: das ist gewollt",
+            "Start: npm start -- src/uebung-2-funktionen.ts",
+            "Musterlösung: loesung/uebung-2-funktionen.ts"
+          ],
+          "notes": "Folie: „TS-Übung 2: Funktionen typisieren“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung öffnen die Teilnehmenden die Datei „uebung-2-funktionen.ts“. Vier Funktionen sind nur als Gerüst vorgegeben und müssen geschrieben werden. Jeder Parameter und jeder Rückgabewert bekommt einen Typ.\n\nDie erste Funktion setzt Vor- und Nachname zusammen. Die zweite filtert die Kunden nach einem Suchtext. Die dritte liefert die Stadt mit einem Standardwert, und die vierte verbindet alle Namen mit einem Trennzeichen und benutzt dafür einen Rest-Parameter. Solange die letzten beiden Funktionen fehlen, meldet der Compiler zwei Fehler. Das ist so gewollt. Die Übung dauert etwa 15 Minuten."
+        }
+      ]
     }
-   ]
-  },
-  {
-   "after": 9,
-   "order": 20,
-   "slides": [
-    {
-     "type": "divider",
-     "title": "Typen",
-     "notes": "Kapitelübergangsfolie „Typen“ – Jetzt lernen wir die wichtigsten Typen kennen: Text, Zahl, Ja-Nein-Wert und Datum. Danach sehen wir, wie TypeScript mit fehlenden Werten umgeht."
-    },
-    {
-     "type": "code",
-     "title": "Typen und Typableitung",
-     "code": "const firstname: string = \"Lisa\";\nconst age: number = 42;\nconst active: boolean = true;\nconst since: Date = new Date(2024, 0, 15);\nconst names: string[] = [\"Lisa\", \"Hans\", \"Ned\"];\n\n// Typableitung: Der Compiler erkennt den Typ selbst\nconst city = \"Springfield\";   // string\nconst count = names.length;   // number\nconst ids = [1, 2, 3];        // number[]",
-     "notes": "Codefolie „Typen und Typableitung“.\n\nDie Grundtypen sind „string“ für Text, „number“ für Zahlen, „boolean“ für Ja-Nein-Werte und „Date“ für ein Datum. Mit eckigen Klammern hinter dem Typ beschreiben wir eine Liste. „string[]“ heißt zum Beispiel: eine Liste von Texten. Den Typ schreiben wir mit einem Doppelpunkt hinter den Namen der Variablen.\n\nIm unteren Teil sehen wir die „Typableitung“, auf Englisch „Inference“. Das heißt: Der Compiler erkennt den Typ selbst aus dem Wert, der gleich zugewiesen wird. Bei „city“ ist es ein Text, bei „count“ eine Zahl und bei „ids“ eine Liste von Zahlen. Die Faustregel lautet: Den Typ weglassen, wenn der Wert ihn klar macht. Den Typ schreiben wir bei Parametern von Funktionen und überall, wo der Compiler ihn nicht erraten kann."
-    },
-    {
-     "type": "code",
-     "title": "const und let",
-     "code": "const company = \"Simpson GmbH\";   // Standard: const\nlet counter = 0;                 // let nur, wenn sich der Wert ändert\ncounter = counter + 1;           // erlaubt\n\n// company = \"Andere GmbH\";      // Fehler: const nicht neu zuweisbar\n\nconst names: string[] = [\"Lisa\"];\nnames.push(\"Hans\");              // erlaubt: der Inhalt ändert sich\n// names = [];                   // Fehler: die Variable bleibt fest",
-     "notes": "Codefolie „const und let“.\n\nEs gibt zwei Arten, eine Variable anzulegen. „const“ steht für eine Konstante: Der Variablen kann später kein neuer Wert zugewiesen werden. „let“ benutzen wir nur, wenn sich der Wert wirklich ändern soll, zum Beispiel bei einem Zähler. Im Kurs gilt: Wir schreiben immer „const“, außer es geht nicht anders.\n\nWichtig bei Listen und Objekten: „const“ schützt nur die Variable, nicht den Inhalt. Wir können mit „push“ ein Element an die Liste anhängen, das ist erlaubt. Wir können der Variablen aber keine ganz neue Liste zuweisen. Die beiden Zeilen mit den zwei Schrägstrichen davor sind Kommentare und zeigen Fehler, die der Compiler melden würde."
-    },
-    {
-     "type": "code",
-     "title": "Warum nicht mehr var",
-     "code": "for (var i = 0; i < 10; i++) {\n  setTimeout(() => console.log(\"var:\", i), 0);\n}\n// Ausgabe: zehnmal \"var: 10\"\n\nfor (let j = 0; j < 10; j++) {\n  setTimeout(() => console.log(\"let:\", j), 0);\n}\n// Ausgabe: \"let: 0\" bis \"let: 9\"",
-     "notes": "Codefolie „Warum nicht mehr var“.\n\nFrüher wurde in JavaScript das Schlüsselwort „var“ benutzt. Heute verwenden wir es nicht mehr, und diese Folie zeigt den Grund. Die Funktion „setTimeout“ führt eine andere Funktion etwas später aus. Hier läuft die Schleife schon zu Ende, bevor die Ausgaben passieren.\n\nBei „var“ gibt es nur eine einzige Variable „i“ für die ganze Schleife. Wenn die Ausgaben später kommen, hat „i“ schon den Endwert 10. Deshalb steht zehnmal die 10 auf dem Bildschirm. Bei „let“ bekommt jeder Durchlauf der Schleife seine eigene Variable. Deshalb erscheinen die Zahlen 0 bis 9. Wegen solcher überraschenden Fehler benutzen wir „const“ und „let“ und nie „var“."
-    },
-    {
-     "type": "code",
-     "title": "any, unknown und never",
-     "code": "let anything: any = \"Lisa\";\nanything.toUpperCase();     // kein Fehler, auch wenn es knallen kann\n\nfunction show(value: unknown): string {\n  if (typeof value === \"string\") {\n    return value.toUpperCase();   // hier ist value ein string\n  }\n  return String(value);\n}\n\nfunction fail(message: string): never {\n  throw new Error(message);       // kehrt nie zurück\n}",
-     "notes": "Codefolie „any, unknown und never“.\n\nMit dem Typ „any“ schalten wir die Typprüfung für diese Variable ab. Der Compiler erlaubt dann alles, auch Fehler, die erst beim Ausführen auffallen. Deshalb vermeiden wir „any“.\n\nDer Typ „unknown“ bedeutet: Der Typ ist nicht bekannt. Der Unterschied zu „any“ ist, dass wir den Wert erst benutzen dürfen, wenn wir ihn geprüft haben. In der Funktion „show“ fragen wir mit „typeof“, ob der Wert ein Text ist. Nur innerhalb dieser Bedingung darf die Funktion „toUpperCase“ für Großbuchstaben aufgerufen werden.\n\nDer Typ „never“ bedeutet „niemals“. Er steht bei Funktionen, die nie normal zu Ende kommen. Die Funktion „fail“ wirft immer einen Fehler, also kehrt sie nie mit einem Ergebnis zurück."
-    },
-    {
-     "type": "code",
-     "title": "null und undefined im strikten Modus",
-     "code": "function cityLabel(city: string | undefined): string {\n  return city.toUpperCase();\n  // Fehler TS18048: 'city' is possibly 'undefined'.\n}\n\nfunction safeCityLabel(city: string | undefined): string {\n  if (city === undefined) {\n    return \"unbekannt\";\n  }\n  return city.toUpperCase();   // hier ist city sicher ein string\n}",
-     "notes": "Codefolie „null und undefined im strikten Modus“.\n\n„undefined“ bedeutet: Es gibt keinen Wert. Im strikten Modus „strict“ darf eine Variable vom Typ Text nicht einfach keinen Wert haben. Wenn ein Wert fehlen darf, schreiben wir das ausdrücklich in den Typ. Das senkrechte Zeichen bedeutet „oder“. „string | undefined“ heißt: ein Text oder kein Wert.\n\nIn der ersten Funktion rufen wir „toUpperCase“ auf, ohne zu prüfen. Der Compiler meldet den Fehler „TS18048“: Der Wert könnte fehlen. Das schützt uns vor Abstürzen im laufenden Programm.\n\nIn der zweiten Funktion prüfen wir mit „if“, ob der Wert fehlt. Danach weiß der Compiler, dass es ein Text sein muss, und lässt den Aufruf zu. Man nennt das „Narrowing“, auf Deutsch Eingrenzen des Typs.",
-     "_verify": "error:TS18048"
-    },
-    {
-     "type": "code",
-     "title": "Sicher mit fehlenden Werten: ?., ?? und !",
-     "code": "const customer = customers.find(c => c.id === \"3\");  // Customer | undefined\n\nconst city = customer?.city;                  // ?. : stoppt bei fehlendem Wert\nconst label = customer?.city ?? \"unbekannt\";  // ?? : Ersatzwert\n\nconst lisa = customers.find(c => c.id === \"1\")!;  // ! : \"ich weiß es sicher\"\nconsole.log(lisa.firstname);\n\n// Im Kurs:  customer()?.firstname\n//           customer()!.imageUrl!",
-     "notes": "Codefolie „Sicher mit fehlenden Werten“.\n\nHier sehen wir drei Werkzeuge. Zuerst die Methode „find“. Sie sucht in der Liste einen Kunden und liefert entweder den Kunden oder „undefined“, wenn keiner passt.\n\nDas Zeichen „?.“ heißt „optional chaining“. Es greift nur dann auf eine Eigenschaft zu, wenn der Wert davor existiert. Fehlt er, ist das Ergebnis einfach „undefined“, und es gibt keinen Absturz. Das Zeichen „??“ heißt „nullish coalescing“. Es liefert einen Ersatzwert, wenn links nichts steht. Hier ist das der Text „unbekannt“.\n\nDas Ausrufezeichen am Ende heißt „Non-null-Assertion“. Wir versprechen damit dem Compiler: Dieser Wert fehlt ganz sicher nicht. Der Compiler prüft das Versprechen nicht. Deshalb benutzen wir es nur, wenn wir uns wirklich sicher sind. Im Kurs begegnen uns später „customer()?.firstname“ und „customer()!.imageUrl!“ in den Angular-Vorlagen.",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "exercise",
-     "title": "TS-Übung 1: Typfehler beheben",
-     "bullets": [
-      "Öffne 01_typescript_primer, Datei src/uebung-1-typfehler.ts",
-      "1. Führe npm run check aus und lies die 6 Fehlermeldungen",
-      "2. Behebe jeden Fehler, ohne any zu benutzen",
-      "3. Manche Fehler behebst du im Code, bei anderen musst du den Typ anpassen",
-      "4. Starte das Programm: npm start -- src/uebung-1-typfehler.ts",
-      "Tipp: string | undefined, customer.city?.toUpperCase() ?? \"UNBEKANNT\"",
-      "Musterlösung: loesung/uebung-1-typfehler.ts"
-     ],
-     "notes": "Folie: „TS-Übung 1: Typfehler beheben“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung öffnen die Teilnehmenden die Datei „uebung-1-typfehler.ts“ im Ordner „01_typescript_primer“. Das Programm enthält absichtlich sechs Fehler. Mit dem Befehl „npm run check“ werden die Fehlermeldungen angezeigt, und die Teilnehmenden lernen, sie zu lesen.\n\nDie Aufgabe ist, alle Fehler zu beheben, ohne den Typ „any“ zu benutzen. Manchmal ist der Code falsch, zum Beispiel bei einer „const“-Variablen, die neu belegt wird. Manchmal muss der Typ angepasst werden, damit auch „kein Wert“ erlaubt ist. Am Ende wird das Programm mit „npm start“ ausgeführt. Die Übung dauert etwa zehn Minuten, die Musterlösung liegt im Ordner „loesung“."
-    }
-   ]
-  },
-  {
-   "after": 9,
-   "order": 30,
-   "slides": [
-    {
-     "type": "divider",
-     "title": "Funktionen",
-     "notes": "Kapitelübergangsfolie „Funktionen“ – Jetzt geht es um Funktionen. Wir sehen, wie man Eingaben und Ergebnisse mit Typen beschreibt, wie Pfeilfunktionen aussehen und wie man Listen von Kunden verarbeitet."
-    },
-    {
-     "type": "code",
-     "title": "Funktionen typisieren",
-     "code": "function cityOf(customer: Customer, fallback = \"unbekannt\"): string {\n  return customer.city ?? fallback;\n}\n\nfunction greet(name: string, greeting?: string): string {\n  return `${greeting ?? \"Hallo\"} ${name}`;\n}\n\nfunction logMessage(message: string): void {\n  console.log(message);\n}\n\ncityOf(customers[2]);                  // \"unbekannt\"\ncityOf(customers[2], \"Ogdenville\");    // \"Ogdenville\"",
-     "notes": "Codefolie „Funktionen typisieren“.\n\nBei einer Funktion geben wir jedem Parameter einen Typ und schreiben hinter die Klammern den Typ des Ergebnisses, den „Rückgabetyp“. Bei „cityOf“ bekommt die Funktion einen Kunden und liefert einen Text.\n\nDer zweite Parameter „fallback“ hat einen Standardwert, nämlich „unbekannt“. Wenn der Aufrufer ihn weglässt, wird der Standardwert benutzt. Der Typ wird dabei vom Standardwert abgeleitet.\n\nBei der Funktion „greet“ steht hinter dem Parameter ein Fragezeichen. Das bedeutet: Der Parameter ist optional und darf beim Aufruf fehlen. Innerhalb der Funktion kann er dann „undefined“ sein. Die Funktion „logMessage“ gibt nichts zurück. Dafür steht der Typ „void“, das heißt „leer“.",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "code",
-     "title": "Rest-Parameter und Arrow-Funktionen",
-     "code": "function sum(...nums: number[]): number {\n  return nums.reduce((a, b) => a + b, 0);\n}\nsum(1, 2, 3);                // 6\n\nconst double = (n: number): number => n * 2;\nconst add = (a: number, b: number) => a + b;\n\nfunction applyTwice(value: number, fn: (n: number) => number): number {\n  return fn(fn(value));\n}\napplyTwice(3, double);       // 12\napplyTwice(3, n => n + 10);  // 23",
-     "notes": "Codefolie „Rest-Parameter und Arrow-Funktionen“.\n\nEin „Rest-Parameter“ steht am Ende der Parameterliste und beginnt mit drei Punkten. Er sammelt beliebig viele Argumente in einer Liste. Die Funktion „sum“ kann also mit zwei, drei oder zehn Zahlen aufgerufen werden. Die Methode „reduce“ addiert alle Zahlen der Liste, beginnend bei null.\n\nEine „Arrow-Funktion“, auf Deutsch Pfeilfunktion, ist eine kurze Schreibweise für eine Funktion. Links vom Pfeil stehen die Parameter, rechts steht das Ergebnis. „double“ verdoppelt eine Zahl, „add“ addiert zwei Zahlen.\n\nFunktionen können auch als Argument übergeben werden. Man nennt sie dann „Callback“. Bei „applyTwice“ wird die übergebene Funktion zweimal angewendet. Der Typ „(n: number) => number“ beschreibt eine solche Funktion. Im Angular-Kurs benutzen wir Pfeilfunktionen sehr oft."
-    },
-    {
-     "type": "code",
-     "title": "Listen verarbeiten: filter, map, find",
-     "code": "const springfield = customers.filter(c => c.city === \"Springfield\");\n// zwei Kunden\n\nconst names = customers.map(c => `${c.firstname} ${c.lastname}`);\n// [\"Lisa Simpson\", \"Hans Maulwurf\", \"Ned Flanders\"]\n\nconst ned = customers.find(c => c.id === \"3\");   // Customer | undefined\nconsole.log(ned?.firstname ?? \"nicht gefunden\");\n\nconst active = customers\n  .filter(c => !c.discontinued)\n  .map(c => c.lastname);                         // [\"Simpson\", \"Flanders\"]",
-     "notes": "Codefolie „Listen verarbeiten: filter, map, find“.\n\nFür Listen gibt es drei wichtige Methoden. Alle bekommen eine Pfeilfunktion als Argument, die für jedes Element der Liste aufgerufen wird. Die Variable „c“ steht dabei für den jeweiligen Kunden.\n\n„filter“ behält nur die Elemente, bei denen die Pfeilfunktion „wahr“ liefert. Hier bleiben die Kunden aus Springfield übrig, das Ergebnis ist eine neue Liste. „map“ wandelt jedes Element in etwas anderes um. Hier entsteht aus jedem Kunden ein Text mit Vorname und Nachname. „find“ liefert das erste passende Element oder „undefined“, wenn keines passt. Darum benutzen wir danach das Fragezeichen und den Ersatzwert.\n\nDie Methoden lassen sich hintereinander schreiben. Unten werden zuerst die beendeten Kunden herausgefiltert, dann bleiben die Nachnamen übrig. Die ursprüngliche Liste ändert sich dabei nie.",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "exercise",
-     "title": "TS-Übung 2: Funktionen typisieren",
-     "bullets": [
-      "Öffne 01_typescript_primer, Datei src/uebung-2-funktionen.ts",
-      "1. Schreibe fullName und filterCustomers (Tipp: filter, includes, toLowerCase)",
-      "2. Schreibe cityOf mit einem Standardwert für den zweiten Parameter",
-      "3. Schreibe joinNames mit einem Rest-Parameter (...customers), map und join",
-      "4. Bis Aufgabe 3 und 4 gelöst sind, meldet npm run check zwei Fehler: das ist gewollt",
-      "Start: npm start -- src/uebung-2-funktionen.ts",
-      "Musterlösung: loesung/uebung-2-funktionen.ts"
-     ],
-     "notes": "Folie: „TS-Übung 2: Funktionen typisieren“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung öffnen die Teilnehmenden die Datei „uebung-2-funktionen.ts“. Vier Funktionen sind nur als Gerüst vorgegeben und müssen geschrieben werden. Jeder Parameter und jeder Rückgabewert bekommt einen Typ.\n\nDie erste Funktion setzt Vor- und Nachname zusammen. Die zweite filtert die Kunden nach einem Suchtext. Die dritte liefert die Stadt mit einem Standardwert, und die vierte verbindet alle Namen mit einem Trennzeichen und benutzt dafür einen Rest-Parameter. Solange die letzten beiden Funktionen fehlen, meldet der Compiler zwei Fehler. Das ist so gewollt. Die Übung dauert etwa 15 Minuten."
-    }
-   ]
-  }
- ]
+  ]
 }

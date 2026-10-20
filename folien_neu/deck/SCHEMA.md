@@ -61,3 +61,15 @@ Die Notizen unter den Folien sind **Sprechtexte für eine Gebärdensprachdolmets
 ## Hinweise
 - Dateiname: `content_<kurzname>.json`, gültiges JSON (UTF-8, keine Kommentare).
 - Jede Folie soll eigenständig verständlich sein; Fachwörter, die im Kurs schon vorkamen, trotzdem kurz einordnen.
+
+## Diagramme und Code-Kästen (`diagram`, nur bei `type: content`)
+Eine Inhaltsfolie kann ein Feld `"diagram"` haben. Die Aufzählung steht dann links, rechts erscheint eine Grafik aus PowerPoint-Formen (siehe `diagrams.py`). Arten (`kind`):
+
+- `flow`: `{"steps": ["A","B","C"], "highlight_last": true, "note": "…"}` (2–6 Kästen mit Pfeilen)
+- `layers`: `{"layers": ["oben","mitte","unten"], "note": "…"}` (2–6 Schichten)
+- `tree`: `{"root": "Eltern", "children": ["A","B","C"]}` (2–6 Kinder)
+- `compare`: `{"left": {"title": "…", "items": ["…"]}, "right": {…}}` (zwei Spalten)
+- `cycle`: `{"steps": ["A","B","C","D"]}` (3–4 Schritte im Kreis)
+- `code`: `{"title": "Datei", "text": "Zeile 1\nZeile 2"}` (höchstens 16 Zeilen, etwa 34 Zeichen pro Zeile)
+
+Kurze Texte verwenden (höchstens etwa 30 Zeichen pro Kasten). Ein Diagramm ersetzt nicht den Sprechtext: Der Sprechtext sollte es kurz beschreiben.
