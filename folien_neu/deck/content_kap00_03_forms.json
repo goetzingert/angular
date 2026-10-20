@@ -52,7 +52,20 @@
             "Werkzeuge: Angular CLI mit dem Befehl ng (sonst z. B. Vite oder eigene Konfiguration)",
             "Tests: Vitest-Setup ab Version 21 und TestBed (sonst z. B. Jest mit Testing Library)"
           ],
-          "notes": "Folie: „Batteries included: Was Angular mitbringt“.\n\n„Batteries included“ ist ein englischer Ausdruck. Er bedeutet, dass die Batterien schon mitgeliefert werden. Für Angular heißt das: Die wichtigsten Bausteine sind bereits enthalten.\n\nDie Folie nennt sieben Bereiche. Angular hat einen eigenen Router für die Navigation und einen eigenen Client für Netzwerkzugriffe, den „HttpClient“. Dazu kommen Formulare, Zustandsverwaltung mit „Signals“, eine eingebaute Bereitstellung von Abhängigkeiten, ein Kommandozeilenwerkzeug und ein Test-Setup.\n\nIn anderen Bibliotheken muss man diese Teile einzeln aussuchen. Die Folie nennt dafür jeweils bekannte Beispiele. Wichtig ist nur: Bei Angular kommt alles aus einer Hand."
+          "notes": "Folie: „Batteries included: Was Angular mitbringt“.\n\n„Batteries included“ ist ein englischer Ausdruck. Er bedeutet, dass die Batterien schon mitgeliefert werden. Für Angular heißt das: Die wichtigsten Bausteine sind bereits enthalten.\n\nDie Folie nennt sieben Bereiche. Angular hat einen eigenen Router für die Navigation und einen eigenen Client für Netzwerkzugriffe, den „HttpClient“. Dazu kommen Formulare, Zustandsverwaltung mit „Signals“, eine eingebaute Bereitstellung von Abhängigkeiten, ein Kommandozeilenwerkzeug und ein Test-Setup.\n\nIn anderen Bibliotheken muss man diese Teile einzeln aussuchen. Die Folie nennt dafür jeweils bekannte Beispiele. Wichtig ist nur: Bei Angular kommt alles aus einer Hand.",
+          "diagram": {
+            "kind": "tree",
+            "root": "Angular",
+            "children": [
+              "Router",
+              "HttpClient",
+              "Formulare",
+              "Dependency Injection",
+              "CLI",
+              "Vitest"
+            ],
+            "note": "Alles in einem Paket"
+          }
         },
         {
           "type": "content",
@@ -66,7 +79,26 @@
             "Entscheidungskriterien: Teamgröße, Lebensdauer, vorhandene Skills, Integrationsbedarf",
             "Außerdem: Rendering-Anforderungen wie Suchmaschinen-Optimierung (SEO) und Server-Rendering"
           ],
-          "notes": "Folie: „Einsatzgebiete: Wann passt Angular, wann nicht?“.\n\nAngular passt gut zu großen Anwendungen in Unternehmen, die viele Jahre gepflegt werden und an denen mehrere Teams arbeiten. Dazu gehören Dashboards und Fachanwendungen mit vielen Formularen. Weniger gut passt Angular für reine Inhaltsseiten wie Blogs und für sehr kleine Bausteine. Ein Team braucht außerdem Kenntnisse in „TypeScript“ und Zeit zum Einarbeiten.\n\nFür die Entscheidung helfen diese Fragen: Wie groß ist das Team? Wie lange soll die Anwendung leben? Welche Fähigkeiten sind vorhanden? Muss die Seite von Suchmaschinen gefunden werden? „SEO“ steht für Suchmaschinen-Optimierung."
+          "notes": "Folie: „Einsatzgebiete: Wann passt Angular, wann nicht?“.\n\nAngular passt gut zu großen Anwendungen in Unternehmen, die viele Jahre gepflegt werden und an denen mehrere Teams arbeiten. Dazu gehören Dashboards und Fachanwendungen mit vielen Formularen. Weniger gut passt Angular für reine Inhaltsseiten wie Blogs und für sehr kleine Bausteine. Ein Team braucht außerdem Kenntnisse in „TypeScript“ und Zeit zum Einarbeiten.\n\nFür die Entscheidung helfen diese Fragen: Wie groß ist das Team? Wie lange soll die Anwendung leben? Welche Fähigkeiten sind vorhanden? Muss die Seite von Suchmaschinen gefunden werden? „SEO“ steht für Suchmaschinen-Optimierung.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Passt gut",
+              "items": [
+                "große Firmen-Apps",
+                "viele Teams",
+                "lange Laufzeit"
+              ]
+            },
+            "right": {
+              "title": "Weniger passend",
+              "items": [
+                "Blogs, Inhalte",
+                "kleine Widgets",
+                "Team ohne TS"
+              ]
+            }
+          }
         },
         {
           "type": "content",
@@ -87,8 +119,8 @@
             "kind": "tree",
             "root": "AppComponent",
             "children": [
-              "CustomerList",
-              "CustomerDetails",
+              "List",
+              "Details",
               "Header"
             ]
           }
@@ -106,7 +138,26 @@
             "Klassen-Guards und -Interceptors werden zu funktionalen Guards und Interceptors",
             "Karma und Jasmine werden zu Vitest"
           ],
-          "notes": "Folie: „Die Angular-Denkweise heute“.\n\nDie Folie zeigt, wie sich die Arbeit mit Angular verändert hat. Der Leitgedanke ist: weniger „Boilerplate“, also weniger Code, der nur der Form dient, und mehr „Reaktivität“. Reaktiv bedeutet, dass die Oberfläche sich automatisch aktualisiert, wenn sich Daten ändern.\n\nFrüher benutzte man „NgModule“, heute benutzt man „Standalone-Komponenten“, die ihre Abhängigkeiten selbst auflisten. Statt der alten Änderungserkennung mit „Zone.js“ verwendet man heute „Signals“, die genau melden, was sich geändert hat. Die Schreibweisen für Bedingungen und Schleifen im Template, für Eingaben und Ausgaben, für die Bereitstellung von Abhängigkeiten, für Guards und Interceptors sowie für Tests sind ebenfalls neu.\n\nBestehende Projekte enthalten meistens noch die alte Schreibweise. Deshalb zeigt der Kurs am Ende in einem Legacy-Kapitel mit Übung 30 beide Welten."
+          "notes": "Folie: „Die Angular-Denkweise heute“.\n\nDie Folie zeigt, wie sich die Arbeit mit Angular verändert hat. Der Leitgedanke ist: weniger „Boilerplate“, also weniger Code, der nur der Form dient, und mehr „Reaktivität“. Reaktiv bedeutet, dass die Oberfläche sich automatisch aktualisiert, wenn sich Daten ändern.\n\nFrüher benutzte man „NgModule“, heute benutzt man „Standalone-Komponenten“, die ihre Abhängigkeiten selbst auflisten. Statt der alten Änderungserkennung mit „Zone.js“ verwendet man heute „Signals“, die genau melden, was sich geändert hat. Die Schreibweisen für Bedingungen und Schleifen im Template, für Eingaben und Ausgaben, für die Bereitstellung von Abhängigkeiten, für Guards und Interceptors sowie für Tests sind ebenfalls neu.\n\nBestehende Projekte enthalten meistens noch die alte Schreibweise. Deshalb zeigt der Kurs am Ende in einem Legacy-Kapitel mit Übung 30 beide Welten.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Früher",
+              "items": [
+                "NgModule",
+                "*ngIf, @Input()",
+                "Zone.js, Karma"
+              ]
+            },
+            "right": {
+              "title": "Heute",
+              "items": [
+                "Standalone",
+                "@if, input()",
+                "Signals, Vitest"
+              ]
+            }
+          }
         },
         {
           "type": "content",

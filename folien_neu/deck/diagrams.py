@@ -86,7 +86,7 @@ def flow(slide, d):
     note_h = 450000 if d.get("note") else 0
     gap = 250000 if n <= 5 else 180000
     h = min(780000, int((H - note_h - gap * (n - 1)) / n))
-    size = 15 if h > 600000 else 13
+    size = 17 if h > 600000 else 15
     for i, t in enumerate(steps):
         y = Y0 + i * (h + gap)
         last = i == n - 1
@@ -108,7 +108,7 @@ def layers(slide, d):
     for i, t in enumerate(items):
         f = fills[min(i, len(fills) - 1)]
         col = WHITE if i < 2 else DARK
-        _box(slide, X0, Y0 + i * (h + gap), W, h, t, fill=f, line=None, color=col, size=15, bold=i < 2)
+        _box(slide, X0, Y0 + i * (h + gap), W, h, t, fill=f, line=None, color=col, size=17, bold=i < 2)
     if d.get("note"):
         _note(slide, d["note"], Y0 + n * h + (n - 1) * gap + 60000)
 
@@ -123,7 +123,7 @@ def tree(slide, d):
     gap_x = 150000
     cw = int((W - gap_x * (cols - 1)) / cols)
     ch = min(750000, int((H - root_h - gap_y - 120000 * (rows - 1)) / rows))
-    _box(slide, X0 + W // 4, Y0, W // 2, root_h, d["root"], fill=GREEN, line=None, color=WHITE, size=15, bold=True)
+    _box(slide, X0 + W // 4, Y0, W // 2, root_h, d["root"], fill=GREEN, line=None, color=WHITE, size=16, bold=True)
     for i, t in enumerate(kids):
         r, c = divmod(i, cols)
         # letzte Zeile zentrieren
@@ -131,7 +131,7 @@ def tree(slide, d):
         total = in_row * cw + (in_row - 1) * gap_x
         x = X0 + (W - total) // 2 + c * (cw + gap_x)
         y = Y0 + root_h + gap_y + r * (ch + 120000)
-        _box(slide, x, y, cw, ch, t, size=13)
+        _box(slide, x, y, cw, ch, t, size=14)
         if r == 0:
             _arrow(slide, X0 + W // 2, Y0 + root_h, x + cw // 2, y)
 
@@ -147,7 +147,7 @@ def compare(slide, d):
         ih = min(620000, int((H - 600000 - 100000 - 90000 * (len(items) - 1)) / max(1, len(items))))
         for j, t in enumerate(items):
             _box(slide, x, Y0 + 700000 + j * (ih + 90000), cw, ih, t, fill=LIGHT if i == 0 else GREY,
-                 line=GREEN if i == 0 else RGBColor(0x8A, 0x96, 0x9C), size=13)
+                 line=GREEN if i == 0 else RGBColor(0x8A, 0x96, 0x9C), size=14)
 
 
 def cycle(slide, d):
@@ -156,7 +156,7 @@ def cycle(slide, d):
     bw, bh = 1850000, 700000
     pos = [(X0, Y0 + 200000), (X0 + W - bw, Y0 + 200000), (X0 + W - bw, Y0 + 2400000), (X0, Y0 + 2400000)][:n]
     for t, (x, y) in zip(steps, pos):
-        _box(slide, x, y, bw, bh, t, size=14)
+        _box(slide, x, y, bw, bh, t, size=16)
     for i in range(n):
         (x1, y1), (x2, y2) = pos[i], pos[(i + 1) % n]
         if y1 == y2:
@@ -175,7 +175,7 @@ def cycle(slide, d):
 
 def code(slide, d):
     lines = d["text"].split("\n")
-    size = 14 if len(lines) <= 9 and max(len(l) for l in lines) <= 36 else 12
+    size = 15 if len(lines) <= 9 and max(len(l) for l in lines) <= 34 else 13
     title = d.get("title")
     top = Y0
     if title:
