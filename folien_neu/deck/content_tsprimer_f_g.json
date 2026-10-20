@@ -1,143 +1,154 @@
 {
- "blocks": [
-  {
-   "after": 9,
-   "order": 60,
-   "slides": [
+  "blocks": [
     {
-     "type": "divider",
-     "title": "Klassen",
-     "notes": "Kapitelübergangsfolie „Klassen“ – Jetzt geht es um Klassen. Eine „Klasse“ ist ein Bauplan für Objekte, die zusammengehörige Daten und passende Funktionen bündeln. Wir bauen Schritt für Schritt die Klasse „Customer“, die in der Invoice-App wirklich vorkommt. Am Ende steht eine Übung, in der die Teilnehmenden diese Klasse selbst schreiben."
+      "after": 9,
+      "order": 60,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Klassen",
+          "notes": "Kapitelübergangsfolie „Klassen“ – Jetzt geht es um Klassen. Eine „Klasse“ ist ein Bauplan für Objekte, die zusammengehörige Daten und passende Funktionen bündeln. Wir bauen Schritt für Schritt die Klasse „Customer“, die in der Invoice-App wirklich vorkommt. Am Ende steht eine Übung, in der die Teilnehmenden diese Klasse selbst schreiben."
+        },
+        {
+          "type": "code",
+          "title": "Klassen: Attribute, Konstruktor, Methoden",
+          "code": "class Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  constructor(firstname: string, lastname: string, city?: string) {\n    this.id = crypto.randomUUID();\n    this.firstname = firstname;\n    this.lastname = lastname;\n    this.city = city;\n  }\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\nconst lisa = new Customer(\"Lisa\", \"Simpson\", \"Springfield\");",
+          "notes": "Codefolie „Klassen: Attribute, Konstruktor, Methoden“.\n\nHier steht die Klasse „Customer“ ausführlich, ohne Abkürzung. Oben stehen die „Attribute“. Das sind die Eigenschaften, die jedes Kunden-Objekt hat: Kennung, Vorname, Nachname und optional die Stadt. Das Fragezeichen bei „city“ bedeutet, dass dieser Wert fehlen darf.\n\nDer „Konstruktor“ ist eine besondere Funktion, die beim Erzeugen eines Objekts automatisch läuft. Er bekommt Vorname, Nachname und Stadt und speichert sie mit „this“ im neuen Objekt. „this“ bedeutet: genau dieses Objekt. Die Kennung wird mit „crypto.randomUUID()“ erzeugt, das ist eine zufällige, eindeutige Zeichenkette.\n\nDie „Methode“ „getLabel“ ist eine Funktion, die zur Klasse gehört. Sie liefert einen Text mit dem Namen. Mit „new Customer(…)“ in der letzten Zeile entsteht ein neues Objekt. Auf der nächsten Folie sehen wir, wie man das Ganze kürzer schreibt."
+        },
+        {
+          "type": "code",
+          "title": "Parameter Properties",
+          "code": "class Customer {\n  id: string;\n  constructor(\n    public firstname: string,\n    public lastname: string,\n    public street?: string,\n    public zip?: string,\n    public city?: string,\n  ) {\n    this.id = crypto.randomUUID();\n  }\n}\n// Später in Angular:\n// constructor(private service: CustomerService) {}",
+          "notes": "Codefolie „Parameter Properties“.\n\nDie Schreibweise von der letzten Folie war lang. TypeScript bietet eine Abkürzung, die „Parameter Properties“ heißt, also Parameter, die zugleich Eigenschaften sind. Wenn vor einem Konstruktor-Parameter ein Wort wie „public“ steht, legt TypeScript automatisch ein Attribut mit demselben Namen an und füllt es mit dem übergebenen Wert. Die Zeilen mit „this.firstname = firstname“ entfallen.\n\nDas ist fast genau die Klasse aus der Invoice-App, die Datei „customer.model.ts“. Dort kommen noch Bildadresse, „discontinued“ und das Datum der letzten Bestellung hinzu. Nur die Kennung „id“ wird weiterhin im Konstruktor gesetzt.\n\nDiese Schreibweise ist wichtig für den Kurs: In Angular steht später im Konstruktor zum Beispiel „private service: CustomerService“. Damit bekommt die Komponente einen Dienst automatisch geliefert. Neuere Angular-Versionen nutzen dafür auch die Funktion „inject()“, aber das Prinzip ist dasselbe."
+        },
+        {
+          "type": "code",
+          "title": "Sichtbarkeit und readonly",
+          "code": "class Account {\n  readonly id = crypto.randomUUID();\n  protected owner: string;\n  private balance = 0;\n  constructor(owner: string) {\n    this.owner = owner;\n  }\n  deposit(amount: number): void {\n    this.balance += amount;\n  }\n}\nconst account = new Account(\"Lisa\");\naccount.deposit(50);\nconsole.log(account.balance);",
+          "notes": "Codefolie „Sichtbarkeit und readonly“.\n\nMit Schlüsselwörtern legt man fest, wer auf ein Attribut zugreifen darf. „public“ heißt: jeder. Das ist der Standard. „private“ heißt: nur Code innerhalb dieser Klasse. „protected“ heißt: die Klasse selbst und ihre Unterklassen. „readonly“ heißt: Der Wert darf nur im Konstruktor oder bei der Deklaration gesetzt werden, danach nicht mehr.\n\nIn diesem Beispiel ist „balance“ privat. Die letzte Zeile versucht, von außen darauf zuzugreifen. Der Compiler meldet dafür den Fehler TS2341: Die Eigenschaft ist privat und nur innerhalb der Klasse erreichbar. Das Beispiel zeigt diesen Fehler absichtlich.\n\nWichtig: Diese Sichtbarkeit prüft nur der Compiler. Im fertigen JavaScript gibt es sie nicht. In Angular sind Dienste in Komponenten oft „private“, und Werte, die das Template braucht, müssen erreichbar sein.",
+          "_verify": "error:TS2341"
+        },
+        {
+          "type": "code",
+          "title": "Getter und Setter",
+          "code": "class Customer {\n  private _discount = 0;\n  constructor(public firstname: string, public lastname: string) {}\n  get fullName(): string {\n    return `${this.firstname} ${this.lastname}`;\n  }\n  get discount(): number {\n    return this._discount;\n  }\n  set discount(value: number) {\n    if (value < 0 || value > 100) throw new Error(\"0 bis 100\");\n    this._discount = value;\n  }\n}",
+          "notes": "Codefolie „Getter und Setter“.\n\nEin „Getter“ sieht von außen wie ein Attribut aus, ist aber eine Funktion, die einen Wert berechnet. Hier liefert „get fullName“ den Vor- und Nachnamen zusammen. Man benutzt ihn ohne Klammern, also „customer.fullName“. Das ist praktisch für abgeleitete Werte.\n\nEin „Setter“ wird ausgeführt, wenn man dem Attribut einen Wert zuweist. Hier prüft „set discount“, ob der Rabatt zwischen 0 und 100 liegt, und wirft sonst einen Fehler. Der eigentliche Wert wird in einem privaten Attribut „_discount“ gespeichert. Der Unterstrich ist nur eine Namenskonvention.\n\nGetter und Setter mit demselben Namen müssen denselben Typ haben. Der Setter hat keinen Rückgabetyp. Die Übung 4 benutzt den Getter „fullName“."
+        },
+        {
+          "type": "code",
+          "title": "implements: ein Interface erfüllen",
+          "code": "interface Labelled {\n  getLabel(): string;\n}\nclass Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\nfunction printLabel(item: Labelled): void {\n  console.log(item.getLabel());\n}\nprintLabel(new Customer(\"Lisa\", \"Simpson\"));",
+          "notes": "Codefolie „implements: ein Interface erfüllen“.\n\nEin „Interface“ beschreibt, welche Eigenschaften und Methoden ein Objekt haben muss. Mit „implements“ verspricht eine Klasse, dieses Interface zu erfüllen. Hier verlangt „Labelled“ eine Methode „getLabel“, die einen Text liefert. Die Klasse „Customer“ hat diese Methode. Würde sie fehlen, meldete der Compiler einen Fehler.\n\nDer Nutzen zeigt sich bei der Funktion „printLabel“. Sie verlangt nur etwas, das „Labelled“ ist, und kennt die Klasse „Customer“ gar nicht. Dadurch kann sie mit jeder Klasse arbeiten, die dieses Interface erfüllt.\n\nIm Kurs begegnet uns das später bei den Lebenszyklus-Schnittstellen von Angular, zum Beispiel „implements OnInit“. Das Prinzip ist genau dieses."
+        },
+        {
+          "type": "code",
+          "title": "extends und super",
+          "code": "class VipCustomer extends Customer {\n  constructor(\n    firstname: string,\n    lastname: string,\n    public discount: number,\n  ) {\n    super(firstname, lastname);\n  }\n  override getLabel(): string {\n    return super.getLabel() + ` - VIP -${this.discount}%`;\n  }\n}\nconst ned = new VipCustomer(\"Ned\", \"Flanders\", 10);\nconsole.log(ned.getLabel());",
+          "notes": "Codefolie „extends und super“.\n\nMit „extends“ erbt eine Klasse von einer anderen. „VipCustomer“ ist ein „Customer“ und hat zusätzlich einen Rabatt. Alles, was „Customer“ kann, kann „VipCustomer“ auch. Die erbende Klasse heißt Unterklasse, die andere Oberklasse.\n\nHat die Unterklasse einen eigenen Konstruktor, muss sie als Allererstes „super(…)“ aufrufen. Das ruft den Konstruktor der Oberklasse auf und gibt ihm Vorname und Nachname. Erst danach darf man „this“ benutzen.\n\n„override“ markiert, dass die Methode „getLabel“ eine Methode der Oberklasse ersetzt. Der Compiler meldet einen Fehler, wenn es in der Oberklasse gar keine solche Methode gibt. Mit „super.getLabel()“ ruft man die ursprüngliche Version auf und hängt den VIP-Text an. Die Oberklasse „Customer“ ist hier nicht sichtbar, sie entspricht der Klasse von der Folie mit den Parameter Properties.",
+          "_prelude": "interface Labelled { getLabel(): string; }\nclass Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string { return `Kunde: ${this.firstname} ${this.lastname}`; }\n}"
+        },
+        {
+          "type": "code",
+          "title": "Dekoratoren: ein Blick auf Angular",
+          "code": "function Component(config: { selector: string }) {\n  return (target: Function) => {\n    console.log(`${target.name} -> <${config.selector}>`);\n  };\n}\n\n@Component({ selector: \"customer-list\" })\nclass CustomerListComponent {\n  title = \"Kunden\";\n}",
+          "notes": "Codefolie „Dekoratoren: ein Blick auf Angular“.\n\nEin „Dekorator“ ist eine Funktion, die mit einem @-Zeichen vor eine Klasse geschrieben wird und diese Klasse beschreibt oder erweitert. Oben definieren wir selbst einen sehr einfachen Dekorator namens „Component“. Er bekommt eine Einstellung, hier den Namen „selector“, und gibt eine zweite Funktion zurück. Diese zweite Funktion erhält die Klasse selbst und könnte sie verändern. Wir geben nur eine Zeile aus.\n\nUnten sehen wir die Verwendung: „@Component“ steht direkt über der Klasse „CustomerListComponent“. Genau das passiert in Angular. Das echte „@Component“ kommt aus dem Paket „@angular/core“ und bekommt dort zusätzlich ein Template, also das HTML, und Stile. Der „selector“ ist der Name, unter dem man die Komponente im HTML verwendet.\n\nDamit Dekoratoren in der Invoice-App funktionieren, steht in der Datei „tsconfig.json“ die Option „experimentalDecorators“. Das haben wir am Anfang gesehen."
+        },
+        {
+          "type": "exercise",
+          "title": "TS-Übung 4: Die Klasse Customer",
+          "bullets": [
+            "Öffne 01_typescript_primer, Datei src/uebung-4-klassen.ts",
+            "1. Schreibe die Klasse Customer mit Parameter properties (firstname, lastname, city?)",
+            "2. Setze id im Konstruktor mit crypto.randomUUID()",
+            "3. Ergänze den Getter fullName und die Methode getLabel()",
+            "4. Customer implementiert das Interface Labelled",
+            "5. VipCustomer extends Customer mit discount: super(...) zuerst, getLabel() ergänzen",
+            "6. Entferne die Kommentarzeichen am Dateiende und starte: npm start -- src/uebung-4-klassen.ts",
+            "Musterlösung: loesung/uebung-4-klassen.ts"
+          ],
+          "notes": "Folie: „TS-Übung 4: Die Klasse Customer“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung schreiben die Teilnehmenden die Klasse „Customer“ selbst, so wie sie später in der Invoice-App gebraucht wird. Die Datei „src/uebung-4-klassen.ts“ enthält schon das Interface „Labelled“ und Kommentare mit den Aufgaben. Zuerst entsteht die Klasse mit den Parameter Properties, mit einer Kennung, einem Getter „fullName“ und der Methode „getLabel“. Dann erbt die Klasse „VipCustomer“ davon und ergänzt einen Rabatt. Am Ende werden die Kommentarzeichen entfernt und das Programm gestartet. Ein Kunde ohne Stadt soll dabei als „unbekannt“ erscheinen. Die Übung dauert etwa 20 Minuten."
+        }
+      ]
     },
     {
-     "type": "code",
-     "title": "Klassen: Attribute, Konstruktor, Methoden",
-     "code": "class Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  constructor(firstname: string, lastname: string, city?: string) {\n    this.id = crypto.randomUUID();\n    this.firstname = firstname;\n    this.lastname = lastname;\n    this.city = city;\n  }\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\nconst lisa = new Customer(\"Lisa\", \"Simpson\", \"Springfield\");",
-     "notes": "Codefolie „Klassen: Attribute, Konstruktor, Methoden“.\n\nHier steht die Klasse „Customer“ ausführlich, ohne Abkürzung. Oben stehen die „Attribute“. Das sind die Eigenschaften, die jedes Kunden-Objekt hat: Kennung, Vorname, Nachname und optional die Stadt. Das Fragezeichen bei „city“ bedeutet, dass dieser Wert fehlen darf.\n\nDer „Konstruktor“ ist eine besondere Funktion, die beim Erzeugen eines Objekts automatisch läuft. Er bekommt Vorname, Nachname und Stadt und speichert sie mit „this“ im neuen Objekt. „this“ bedeutet: genau dieses Objekt. Die Kennung wird mit „crypto.randomUUID()“ erzeugt, das ist eine zufällige, eindeutige Zeichenkette.\n\nDie „Methode“ „getLabel“ ist eine Funktion, die zur Klasse gehört. Sie liefert einen Text mit dem Namen. Mit „new Customer(…)“ in der letzten Zeile entsteht ein neues Objekt. Auf der nächsten Folie sehen wir, wie man das Ganze kürzer schreibt."
-    },
-    {
-     "type": "code",
-     "title": "Parameter Properties",
-     "code": "class Customer {\n  id: string;\n  constructor(\n    public firstname: string,\n    public lastname: string,\n    public street?: string,\n    public zip?: string,\n    public city?: string,\n  ) {\n    this.id = crypto.randomUUID();\n  }\n}\n// Später in Angular:\n// constructor(private service: CustomerService) {}",
-     "notes": "Codefolie „Parameter Properties“.\n\nDie Schreibweise von der letzten Folie war lang. TypeScript bietet eine Abkürzung, die „Parameter Properties“ heißt, also Parameter, die zugleich Eigenschaften sind. Wenn vor einem Konstruktor-Parameter ein Wort wie „public“ steht, legt TypeScript automatisch ein Attribut mit demselben Namen an und füllt es mit dem übergebenen Wert. Die Zeilen mit „this.firstname = firstname“ entfallen.\n\nDas ist fast genau die Klasse aus der Invoice-App, die Datei „customer.model.ts“. Dort kommen noch Bildadresse, „discontinued“ und das Datum der letzten Bestellung hinzu. Nur die Kennung „id“ wird weiterhin im Konstruktor gesetzt.\n\nDiese Schreibweise ist wichtig für den Kurs: In Angular steht später im Konstruktor zum Beispiel „private service: CustomerService“. Damit bekommt die Komponente einen Dienst automatisch geliefert. Neuere Angular-Versionen nutzen dafür auch die Funktion „inject()“, aber das Prinzip ist dasselbe."
-    },
-    {
-     "type": "code",
-     "title": "Sichtbarkeit und readonly",
-     "code": "class Account {\n  readonly id = crypto.randomUUID();\n  protected owner: string;\n  private balance = 0;\n  constructor(owner: string) {\n    this.owner = owner;\n  }\n  deposit(amount: number): void {\n    this.balance += amount;\n  }\n}\nconst account = new Account(\"Lisa\");\naccount.deposit(50);\nconsole.log(account.balance);",
-     "notes": "Codefolie „Sichtbarkeit und readonly“.\n\nMit Schlüsselwörtern legt man fest, wer auf ein Attribut zugreifen darf. „public“ heißt: jeder. Das ist der Standard. „private“ heißt: nur Code innerhalb dieser Klasse. „protected“ heißt: die Klasse selbst und ihre Unterklassen. „readonly“ heißt: Der Wert darf nur im Konstruktor oder bei der Deklaration gesetzt werden, danach nicht mehr.\n\nIn diesem Beispiel ist „balance“ privat. Die letzte Zeile versucht, von außen darauf zuzugreifen. Der Compiler meldet dafür den Fehler TS2341: Die Eigenschaft ist privat und nur innerhalb der Klasse erreichbar. Das Beispiel zeigt diesen Fehler absichtlich.\n\nWichtig: Diese Sichtbarkeit prüft nur der Compiler. Im fertigen JavaScript gibt es sie nicht. In Angular sind Dienste in Komponenten oft „private“, und Werte, die das Template braucht, müssen erreichbar sein.",
-     "_verify": "error:TS2341"
-    },
-    {
-     "type": "code",
-     "title": "Getter und Setter",
-     "code": "class Customer {\n  private _discount = 0;\n  constructor(public firstname: string, public lastname: string) {}\n  get fullName(): string {\n    return `${this.firstname} ${this.lastname}`;\n  }\n  get discount(): number {\n    return this._discount;\n  }\n  set discount(value: number) {\n    if (value < 0 || value > 100) throw new Error(\"0 bis 100\");\n    this._discount = value;\n  }\n}",
-     "notes": "Codefolie „Getter und Setter“.\n\nEin „Getter“ sieht von außen wie ein Attribut aus, ist aber eine Funktion, die einen Wert berechnet. Hier liefert „get fullName“ den Vor- und Nachnamen zusammen. Man benutzt ihn ohne Klammern, also „customer.fullName“. Das ist praktisch für abgeleitete Werte.\n\nEin „Setter“ wird ausgeführt, wenn man dem Attribut einen Wert zuweist. Hier prüft „set discount“, ob der Rabatt zwischen 0 und 100 liegt, und wirft sonst einen Fehler. Der eigentliche Wert wird in einem privaten Attribut „_discount“ gespeichert. Der Unterstrich ist nur eine Namenskonvention.\n\nGetter und Setter mit demselben Namen müssen denselben Typ haben. Der Setter hat keinen Rückgabetyp. Die Übung 4 benutzt den Getter „fullName“."
-    },
-    {
-     "type": "code",
-     "title": "implements: ein Interface erfüllen",
-     "code": "interface Labelled {\n  getLabel(): string;\n}\nclass Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\nfunction printLabel(item: Labelled): void {\n  console.log(item.getLabel());\n}\nprintLabel(new Customer(\"Lisa\", \"Simpson\"));",
-     "notes": "Codefolie „implements: ein Interface erfüllen“.\n\nEin „Interface“ beschreibt, welche Eigenschaften und Methoden ein Objekt haben muss. Mit „implements“ verspricht eine Klasse, dieses Interface zu erfüllen. Hier verlangt „Labelled“ eine Methode „getLabel“, die einen Text liefert. Die Klasse „Customer“ hat diese Methode. Würde sie fehlen, meldete der Compiler einen Fehler.\n\nDer Nutzen zeigt sich bei der Funktion „printLabel“. Sie verlangt nur etwas, das „Labelled“ ist, und kennt die Klasse „Customer“ gar nicht. Dadurch kann sie mit jeder Klasse arbeiten, die dieses Interface erfüllt.\n\nIm Kurs begegnet uns das später bei den Lebenszyklus-Schnittstellen von Angular, zum Beispiel „implements OnInit“. Das Prinzip ist genau dieses."
-    },
-    {
-     "type": "code",
-     "title": "extends und super",
-     "code": "class VipCustomer extends Customer {\n  constructor(\n    firstname: string,\n    lastname: string,\n    public discount: number,\n  ) {\n    super(firstname, lastname);\n  }\n  override getLabel(): string {\n    return super.getLabel() + ` - VIP -${this.discount}%`;\n  }\n}\nconst ned = new VipCustomer(\"Ned\", \"Flanders\", 10);\nconsole.log(ned.getLabel());",
-     "notes": "Codefolie „extends und super“.\n\nMit „extends“ erbt eine Klasse von einer anderen. „VipCustomer“ ist ein „Customer“ und hat zusätzlich einen Rabatt. Alles, was „Customer“ kann, kann „VipCustomer“ auch. Die erbende Klasse heißt Unterklasse, die andere Oberklasse.\n\nHat die Unterklasse einen eigenen Konstruktor, muss sie als Allererstes „super(…)“ aufrufen. Das ruft den Konstruktor der Oberklasse auf und gibt ihm Vorname und Nachname. Erst danach darf man „this“ benutzen.\n\n„override“ markiert, dass die Methode „getLabel“ eine Methode der Oberklasse ersetzt. Der Compiler meldet einen Fehler, wenn es in der Oberklasse gar keine solche Methode gibt. Mit „super.getLabel()“ ruft man die ursprüngliche Version auf und hängt den VIP-Text an. Die Oberklasse „Customer“ ist hier nicht sichtbar, sie entspricht der Klasse von der Folie mit den Parameter Properties.",
-     "_prelude": "interface Labelled { getLabel(): string; }\nclass Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string { return `Kunde: ${this.firstname} ${this.lastname}`; }\n}"
-    },
-    {
-     "type": "code",
-     "title": "Dekoratoren: ein Blick auf Angular",
-     "code": "function Component(config: { selector: string }) {\n  return (target: Function) => {\n    console.log(`${target.name} -> <${config.selector}>`);\n  };\n}\n\n@Component({ selector: \"customer-list\" })\nclass CustomerListComponent {\n  title = \"Kunden\";\n}",
-     "notes": "Codefolie „Dekoratoren: ein Blick auf Angular“.\n\nEin „Dekorator“ ist eine Funktion, die mit einem @-Zeichen vor eine Klasse geschrieben wird und diese Klasse beschreibt oder erweitert. Oben definieren wir selbst einen sehr einfachen Dekorator namens „Component“. Er bekommt eine Einstellung, hier den Namen „selector“, und gibt eine zweite Funktion zurück. Diese zweite Funktion erhält die Klasse selbst und könnte sie verändern. Wir geben nur eine Zeile aus.\n\nUnten sehen wir die Verwendung: „@Component“ steht direkt über der Klasse „CustomerListComponent“. Genau das passiert in Angular. Das echte „@Component“ kommt aus dem Paket „@angular/core“ und bekommt dort zusätzlich ein Template, also das HTML, und Stile. Der „selector“ ist der Name, unter dem man die Komponente im HTML verwendet.\n\nDamit Dekoratoren in der Invoice-App funktionieren, steht in der Datei „tsconfig.json“ die Option „experimentalDecorators“. Das haben wir am Anfang gesehen."
-    },
-    {
-     "type": "exercise",
-     "title": "TS-Übung 4: Die Klasse Customer",
-     "bullets": [
-      "Öffne 01_typescript_primer, Datei src/uebung-4-klassen.ts",
-      "1. Schreibe die Klasse Customer mit Parameter properties (firstname, lastname, city?)",
-      "2. Setze id im Konstruktor mit crypto.randomUUID()",
-      "3. Ergänze den Getter fullName und die Methode getLabel()",
-      "4. Customer implementiert das Interface Labelled",
-      "5. VipCustomer extends Customer mit discount: super(...) zuerst, getLabel() ergänzen",
-      "6. Entferne die Kommentarzeichen am Dateiende und starte: npm start -- src/uebung-4-klassen.ts",
-      "Musterlösung: loesung/uebung-4-klassen.ts"
-     ],
-     "notes": "Folie: „TS-Übung 4: Die Klasse Customer“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung schreiben die Teilnehmenden die Klasse „Customer“ selbst, so wie sie später in der Invoice-App gebraucht wird. Die Datei „src/uebung-4-klassen.ts“ enthält schon das Interface „Labelled“ und Kommentare mit den Aufgaben. Zuerst entsteht die Klasse mit den Parameter Properties, mit einer Kennung, einem Getter „fullName“ und der Methode „getLabel“. Dann erbt die Klasse „VipCustomer“ davon und ergänzt einen Rabatt. Am Ende werden die Kommentarzeichen entfernt und das Programm gestartet. Ein Kunde ohne Stadt soll dabei als „unbekannt“ erscheinen. Die Übung dauert etwa 20 Minuten."
+      "after": 9,
+      "order": 70,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Module",
+          "notes": "Kapitelübergangsfolie „Module“ – Zum Schluss geht es um Module. Ein „Modul“ ist in TypeScript einfach eine Datei, die Dinge nach außen anbietet und Dinge aus anderen Dateien benutzt. So verteilt man größere Programme auf viele kleine Dateien. Jede Angular-Komponente arbeitet auf diese Weise."
+        },
+        {
+          "type": "code",
+          "title": "Module: export und import",
+          "code": "// customer.ts\nexport interface Labelled {\n  getLabel(): string;\n}\nexport class Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\n// main.ts\nimport { Customer, type Labelled } from \"./customer\";",
+          "notes": "Codefolie „Module: export und import“.\n\nDas sind zwei Dateien auf einer Folie, getrennt durch Kommentarzeilen. In der ersten Datei „customer.ts“ steht vor dem Interface und vor der Klasse das Wort „export“. Damit werden sie für andere Dateien sichtbar. Ohne „export“ bleibt ein Name privat in seiner Datei.\n\nIn der zweiten Datei „main.ts“ holt die Zeile mit „import“ die beiden Namen aus der ersten Datei. Die geschweiften Klammern enthalten die Namen, die man braucht. Das Wort „from“ nennt den Pfad. „Labelled“ ist nur ein Typ und existiert zur Laufzeit nicht, deshalb steht davor „type“.\n\nDie Zeile ist nur ein Ausschnitt und wird hier nicht einzeln übersetzt, weil sie zwei Dateien braucht. In der Übung 5 probieren die Teilnehmenden genau das aus.",
+          "_verify": "skip"
+        },
+        {
+          "type": "content",
+          "title": "Regeln für import und export",
+          "bullets": [
+            "Imports sind statisch: sie stehen oben in der Datei, nicht in einer if-Abfrage",
+            "Pfad zu eigenen Dateien beginnt mit ./ oder ../ und hat keine Endung",
+            "Benannte Exporte: export class Customer, Import mit geschweiften Klammern",
+            "Standard-Export: export default, Import ohne Klammern (im Kurs selten)",
+            "import type { Labelled } holt nur einen Typ, der nach dem Übersetzen verschwindet",
+            "Pakete wie @angular/core importiert man ohne Pfad: import { Component } from \"@angular/core\"",
+            "Eine Datei mit import oder export ist ein Modul; ihre Namen stören andere Dateien nicht"
+          ],
+          "notes": "Folie: „Regeln für import und export“.\n\nDiese Folie fasst die wichtigsten Regeln zusammen. Imports sind „statisch“. Das bedeutet, der Compiler muss sie vor dem Ausführen kennen. Sie stehen deshalb oben in der Datei und nicht innerhalb einer Bedingung.\n\nEigene Dateien werden mit einem Pfad angegeben, der mit einem Punkt und Schrägstrich beginnt, zum Beispiel „./customer“. Eine Dateiendung schreibt man nicht. Bei Paketen wie „@angular/core“ gibt es keinen solchen Pfad, nur den Paketnamen.\n\nEs gibt „benannte Exporte“, die man mit geschweiften Klammern importiert, und den „Standard-Export“ mit „export default“. Im Kurs benutzen wir fast nur benannte Exporte. Mit „import type“ holt man nur Typen. Jede Datei mit „import“ oder „export“ ist ein eigenes Modul, deshalb stören sich gleiche Namen in verschiedenen Dateien nicht."
+        },
+        {
+          "type": "exercise",
+          "title": "TS-Übung 5: Module",
+          "bullets": [
+            "Öffne 01_typescript_primer, Datei src/uebung-5-module.ts",
+            "1. Lege die Datei src/customer.ts an",
+            "2. Verschiebe die Klasse Customer dorthin und exportiere sie mit export",
+            "3. Importiere sie in src/uebung-5-module.ts: import { Customer } from \"./customer\";",
+            "4. Starte: npm start -- src/uebung-5-module.ts",
+            "Zusatz: Exportiere und importiere auch das Interface Labelled",
+            "Musterlösung: loesung/uebung-5-module/"
+          ],
+          "notes": "Folie: „TS-Übung 5: Module“.\n\nErklärung für die Dolmetscherin:\nDiese kurze Übung dauert etwa 10 Minuten. In der Datei „src/uebung-5-module.ts“ stehen das Interface „Labelled“ und die Klasse „Customer“ noch zusammen mit dem Programm. Die Teilnehmenden legen eine neue Datei „customer.ts“ an, verschieben die Klasse dorthin und schreiben vor die Klasse das Wort „export“. In der ursprünglichen Datei importieren sie die Klasse mit „import“ und starten das Programm. Die Ausgabe muss dieselbe sein wie vorher. Als Zusatz kann auch das Interface exportiert und importiert werden."
+        },
+        {
+          "type": "code",
+          "title": "Von TypeScript zu Angular",
+          "code": "import { Component } from \"@angular/core\";\nimport { Customer } from \"./customer\";\n\n@Component({\n  selector: \"app-customer-list\",\n  template: `<h1>Kunden</h1>`,\n})\nexport class CustomerListComponent {\n  customers: Customer[] = [];\n  constructor(private service: CustomerService) {}\n}",
+          "notes": "Codefolie „Von TypeScript zu Angular“.\n\nDiese Folie zeigt eine winzige Angular-Komponente. Die Bausteine kennen wir schon alle. Oben stehen zwei Importe, einer aus dem Paket „@angular/core“ und einer aus unserer eigenen Datei. Darunter steht der Dekorator „@Component“ mit einem „selector“ und einem „template“, also dem HTML der Komponente. Dann folgt die exportierte Klasse mit einem typisierten Attribut, einer Liste von Kunden, und einem Konstruktor mit einer Parameter Property für einen Dienst.\n\nDas Beispiel wird nicht übersetzt, weil „@angular/core“ im Primer-Ordner nicht installiert ist und „CustomerService“ hier fehlt. Im nächsten Schritt des Kurses legen die Teilnehmenden mit der Angular CLI ein echtes Projekt an. Das ist die Übung 4 des Angular-Kurses.",
+          "_verify": "skip"
+        },
+        {
+          "type": "content",
+          "title": "Zusammenfassung: Was wir für Angular mitnehmen",
+          "bullets": [
+            "Typen und Typableitung, strict, null und undefined: Grundlage jeder Komponente",
+            "?. und ??: im Template, zum Beispiel customer()?.firstname",
+            "Funktionen, Arrow-Funktionen, filter und map: Listen im Kurs verarbeiten",
+            "Interfaces und Destructuring: Datenmodelle und Eingaben",
+            "Spread: neue Objekte statt Veränderung, wichtig für Signals (Reaktivität)",
+            "Union Types und Literal-Typen: Zustände wie loading und loaded",
+            "Generics: signal<T>(), input<T>(), Observable<T>",
+            "Klassen und Parameter properties: customer.model.ts, Konstruktor-Injection",
+            "Dekoratoren und Module: @Component, import und export in jeder Datei"
+          ],
+          "notes": "Folie: „Zusammenfassung: Was wir für Angular mitnehmen“.\n\nDiese Folie ist eine Checkliste. Sie zeigt, welche Themen aus dem TypeScript Primer wir im Angular-Kurs wieder brauchen. Typen und der strikte Modus schützen vor vielen Fehlern. Die Operatoren für fehlende Werte benutzen wir in den Templates.\n\nListen verarbeiten wir ständig mit „filter“ und „map“. Beim Thema Reaktivität kommt der Spread-Operator zurück: Signals erwarten ein neues Objekt statt einer Veränderung des alten. Union Types beschreiben später Zustände wie „wird geladen“ und „geladen“.\n\nGenerics erkennt man in „signal“, „input“ und „Observable“ mit den spitzen Klammern. Klassen mit Parameter Properties finden wir in „customer.model.ts“ und bei Diensten. Dekoratoren und Module sind in jeder Komponente zu sehen. Damit sind die Teilnehmenden für den Einstieg in Angular vorbereitet.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "TypeScript-Grundlagen",
+              "Komponenten und Templates",
+              "Signals und Services",
+              "Formulare, Routing, HTTP"
+            ],
+            "highlight_last": true,
+            "note": "Weiter mit Übung 4"
+          }
+        }
+      ]
     }
-   ]
-  },
-  {
-   "after": 9,
-   "order": 70,
-   "slides": [
-    {
-     "type": "divider",
-     "title": "Module",
-     "notes": "Kapitelübergangsfolie „Module“ – Zum Schluss geht es um Module. Ein „Modul“ ist in TypeScript einfach eine Datei, die Dinge nach außen anbietet und Dinge aus anderen Dateien benutzt. So verteilt man größere Programme auf viele kleine Dateien. Jede Angular-Komponente arbeitet auf diese Weise."
-    },
-    {
-     "type": "code",
-     "title": "Module: export und import",
-     "code": "// customer.ts\nexport interface Labelled {\n  getLabel(): string;\n}\nexport class Customer implements Labelled {\n  constructor(public firstname: string, public lastname: string) {}\n  getLabel(): string {\n    return `Kunde: ${this.firstname} ${this.lastname}`;\n  }\n}\n// main.ts\nimport { Customer, type Labelled } from \"./customer\";",
-     "notes": "Codefolie „Module: export und import“.\n\nDas sind zwei Dateien auf einer Folie, getrennt durch Kommentarzeilen. In der ersten Datei „customer.ts“ steht vor dem Interface und vor der Klasse das Wort „export“. Damit werden sie für andere Dateien sichtbar. Ohne „export“ bleibt ein Name privat in seiner Datei.\n\nIn der zweiten Datei „main.ts“ holt die Zeile mit „import“ die beiden Namen aus der ersten Datei. Die geschweiften Klammern enthalten die Namen, die man braucht. Das Wort „from“ nennt den Pfad. „Labelled“ ist nur ein Typ und existiert zur Laufzeit nicht, deshalb steht davor „type“.\n\nDie Zeile ist nur ein Ausschnitt und wird hier nicht einzeln übersetzt, weil sie zwei Dateien braucht. In der Übung 5 probieren die Teilnehmenden genau das aus.",
-     "_verify": "skip"
-    },
-    {
-     "type": "content",
-     "title": "Regeln für import und export",
-     "bullets": [
-      "Imports sind statisch: sie stehen oben in der Datei, nicht in einer if-Abfrage",
-      "Pfad zu eigenen Dateien beginnt mit ./ oder ../ und hat keine Endung",
-      "Benannte Exporte: export class Customer, Import mit geschweiften Klammern",
-      "Standard-Export: export default, Import ohne Klammern (im Kurs selten)",
-      "import type { Labelled } holt nur einen Typ, der nach dem Übersetzen verschwindet",
-      "Pakete wie @angular/core importiert man ohne Pfad: import { Component } from \"@angular/core\"",
-      "Eine Datei mit import oder export ist ein Modul; ihre Namen stören andere Dateien nicht"
-     ],
-     "notes": "Folie: „Regeln für import und export“.\n\nDiese Folie fasst die wichtigsten Regeln zusammen. Imports sind „statisch“. Das bedeutet, der Compiler muss sie vor dem Ausführen kennen. Sie stehen deshalb oben in der Datei und nicht innerhalb einer Bedingung.\n\nEigene Dateien werden mit einem Pfad angegeben, der mit einem Punkt und Schrägstrich beginnt, zum Beispiel „./customer“. Eine Dateiendung schreibt man nicht. Bei Paketen wie „@angular/core“ gibt es keinen solchen Pfad, nur den Paketnamen.\n\nEs gibt „benannte Exporte“, die man mit geschweiften Klammern importiert, und den „Standard-Export“ mit „export default“. Im Kurs benutzen wir fast nur benannte Exporte. Mit „import type“ holt man nur Typen. Jede Datei mit „import“ oder „export“ ist ein eigenes Modul, deshalb stören sich gleiche Namen in verschiedenen Dateien nicht."
-    },
-    {
-     "type": "exercise",
-     "title": "TS-Übung 5: Module",
-     "bullets": [
-      "Öffne 01_typescript_primer, Datei src/uebung-5-module.ts",
-      "1. Lege die Datei src/customer.ts an",
-      "2. Verschiebe die Klasse Customer dorthin und exportiere sie mit export",
-      "3. Importiere sie in src/uebung-5-module.ts: import { Customer } from \"./customer\";",
-      "4. Starte: npm start -- src/uebung-5-module.ts",
-      "Zusatz: Exportiere und importiere auch das Interface Labelled",
-      "Musterlösung: loesung/uebung-5-module/"
-     ],
-     "notes": "Folie: „TS-Übung 5: Module“.\n\nErklärung für die Dolmetscherin:\nDiese kurze Übung dauert etwa 10 Minuten. In der Datei „src/uebung-5-module.ts“ stehen das Interface „Labelled“ und die Klasse „Customer“ noch zusammen mit dem Programm. Die Teilnehmenden legen eine neue Datei „customer.ts“ an, verschieben die Klasse dorthin und schreiben vor die Klasse das Wort „export“. In der ursprünglichen Datei importieren sie die Klasse mit „import“ und starten das Programm. Die Ausgabe muss dieselbe sein wie vorher. Als Zusatz kann auch das Interface exportiert und importiert werden."
-    },
-    {
-     "type": "code",
-     "title": "Von TypeScript zu Angular",
-     "code": "import { Component } from \"@angular/core\";\nimport { Customer } from \"./customer\";\n\n@Component({\n  selector: \"app-customer-list\",\n  template: `<h1>Kunden</h1>`,\n})\nexport class CustomerListComponent {\n  customers: Customer[] = [];\n  constructor(private service: CustomerService) {}\n}",
-     "notes": "Codefolie „Von TypeScript zu Angular“.\n\nDiese Folie zeigt eine winzige Angular-Komponente. Die Bausteine kennen wir schon alle. Oben stehen zwei Importe, einer aus dem Paket „@angular/core“ und einer aus unserer eigenen Datei. Darunter steht der Dekorator „@Component“ mit einem „selector“ und einem „template“, also dem HTML der Komponente. Dann folgt die exportierte Klasse mit einem typisierten Attribut, einer Liste von Kunden, und einem Konstruktor mit einer Parameter Property für einen Dienst.\n\nDas Beispiel wird nicht übersetzt, weil „@angular/core“ im Primer-Ordner nicht installiert ist und „CustomerService“ hier fehlt. Im nächsten Schritt des Kurses legen die Teilnehmenden mit der Angular CLI ein echtes Projekt an. Das ist die Übung 4 des Angular-Kurses.",
-     "_verify": "skip"
-    },
-    {
-     "type": "content",
-     "title": "Zusammenfassung: Was wir für Angular mitnehmen",
-     "bullets": [
-      "Typen und Typableitung, strict, null und undefined: Grundlage jeder Komponente",
-      "?. und ??: im Template, zum Beispiel customer()?.firstname",
-      "Funktionen, Arrow-Funktionen, filter und map: Listen im Kurs verarbeiten",
-      "Interfaces und Destructuring: Datenmodelle und Eingaben",
-      "Spread: neue Objekte statt Veränderung, wichtig für Signals (Reaktivität)",
-      "Union Types und Literal-Typen: Zustände wie loading und loaded",
-      "Generics: signal<T>(), input<T>(), Observable<T>",
-      "Klassen und Parameter properties: customer.model.ts, Konstruktor-Injection",
-      "Dekoratoren und Module: @Component, import und export in jeder Datei"
-     ],
-     "notes": "Folie: „Zusammenfassung: Was wir für Angular mitnehmen“.\n\nDiese Folie ist eine Checkliste. Sie zeigt, welche Themen aus dem TypeScript Primer wir im Angular-Kurs wieder brauchen. Typen und der strikte Modus schützen vor vielen Fehlern. Die Operatoren für fehlende Werte benutzen wir in den Templates.\n\nListen verarbeiten wir ständig mit „filter“ und „map“. Beim Thema Reaktivität kommt der Spread-Operator zurück: Signals erwarten ein neues Objekt statt einer Veränderung des alten. Union Types beschreiben später Zustände wie „wird geladen“ und „geladen“.\n\nGenerics erkennt man in „signal“, „input“ und „Observable“ mit den spitzen Klammern. Klassen mit Parameter Properties finden wir in „customer.model.ts“ und bei Diensten. Dekoratoren und Module sind in jeder Komponente zu sehen. Damit sind die Teilnehmenden für den Einstieg in Angular vorbereitet."
-    }
-   ]
-  }
- ]
+  ]
 }

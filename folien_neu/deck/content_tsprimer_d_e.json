@@ -1,125 +1,130 @@
 {
- "blocks": [
-  {
-   "after": 9,
-   "order": 40,
-   "slides": [
+  "blocks": [
     {
-     "type": "divider",
-     "title": "Objekte und Listen",
-     "notes": "Kapitelübergangsfolie „Objekte und Listen“ – Jetzt geht es um Daten. Wir beschreiben, wie ein Objekt aussehen muss, und wir lernen, Objekte und Listen zu zerlegen, zu kopieren und in Texte einzubauen. Diese Techniken braucht man in Angular ständig."
+      "after": 9,
+      "order": 40,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Objekte und Listen",
+          "notes": "Kapitelübergangsfolie „Objekte und Listen“ – Jetzt geht es um Daten. Wir beschreiben, wie ein Objekt aussehen muss, und wir lernen, Objekte und Listen zu zerlegen, zu kopieren und in Texte einzubauen. Diese Techniken braucht man in Angular ständig."
+        },
+        {
+          "type": "code",
+          "title": "Interfaces: die Form eines Objekts",
+          "code": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\n\nconst lisa: Customer = { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\" };\n\n// Fehler: Die Pflicht-Eigenschaft \"lastname\" fehlt\n// const hans: Customer = { id: \"2\", firstname: \"Hans\" };",
+          "notes": "Codefolie „Interfaces: die Form eines Objekts“.\n\nEin „Interface“ beschreibt die Form eines Objekts: Welche Eigenschaften gibt es, und welchen Typ hat jede Eigenschaft? Hier ist es das Interface „Customer“ für einen Kunden. Ein Kunde hat eine „id“, einen Vornamen und einen Nachnamen, alle drei als Text.\n\nDie Eigenschaften „city“, „discontinued“ und „lastOrderDate“ haben ein Fragezeichen. Das bedeutet: Sie sind optional und dürfen fehlen. Alle anderen sind Pflicht.\n\nDie Konstante „lisa“ erfüllt das Interface, weil alle Pflicht-Eigenschaften vorhanden sind. Der Kommentar darunter zeigt einen Fehler: Wenn bei Hans der Nachname fehlt, meldet der Compiler sofort, dass die Eigenschaft „lastname“ fehlt. So fallen Tippfehler und vergessene Felder schon beim Schreiben auf und nicht erst im Browser.",
+          "_verify": "ok"
+        },
+        {
+          "type": "code",
+          "title": "Optional und readonly",
+          "code": "interface Invoice {\n  readonly id: string;     // nur lesbar, nach dem Anlegen nicht änderbar\n  customerId: string;\n  note?: string;           // optional, darf fehlen\n}\n\nconst invoice: Invoice = { id: \"R-1\", customerId: \"1\" };\ninvoice.note = \"bezahlt\";  // erlaubt\n// invoice.id = \"R-2\";     // Fehler TS2540: id ist readonly\n\nconst ids: readonly string[] = [\"1\", \"2\"];\n// ids.push(\"3\");          // Fehler: Eine readonly-Liste hat kein push\nconst more = [...ids, \"3\"];  // neue Liste ist erlaubt",
+          "notes": "Codefolie „Optional und readonly“.\n\nHier sehen wir zwei Hilfsmittel für Eigenschaften. Das Fragezeichen hinter einem Namen macht die Eigenschaft optional. Das Wort „readonly“ heißt „nur lesbar“: Der Wert wird beim Anlegen gesetzt und kann danach nicht mehr geändert werden.\n\nIm Beispiel hat die Rechnung eine feste „id“, eine Kundennummer und eine optionale Notiz. Die Notiz darf man nachträglich setzen. Die „id“ zu ändern meldet der Compiler als Fehler.\n\n„readonly“ gibt es auch für Listen. Eine solche Liste darf man lesen, aber nicht mit „push“ verändern. Stattdessen baut man eine neue Liste, wie in der letzten Zeile. Das passt zu Angular, wo Daten durch neue Objekte ersetzt werden und nicht verändert.",
+          "_verify": "ok"
+        },
+        {
+          "type": "code",
+          "title": "Destructuring",
+          "code": "const [first, , third] = customers;      // Liste zerlegen, zweiten überspringen\n\nconst { firstname, lastname } = first;   // Objekt zerlegen\nconst { city = \"unbekannt\" } = third;    // Standardwert, falls city fehlt\nconst { id, ...rest } = first;           // rest: alle übrigen Eigenschaften\n\n// Zerlegen direkt in der Parameterliste\nfunction label({ firstname, lastname }: Customer): string {\n  return `${lastname}, ${firstname}`;\n}\n\nconsole.log(firstname, lastname, city, id);   // Lisa Simpson unbekannt 1\nconsole.log(rest.city, label(third));         // Springfield Flanders, Ned",
+          "notes": "Codefolie „Destructuring“.\n\n„Destructuring“ heißt „Zerlegen“. Man holt mehrere Werte aus einem Objekt oder einer Liste mit einer einzigen Zeile heraus und legt sie in eigene Variablen.\n\nBei einer Liste zählt die Reihenfolge. In der ersten Zeile bekommt „first“ den ersten Kunden und „third“ den dritten. Das Komma ohne Namen überspringt den zweiten. Bei einem Objekt zählt der Name der Eigenschaft: „firstname“ und „lastname“ werden aus dem ersten Kunden gelesen.\n\nMit einem Gleichheitszeichen gibt man einen Standardwert an. Der Kunde „Ned“ hat keine Stadt, deshalb ist „city“ hier „unbekannt“. Die drei Punkte vor „rest“ sammeln alle übrigen Eigenschaften in einem neuen Objekt.\n\nZerlegen funktioniert auch direkt in der Parameterliste einer Funktion. Das sieht man in „label“. Dieses Muster begegnet uns später in Angular häufig.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "code",
+          "title": "Spread: kopieren statt verändern",
+          "code": "const lisa = customers[0];\n\nconst renamed = { ...lisa, firstname: \"Liesel\" };  // neues Objekt\nconst more = [...customers, renamed];              // neue Liste\n\nconsole.log(lisa.firstname, renamed.firstname);    // Lisa Liesel\nconsole.log(customers.length, more.length);        // 3 4\n\n// Achtung: Spread kopiert nur flach, Verschachteltes wird geteilt\nconst copy = { ...lisa };\nconsole.log(copy.lastOrderDate === lisa.lastOrderDate);  // true",
+          "notes": "Codefolie „Spread: kopieren statt verändern“.\n\nDie drei Punkte heißen „Spread-Operator“, auf Deutsch etwa „Ausbreiten“. Sie breiten den Inhalt eines Objekts oder einer Liste in einem neuen Objekt oder einer neuen Liste aus.\n\nIn der ersten Zeile entsteht ein neues Objekt, das alle Eigenschaften von „lisa“ hat, aber einen anderen Vornamen. Das ursprüngliche Objekt bleibt unverändert, das zeigt die Ausgabe: „Lisa“ und „Liesel“. In der zweiten Zeile entsteht eine neue Liste mit einem Eintrag mehr. Die alte Liste hat weiterhin drei Einträge.\n\nWichtig ist die Einschränkung: Spread kopiert nur flach. Ist eine Eigenschaft selbst ein Objekt, zum Beispiel ein Datum, dann zeigen Original und Kopie auf dasselbe Objekt.\n\nDie Brücke zum Kurs: Im Kapitel Reaktivität lernen wir Signals. Ein Signal bemerkt eine Änderung nur, wenn es ein neues Objekt bekommt. Wer ein Objekt direkt verändert, löst keine Aktualisierung aus. Deshalb kopieren wir mit Spread, statt zu verändern.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "code",
+          "title": "Template-Strings",
+          "code": "const c = customers[0];\n\n// Backticks: Ausdrücke in ${...} werden in den Text eingesetzt\nconst line = `${c.lastname}, ${c.firstname} (${c.city ?? \"unbekannt\"})`;\n\n// Auch mehrere Zeilen sind möglich\nconst mail = `Guten Tag ${c.firstname},\nIhre Rechnung ist fertig.`;\n\nconst total = 3 * 19.99;\nconsole.log(`Summe: ${total.toFixed(2)} Euro`);   // Summe: 59.97 Euro\nconsole.log(line);                                 // Simpson, Lisa (Springfield)\nconsole.log(mail);",
+          "notes": "Codefolie „Template-Strings“.\n\nEin „Template-String“ ist ein Text mit Platzhaltern. Er wird nicht mit normalen Anführungszeichen geschrieben, sondern mit schrägen Hochkommas, den sogenannten „Backticks“.\n\nInnerhalb des Textes steht ein Dollarzeichen mit geschweiften Klammern. Dort darf ein beliebiger Ausdruck stehen, zum Beispiel ein Feld eines Objekts oder eine Rechnung. Das Ergebnis wird in den Text eingesetzt. Das ist übersichtlicher, als Texte mit einem Plus zusammenzukleben.\n\nIm Beispiel setzt die erste Zeile Nachname, Vorname und Stadt zusammen. Fehlt die Stadt, steht dort „unbekannt“. Ein Template-String darf außerdem über mehrere Zeilen gehen. In Angular schreibt man Komponenten-Vorlagen oft genau so.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "exercise",
+          "title": "TS-Übung 3: Objekte und Listen",
+          "bullets": [
+            "Öffne 01_typescript_primer, Datei src/uebung-3-objekte.ts",
+            "1. renameCustomer: neue Liste, ein Kunde hat den neuen Vornamen (map und Spread)",
+            "2. addCustomer: neue Liste mit einem Kunden mehr am Ende ([...customers, customer])",
+            "3. describe: Parameter in der Signatur zerlegen, city-Standardwert, Template-String",
+            "4. Prüfe in der Ausgabe: Die ursprüngliche Liste ist unverändert geblieben",
+            "Ausführen: npm start -- src/uebung-3-objekte.ts",
+            "Musterlösung: loesung/uebung-3-objekte.ts"
+          ],
+          "notes": "Folie: „TS-Übung 3: Objekte und Listen“.\n\nErklärung für die Dolmetscherin:\nDie Teilnehmenden öffnen die Datei „uebung-3-objekte.ts“ im Ordner „01_typescript_primer“. Dort sind drei Funktionen vorgegeben, die noch nichts tun. Die erste Funktion soll eine neue Liste zurückgeben, in der ein Kunde einen neuen Vornamen hat. Die zweite soll eine neue Liste mit einem zusätzlichen Kunden zurückgeben. Bei der dritten wird der Kunde direkt in der Funktionsdefinition zerlegt, und es entsteht ein Text mit einem Template-String.\n\nDie wichtigste Regel: Die ursprüngliche Liste darf nicht verändert werden. Am Ende prüft man in der Ausgabe, dass das Original gleich geblieben ist. Die Musterlösung liegt im Ordner „loesung“."
+        }
+      ]
     },
     {
-     "type": "code",
-     "title": "Interfaces: die Form eines Objekts",
-     "code": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\n\nconst lisa: Customer = { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\" };\n\n// Fehler: Die Pflicht-Eigenschaft \"lastname\" fehlt\n// const hans: Customer = { id: \"2\", firstname: \"Hans\" };",
-     "notes": "Codefolie „Interfaces: die Form eines Objekts“.\n\nEin „Interface“ beschreibt die Form eines Objekts: Welche Eigenschaften gibt es, und welchen Typ hat jede Eigenschaft? Hier ist es das Interface „Customer“ für einen Kunden. Ein Kunde hat eine „id“, einen Vornamen und einen Nachnamen, alle drei als Text.\n\nDie Eigenschaften „city“, „discontinued“ und „lastOrderDate“ haben ein Fragezeichen. Das bedeutet: Sie sind optional und dürfen fehlen. Alle anderen sind Pflicht.\n\nDie Konstante „lisa“ erfüllt das Interface, weil alle Pflicht-Eigenschaften vorhanden sind. Der Kommentar darunter zeigt einen Fehler: Wenn bei Hans der Nachname fehlt, meldet der Compiler sofort, dass die Eigenschaft „lastname“ fehlt. So fallen Tippfehler und vergessene Felder schon beim Schreiben auf und nicht erst im Browser.",
-     "_verify": "ok"
-    },
-    {
-     "type": "code",
-     "title": "Optional und readonly",
-     "code": "interface Invoice {\n  readonly id: string;     // nur lesbar, nach dem Anlegen nicht änderbar\n  customerId: string;\n  note?: string;           // optional, darf fehlen\n}\n\nconst invoice: Invoice = { id: \"R-1\", customerId: \"1\" };\ninvoice.note = \"bezahlt\";  // erlaubt\n// invoice.id = \"R-2\";     // Fehler TS2540: id ist readonly\n\nconst ids: readonly string[] = [\"1\", \"2\"];\n// ids.push(\"3\");          // Fehler: Eine readonly-Liste hat kein push\nconst more = [...ids, \"3\"];  // neue Liste ist erlaubt",
-     "notes": "Codefolie „Optional und readonly“.\n\nHier sehen wir zwei Hilfsmittel für Eigenschaften. Das Fragezeichen hinter einem Namen macht die Eigenschaft optional. Das Wort „readonly“ heißt „nur lesbar“: Der Wert wird beim Anlegen gesetzt und kann danach nicht mehr geändert werden.\n\nIm Beispiel hat die Rechnung eine feste „id“, eine Kundennummer und eine optionale Notiz. Die Notiz darf man nachträglich setzen. Die „id“ zu ändern meldet der Compiler als Fehler.\n\n„readonly“ gibt es auch für Listen. Eine solche Liste darf man lesen, aber nicht mit „push“ verändern. Stattdessen baut man eine neue Liste, wie in der letzten Zeile. Das passt zu Angular, wo Daten durch neue Objekte ersetzt werden und nicht verändert.",
-     "_verify": "ok"
-    },
-    {
-     "type": "code",
-     "title": "Destructuring",
-     "code": "const [first, , third] = customers;      // Liste zerlegen, zweiten überspringen\n\nconst { firstname, lastname } = first;   // Objekt zerlegen\nconst { city = \"unbekannt\" } = third;    // Standardwert, falls city fehlt\nconst { id, ...rest } = first;           // rest: alle übrigen Eigenschaften\n\n// Zerlegen direkt in der Parameterliste\nfunction label({ firstname, lastname }: Customer): string {\n  return `${lastname}, ${firstname}`;\n}\n\nconsole.log(firstname, lastname, city, id);   // Lisa Simpson unbekannt 1\nconsole.log(rest.city, label(third));         // Springfield Flanders, Ned",
-     "notes": "Codefolie „Destructuring“.\n\n„Destructuring“ heißt „Zerlegen“. Man holt mehrere Werte aus einem Objekt oder einer Liste mit einer einzigen Zeile heraus und legt sie in eigene Variablen.\n\nBei einer Liste zählt die Reihenfolge. In der ersten Zeile bekommt „first“ den ersten Kunden und „third“ den dritten. Das Komma ohne Namen überspringt den zweiten. Bei einem Objekt zählt der Name der Eigenschaft: „firstname“ und „lastname“ werden aus dem ersten Kunden gelesen.\n\nMit einem Gleichheitszeichen gibt man einen Standardwert an. Der Kunde „Ned“ hat keine Stadt, deshalb ist „city“ hier „unbekannt“. Die drei Punkte vor „rest“ sammeln alle übrigen Eigenschaften in einem neuen Objekt.\n\nZerlegen funktioniert auch direkt in der Parameterliste einer Funktion. Das sieht man in „label“. Dieses Muster begegnet uns später in Angular häufig.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "code",
-     "title": "Spread: kopieren statt verändern",
-     "code": "const lisa = customers[0];\n\nconst renamed = { ...lisa, firstname: \"Liesel\" };  // neues Objekt\nconst more = [...customers, renamed];              // neue Liste\n\nconsole.log(lisa.firstname, renamed.firstname);    // Lisa Liesel\nconsole.log(customers.length, more.length);        // 3 4\n\n// Achtung: Spread kopiert nur flach, Verschachteltes wird geteilt\nconst copy = { ...lisa };\nconsole.log(copy.lastOrderDate === lisa.lastOrderDate);  // true",
-     "notes": "Codefolie „Spread: kopieren statt verändern“.\n\nDie drei Punkte heißen „Spread-Operator“, auf Deutsch etwa „Ausbreiten“. Sie breiten den Inhalt eines Objekts oder einer Liste in einem neuen Objekt oder einer neuen Liste aus.\n\nIn der ersten Zeile entsteht ein neues Objekt, das alle Eigenschaften von „lisa“ hat, aber einen anderen Vornamen. Das ursprüngliche Objekt bleibt unverändert, das zeigt die Ausgabe: „Lisa“ und „Liesel“. In der zweiten Zeile entsteht eine neue Liste mit einem Eintrag mehr. Die alte Liste hat weiterhin drei Einträge.\n\nWichtig ist die Einschränkung: Spread kopiert nur flach. Ist eine Eigenschaft selbst ein Objekt, zum Beispiel ein Datum, dann zeigen Original und Kopie auf dasselbe Objekt.\n\nDie Brücke zum Kurs: Im Kapitel Reaktivität lernen wir Signals. Ein Signal bemerkt eine Änderung nur, wenn es ein neues Objekt bekommt. Wer ein Objekt direkt verändert, löst keine Aktualisierung aus. Deshalb kopieren wir mit Spread, statt zu verändern.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "code",
-     "title": "Template-Strings",
-     "code": "const c = customers[0];\n\n// Backticks: Ausdrücke in ${...} werden in den Text eingesetzt\nconst line = `${c.lastname}, ${c.firstname} (${c.city ?? \"unbekannt\"})`;\n\n// Auch mehrere Zeilen sind möglich\nconst mail = `Guten Tag ${c.firstname},\nIhre Rechnung ist fertig.`;\n\nconst total = 3 * 19.99;\nconsole.log(`Summe: ${total.toFixed(2)} Euro`);   // Summe: 59.97 Euro\nconsole.log(line);                                 // Simpson, Lisa (Springfield)\nconsole.log(mail);",
-     "notes": "Codefolie „Template-Strings“.\n\nEin „Template-String“ ist ein Text mit Platzhaltern. Er wird nicht mit normalen Anführungszeichen geschrieben, sondern mit schrägen Hochkommas, den sogenannten „Backticks“.\n\nInnerhalb des Textes steht ein Dollarzeichen mit geschweiften Klammern. Dort darf ein beliebiger Ausdruck stehen, zum Beispiel ein Feld eines Objekts oder eine Rechnung. Das Ergebnis wird in den Text eingesetzt. Das ist übersichtlicher, als Texte mit einem Plus zusammenzukleben.\n\nIm Beispiel setzt die erste Zeile Nachname, Vorname und Stadt zusammen. Fehlt die Stadt, steht dort „unbekannt“. Ein Template-String darf außerdem über mehrere Zeilen gehen. In Angular schreibt man Komponenten-Vorlagen oft genau so.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "exercise",
-     "title": "TS-Übung 3: Objekte und Listen",
-     "bullets": [
-      "Öffne 01_typescript_primer, Datei src/uebung-3-objekte.ts",
-      "1. renameCustomer: neue Liste, ein Kunde hat den neuen Vornamen (map und Spread)",
-      "2. addCustomer: neue Liste mit einem Kunden mehr am Ende ([...customers, customer])",
-      "3. describe: Parameter in der Signatur zerlegen, city-Standardwert, Template-String",
-      "4. Prüfe in der Ausgabe: Die ursprüngliche Liste ist unverändert geblieben",
-      "Ausführen: npm start -- src/uebung-3-objekte.ts",
-      "Musterlösung: loesung/uebung-3-objekte.ts"
-     ],
-     "notes": "Folie: „TS-Übung 3: Objekte und Listen“.\n\nErklärung für die Dolmetscherin:\nDie Teilnehmenden öffnen die Datei „uebung-3-objekte.ts“ im Ordner „01_typescript_primer“. Dort sind drei Funktionen vorgegeben, die noch nichts tun. Die erste Funktion soll eine neue Liste zurückgeben, in der ein Kunde einen neuen Vornamen hat. Die zweite soll eine neue Liste mit einem zusätzlichen Kunden zurückgeben. Bei der dritten wird der Kunde direkt in der Funktionsdefinition zerlegt, und es entsteht ein Text mit einem Template-String.\n\nDie wichtigste Regel: Die ursprüngliche Liste darf nicht verändert werden. Am Ende prüft man in der Ausgabe, dass das Original gleich geblieben ist. Die Musterlösung liegt im Ordner „loesung“."
+      "after": 9,
+      "order": 50,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Typen kombinieren",
+          "notes": "Kapitelübergangsfolie „Typen kombinieren“ – Bisher hatte jeder Wert genau einen Typ. Jetzt lernen wir, Typen zu verbinden: ein Wert kann mehrere Typen haben, Typen bekommen Namen, und Typen können einen Platzhalter enthalten. Am Ende folgen praktische Hilfstypen."
+        },
+        {
+          "type": "code",
+          "title": "Union Types und Narrowing",
+          "code": "function show(value: string | number): string {\n  return typeof value === \"string\" ? value.toUpperCase() : value.toFixed(2);\n}\n\ntype State =\n  | { status: \"loading\" }\n  | { status: \"loaded\"; data: Customer[] }\n  | { status: \"error\"; message: string };\n\nfunction render(state: State): string {\n  switch (state.status) {\n    case \"loading\": return \"Lade ...\";\n    case \"loaded\": return `${state.data.length} Kunden`;\n    case \"error\": return state.message;\n  }\n}",
+          "notes": "Codefolie „Union Types und Narrowing“.\n\nEin „Union Type“, auf Deutsch „Vereinigungstyp“, sagt: Der Wert ist der eine Typ oder der andere. „string | number“ heißt: Text oder Zahl. Der senkrechte Strich bedeutet „oder“.\n\nAber mit so einem Wert kann man nicht alles tun. Deshalb prüft man den Typ, und der Compiler merkt sich das Ergebnis. Dieses Eingrenzen heißt „Narrowing“, also „Einengen“. In der Funktion „show“ prüft „typeof“, ob der Wert ein Text ist. Im einen Zweig ist er ein Text, im anderen eine Zahl. Auch das Wort „in“ kann man so verwenden, um zu prüfen, ob ein Objekt eine bestimmte Eigenschaft hat.\n\nDas untere Beispiel ist besonders wichtig. Ein Zustand ist entweder „loading“, „loaded“ mit Daten oder „error“ mit Meldung. Jede Variante hat das Feld „status“ mit einem festen Text. Das nennt man „diskriminierte Union“, also eine Union mit Unterscheidungsmerkmal. Die „switch“-Anweisung prüft das Feld, und in jedem Fall kennt der Compiler die passenden Eigenschaften. Dieses Muster nutzen wir im Kapitel über Zustand wieder.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}"
+        },
+        {
+          "type": "code",
+          "title": "Literal-Typen und type",
+          "code": "type Status = \"active\" | \"discontinued\";   // nur diese zwei Texte sind erlaubt\ntype CustomerId = string;                  // ein Alias, also ein zweiter Name\n\nfunction setStatus(c: Customer, status: Status): Customer {\n  return { ...c, discontinued: status === \"discontinued\" };\n}\n\nsetStatus(customers[0], \"discontinued\");\n// setStatus(customers[0], \"gesperrt\");    // Fehler TS2345: nicht erlaubter Wert\n\nenum Role { Admin, User }                  // enum gibt es auch\nconst role: Role = Role.Admin;",
+          "notes": "Codefolie „Literal-Typen und type“.\n\nMit dem Wort „type“ gibt man einem Typ einen Namen. Das nennt man „Alias“, also einen zweiten Namen. Der Typ „CustomerId“ ist zum Beispiel nur ein anderer Name für „string“.\n\nBesonders nützlich sind „Literal-Typen“. Ein Literal-Typ erlaubt nicht irgendeinen Text, sondern nur bestimmte feste Werte. „Status“ erlaubt genau zwei Texte: „active“ und „discontinued“. Wer der Funktion „setStatus“ einen anderen Text gibt, bekommt einen Compilerfehler. So sind Tippfehler ausgeschlossen, und der Editor schlägt die erlaubten Werte sogar vor.\n\nEs gibt auch „enum“, eine Aufzählung mit Namen. Sie funktioniert, erzeugt aber zusätzlichen Code. Literal-Typen sind meistens einfacher und reichen im Kurs aus.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "content",
+          "title": "interface oder type?",
+          "bullets": [
+            "Beide beschreiben die Form eines Objekts, mit optionalen und readonly-Eigenschaften",
+            "Beide lassen sich erweitern: interface mit extends, type mit & (Schnittmenge)",
+            "Nur type kann Unions, Literal-Typen und Alias für einfache Typen: type Status = \"a\" | \"b\"",
+            "Nur interface kann später um Eigenschaften ergänzt werden (declaration merging)",
+            "Klassen können ein interface oder einen Objekt-type mit implements erfüllen",
+            "Faustregel im Kurs: Objekt-Formen als interface (Customer)",
+            "Faustregel im Kurs: Unions und Aliase als type (Status, State)",
+            "Wichtiger als die Wahl: im Projekt einheitlich bleiben"
+          ],
+          "notes": "Folie: „interface oder type?“.\n\nOft fragen Teilnehmende, wann man ein „interface“ und wann ein „type“ nimmt. Die gute Nachricht: Für Objekte sind beide fast gleich. Beide beschreiben, welche Eigenschaften ein Objekt hat, und beide können optionale und nur lesbare Eigenschaften haben. Beide kann man erweitern. Ein „interface“ benutzt dafür das Wort „extends“, ein „type“ benutzt das Zeichen „&“, das eine Schnittmenge bildet.\n\nDie Unterschiede: Nur ein „type“ kann eine Union oder einen Literal-Typ beschreiben. Nur ein „interface“ kann an anderer Stelle um weitere Eigenschaften ergänzt werden. Das nennt man „declaration merging“, also „Deklarationen zusammenführen“. Das braucht man im Alltag selten.\n\nDie Faustregel für diesen Kurs lautet: Für die Form von Objekten nehmen wir „interface“, für Unions und Aliase nehmen wir „type“. Wichtiger als diese Wahl ist, dass das Projekt einheitlich bleibt.",
+          "diagram": {
+            "kind": "code",
+            "title": "Faustregel im Kurs",
+            "text": "interface Customer {\n  id: string;\n  lastname: string;\n}\n\ntype Status = \"active\" | \"gesperrt\";\n\ntype State =\n  | { status: \"loading\" }\n  | { status: \"error\" };"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Generics",
+          "code": "const names: Array<string> = [\"Lisa\", \"Hans\"];       // dasselbe wie string[]\nconst pending: Promise<Customer[]> = Promise.resolve(customers);\n\nfunction first<T>(items: T[]): T | undefined {\n  return items[0];\n}\n\nconst firstCustomer = first(customers);   // Typ: Customer | undefined\nconst firstName = first(names);           // Typ: string | undefined\n\n// In Angular begegnen uns dieselben spitzen Klammern:\n// signal<Customer[]>([]), input<string>(), Observable<Customer>",
+          "notes": "Codefolie „Generics“.\n\n„Generics“ sind Typen mit Platzhalter. Die spitzen Klammern enthalten den Typ, der eingesetzt wird. „Array<string>“ ist eine Liste von Texten, „Promise<Customer[]>“ ist ein Versprechen, das später eine Liste von Kunden liefert. Ein „Promise“ steht für ein Ergebnis, das erst später ankommt, zum Beispiel eine Antwort vom Server.\n\nDie Funktion „first“ zeigt, wie man einen eigenen Platzhalter schreibt. Das „T“ steht für einen beliebigen Typ. Die Funktion nimmt eine Liste von „T“ und gibt ein „T“ zurück, oder nichts, wenn die Liste leer ist. Der Compiler erkennt „T“ beim Aufruf selbst. Mit der Kundenliste ist das Ergebnis ein Kunde oder nichts, mit der Textliste ein Text oder nichts. Die Funktion muss also nur einmal geschrieben werden.\n\nDie Brücke zum Kurs: Dieselbe Schreibweise sehen wir bei „signal“, bei „input“ und bei „Observable“. Dort sagt der Typ in den spitzen Klammern, welche Art von Wert darin steckt.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        },
+        {
+          "type": "code",
+          "title": "Hilfstypen: Partial, Pick, Omit",
+          "code": "type CustomerChanges = Partial<Customer>;       // alles optional\ntype CustomerName = Pick<Customer, \"firstname\" | \"lastname\">;  // nur diese\ntype NewCustomer = Omit<Customer, \"id\">;        // alles außer id\n\nfunction update(c: Customer, changes: Partial<Customer>): Customer {\n  return { ...c, ...changes };\n}\n\nconst changed = update(customers[0], { city: \"Shelbyville\" });\nconst draft: NewCustomer = { firstname: \"Ned\", lastname: \"Flanders\" };\nconst label: CustomerName = changed;     // Customer hat diese Felder auch",
+          "notes": "Codefolie „Hilfstypen: Partial, Pick, Omit“.\n\nHilfstypen sind fertige Bausteine, die aus einem vorhandenen Typ einen neuen Typ machen. So muss man nichts doppelt schreiben.\n\n„Partial“ bedeutet „teilweise“. Aus „Customer“ wird ein Typ, bei dem alle Eigenschaften optional sind. Das passt gut für Änderungen: Die Funktion „update“ bekommt einen Kunden und nur die Felder, die sich ändern sollen, und baut mit Spread einen neuen Kunden. „Pick“ bedeutet „auswählen“ und behält nur die genannten Eigenschaften. „Omit“ bedeutet „weglassen“ und entfernt die genannten Eigenschaften. Ein neuer Kunde hat zum Beispiel noch keine „id“, denn die vergibt später das System.\n\nSolche Typen entstehen automatisch aus „Customer“. Ändert sich das Interface, passen sich diese Typen mit an.",
+          "_verify": "ok",
+          "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
+        }
+      ]
     }
-   ]
-  },
-  {
-   "after": 9,
-   "order": 50,
-   "slides": [
-    {
-     "type": "divider",
-     "title": "Typen kombinieren",
-     "notes": "Kapitelübergangsfolie „Typen kombinieren“ – Bisher hatte jeder Wert genau einen Typ. Jetzt lernen wir, Typen zu verbinden: ein Wert kann mehrere Typen haben, Typen bekommen Namen, und Typen können einen Platzhalter enthalten. Am Ende folgen praktische Hilfstypen."
-    },
-    {
-     "type": "code",
-     "title": "Union Types und Narrowing",
-     "code": "function show(value: string | number): string {\n  return typeof value === \"string\" ? value.toUpperCase() : value.toFixed(2);\n}\n\ntype State =\n  | { status: \"loading\" }\n  | { status: \"loaded\"; data: Customer[] }\n  | { status: \"error\"; message: string };\n\nfunction render(state: State): string {\n  switch (state.status) {\n    case \"loading\": return \"Lade ...\";\n    case \"loaded\": return `${state.data.length} Kunden`;\n    case \"error\": return state.message;\n  }\n}",
-     "notes": "Codefolie „Union Types und Narrowing“.\n\nEin „Union Type“, auf Deutsch „Vereinigungstyp“, sagt: Der Wert ist der eine Typ oder der andere. „string | number“ heißt: Text oder Zahl. Der senkrechte Strich bedeutet „oder“.\n\nAber mit so einem Wert kann man nicht alles tun. Deshalb prüft man den Typ, und der Compiler merkt sich das Ergebnis. Dieses Eingrenzen heißt „Narrowing“, also „Einengen“. In der Funktion „show“ prüft „typeof“, ob der Wert ein Text ist. Im einen Zweig ist er ein Text, im anderen eine Zahl. Auch das Wort „in“ kann man so verwenden, um zu prüfen, ob ein Objekt eine bestimmte Eigenschaft hat.\n\nDas untere Beispiel ist besonders wichtig. Ein Zustand ist entweder „loading“, „loaded“ mit Daten oder „error“ mit Meldung. Jede Variante hat das Feld „status“ mit einem festen Text. Das nennt man „diskriminierte Union“, also eine Union mit Unterscheidungsmerkmal. Die „switch“-Anweisung prüft das Feld, und in jedem Fall kennt der Compiler die passenden Eigenschaften. Dieses Muster nutzen wir im Kapitel über Zustand wieder.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}"
-    },
-    {
-     "type": "code",
-     "title": "Literal-Typen und type",
-     "code": "type Status = \"active\" | \"discontinued\";   // nur diese zwei Texte sind erlaubt\ntype CustomerId = string;                  // ein Alias, also ein zweiter Name\n\nfunction setStatus(c: Customer, status: Status): Customer {\n  return { ...c, discontinued: status === \"discontinued\" };\n}\n\nsetStatus(customers[0], \"discontinued\");\n// setStatus(customers[0], \"gesperrt\");    // Fehler TS2345: nicht erlaubter Wert\n\nenum Role { Admin, User }                  // enum gibt es auch\nconst role: Role = Role.Admin;",
-     "notes": "Codefolie „Literal-Typen und type“.\n\nMit dem Wort „type“ gibt man einem Typ einen Namen. Das nennt man „Alias“, also einen zweiten Namen. Der Typ „CustomerId“ ist zum Beispiel nur ein anderer Name für „string“.\n\nBesonders nützlich sind „Literal-Typen“. Ein Literal-Typ erlaubt nicht irgendeinen Text, sondern nur bestimmte feste Werte. „Status“ erlaubt genau zwei Texte: „active“ und „discontinued“. Wer der Funktion „setStatus“ einen anderen Text gibt, bekommt einen Compilerfehler. So sind Tippfehler ausgeschlossen, und der Editor schlägt die erlaubten Werte sogar vor.\n\nEs gibt auch „enum“, eine Aufzählung mit Namen. Sie funktioniert, erzeugt aber zusätzlichen Code. Literal-Typen sind meistens einfacher und reichen im Kurs aus.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "content",
-     "title": "interface oder type?",
-     "bullets": [
-      "Beide beschreiben die Form eines Objekts, mit optionalen und readonly-Eigenschaften",
-      "Beide lassen sich erweitern: interface mit extends, type mit & (Schnittmenge)",
-      "Nur type kann Unions, Literal-Typen und Alias für einfache Typen: type Status = \"a\" | \"b\"",
-      "Nur interface kann später um Eigenschaften ergänzt werden (declaration merging)",
-      "Klassen können ein interface oder einen Objekt-type mit implements erfüllen",
-      "Faustregel im Kurs: Objekt-Formen als interface (Customer)",
-      "Faustregel im Kurs: Unions und Aliase als type (Status, State)",
-      "Wichtiger als die Wahl: im Projekt einheitlich bleiben"
-     ],
-     "notes": "Folie: „interface oder type?“.\n\nOft fragen Teilnehmende, wann man ein „interface“ und wann ein „type“ nimmt. Die gute Nachricht: Für Objekte sind beide fast gleich. Beide beschreiben, welche Eigenschaften ein Objekt hat, und beide können optionale und nur lesbare Eigenschaften haben. Beide kann man erweitern. Ein „interface“ benutzt dafür das Wort „extends“, ein „type“ benutzt das Zeichen „&“, das eine Schnittmenge bildet.\n\nDie Unterschiede: Nur ein „type“ kann eine Union oder einen Literal-Typ beschreiben. Nur ein „interface“ kann an anderer Stelle um weitere Eigenschaften ergänzt werden. Das nennt man „declaration merging“, also „Deklarationen zusammenführen“. Das braucht man im Alltag selten.\n\nDie Faustregel für diesen Kurs lautet: Für die Form von Objekten nehmen wir „interface“, für Unions und Aliase nehmen wir „type“. Wichtiger als diese Wahl ist, dass das Projekt einheitlich bleibt."
-    },
-    {
-     "type": "code",
-     "title": "Generics",
-     "code": "const names: Array<string> = [\"Lisa\", \"Hans\"];       // dasselbe wie string[]\nconst pending: Promise<Customer[]> = Promise.resolve(customers);\n\nfunction first<T>(items: T[]): T | undefined {\n  return items[0];\n}\n\nconst firstCustomer = first(customers);   // Typ: Customer | undefined\nconst firstName = first(names);           // Typ: string | undefined\n\n// In Angular begegnen uns dieselben spitzen Klammern:\n// signal<Customer[]>([]), input<string>(), Observable<Customer>",
-     "notes": "Codefolie „Generics“.\n\n„Generics“ sind Typen mit Platzhalter. Die spitzen Klammern enthalten den Typ, der eingesetzt wird. „Array<string>“ ist eine Liste von Texten, „Promise<Customer[]>“ ist ein Versprechen, das später eine Liste von Kunden liefert. Ein „Promise“ steht für ein Ergebnis, das erst später ankommt, zum Beispiel eine Antwort vom Server.\n\nDie Funktion „first“ zeigt, wie man einen eigenen Platzhalter schreibt. Das „T“ steht für einen beliebigen Typ. Die Funktion nimmt eine Liste von „T“ und gibt ein „T“ zurück, oder nichts, wenn die Liste leer ist. Der Compiler erkennt „T“ beim Aufruf selbst. Mit der Kundenliste ist das Ergebnis ein Kunde oder nichts, mit der Textliste ein Text oder nichts. Die Funktion muss also nur einmal geschrieben werden.\n\nDie Brücke zum Kurs: Dieselbe Schreibweise sehen wir bei „signal“, bei „input“ und bei „Observable“. Dort sagt der Typ in den spitzen Klammern, welche Art von Wert darin steckt.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    },
-    {
-     "type": "code",
-     "title": "Hilfstypen: Partial, Pick, Omit",
-     "code": "type CustomerChanges = Partial<Customer>;       // alles optional\ntype CustomerName = Pick<Customer, \"firstname\" | \"lastname\">;  // nur diese\ntype NewCustomer = Omit<Customer, \"id\">;        // alles außer id\n\nfunction update(c: Customer, changes: Partial<Customer>): Customer {\n  return { ...c, ...changes };\n}\n\nconst changed = update(customers[0], { city: \"Shelbyville\" });\nconst draft: NewCustomer = { firstname: \"Ned\", lastname: \"Flanders\" };\nconst label: CustomerName = changed;     // Customer hat diese Felder auch",
-     "notes": "Codefolie „Hilfstypen: Partial, Pick, Omit“.\n\nHilfstypen sind fertige Bausteine, die aus einem vorhandenen Typ einen neuen Typ machen. So muss man nichts doppelt schreiben.\n\n„Partial“ bedeutet „teilweise“. Aus „Customer“ wird ein Typ, bei dem alle Eigenschaften optional sind. Das passt gut für Änderungen: Die Funktion „update“ bekommt einen Kunden und nur die Felder, die sich ändern sollen, und baut mit Spread einen neuen Kunden. „Pick“ bedeutet „auswählen“ und behält nur die genannten Eigenschaften. „Omit“ bedeutet „weglassen“ und entfernt die genannten Eigenschaften. Ein neuer Kunde hat zum Beispiel noch keine „id“, denn die vergibt später das System.\n\nSolche Typen entstehen automatisch aus „Customer“. Ändert sich das Interface, passen sich diese Typen mit an.",
-     "_verify": "ok",
-     "_prelude": "interface Customer {\n  id: string;\n  firstname: string;\n  lastname: string;\n  city?: string;\n  discontinued?: boolean;\n  lastOrderDate?: Date;\n}\nconst customers: Customer[] = [\n  { id: \"1\", firstname: \"Lisa\", lastname: \"Simpson\", city: \"Springfield\" },\n  { id: \"2\", firstname: \"Hans\", lastname: \"Maulwurf\", city: \"Springfield\", discontinued: true },\n  { id: \"3\", firstname: \"Ned\", lastname: \"Flanders\" },\n];"
-    }
-   ]
-  }
- ]
+  ]
 }

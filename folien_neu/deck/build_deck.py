@@ -20,6 +20,9 @@ from lxml import etree
 from pptx import Presentation
 from pptx.oxml.ns import qn
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import diagrams  # noqa: E402
+
 A = "http://schemas.openxmlformats.org/drawingml/2006/main"
 P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -273,6 +276,13 @@ def validate_slide(s, where, fname):
         if "bullets" not in s:
             raise BuildError("%s: 'bullets' fehlt (type %s)" % (where, typ))
         out["bullets"] = normalize_bullets(s["bullets"], where)
+        if "diagram" in s:
+            if typ != "content":
+                raise BuildError("%s: 'diagram' ist nur bei type content erlaubt" % where)
+            err = diagrams.validate(s["diagram"], where)
+            if err:
+                raise BuildError(err)
+            out["diagram"] = s["diagram"]
     elif typ == "code":
         if not isinstance(s.get("code"), str):
             raise BuildError("%s: 'code' (String) fehlt (type code)" % where)
@@ -406,7 +416,41 @@ def build_title(tree, title, sizes, width_pt, height_pt, char_factor, line_facto
     replace_paragraphs(body, [make_para(proto, title, sz=sz)])
 
 
-def build_lines_body(tree, bullets, kind, warns, ctx):
+TITLE_BOX = (838080, 365040, 10514160, 1324080)
+BODY_BOX = (838080, 1825560, 10514160, 4349880)
+BODY_BOX_NARROW = (838080, 1825560, 5900000, 4349880)
+
+
+def set_xfrm(sp, box):
+    """Setzt eine feste Position/Groesse (Platzhalter der Layout-Vorlage 'Titelfolie' ueberlappen sonst)."""
+    sppr = sp.find(qn("p:spPr"))
+    old = sppr.find(qn("a:xfrm"))
+    if old is not None:
+        sppr.remove(old)
+    xfrm = etree.Element(qn("a:xfrm"))
+    sub(xfrm, "a:off", x=box[0], y=box[1])
+    sub(xfrm, "a:ext", cx=box[2], cy=box[3])
+    sppr.insert(0, xfrm)
+
+
+def fix_title_body_overlap(prs):
+    """Alle Folien mit Titel + Untertitel ohne eigene Position: Titel oben, Text darunter."""
+    fixed = 0
+    for slide in prs.slides:
+        tree = slide.shapes._spTree
+        title = find_title_sp(tree)
+        subs = [sp for sp in tree.iter(qn("p:sp")) if ph_type(sp) == "subTitle"]
+        if title is None or len(subs) != 1:
+            continue
+        if title.find(qn("p:spPr")).find(qn("a:xfrm")) is not None or subs[0].find(qn("p:spPr")).find(qn("a:xfrm")) is not None:
+            continue
+        set_xfrm(title, TITLE_BOX)
+        set_xfrm(subs[0], BODY_BOX)
+        fixed += 1
+    return fixed
+
+
+def build_lines_body(tree, bullets, kind, warns, ctx, narrow=False):
     """Aufzaehlung (content/exercise) im Stil der Folien 256/258."""
     sp = find_body_sp(tree)
     body = sp.find(qn("p:txBody"))
@@ -415,7 +459,7 @@ def build_lines_body(tree, bullets, kind, warns, ctx):
     bpr = body.find(qn("a:bodyPr"))
     if bpr is not None:
         bpr.set("anchor", "t")  # oben beginnen, auch bei kurzen Listen
-    W, H = 810.0, 330.0
+    W, H = (460.0 if narrow else 810.0), 330.0
     CF, PITCH = 0.50, 1.35
     chosen = 1.0
     for scale in (1.0, 0.9, 0.8, 0.7, 0.6):
@@ -475,7 +519,12 @@ def build_slide(prs, tpl, spec, warns):
     slide, tree = new_slide_from_template(prs, tpl, typ)
     if typ in ("content", "exercise"):
         build_title(tree, spec["title"], [3600, 3200, 2800, 2400], 800, 100, 0.56, 1.2, warns, ctx)
-        build_lines_body(tree, spec["bullets"], typ, warns, ctx)
+        set_xfrm(find_title_sp(tree), TITLE_BOX)
+        narrow = "diagram" in spec
+        set_xfrm(find_body_sp(tree), BODY_BOX_NARROW if narrow else BODY_BOX)
+        build_lines_body(tree, spec["bullets"], typ, warns, ctx, narrow=narrow)
+        if narrow:
+            diagrams.draw(slide, spec["diagram"])
     elif typ == "code":
         build_title(tree, spec["title"], [4400, 3600, 3200, 2800, 2400], 800, 100, 0.48, 1.08, warns, ctx)
         build_code_body(tree, spec["code"], warns, ctx)
@@ -682,6 +731,7 @@ def build(in_path, out_path, content_dir, quiet=False):
     for num in deleted:
         prs.part.drop_rel(orig_ids[num - 1].get(qn("r:id")))
     stats["deleted"] = len(deleted)
+    stats["layout_fixed"] = fix_title_body_overlap(prs)
     ext = prs.part._element.find(".//{http://schemas.microsoft.com/office/powerpoint/2010/main}sectionLst")
     if ext is not None:
         warns.append("Praesentation enthaelt Abschnitte (sectionLst); neue/verschobene Folien sind evtl. nicht zugeordnet")
