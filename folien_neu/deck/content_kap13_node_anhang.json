@@ -334,7 +334,7 @@
             "right": {
               "title": "Laufzeit (Browser)",
               "items": [
-                "main-….js, styles-….css",
+                "JS- und CSS-Dateien",
                 "index.html",
                 "Signals, DOM, HTTP"
               ]
@@ -581,9 +581,9 @@
         },
         {
           "type": "code",
-          "title": "Pakete aktualisieren: outdated und update",
+          "title": "npm outdated und npm update",
           "code": "$ npm outdated\nPackage       Current   Wanted   Latest   Location\n@angular/core  21.0.1   21.0.6   21.0.6   node_modules/@angular/core\nrxjs            7.8.1    7.8.2    7.8.2   node_modules/rxjs\njsdom          28.0.0   28.1.0   29.0.0   node_modules/jsdom\n\n# Current: installiert   Wanted: höchste im erlaubten Bereich   Latest: neueste\n$ npm update                    # aktualisiert bis \"Wanted\", passt Lock-Datei an\n\n$ npm install -D jsdom@29       # Sprung auf neue Hauptversion: bewusst und einzeln\n\n# Für Angular-Pakete besser das Angular-Werkzeug (passt auch Code an):\n$ ng update @angular/core @angular/cli",
-          "notes": "Codefolie „Pakete aktualisieren: outdated und update“.\n\n„npm outdated“ zeigt eine Tabelle der veralteten Pakete. Die Zahlen auf der Folie sind nur Beispiele. Die Spalte „Current“ zeigt die installierte Version. „Wanted“ ist die höchste Version, die der Versionsbereich in „package.json“ erlaubt. „Latest“ ist die neueste veröffentlichte Version.\n\n„npm update“ aktualisiert alle Pakete bis zur Spalte „Wanted“. Einen Sprung auf eine neue Hauptversion macht npm dabei nicht. Den muss man bewusst mit „npm install“ und der neuen Version durchführen.\n\nFür Angular selbst nimmt man „ng update“. Dieser Befehl aktualisiert alle Angular-Pakete gemeinsam und passt bei Bedarf auch den Code an."
+          "notes": "Codefolie „npm outdated und npm update“.\n\n„npm outdated“ zeigt eine Tabelle der veralteten Pakete. Die Zahlen auf der Folie sind nur Beispiele. Die Spalte „Current“ zeigt die installierte Version. „Wanted“ ist die höchste Version, die der Versionsbereich in „package.json“ erlaubt. „Latest“ ist die neueste veröffentlichte Version.\n\n„npm update“ aktualisiert alle Pakete bis zur Spalte „Wanted“. Einen Sprung auf eine neue Hauptversion macht npm dabei nicht. Den muss man bewusst mit „npm install“ und der neuen Version durchführen.\n\nFür Angular selbst nimmt man „ng update“. Dieser Befehl aktualisiert alle Angular-Pakete gemeinsam und passt bei Bedarf auch den Code an."
         },
         {
           "type": "content",
@@ -646,9 +646,9 @@
         },
         {
           "type": "code",
-          "title": "Beispiel: package.json eines Übungsprojekts",
-          "code": "{\n  \"name\": \"invoice-app\",\n  \"version\": \"0.0.0\",\n  \"private\": true,\n  \"scripts\": { \"start\": \"ng serve\", \"build\": \"ng build\", \"test\": \"ng test\" },\n  \"dependencies\": {\n    \"@angular/core\": \"^21.0.0\",  \"@angular/router\": \"^21.0.0\",\n    \"rxjs\": \"^7.8.0\",            \"tslib\": \"^2.1.0\"\n  },\n  \"devDependencies\": {\n    \"@angular/build\": \"^21.0.0\", \"@angular/cli\": \"^21.0.0\",\n    \"typescript\": \"~5.9.0\",      \"vitest\": \"~4.0.18\"\n  }\n}",
-          "notes": "Codefolie „Beispiel: package.json eines Übungsprojekts“.\n\nDas ist eine gekürzte Fassung der Datei „package.json“ aus dem Übungsprojekt „26_resourceApi“. Das Projekt heißt „invoice-app“ und ist als privat markiert. Die Scripts starten, bauen und testen die Anwendung.\n\nUnter „dependencies“ stehen die Pakete, die im Browser gebraucht werden: Angular selbst, „rxjs“ und „tslib“, eine kleine Hilfsbibliothek für übersetzten TypeScript-Code. Unter „devDependencies“ stehen die Werkzeuge: das Build-System, die CLI, TypeScript und Vitest für die Tests.\n\nVor den Versionsnummern stehen die Zeichen Dach und Tilde. Was sie bedeuten, erklären die nächsten Folien."
+          "title": "package.json eines Übungsprojekts",
+          "code": "{\n  \"name\": \"invoice-app\",\n  \"version\": \"0.0.0\",\n  \"private\": true,\n  \"scripts\": { \"start\": \"ng serve\", \"build\": \"ng build\", \"test\": \"ng test\" },\n  \"dependencies\": {\n    \"@angular/core\": \"^21.0.0\", \"@angular/router\": \"^21.0.0\",\n    \"rxjs\": \"^7.8.0\", \"tslib\": \"^2.1.0\"\n  },\n  \"devDependencies\": {\n    \"@angular/build\": \"^21.0.0\", \"@angular/cli\": \"^21.0.0\",\n    \"typescript\": \"~5.9.0\", \"vitest\": \"~4.0.18\"\n  }\n}",
+          "notes": "Codefolie „package.json eines Übungsprojekts“.\n\nDas ist eine gekürzte Fassung der Datei „package.json“ aus dem Übungsprojekt „26_resourceApi“. Das Projekt heißt „invoice-app“ und ist als privat markiert. Die Scripts starten, bauen und testen die Anwendung.\n\nUnter „dependencies“ stehen die Pakete, die im Browser gebraucht werden: Angular selbst, „rxjs“ und „tslib“, eine kleine Hilfsbibliothek für übersetzten TypeScript-Code. Unter „devDependencies“ stehen die Werkzeuge: das Build-System, die CLI, TypeScript und Vitest für die Tests.\n\nVor den Versionsnummern stehen die Zeichen Dach und Tilde. Was sie bedeuten, erklären die nächsten Folien."
         },
         {
           "type": "content",
@@ -854,7 +854,7 @@
         },
         {
           "type": "content",
-          "title": "Zwei Modulsysteme: CommonJS und ES-Module",
+          "title": "CommonJS und ES-Module",
           "bullets": [
             "CommonJS (CJS): das klassische Modulsystem von node.js",
             [
@@ -869,7 +869,7 @@
             "Neue node-Projekte nutzen zunehmend ESM",
             "Im Angular-Code schreibt man immer import / export"
           ],
-          "notes": "Folie: „Zwei Modulsysteme: CommonJS und ES-Module“.\n\nEin „Modul“ ist eine Datei, die bestimmte Dinge nach außen freigibt, und andere Dateien können diese Dinge laden. In JavaScript gibt es dafür zwei Systeme.\n\n„CommonJS“ ist das ältere, klassische System von node.js. Man lädt mit „require“ und gibt mit „module.exports“ frei. Das Laden passiert sofort beim Aufruf.\n\n„ES-Module“ sind der offizielle Standard der Sprache seit 2015. Man schreibt „import“ und „export“. Diese Schreibweise kennen wir aus TypeScript und aus jeder Angular-Datei. Browser verstehen ES-Module direkt, und auch neue node-Projekte verwenden sie immer häufiger. Das Diagramm stellt die beiden Schreibweisen gegenüber.",
+          "notes": "Folie: „CommonJS und ES-Module“.\n\nEin „Modul“ ist eine Datei, die bestimmte Dinge nach außen freigibt, und andere Dateien können diese Dinge laden. In JavaScript gibt es dafür zwei Systeme.\n\n„CommonJS“ ist das ältere, klassische System von node.js. Man lädt mit „require“ und gibt mit „module.exports“ frei. Das Laden passiert sofort beim Aufruf.\n\n„ES-Module“ sind der offizielle Standard der Sprache seit 2015. Man schreibt „import“ und „export“. Diese Schreibweise kennen wir aus TypeScript und aus jeder Angular-Datei. Browser verstehen ES-Module direkt, und auch neue node-Projekte verwenden sie immer häufiger. Das Diagramm stellt die beiden Schreibweisen gegenüber.",
           "diagram": {
             "kind": "compare",
             "left": {
@@ -952,9 +952,9 @@
           "type": "content",
           "title": "Wie node.js ein Modul findet",
           "bullets": [
-            "Pfad mit ./ oder ../ : eigene Datei relativ zur aktuellen Datei",
-            "Präfix node: : eingebautes Modul (node:fs, node:http)",
-            "Nur ein Name (rxjs, express): Paket in node_modules",
+            "Pfad mit ./ oder ../ – eigene Datei relativ zur aktuellen Datei",
+            "Präfix „node:“ – eingebautes Modul (node:fs, node:http)",
+            "Nur ein Name (rxjs, express) – Paket in node_modules",
             [
               "Sucht im eigenen Ordner, dann in übergeordneten Ordnern",
               1

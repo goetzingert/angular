@@ -7,38 +7,248 @@
         {
           "type": "divider",
           "title": "Komponenten sinnvoll aufteilen",
-          "notes": "Kapitelübergangsfolie „Komponenten sinnvoll aufteilen“ – Nach der Übung zu Content Projection beginnt ein Abschnitt darüber, wie man die Komponenten einer wachsenden Anwendung sinnvoll aufteilt und wie man den Code gut wartbar hält. Er baut auf den Grundlagen zu Komponenten, Eingaben und Ausgaben auf und endet mit Übung 31, in der die Kundenliste zerlegt wird."
+          "notes": "Kapitelübergangsfolie „Komponenten sinnvoll aufteilen“ – Nach der Übung zu Content Projection beginnt ein Abschnitt darüber, wie man die Komponenten einer wachsenden Anwendung sinnvoll aufteilt und wie man den Code gut wartbar hält. Er baut auf den Grundlagen zu Komponenten, Eingaben und Ausgaben auf. Behandelt werden Container- und Darstellungskomponenten, der Datenfluss zwischen ihnen, Komposition statt Vererbung und Host-Direktiven. Der Abschnitt endet mit Übung 31, in der die Kundenliste zerlegt wird."
+        },
+        {
+          "type": "content",
+          "title": "Warum Komponenten aufteilen?",
+          "bullets": [
+            "Komponenten wachsen: Template, Zustand, Laden, Filtern, Auswahl in einer Datei",
+            "Folgen einer zu großen Komponente:",
+            [
+              "schwer zu lesen und zu ändern",
+              1
+            ],
+            [
+              "Tests brauchen viel Vorbereitung (HTTP, Router, DOM)",
+              1
+            ],
+            [
+              "Teile lassen sich nicht wiederverwenden",
+              1
+            ],
+            "Ziel: kleine Bausteine mit klarer Aufgabe und klarer Schnittstelle"
+          ],
+          "notes": "Folie: „Warum Komponenten aufteilen?“.\n\nKomponenten wachsen mit der Zeit. Am Anfang zeigt eine Komponente nur eine Liste. Später kommen Laden, Filtern, Auswählen und Hervorheben dazu, und alles steht in einer einzigen Datei. Ein Beispiel ist die „CustomerListComponent“ aus den bisherigen Übungen.\n\nEine zu große Komponente hat drei Nachteile. Sie ist schwer zu lesen und zu ändern. Tests brauchen viel Vorbereitung, weil man den Server, den Router und das Seitenelement nachbauen muss. Und einzelne Teile, zum Beispiel das Suchfeld, lassen sich nicht an anderer Stelle wiederverwenden.\n\nDas Ziel sind kleine Bausteine. Jeder hat eine klare Aufgabe und eine klare Schnittstelle. Rechts sieht man, wie die Kundenliste in Übung 31 zerlegt wird.",
+          "diagram": {
+            "kind": "tree",
+            "root": "CustomerList\n(vorher: alles)",
+            "children": [
+              "CustomerFilter\nSuchfeld",
+              "CustomerListItem\neine Zeile"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Kriterien für das Aufteilen",
+          "bullets": [
+            "Ein Satz ohne „und“: Lässt sich die Aufgabe so beschreiben?",
+            "Wiederverwendung: Wird der Teil an mehreren Stellen gebraucht?",
+            "Unterschiedliche Änderungsgründe: Ändern sich Teile aus verschiedenen Gründen?",
+            "Größe als Warnsignal: langes Template, viele Felder, viele inject()",
+            "Testbarkeit: Lässt sich der Teil allein prüfen?",
+            "Nicht übertreiben: Jede neue Komponente kostet eine Schnittstelle"
+          ],
+          "notes": "Folie: „Kriterien für das Aufteilen“.\n\nEs gibt einige einfache Prüffragen. Die erste ist der „Satz ohne und“: Kann man die Aufgabe der Komponente in einem Satz ohne das Wort „und“ beschreiben? Wenn man sagen muss „sie lädt Kunden und filtert und markiert“, macht sie zu viel.\n\nWeitere Fragen sind: Wird ein Teil an mehreren Stellen gebraucht? Ändern sich Teile aus verschiedenen Gründen, zum Beispiel das Aussehen einer Zeile und die Art, wie Daten geladen werden? Ein langes Template, viele Felder und viele Aufrufe von „inject“ sind Warnsignale. Und: Kann man den Teil allein testen?\n\nMan soll aber nicht übertreiben. Jede neue Komponente braucht eine eigene Schnittstelle mit Eingaben und Ausgaben. Zu viele winzige Komponenten machen den Code ebenfalls schwer lesbar."
+        },
+        {
+          "type": "content",
+          "title": "Container- und Darstellungskomponenten",
+          "bullets": [
+            "Container (smart): lädt Daten, hält Zustand, ruft Services",
+            [
+              "Beispiel: CustomerListComponent",
+              1
+            ],
+            "Darstellung (presentational): zeigt an, meldet Ereignisse",
+            [
+              "kennt keine Services, nur input() und output()",
+              1
+            ],
+            [
+              "Beispiele: CustomerFilter, CustomerListItem",
+              1
+            ],
+            "Darstellungskomponenten sind leicht wiederzuverwenden und zu testen"
+          ],
+          "notes": "Folie: „Container- und Darstellungskomponenten“.\n\nEine bewährte Aufteilung unterscheidet zwei Arten von Komponenten. Eine „Container-Komponente“, auf Englisch auch „smart“ genannt, lädt Daten, hält den Zustand und spricht mit Services. In Übung 31 ist das die „CustomerListComponent“.\n\nEine „Darstellungskomponente“, auf Englisch „presentational“, zeigt nur an und meldet Ereignisse. Sie kennt keine Services. Sie bekommt alles über Eingaben, also „input“, und meldet alles über Ausgaben, also „output“. Beispiele sind das Suchfeld „CustomerFilter“ und die Zeile „CustomerListItem“.\n\nWeil Darstellungskomponenten nichts von ihrer Umgebung wissen, kann man sie leicht an anderer Stelle einsetzen und leicht testen. Rechts sind die beiden Arten gegenübergestellt.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Container",
+              "items": [
+                "lädt Daten",
+                "hält Zustand",
+                "inject(Service)"
+              ]
+            },
+            "right": {
+              "title": "Darstellung",
+              "items": [
+                "input(): Daten",
+                "output(): Ereignisse",
+                "keine Services"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Datenfluss: Daten runter, Ereignisse hoch",
+          "bullets": [
+            "Container besitzt den Zustand: filterText = signal('')",
+            "Nach unten per Property Binding: [value]=\"filterText()\"",
+            "Kind liest ihn über value = input('')",
+            "Benutzer tippt: Kind ruft changed.emit(text)",
+            "Nach oben per Event Binding: (changed)=\"onFilterChanged($event)\"",
+            "Nur der Container ändert den Zustand: eine Richtung, ein Besitzer"
+          ],
+          "notes": "Folie: „Datenfluss: Daten runter, Ereignisse hoch“.\n\nZwischen Container und Darstellungskomponente fließen die Daten in einem festen Kreislauf. Der Container besitzt den Zustand, hier den Filtertext als Signal. Über eine Eigenschaftsbindung mit eckigen Klammern gibt er den Wert nach unten an das Kind. Das Kind liest ihn über „input“.\n\nWenn der Benutzer tippt, ändert das Kind den Wert nicht selbst. Es meldet das Ereignis mit „emit“ nach oben. Der Container hört mit einer Ereignisbindung in runden Klammern zu und setzt sein Signal neu. Danach fließt der neue Wert wieder nach unten.\n\nDie Regel lautet: Daten fließen nach unten, Ereignisse nach oben. Jeder Zustand hat genau einen Besitzer. Das Diagramm rechts zeigt diesen Kreislauf.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "Container hält\nfilterText",
+              "[value] nach\nunten: input",
+              "Kind: Benutzer\ntippt",
+              "(changed) nach\noben: output"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "Darstellungskomponente: CustomerFilter",
+          "code": "@Component({\n  selector: 'customer-filter', templateUrl: './customer-filter.component.html'\n})\nexport class CustomerFilterComponent {\n  value = input('');                 // Eingabe: aktueller Filtertext\n  changed = output<string>();        // Ausgabe: neuer Text\n  cleared = output<void>();          // Ausgabe: ohne Nutzdaten\n\n  searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');\n\n  onInput(event: Event) {\n    this.changed.emit((event.target as HTMLInputElement).value);\n  }\n  clear() {\n    this.cleared.emit();\n    this.searchInput()?.nativeElement.focus();\n  }\n}",
+          "notes": "Codefolie „Darstellungskomponente: CustomerFilter“.\n\nDas ist das Suchfeld aus der Musterlösung von Übung 31. Die Komponente kennt weder Kundendaten noch Services. Sie hat eine Eingabe „value“ für den aktuellen Text und zwei Ausgaben: „changed“ meldet einen neuen Text, „cleared“ meldet, dass der Filter geleert werden soll.\n\n„viewChild“ liefert ein Signal auf das Eingabefeld im eigenen Template. Es ist mit dem Eingabefeld aus der Kundenliste hierher umgezogen. Die Methode „onInput“ liest den Text aus dem Ereignis und meldet ihn nach oben. Die Methode „clear“ meldet das Leeren und setzt danach den Fokus in das Eingabefeld.\n\nWichtig: Die Komponente ändert ihren Eingabewert nicht selbst. Sie meldet nur. Ob der Text wirklich übernommen wird, entscheidet der Container."
+        },
+        {
+          "type": "content",
+          "title": "input() und output() im Detail",
+          "bullets": [
+            "input(''): Angular liefert ein schreibgeschütztes Signal (InputSignal<string>)",
+            [
+              "Startwert '' gilt, solange die Eltern nichts binden",
+              1
+            ],
+            "input.required<T>(): Eltern müssen binden, sonst Fehler beim Kompilieren",
+            "output<T>(): liefert ein OutputEmitterRef<T> mit emit(wert)",
+            [
+              "output<void>(): emit() ohne Argument",
+              1
+            ],
+            "Im Eltern-Template: $event ist genau der Wert aus emit(...)"
+          ],
+          "notes": "Folie: „input() und output() im Detail“.\n\nDie Funktion „input“ erzeugt eine Eingabe. Angular liefert dafür ein Signal, das die Komponente nur lesen, aber nicht setzen kann. Der Typ heißt „InputSignal“. Der Wert in den Klammern ist der Startwert. Er gilt, solange die Eltern-Komponente nichts bindet. „input.required“ ist eine Pflichteingabe: Fehlt die Bindung im Eltern-Template, meldet schon der Compiler einen Fehler.\n\nDie Funktion „output“ erzeugt eine Ausgabe. Man bekommt ein Objekt mit der Methode „emit“. Mit „emit“ schickt das Kind einen Wert nach oben. Bei „output“ mit dem Typ „void“, also „kein Wert“, ruft man „emit“ ohne Argument auf.\n\nIm Template der Eltern-Komponente heißt der gesendete Wert „$event“. Das ist genau der Wert, den das Kind an „emit“ übergeben hat. Rechts sieht man, wie der Container die Ausgaben verbindet.",
+          "diagram": {
+            "kind": "code",
+            "title": "customer-list.component.html",
+            "text": "<customer-filter\n  [value]=\"filterText()\"\n  (changed)=\n    \"onFilterChanged($event)\"\n  (cleared)=\n    \"onFilterCleared()\" />\n\n// in der Klasse:\nonFilterChanged(t: string) {\n  this.filterText.set(t);\n}"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Zeilenkomponente: Attribut-Selektor und host",
+          "code": "@Component({\n  selector: 'li[customer-list-item]',     // Attribut-Selektor auf <li>\n  imports: [RouterLink],\n  templateUrl: './customer-list-item.component.html',\n  host: {\n    '[class.discontinued]': 'customer().discontinued',  // Klasse am Host-Element\n    '[class.selected]': 'selected()',\n    '(click)': 'chosen.emit(customer())'                 // Klick am Host-Element\n  }\n})\nexport class CustomerListItemComponent {\n  customer = input.required<Customer>();\n  selected = input(false);\n  chosen = output<Customer>();\n}\n\n// Container: <li customer-list-item [customer]=\"customer\"\n//   [selected]=\"isSelectedCustomer(customer)\" (chosen)=\"listItemClicked($event)\">",
+          "notes": "Codefolie „Zeilenkomponente: Attribut-Selektor und host“.\n\nDas ist die Komponente für eine Zeile der Kundenliste. Der Selektor ist ein „Attribut-Selektor“: Die Komponente hängt sich an ein normales „li“-Element mit dem Attribut „customer-list-item“. So bleibt im Container eine gültige Liste aus „ul“ und „li“ erhalten. Ein eigenes Element zwischen „ul“ und „li“ wäre kein gültiges HTML.\n\nMit „host“ im Dekorator setzt man Bindungen direkt am Host-Element, also am „li“ selbst. Die Klasse „discontinued“ wird gesetzt, wenn der Kunde nicht mehr aktiv ist. Die Klasse „selected“ folgt der Eingabe „selected“. Ein Klick auf die Zeile sendet den Kunden über „chosen“ nach oben.\n\nDie Komponente hat eine Pflichteingabe „customer“, eine optionale Eingabe „selected“ mit dem Startwert „false“ und eine Ausgabe „chosen“. Unten steht als Kommentar, wie der Container die Zeile verwendet."
         },
         {
           "type": "content",
           "title": "Komposition statt Vererbung",
           "bullets": [
-            "Wiederverwendung über Komposition: <ng-content> (Übung 29), Direktiven, kleine Komponenten",
-            "Vererbung zwischen Komponenten vermeiden",
+            "Komposition: größere Bausteine aus kleinen zusammensetzen",
             [
-              "Gründe: versteckte Kopplung und Eigenheiten der Dekoratoren",
+              "<ng-content> (Übung 29), Kind-Komponenten, Direktiven, Services",
               1
             ],
-            "Gemeinsames Verhalten besser in Services oder Host-Direktiven (hostDirectives)"
+            "Vererbung: Komponente erweitert eine Basisklasse (extends)",
+            [
+              "versteckte Kopplung: Änderung an der Basis trifft alle",
+              1
+            ],
+            [
+              "nur eine Basisklasse möglich, Template wird nicht geerbt",
+              1
+            ],
+            "Faustregel: Verhalten hineinholen statt erben"
           ],
-          "notes": "Folie: „Komposition statt Vererbung“.\n\n„Komposition“ bedeutet, dass man größere Bausteine aus kleineren zusammensetzt. Das kennen die Teilnehmer schon aus Übung 29: Mit „ng-content“ setzt die Eltern-Komponente Inhalt in eine wiederverwendbare Komponente ein. Auch Direktiven und kleine Komponenten dienen dazu.\n\nVererbung, bei der eine Komponente die Klasse einer anderen erweitert, sollte man bei Komponenten vermeiden. Sie erzeugt versteckte Abhängigkeiten, und die Dekoratoren verhalten sich dabei teilweise unerwartet.\n\nGemeinsames Verhalten legt man besser in Services oder in sogenannte „Host-Direktiven“. Das sind Direktiven, die eine Komponente auf sich selbst anwendet.",
+          "notes": "Folie: „Komposition statt Vererbung“.\n\n„Komposition“ bedeutet, dass man größere Bausteine aus kleineren zusammensetzt. Das kennen die Teilnehmer schon: Mit „ng-content“ setzt die Eltern-Komponente Inhalt in eine andere Komponente ein. Auch Kind-Komponenten, Direktiven und Services sind Formen der Komposition.\n\nBei „Vererbung“ erweitert eine Komponenten-Klasse mit „extends“ eine Basisklasse. Das klingt praktisch, hat aber Nachteile. Jede Änderung an der Basisklasse wirkt auf alle abgeleiteten Klassen, auch dort, wo man es nicht erwartet. Eine Klasse kann nur eine Basisklasse haben. Und das Template und die Stile werden nicht geerbt.\n\nDie Faustregel lautet deshalb: Gemeinsames Verhalten holt man in die Komponente hinein, statt es zu erben. Die nächsten Folien zeigen beide Wege im Code.",
           "diagram": {
             "kind": "compare",
             "left": {
               "title": "Vererbung (meiden)",
               "items": [
-                "BaseListComponent",
-                "CustomerList extends Base"
+                "BaseList",
+                "CustomerList\nextends BaseList",
+                "Kopplung an Basis"
               ]
             },
             "right": {
               "title": "Komposition",
               "items": [
-                "Service / Direktive",
-                "<ng-content> Slots"
+                "Service per inject()",
+                "hostDirectives",
+                "<ng-content>"
               ]
             }
           }
+        },
+        {
+          "type": "code",
+          "title": "Vererbung: so sieht es aus",
+          "code": "// Basisklasse mit Angular-Funktionen braucht einen eigenen Dekorator\n@Directive()\nexport abstract class BaseListComponent<T> {\n  selected = signal<T | undefined>(undefined);\n  select(item: T) { this.selected.set(item); }\n  isSelected(item: T) { return item === this.selected(); }\n}\n\n@Component({ selector: 'customer-list', templateUrl: './customer-list.component.html' })\nexport class CustomerListComponent extends BaseListComponent<Customer> {\n  // erbt selected, select, isSelected\n}\n\n// Probleme:\n// - Template und Styles werden nicht geerbt, nur Klassenlogik\n// - Konstruktor-Parameter der Basis müssen per super(...) durchgereicht werden\n// - Jede Änderung an BaseListComponent trifft alle Listen der Anwendung\n// - Eine zweite Basisklasse (z. B. für Sortierung) ist nicht möglich",
+          "notes": "Codefolie „Vererbung: so sieht es aus“.\n\nHier wird gemeinsames Auswahlverhalten in eine Basisklasse gelegt. Die Basisklasse hält die Auswahl als Signal und bietet zwei Methoden an. Weil sie Angular-Funktionen nutzt, braucht sie einen eigenen leeren Dekorator „@Directive“. Ohne ihn meldet Angular einen Fehler. Die Kundenliste erweitert diese Basisklasse mit „extends“ und erbt alles.\n\nUnten stehen die Probleme. Template und Stile werden nicht geerbt, nur die Logik der Klasse. Wenn die Basisklasse einen Konstruktor mit Parametern hat, muss jede Unterklasse ihn mit „super“ aufrufen. Jede Änderung an der Basisklasse wirkt auf alle Listen der Anwendung. Und eine zweite Basisklasse, etwa für Sortierung, ist in TypeScript nicht möglich."
+        },
+        {
+          "type": "code",
+          "title": "Komposition: Verhalten als Service",
+          "code": "// Gemeinsames Verhalten in einer eigenen Klasse, ohne providedIn\n@Injectable()\nexport class Selection<T> {\n  readonly selected = signal<T | undefined>(undefined);\n  select(item: T) { this.selected.set(item); }\n  isSelected(item: T) { return item === this.selected(); }\n}\n\n@Component({\n  selector: 'customer-list', templateUrl: './customer-list.component.html',\n  providers: [Selection]             // jede Liste bekommt ihre eigene Instanz\n})\nexport class CustomerListComponent {\n  readonly selection = inject<Selection<Customer>>(Selection);\n}\n\n// Template: [selected]=\"selection.isSelected(customer)\"\n// Weitere Bausteine (Sortierung, Paging) einfach zusätzlich injizieren",
+          "notes": "Codefolie „Komposition: Verhalten als Service“.\n\nDasselbe Auswahlverhalten steckt jetzt in einer eigenen Klasse „Selection“. Sie ist ein Service ohne „providedIn“. Das bedeutet: Sie gilt nicht für die ganze Anwendung, sondern wird gezielt bereitgestellt.\n\nDie Kundenliste trägt „Selection“ in ihre „providers“ ein. Dadurch bekommt jede Liste ihre eigene Instanz, und zwei Listen auf einer Seite stören sich nicht. Mit „inject“ holt sich die Komponente diese Instanz. Im Template ruft sie dann zum Beispiel „selection.isSelected“ auf.\n\nDer Vorteil: Man kann beliebig viele solcher Bausteine kombinieren, etwa zusätzlich Sortierung und Blättern. Jeder Baustein ist für sich testbar, und es gibt keine starre Klassenhierarchie."
+        },
+        {
+          "type": "content",
+          "title": "hostDirectives: Direktiven mitbringen",
+          "bullets": [
+            "Direktive: fügt einem Element Verhalten hinzu (z. B. Hervorheben)",
+            "Normal: Nutzer schreibt sie ins Template: <li appHighlight>",
+            "hostDirectives: Komponente bringt die Direktive selbst mit",
+            [
+              "Angular erzeugt sie automatisch am Host-Element",
+              1
+            ],
+            "Inputs und Outputs der Direktive nur, wenn ausdrücklich freigegeben",
+            "Komponente kann die Direktive per inject() nutzen"
+          ],
+          "notes": "Folie: „hostDirectives: Direktiven mitbringen“.\n\nEine „Direktive“ fügt einem Element Verhalten hinzu, zum Beispiel ein Hervorheben, wenn die Maus darüber ist. Normalerweise schreibt der Nutzer einer Komponente die Direktive selbst ins Template, als Attribut am Element.\n\nMit „hostDirectives“ bringt die Komponente die Direktive selbst mit. Angular erzeugt die Direktive dann automatisch an dem Element, an dem die Komponente sitzt. Das nennt man das „Host-Element“. Der Nutzer muss nichts mehr dazuschreiben.\n\nEingaben und Ausgaben der Direktive sind dabei zunächst nicht von außen erreichbar. Man muss sie ausdrücklich freigeben und kann sie dabei umbenennen. Die Komponente kann die Direktive außerdem mit „inject“ holen und ihre Werte lesen. Rechts ist der Aufbau skizziert.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "<li customer-list-item>",
+              "Angular erzeugt zuerst\nHighlight (Direktive)",
+              "dann CustomerListItem\n(Komponente)",
+              "Beide wirken am\nselben <li>"
+            ],
+            "highlight_last": true,
+            "note": "Host-Direktiven laufen vor der Komponente"
+          }
+        },
+        {
+          "type": "code",
+          "title": "hostDirectives im Code",
+          "code": "@Directive({\n  selector: '[appHighlight]',\n  host: {\n    '[style.background]': 'active() ? color() : null',\n    '(mouseenter)': 'active.set(true)',\n    '(mouseleave)': 'active.set(false)'\n  }\n})\nexport class Highlight { color = input('lightyellow'); active = signal(false); }\n\n@Component({\n  selector: 'li[customer-list-item]',\n  hostDirectives: [{ directive: Highlight, inputs: ['color: highlightColor'] }]\n})\nexport class CustomerListItemComponent { /* wie bisher */ }\n// Nutzung: <li customer-list-item highlightColor=\"lightblue\" [customer]=\"c\">",
+          "notes": "Codefolie „hostDirectives im Code“.\n\nOben steht eine kleine Direktive „Highlight“. Sie färbt das Element ein, solange die Maus darüber ist. Die Farbe kommt aus der Eingabe „color“. Ob die Maus gerade darüber ist, merkt sie sich im Signal „active“. Über „host“ reagiert sie auf das Hineinfahren und Hinausfahren der Maus.\n\nDie Zeilenkomponente trägt die Direktive unter „hostDirectives“ ein. Jede Zeile wird dadurch automatisch hervorgehoben. Mit „inputs“ wird die Eingabe „color“ freigegeben und gleichzeitig umbenannt: Von außen heißt sie „highlightColor“. Ohne diesen Eintrag könnte man die Farbe von außen nicht setzen.\n\nUnten sieht man die Nutzung im Container: Die Farbe wird als Attribut an der Zeile angegeben, ohne dass „appHighlight“ dort stehen muss."
+        },
+        {
+          "type": "content",
+          "title": "hostDirectives: Regeln",
+          "bullets": [
+            "Nur Standalone-Direktiven (in Angular 21 der Standard)",
+            "Der Selektor der Direktive spielt keine Rolle",
+            "Inputs und Outputs: inputs: ['name'] oder ['name: alias']",
+            "Reihenfolge: erst Host-Direktiven, dann die Komponente",
+            "Zugriff aus der Komponente: inject(Highlight)",
+            "Nutzen: gemeinsames Verhalten ohne Basisklasse, mehrere kombinierbar"
+          ],
+          "notes": "Folie: „hostDirectives: Regeln“.\n\nFür Host-Direktiven gelten einige Regeln. Es dürfen nur eigenständige Direktiven sein, sogenannte „Standalone“-Direktiven. In Angular 21 ist das der Standard. Der Selektor der Direktive wird dabei nicht verwendet, denn Angular erzeugt sie ohnehin.\n\nEingaben und Ausgaben gibt man mit „inputs“ und „outputs“ frei. Man schreibt entweder nur den Namen oder den Namen, einen Doppelpunkt und einen neuen Namen für außen. Angular erzeugt zuerst die Host-Direktiven und danach die Komponente. Deshalb kann die Komponente die Direktive mit „inject“ holen.\n\nDer Nutzen: Gemeinsames Verhalten lässt sich ohne Basisklasse wiederverwenden, und eine Komponente kann mehrere solcher Direktiven gleichzeitig mitbringen."
         },
         {
           "type": "content",
@@ -47,12 +257,12 @@
             "Ebene 1: Komponente – Darstellung und Eingaben",
             "Ebene 2: Service oder Store – Fachlogik und Zustand",
             "Ebene 3: API-Client (HttpClient) – Zugriff nach außen",
-            "Abhängigkeiten zeigen nur nach unten: Komponente kennt Service, Service kennt Client",
+            "Abhängigkeiten zeigen nur nach unten",
             "Der Service kennt keine Komponente",
-            "Reine Berechnungen (z. B. aktive Kunden) als pure Funktion oder Pipe, ohne Angular testbar",
-            "Keine Fachregeln im Template: komplexe @if-Bedingungen in ein computed oder eine Pipe"
+            "Reine Berechnungen als pure Funktion oder Pipe: ohne Angular testbar",
+            "Keine Fachregeln im Template: lieber computed oder Pipe"
           ],
-          "notes": "Folie: „Trennung von Oberfläche und Fachlogik“.\n\nEine Anwendung lässt sich in drei Ebenen gliedern. Oben steht die Komponente. Sie zeigt Daten an und nimmt Eingaben entgegen. In der Mitte steht ein Service oder Store mit Fachlogik und Zustand. Unten steht der API-Client, zum Beispiel der „HttpClient“, der mit dem Server spricht.\n\nDie Abhängigkeiten zeigen nur nach unten. Der Service weiß nichts von der Komponente. Reine Berechnungen schreibt man als „pure Funktion“ oder Pipe, dann lassen sie sich ohne Angular testen. Fachliche Regeln gehören nicht in komplizierte Bedingungen im Template, dafür nimmt man ein „computed“ oder eine Pipe.",
+          "notes": "Folie: „Trennung von Oberfläche und Fachlogik“.\n\nEine Anwendung lässt sich in drei Ebenen gliedern. Oben steht die Komponente. Sie zeigt Daten an und nimmt Eingaben entgegen. In der Mitte steht ein Service oder Store mit Fachlogik und Zustand. Unten steht der API-Client, zum Beispiel der „HttpClient“, der mit dem Server spricht.\n\nDie Abhängigkeiten zeigen nur nach unten. Die Komponente kennt den Service, der Service kennt den Client. Der Service weiß nichts von der Komponente. Reine Berechnungen schreibt man als „pure Funktion“, also als Funktion, die nur aus ihren Parametern ein Ergebnis berechnet. Dann lassen sie sich ohne Angular testen. Fachliche Regeln gehören nicht in komplizierte Bedingungen im Template, dafür nimmt man ein „computed“ oder eine Pipe.",
           "diagram": {
             "kind": "layers",
             "layers": [
@@ -65,7 +275,7 @@
         },
         {
           "type": "content",
-          "title": "Wartbarkeit: Merkmale einer stabilen Codebasis",
+          "title": "Wartbarkeit: Merkmale stabiler Codebasen",
           "bullets": [
             "Namen sagen, was etwas ist (CustomerListComponent), nicht wie (Helper2)",
             "Dateistruktur nach Features (customer/, auth/, shared/), nicht nach Typ",
@@ -74,43 +284,65 @@
             "Automatische Prüfung: ESLint, Prettier und Tests in der Pipeline",
             "Entscheidungen festhalten: kurze Notiz (ADR), z. B. „Warum Store statt Service?“"
           ],
-          "notes": "Folie: „Wartbarkeit: Merkmale einer stabilen Codebasis“.\n\nEine Codebasis ist gut wartbar, wenn man sie auch nach langer Zeit noch versteht und sicher ändern kann. Die Folie nennt sechs Merkmale.\n\nNamen sollen sagen, was etwas ist, zum Beispiel „CustomerListComponent“, und nicht, wie es funktioniert. Die Ordner sind nach Fachbereichen aufgebaut, etwa „customer“ und „auth“, und nicht nach der Art der Dateien. Man nutzt TypeScript im strengen Modus und vermeidet „any“. Funktionen und Komponenten sind klein und wenig verschachtelt.\n\nWerkzeuge wie „ESLint“ und „Prettier“ sowie automatische Tests laufen in der Pipeline, das ist die automatische Prüfstrecke bei jeder Änderung. Schließlich werden wichtige Entscheidungen kurz aufgeschrieben. Eine solche Notiz heißt „ADR“, das steht für „Architecture Decision Record“, also Protokoll einer Architekturentscheidung."
+          "notes": "Folie: „Wartbarkeit: Merkmale stabiler Codebasen“.\n\nEine Codebasis ist gut wartbar, wenn man sie auch nach langer Zeit noch versteht und sicher ändern kann. Die Folie nennt sechs Merkmale.\n\nNamen sollen sagen, was etwas ist, zum Beispiel „CustomerListComponent“, und nicht, wie es funktioniert. Die Ordner sind nach Fachbereichen aufgebaut, etwa „customer“ und „auth“, und nicht nach der Art der Datei. TypeScript läuft im strengen Modus „strict“, und der Typ „any“, der jede Prüfung abschaltet, wird nur mit Begründung verwendet.\n\nFunktionen und Komponenten bleiben klein. Werkzeuge wie „ESLint“ und „Prettier“ prüfen und formatieren den Code automatisch, und Tests laufen bei jeder Änderung. Wichtige Entscheidungen hält man in einer kurzen Notiz fest. Diese Notiz heißt „ADR“, das steht für „Architecture Decision Record“, also Aufzeichnung einer Architekturentscheidung."
         },
         {
           "type": "content",
           "title": "Struktur und Testbarkeit hängen zusammen",
           "bullets": [
-            "Kleine Komponenten mit klaren Inputs und Outputs: Test in etwa 5 Zeilen",
-            "Viele versteckte Abhängigkeiten (inject überall, globale Zustände): Test braucht viel Mocking",
-            "Faustregel: Wenn ein Test schwer zu schreiben ist, ist oft die Struktur das Problem",
+            "Kleine Komponente mit klaren Inputs und Outputs: Test in wenigen Zeilen",
+            "Viele versteckte Abhängigkeiten: Test braucht viel Mocking",
+            "Pflicht-Input vor dem ersten Rendern setzen: setInput(...)",
+            "Output prüfen: abonnieren und Wert vergleichen",
+            "Faustregel: Schwer zu testen heißt oft schlecht geschnitten",
             "Vertiefung im Kapitel zur Testbarkeit"
           ],
-          "notes": "Folie: „Struktur und Testbarkeit hängen zusammen“.\n\nGute Struktur und gute Testbarkeit gehören zusammen. Eine kleine Komponente mit klaren Eingaben und Ausgaben lässt sich mit wenigen Zeilen testen.\n\nHat eine Komponente dagegen viele versteckte Abhängigkeiten, zum Beispiel weil überall „inject“ aufgerufen wird oder weil sie globale Zustände nutzt, dann muss der Test sehr viel nachbauen. Dieses Nachbauen nennt man „Mocking“.\n\nDaraus ergibt sich eine Faustregel: Wenn ein Test schwer zu schreiben ist, liegt das oft nicht am Test, sondern an der Struktur des Codes. Das Thema wird im Kapitel zur Testbarkeit vertieft."
+          "notes": "Folie: „Struktur und Testbarkeit hängen zusammen“.\n\nEine kleine Darstellungskomponente mit klaren Eingaben und Ausgaben lässt sich in wenigen Zeilen testen. Rechts steht ein Beispiel für die Zeilenkomponente. Mit „setInput“ setzt der Test die Pflichteingabe „customer“, bevor die Komponente zum ersten Mal gezeichnet wird. Sonst meldet Angular einen Fehler, weil die Pflichteingabe fehlt. Danach abonniert der Test die Ausgabe „chosen“, klickt auf die Zeile und prüft den gemeldeten Wert.\n\nHat eine Komponente dagegen viele versteckte Abhängigkeiten, etwa viele Services oder globalen Zustand, muss der Test viel nachbauen. Das nennt man „Mocking“. Die Faustregel lautet: Wenn ein Test schwer zu schreiben ist, liegt das Problem oft in der Struktur. Vertieft wird das im Kapitel zur Testbarkeit.",
+          "diagram": {
+            "kind": "code",
+            "title": "customer-list-item.spec.ts",
+            "text": "const f = TestBed.createComponent(\n  CustomerListItemComponent);\nf.componentRef.setInput(\n  'customer', anna);\nf.detectChanges();\n\nlet got: Customer | undefined;\nf.componentInstance.chosen\n  .subscribe(c => got = c);\nf.nativeElement.click();\nexpect(got).toBe(anna);"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Stolperfallen beim Aufteilen",
+          "bullets": [
+            "Kind ändert Eingabedaten selbst: input() ist schreibgeschützt",
+            [
+              "Stattdessen Ereignis per output() melden",
+              1
+            ],
+            "Werte durch viele Ebenen durchreichen: lieber Service oder Store",
+            "Ungültiges HTML durch Komponenten-Tags in <ul> oder <table>",
+            [
+              "Lösung: Attribut-Selektor wie li[customer-list-item]",
+              1
+            ],
+            "Zu fein zerlegt: Komponenten ohne eigene Aufgabe wieder zusammenlegen"
+          ],
+          "notes": "Folie: „Stolperfallen beim Aufteilen“.\n\nErste Stolperfalle: Das Kind will die Daten ändern, die es über eine Eingabe bekommen hat. Das geht mit „input“ nicht, denn das Signal ist schreibgeschützt. Das ist Absicht: Der Besitzer der Daten ist der Container. Das Kind meldet stattdessen ein Ereignis mit „output“.\n\nZweite Stolperfalle: Ein Wert wird durch viele Ebenen nach unten durchgereicht, obwohl die mittleren Ebenen ihn gar nicht brauchen. Dann ist ein gemeinsamer Service oder Store besser.\n\nDritte Stolperfalle: Ein eigenes Element wie „customer-list-item“ direkt in einer Liste „ul“ oder in einer Tabelle ist kein gültiges HTML. Die Lösung ist ein Attribut-Selektor, wie in Übung 31. Und schließlich: Wer zu fein zerlegt, bekommt Komponenten ohne eigene Aufgabe. Diese legt man wieder zusammen."
         },
         {
           "type": "exercise",
           "title": "Übung 31: Kundenliste aufteilen",
           "bullets": [
-            "1. CustomerFilterComponent: Eingabefeld und Löschen-Button, viewChild-Fokus wandert mit",
+            "1. CustomerFilterComponent: Eingabefeld und Button „Filter leeren & fokussieren“",
             [
-              "value = input(''), changed = output<string>(), cleared = output<void>()",
+              "value = input(''), changed = output<string>(), cleared = output<void>(); viewChild wandert mit",
               1
             ],
-            "2. CustomerListItemComponent erstellen",
+            "2. CustomerListItemComponent für eine Zeile (Stile discontinued und selected wandern mit)",
             [
-              "customer = input.required<Customer>(), selected = input(false)",
-              1
-            ],
-            [
-              "chosen = output<Customer>()",
+              "customer = input.required<Customer>(), selected = input(false), chosen = output<Customer>()",
               1
             ],
             "3. CustomerListComponent behält nur: Daten laden, Filterzustand, Auswahlzustand",
-            "4. Das Verhalten der App darf sich nicht ändern (Smoke-Test im Browser)",
+            "4. Smoke-Test: Laden, Filtern, Fokus, Markieren, Details; ng build und ng test grün",
             "5. Reflexion: Welche Komponente ist jetzt leicht testbar? Welche Abhängigkeiten sind weg?",
             "Musterlösung: 31_komponenten_aufteilen (baut auf 29_contentProjection auf)"
           ],
-          "notes": "Folie: „Übung 31: Kundenliste aufteilen“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 31 im Ordner 31_komponenten_aufteilen. Sie baut auf dem Ergebnis von Übung 29 auf.\n\nDie Teilnehmer zerlegen die Kundenliste. Zuerst erstellen sie eine Filter-Komponente mit Eingabefeld und Löschen-Button, mit einem Eingang für den Text und zwei Ausgängen für geänderten Text und Löschen. Der Fokus-Mechanismus mit „viewChild“ zieht mit um. Dann erstellen sie eine Komponente für einen einzelnen Listeneintrag. Die Liste behält nur Laden, Filterzustand und Auswahlzustand. Das Verhalten der App darf sich nicht ändern. Der „track“-Ausdruck bleibt zunächst unverändert."
+          "notes": "Folie: „Übung 31: Kundenliste aufteilen“.\n\nErklärung für die Dolmetscherin:\nIn dieser Übung wird die große Kundenliste in drei Komponenten zerlegt. Zuerst entsteht das Suchfeld als eigene Komponente mit einer Eingabe für den Text und zwei Ausgaben für „Text geändert“ und „Filter geleert“. Der Fokus-Mechanismus mit „viewChild“ zieht mit um. Danach entsteht eine Komponente für eine einzelne Zeile mit einer Pflichteingabe für den Kunden, einer Eingabe für „ausgewählt“ und einer Ausgabe für den Klick.\n\nDie Kundenliste behält nur das Laden der Daten, den Filterzustand und den Auswahlzustand. Das Verhalten der App darf sich nicht ändern. Das prüft man im Browser und mit Build und Tests. Am Ende überlegt man, welche Komponente jetzt leicht zu testen ist. Hilfreich sind der Attribut-Selektor auf „li“ und „host“ im Dekorator, wie auf den Folien gezeigt."
         }
       ]
     },
@@ -121,38 +353,127 @@
         {
           "type": "divider",
           "title": "Reaktivität und Datenfluss",
-          "notes": "Kapitelübergangsfolie „Reaktivität und Datenfluss“ – Dieser Abschnitt zeigt, wie man Zustand in Angular mit Signals sauber organisiert. Es geht um die Frage, welcher Baustein für welche Aufgabe passt, wann ein „effect“ sinnvoll ist und welche typischen Fehler es gibt. Er endet mit Übung 32, in der die Teilnehmer solche Fehler selbst finden und beheben."
+          "notes": "Kapitelübergangsfolie „Reaktivität und Datenfluss“ – Nach dem Aufteilen der Komponenten geht es jetzt darum, wie Daten in einer Angular-Anwendung fließen und wie Änderungen automatisch an der richtigen Stelle ankommen. Im Mittelpunkt stehen die Signals: „signal“, „computed“, „linkedSignal“ und „effect“, dazu die Brücke zu RxJS. Der Abschnitt zeigt auch typische Fehler und endet mit Übung 32."
         },
         {
           "type": "content",
           "title": "Grundmodell: Quelle, Ableitung, Wirkung",
           "bullets": [
             "Quelle (signal): hält Zustand und wird gesetzt",
-            "Ableitung (computed): berechnet aus den Quellen neue Werte",
-            "Wirkung (Template oder effect): greift nach außen – Oberfläche, Speicher, Logging",
-            "Reihenfolge: Quelle, dann Ableitung, dann Wirkung",
-            "Angular verfolgt automatisch, wer welches Signal liest (Abhängigkeitsgraph)",
-            "Nichts muss von Hand abonniert werden"
+            "Ableitung (computed): berechnet aus Quellen neue Werte",
+            "Wirkung (Template oder effect): greift nach außen",
+            [
+              "Oberfläche, Browser-Speicher, Logging",
+              1
+            ],
+            "Angular verfolgt selbst, wer welches Signal liest",
+            "Nichts muss von Hand abonniert oder abgemeldet werden"
           ],
-          "notes": "Folie: „Grundmodell: Quelle, Ableitung, Wirkung“.\n\nDas Grundmodell der Reaktivität hat drei Stufen. Die „Quelle“ ist ein „signal“, ein Wert, der Zustand speichert und gesetzt werden kann. Die „Ableitung“ ist ein „computed“, ein berechneter Wert, der aus anderen Werten entsteht. Die „Wirkung“ führt etwas aus, zum Beispiel das Anzeigen im Template oder das Speichern im Browser.\n\nAngular merkt sich automatisch, welcher Teil welches Signal liest. Diese Beziehungen heißen „Abhängigkeitsgraph“. Ändert sich eine Quelle, aktualisiert Angular genau die betroffenen Stellen. Man muss nichts von Hand abonnieren.",
+          "notes": "Folie: „Grundmodell: Quelle, Ableitung, Wirkung“.\n\nReaktivität mit Signals folgt einem einfachen Modell aus drei Teilen. Eine „Quelle“ ist ein Signal, das einen Wert hält und gesetzt werden kann, zum Beispiel der Filtertext. Eine „Ableitung“ ist ein „computed“. Es berechnet aus Quellen einen neuen Wert, zum Beispiel die gefilterte Kundenliste. Eine „Wirkung“ greift nach außen. Das ist das Template, das die Oberfläche zeichnet, oder ein „effect“, der zum Beispiel etwas im Browser speichert.\n\nDas Diagramm rechts zeigt diesen Graphen. Angular merkt sich selbst, wer welches Signal liest. Ändert sich eine Quelle, werden alle betroffenen Ableitungen und Wirkungen aktualisiert. Man muss nichts von Hand abonnieren und nichts abmelden.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Quelle: filterText\nsignal('')",
+              "Ableitung: visible\ncomputed(...)",
+              "Wirkung: Template\noder effect(...)"
+            ],
+            "highlight_last": true,
+            "note": "Änderungen fließen in Pfeilrichtung"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Grundmodell im Code",
+          "code": "export class CustomerListComponent {\n  // Quellen: halten Zustand\n  customers = signal<Customer[]>([]);\n  filter = signal('');\n\n  // Ableitung: liest zwei Quellen\n  visible = computed(() =>\n    this.customers().filter(c => c.lastname.includes(this.filter()))\n  );\n\n  constructor() {\n    // Wirkung: liest die Ableitung, schreibt nach außen\n    effect(() => console.log('Treffer:', this.visible().length));\n  }\n}\n\n// Template (ebenfalls eine Wirkung):  @for (c of visible(); track c.id) { ... }",
+          "notes": "Codefolie „Grundmodell im Code“.\n\nHier sieht man die drei Teile in einer Komponente. Die Quellen sind die Signals „customers“ und „filter“. Sie halten die Kundenliste und den Filtertext. Die Ableitung „visible“ ist ein „computed“. Es liest beide Quellen und liefert nur die Kunden, deren Nachname den Filtertext enthält.\n\nIm Konstruktor steht ein „effect“. Er liest „visible“ und schreibt die Anzahl der Treffer in die Konsole des Browsers. Auch das Template ist eine Wirkung: Es liest „visible“ und zeichnet die Liste.\n\nÄndert sich der Filter, berechnet Angular „visible“ neu, zeichnet die Liste neu und führt den „effect“ erneut aus. Nirgends steht ein Abonnement oder ein Aufruf zur Aktualisierung."
+        },
+        {
+          "type": "content",
+          "title": "Wie Angular Abhängigkeiten erkennt",
+          "bullets": [
+            "Ein Signal lesen heißt: es aufrufen, z. B. filter()",
+            "Reaktiver Kontext: computed, effect, Template, linkedSignal",
+            "Angular merkt sich den gerade laufenden Leser",
+            "Jedes gelesene Signal meldet sich bei diesem Leser an",
+            "Kein reaktiver Kontext: Konstruktor, Event-Handler, setTimeout",
+            [
+              "Dort gelesen: nur der aktuelle Wert, keine Abhängigkeit",
+              1
+            ]
+          ],
+          "notes": "Folie: „Wie Angular Abhängigkeiten erkennt“.\n\nEin Signal liest man, indem man es wie eine Funktion aufruft, zum Beispiel „filter“ mit runden Klammern. Wird dieses Lesen in einem „reaktiven Kontext“ ausgeführt, entsteht eine Abhängigkeit. Reaktive Kontexte sind die Funktion eines „computed“, die Funktion eines „effect“, das Template und die Berechnung eines „linkedSignal“.\n\nDer Ablauf ist im Diagramm rechts dargestellt. Bevor Angular zum Beispiel ein „computed“ ausführt, merkt es sich dieses „computed“ als aktuellen Leser. Jedes Signal, das während der Ausführung gelesen wird, trägt sich bei diesem Leser ein. Danach weiß Angular genau, wovon das „computed“ abhängt.\n\nIm Konstruktor, in einem Klick-Handler oder in einem Zeitgeber gibt es keinen reaktiven Kontext. Dort bekommt man nur den aktuellen Wert, aber es entsteht keine Abhängigkeit, und nichts läuft später automatisch erneut.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "computed startet",
+              "Angular: aktueller\nLeser = computed",
+              "filter() wird gelesen",
+              "Abhängigkeit:\nfilter → computed",
+              "computed fertig"
+            ],
+            "highlight_last": false
+          }
+        },
+        {
+          "type": "content",
+          "title": "Push und Pull: wie Änderungen ankommen",
+          "bullets": [
+            "set() ändert den Wert der Quelle",
+            "Push: Angular benachrichtigt alle Leser „du bist veraltet“",
+            [
+              "Es wird dabei noch nichts berechnet",
+              1
+            ],
+            "Template und effect werden zur Ausführung eingeplant",
+            "Pull: Ein computed rechnet erst, wenn jemand es liest",
+            "Gleiches Ergebnis wie vorher: Kette stoppt hier"
+          ],
+          "notes": "Folie: „Push und Pull: wie Änderungen ankommen“.\n\nAngular verbindet zwei Verfahren. Wenn eine Quelle mit „set“ einen neuen Wert bekommt, schickt Angular eine Nachricht an alle Leser: „Dein Wert ist vielleicht veraltet“. Das nennt man „Push“, also Schieben. Dabei wird noch nichts berechnet, es wird nur markiert. Templates und Effects, die betroffen sind, werden zur Ausführung eingeplant.\n\nBerechnet wird erst, wenn jemand den Wert wirklich braucht. Liest das Template ein „computed“, prüft das „computed“, ob sich seine Quellen geändert haben, und rechnet nur dann neu. Das nennt man „Pull“, also Ziehen.\n\nKommt bei der Neuberechnung derselbe Wert heraus wie vorher, gilt das „computed“ als unverändert. Dann müssen die Leser dahinter nichts tun. Das spart unnötige Arbeit.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "filter.set('M')",
+              "Push: Leser als\nveraltet markieren",
+              "Template / effect\neingeplant",
+              "Pull: computed rechnet\nbeim Lesen neu",
+              "Ergebnis gleich?\nDann Stopp"
+            ],
+            "highlight_last": false
+          }
+        },
+        {
+          "type": "content",
+          "title": "Glitch-Freiheit: keine Zwischenzustände",
+          "bullets": [
+            "Glitch: kurzer, falscher Mischwert aus alt und neu",
+            "Beispiel rechts: c hängt direkt und über b von a ab",
+            "Signals: Werte werden erst beim Lesen geholt (Pull)",
+            [
+              "c sieht immer a und b im selben Stand",
+              1
+            ],
+            "effect gibt nur 3 und danach 6 aus, nie 4",
+            "Mehrere set() hintereinander: ein einziger Lauf"
+          ],
+          "notes": "Folie: „Glitch-Freiheit: keine Zwischenzustände“.\n\nEin „Glitch“ ist ein kurzer, falscher Zwischenwert. Er entsteht, wenn ein Wert schon den neuen Stand einer Quelle sieht, aber noch den alten Stand einer anderen.\n\nIm Beispiel rechts hängt „c“ auf zwei Wegen von „a“ ab: direkt und über „b“, das doppelt so groß ist wie „a“. Am Anfang ist „a“ gleich 1, „b“ gleich 2 und „c“ gleich 3. Dann wird „a“ auf 2 gesetzt. Richtig ist danach 2 plus 4, also 6. Ein Glitch wäre der Mischwert 2 plus 2, also 4.\n\nBei Signals passiert das nicht. Weil Werte erst beim Lesen geholt werden, sieht „c“ immer einen gemeinsamen, aktuellen Stand. Der „effect“ gibt nur 3 und danach 6 aus. Das nennt man „glitch-frei“.",
           "diagram": {
             "kind": "code",
-            "title": "Quelle, Ableitung, Wirkung",
-            "text": "const filter = signal(\"\");\n\nconst visible = computed(() =>\n  customers().filter(c =>\n    c.lastname.includes(filter())));\n\neffect(() => {\n  console.log(visible().length);\n});"
+            "title": "Diamant-Abhängigkeit",
+            "text": "const a = signal(1);\nconst b = computed(() => a() * 2);\nconst c = computed(() =>\n  a() + b());\n\neffect(() => console.log(c()));\n// Ausgabe: 3\n\na.set(2);\n// Ausgabe: 6  (nie 4)"
           }
         },
         {
           "type": "content",
           "title": "Landkarte der Reaktivitäts-Bausteine",
           "bullets": [
-            "signal(): Zustand halten, schreibbar – z. B. Filtertext, Auswahl",
-            "computed(): Wert ableiten, nur lesbar – z. B. gefilterte Liste, Summen",
-            "linkedSignal(): abgeleitet, überschreibbar – z. B. Auswahl, die bei Listenwechsel zurückspringt",
-            "effect(): Nebenwirkung – z. B. localStorage, Logging, Drittbibliothek",
-            "resource() / httpResource(): asynchron laden – z. B. Daten vom Server",
+            "signal(): Zustand halten, schreibbar – Filtertext, Auswahl",
+            "computed(): Wert ableiten, nur lesbar – gefilterte Liste, Summen",
+            "linkedSignal(): abgeleitet, aber überschreibbar – Auswahl mit Rücksprung",
+            "effect(): Nebenwirkung – localStorage, Logging, Drittbibliothek",
+            "resource() / httpResource(): asynchron laden – Daten vom Server",
             "toSignal() / toObservable(): Brücke zu RxJS – z. B. Router-Ereignisse"
           ],
-          "notes": "Folie: „Landkarte der Reaktivitäts-Bausteine“.\n\nDie Folie ordnet die wichtigsten Bausteine. Ein „signal“ hält Zustand und ist schreibbar, zum Beispiel für einen Filtertext oder eine Auswahl. Ein „computed“ leitet einen Wert ab und ist nur lesbar, zum Beispiel eine gefilterte Liste oder eine Summe.\n\nEin „linkedSignal“ ist ebenfalls abgeleitet, kann aber überschrieben werden. Ein Beispiel ist eine Auswahl, die auf das erste Element zurückspringt, wenn sich die Liste ändert. Ein „effect“ führt eine Nebenwirkung aus, also etwas außerhalb der Signals, zum Beispiel Speichern im Browser oder Protokollieren.\n\nEine „resource“ oder „httpResource“ lädt Daten asynchron, etwa vom Server. Mit „toSignal“ und „toObservable“ verbindet man Signals mit RxJS, der Bibliothek für Datenströme.",
+          "notes": "Folie: „Landkarte der Reaktivitäts-Bausteine“.\n\nDiese Folie gibt einen Überblick über alle Bausteine, die in diesem Abschnitt vorkommen. „signal“ hält einen Zustand, den man ändern kann, zum Beispiel den Filtertext. „computed“ leitet einen Wert ab und ist nur lesbar. „linkedSignal“ ist ebenfalls abgeleitet, kann aber zusätzlich von Hand überschrieben werden.\n\n„effect“ ist für Nebenwirkungen, also für Dinge außerhalb von Angular, wie den Browser-Speicher. „resource“ und „httpResource“ laden Daten asynchron, das heißt mit Wartezeit, zum Beispiel vom Server. Sie wurden in einem früheren Kapitel behandelt. „toSignal“ und „toObservable“ verbinden Signals mit RxJS.\n\nDas Diagramm zeigt die Ebenen: Unten liegen die Quellen, in der Mitte die Ableitungen, oben die Wirkungen.",
           "diagram": {
             "kind": "layers",
             "layers": [
@@ -164,57 +485,216 @@
           }
         },
         {
+          "type": "code",
+          "title": "signal(): die vollständige API",
+          "code": "import { signal, isSignal, Signal, WritableSignal } from '@angular/core';\n\nconst count: WritableSignal<number> = signal(0);    // Startwert 0, Typ wird abgeleitet\nconst selected = signal<Customer | undefined>(undefined);   // Typ ausdrücklich angeben\n\ncount();                      // lesen: 0\ncount.set(5);                 // neuen Wert setzen: 5\ncount.update(n => n + 1);     // aus dem alten Wert berechnen: 6\n\nconst ro: Signal<number> = count.asReadonly();\nro();                         // lesen geht: 6\n// ro.set(1);                 // Fehler beim Kompilieren: Signal hat kein set\n\nisSignal(count);              // true\n\n// Optionen als zweiter Parameter: signal(0, { equal: ..., debugName: 'count' })",
+          "notes": "Codefolie „signal(): die vollständige API“.\n\nDie Funktion „signal“ erzeugt ein schreibbares Signal. Der Typ heißt „WritableSignal“. Der Wert in den Klammern ist der Startwert. Den Typ leitet TypeScript daraus ab. Wenn der Startwert „undefined“ ist, gibt man den Typ in spitzen Klammern ausdrücklich an.\n\nGelesen wird durch Aufrufen mit leeren Klammern. „set“ setzt einen neuen Wert. „update“ berechnet den neuen Wert aus dem alten. „asReadonly“ liefert eine Sicht auf dasselbe Signal, die man nur lesen kann. „isSignal“ prüft, ob ein Wert ein Signal ist.\n\nAls zweiten Parameter kann man Optionen angeben. Die wichtigste ist „equal“, eine eigene Vergleichsfunktion. Sie kommt auf einer der nächsten Folien."
+        },
+        {
+          "type": "content",
+          "title": "set, update und asReadonly erklärt",
+          "bullets": [
+            "set(wert): ersetzt den Wert, Leser werden benachrichtigt",
+            "update(fn): Angular ruft fn mit dem aktuellen Wert auf",
+            [
+              "Rückgabewert von fn wird der neue Wert",
+              1
+            ],
+            "Gleicher Wert wie vorher: keine Benachrichtigung",
+            "asReadonly(): gleiche Daten, aber ohne set und update",
+            [
+              "Muster: privat schreiben, öffentlich nur lesen",
+              1
+            ]
+          ],
+          "notes": "Folie: „set, update und asReadonly erklärt“.\n\n„set“ bekommt den neuen Wert direkt und ersetzt den alten. „update“ bekommt dagegen eine Funktion. Angular ruft diese Funktion auf und übergibt ihr den aktuellen Wert. Was die Funktion zurückgibt, wird der neue Wert. Das ist praktisch, wenn der neue Wert vom alten abhängt, zum Beispiel beim Hochzählen oder beim Anhängen an eine Liste.\n\nIst der neue Wert gleich dem alten, benachrichtigt Angular niemanden. Dann wird auch nichts neu gezeichnet.\n\n„asReadonly“ wird oft in Services verwendet. Rechts sieht man das Muster: Das schreibbare Signal ist privat. Nach außen gibt der Service nur eine lesbare Sicht heraus. Ändern kann man den Zustand nur über eine Methode wie „add“. So bleibt klar, wer den Zustand besitzt.",
+          "diagram": {
+            "kind": "code",
+            "title": "cart.store.ts",
+            "text": "@Injectable({providedIn:'root'})\nexport class CartStore {\n  private _items =\n    signal<Item[]>([]);\n  items =\n    this._items.asReadonly();\n\n  add(item: Item) {\n    this._items.update(list =>\n      [...list, item]);\n  }\n}"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Die Option equal: wann gilt ein Wert als neu?",
+          "bullets": [
+            "Standard: Vergleich mit Object.is (fast wie ===)",
+            [
+              "Objekte und Arrays: nur neue Referenz zählt als Änderung",
+              1
+            ],
+            "equal: eigene Funktion (a, b) => boolean",
+            [
+              "Angular ruft sie mit altem und neuem Wert auf",
+              1
+            ],
+            [
+              "true: gilt als gleich, keine Benachrichtigung",
+              1
+            ],
+            "Gibt es bei signal, computed und linkedSignal",
+            "Vorsicht: falsches equal verschluckt echte Änderungen"
+          ],
+          "notes": "Folie: „Die Option equal: wann gilt ein Wert als neu?“.\n\nWenn ein Signal einen Wert bekommt, prüft Angular, ob er sich vom alten unterscheidet. Standardmäßig nimmt Angular dafür „Object.is“. Das verhält sich fast wie der Vergleich mit drei Gleichheitszeichen. Bei Objekten und Arrays bedeutet das: Nur eine neue Referenz, also ein neues Objekt, zählt als Änderung.\n\nMit der Option „equal“ gibt man eine eigene Vergleichsfunktion an. Angular ruft sie mit dem alten und dem neuen Wert auf. Gibt sie „true“ zurück, gelten die Werte als gleich, und niemand wird benachrichtigt. Im Beispiel rechts gelten zwei Kunden mit derselben Kennung als gleich.\n\nDie Option gibt es bei „signal“, „computed“ und „linkedSignal“. Vorsicht: Ist die Funktion zu großzügig, gehen echte Änderungen verloren, zum Beispiel ein geänderter Name bei gleicher Kennung.",
+          "diagram": {
+            "kind": "code",
+            "title": "equal-Option",
+            "text": "const current = signal<Customer>(\n  anna,\n  { equal: (a, b) =>\n      a.id === b.id });\n\ncurrent.set({ ...anna });\n// gleiche id: keine\n// Benachrichtigung"
+          }
+        },
+        {
           "type": "content",
           "title": "Lokaler und abgeleiteter Zustand",
           "bullets": [
-            "Lokaler Zustand (Quelle): Benutzer oder ein Ereignis kann ihn direkt ändern",
+            "Lokaler Zustand (Quelle): Benutzer oder Ereignis ändert ihn direkt",
+            [
+              "Beispiele: Filtertext, ausgewählter Kunde",
+              1
+            ],
             "Abgeleiteter Zustand: folgt zwingend aus anderem Zustand",
+            [
+              "Beispiele: gefilterte Liste, Anzahl der Treffer",
+              1
+            ],
             [
               "Nicht speichern, sondern berechnen",
               1
             ],
             "Regel: Single Source of Truth",
             [
-              "Derselbe Fakt darf nur an einer Stelle gespeichert sein",
+              "Derselbe Fakt wird nur an einer Stelle gespeichert",
               1
             ]
           ],
-          "notes": "Folie: „Lokaler und abgeleiteter Zustand“.\n\nMan unterscheidet zwei Arten von Zustand. Lokaler Zustand ist eine Quelle, die der Benutzer oder ein Ereignis direkt ändern kann, zum Beispiel der Text im Filterfeld. Abgeleiteter Zustand folgt zwingend aus anderem Zustand, zum Beispiel die gefilterte Liste. Ihn speichert man nicht, sondern man berechnet ihn.\n\nDahinter steht die Regel „Single Source of Truth“, also eine einzige Quelle der Wahrheit. Derselbe Fakt darf nur an einer Stelle gespeichert sein. Sonst können zwei Kopien verschiedene Werte haben. Das nächste Beispiel zeigt den Unterschied im Code."
+          "notes": "Folie: „Lokaler und abgeleiteter Zustand“.\n\nMan unterscheidet zwei Arten von Zustand. „Lokaler Zustand“ ist eine Quelle. Er wird direkt vom Benutzer oder von einem Ereignis geändert, zum Beispiel der Filtertext oder der ausgewählte Kunde. Dafür nimmt man „signal“.\n\n„Abgeleiteter Zustand“ folgt zwingend aus anderem Zustand, zum Beispiel die gefilterte Liste oder die Anzahl der Treffer. Diesen Zustand speichert man nicht, sondern berechnet ihn mit „computed“.\n\nDahinter steht die Regel „Single Source of Truth“, auf Deutsch: eine einzige Quelle der Wahrheit. Jeder Fakt wird nur an einer Stelle gespeichert. Alles andere wird daraus berechnet. So können zwei Kopien nie auseinanderlaufen."
         },
         {
           "type": "code",
           "title": "Doppelter oder abgeleiteter Zustand",
-          "code": "// Falsch: doppelter Zustand, muss von Hand synchron gehalten werden\ncustomers = signal<Customer[]>([]);\nfiltered  = signal<Customer[]>([]);   // wird irgendwo \"mitgepflegt\"\n\n// Richtig: abgeleitet, kann nicht auseinanderlaufen\nfiltered = computed(() => {\n  const text = this.filterText().toLowerCase();\n  return this.customers().filter(c => c.firstname.toLowerCase().includes(text));\n});",
-          "notes": "Codefolie „Doppelter oder abgeleiteter Zustand“.\n\nOben steht die falsche Lösung. Die Liste der Kunden und die gefilterte Liste sind zwei getrennte Signals. Jemand muss die gefilterte Liste bei jeder Änderung von Hand nachführen. Vergisst man das, zeigen beide Listen verschiedene Daten.\n\nUnten steht die richtige Lösung. Die gefilterte Liste ist ein „computed“. Es liest den Filtertext und die Kundenliste und berechnet daraus das Ergebnis. Ändert sich eine der beiden Quellen, rechnet Angular das Ergebnis automatisch neu. Die gefilterte Liste kann deshalb nie von den Quelldaten abweichen."
+          "code": "// Falsch: doppelter Zustand, muss von Hand synchron gehalten werden\ncustomers = signal<Customer[]>([]);\nfiltered  = signal<Customer[]>([]);   // wird irgendwo \"mitgepflegt\"\n\nonFilterChanged(text: string) {\n  this.filterText.set(text);\n  this.filtered.set(this.customers().filter(...));   // vergessen = Fehler\n}\n\n// Richtig: abgeleitet, kann nicht auseinanderlaufen\nfiltered = computed(() => {\n  const text = this.filterText().toLowerCase();\n  return this.customers().filter(c => c.firstname.toLowerCase().includes(text));\n});",
+          "notes": "Codefolie „Doppelter oder abgeleiteter Zustand“.\n\nOben steht die falsche Variante. Die gefilterte Liste ist ein eigenes Signal. Jedes Mal, wenn sich der Filter oder die Kundenliste ändert, muss jemand daran denken, auch die gefilterte Liste neu zu setzen. Vergisst man das an einer Stelle, zeigt die Oberfläche alte Daten. Dieser Fehler ist schwer zu finden.\n\nUnten steht die richtige Variante. Die gefilterte Liste ist ein „computed“. Es liest den Filtertext und die Kundenliste und berechnet daraus das Ergebnis. Ändert sich einer der beiden Werte, rechnet Angular automatisch neu. Die beiden Listen können nicht mehr auseinanderlaufen."
         },
         {
           "type": "code",
-          "title": "Befund im Startprojekt der Übung 31",
-          "code": "// Normale Methode: läuft bei jeder Change Detection neu\nfilteredCustomers() { ... }\n\n// Funktion statt computed: kein Zwischenspeicher\ncustomers = () => this.customerResource.value()?.data ?? [];\n\n// Das funktioniert, aber:\n//  - keine Zwischenspeicherung\n//  - schwer zu verfolgen\n//  - Abhängigkeiten sind nicht sichtbar\n// Umbau zu computed ist Teil von Übung 32",
-          "notes": "Codefolie „Befund im Startprojekt der Übung 31“.\n\nDiese Folie zeigt, was im Startprojekt aus Übung 31 verbessert werden kann. Die Methode „filteredCustomers“ ist eine normale Methode. Sie wird bei jeder Änderungsprüfung neu ausgeführt, auch wenn sich nichts geändert hat. „customers“ ist eine einfache Funktion und kein „computed“.\n\nDas funktioniert, hat aber Nachteile: Das Ergebnis wird nicht zwischengespeichert, der Code ist schwerer nachzuvollziehen, und man sieht nicht, wovon der Wert abhängt. Der Umbau zu „computed“ ist deshalb Teil von Übung 32."
+          "title": "Befund im Startprojekt der Übung 32",
+          "code": "// Startstand nach Übung 31 (CustomerListComponent)\n\n// Pfeilfunktion statt computed: kein Zwischenspeicher\ncustomers = () => this.customerResource.value()?.data ?? [];\n\n// Normale Methode: läuft bei jeder Change Detection neu\nfilteredCustomers() {\n  const filter = this.filterText().toLowerCase();\n  return this.customers().filter(c => c.firstname?.toLowerCase().includes(filter));\n}\n\n// Das funktioniert, aber:\n//  - das Ergebnis wird nicht zwischengespeichert\n//  - jeder Aufruf im Template rechnet erneut\n//  - Abhängigkeiten sind nicht als Graph sichtbar\n// Umbau zu computed ist Teil A von Übung 32",
+          "notes": "Codefolie „Befund im Startprojekt der Übung 32“.\n\nSo sieht die Kundenliste nach Übung 31 aus. Die Kundenliste „customers“ ist eine einfache Pfeilfunktion, und die gefilterte Liste „filteredCustomers“ ist eine normale Methode.\n\nDas funktioniert, weil beide innen Signals lesen und das Template sie aufruft. Aber es gibt keinen Zwischenspeicher. Bei jeder Prüfung der Oberfläche durch Angular, der sogenannten „Change Detection“, wird die Liste neu gefiltert, auch wenn sich nichts geändert hat. Außerdem sind die Abhängigkeiten nicht als eigene Knoten im Signal-Graphen sichtbar.\n\nIn Teil A der Übung 32 werden beide zu „computed“ umgebaut."
         },
         {
           "type": "content",
           "title": "computed im Detail",
           "bullets": [
-            "Lazy: berechnet erst, wenn der Wert zum ersten Mal gelesen wird",
-            "Memoized: liefert den gespeicherten Wert, solange sich die Abhängigkeiten nicht ändern",
-            "Dynamische Abhängigkeiten: nur Signals, die beim letzten Lauf wirklich gelesen wurden, zählen",
-            "Rein: keine Nebenwirkungen und kein Schreiben auf Signals (Angular wirft einen Fehler)",
-            "Gleichheit: geändert nur bei anderem Wert oder anderer Referenz (Vergleich wie ===)"
+            "Lazy: rechnet erst, wenn der Wert zum ersten Mal gelesen wird",
+            "Memoized: liefert den gespeicherten Wert, solange nichts sich ändert",
+            "Rein: keine Nebenwirkungen, kein Schreiben auf Signals",
+            [
+              "Schreiben im computed: Fehler NG0600",
+              1
+            ],
+            "Ergebnis ist Signal<T>: nur lesbar, kein set",
+            "Option equal wie bei signal"
           ],
-          "notes": "Folie: „computed im Detail“.\n\nEin „computed“ hat fünf wichtige Eigenschaften. Es ist „lazy“, das heißt faul: Es rechnet erst, wenn jemand den Wert zum ersten Mal liest. Es ist „memoized“, das heißt: Es merkt sich das Ergebnis und gibt es wieder zurück, solange sich die verwendeten Werte nicht geändert haben.\n\nDie Abhängigkeiten sind dynamisch. Es zählen nur die Signals, die beim letzten Durchlauf wirklich gelesen wurden. Außerdem ist ein „computed“ rein. Es darf nichts außerhalb verändern und keine Signals beschreiben. Tut es das doch, wirft Angular einen Fehler.\n\nSchließlich prüft Angular, ob sich das Ergebnis geändert hat. Bei Objekten und Listen gilt es nur dann als geändert, wenn es ein neues Objekt oder eine neue Liste ist.",
+          "notes": "Folie: „computed im Detail“.\n\nEin „computed“ hat drei wichtige Eigenschaften. Es ist „lazy“, auf Deutsch faul: Es rechnet erst, wenn jemand den Wert zum ersten Mal liest. Es ist „memoized“, auf Deutsch zwischengespeichert: Solange sich keine Abhängigkeit ändert, liefert es den gespeicherten Wert ohne neue Berechnung. Und es soll „rein“ sein: Es berechnet nur einen Wert, hat keine Nebenwirkungen und schreibt keine Signals. Versucht man es trotzdem, meldet Angular den Fehler „NG0600“.\n\nIm Beispiel rechts erscheint die Ausgabe „rechne“ nur beim ersten Lesen und nach der Änderung von „count“. Das zweite Lesen kommt aus dem Speicher. Das Ergebnis eines „computed“ kann man nur lesen. Wie bei „signal“ kann man eine eigene Vergleichsfunktion „equal“ angeben.",
           "diagram": {
             "kind": "code",
             "title": "computed",
-            "text": "const count = signal(2);\n\nconst double = computed(() => {\n  console.log(\"rechne\");\n  return count() * 2;\n});\n\ndouble(); // rechnet, 4\ndouble(); // aus dem Speicher\ncount.set(3);\ndouble(); // rechnet neu, 6"
+            "text": "const count = signal(2);\n\nconst double = computed(() => {\n  console.log('rechne');\n  return count() * 2;\n});\n\ndouble(); // rechnet: 4\ndouble(); // aus dem Speicher\ncount.set(3);\ndouble(); // rechnet neu: 6"
+          }
+        },
+        {
+          "type": "content",
+          "title": "computed: dynamische Abhängigkeiten",
+          "bullets": [
+            "Abhängigkeiten werden bei jedem Lauf neu ermittelt",
+            "Es zählt nur, was im letzten Lauf wirklich gelesen wurde",
+            [
+              "Signal in nicht ausgeführtem Zweig: keine Abhängigkeit",
+              1
+            ],
+            "Fehler in der Funktion: wird gespeichert und beim Lesen geworfen",
+            "Kein async: Signals nach await werden nicht erfasst",
+            [
+              "Asynchrones Laden: resource oder httpResource",
+              1
+            ]
+          ],
+          "notes": "Folie: „computed: dynamische Abhängigkeiten“.\n\nEin „computed“ ermittelt seine Abhängigkeiten bei jedem Lauf neu. Es zählen nur die Signals, die beim letzten Lauf wirklich gelesen wurden. Im Beispiel rechts ist „showDetails“ zuerst „false“. Dann wird „name“ gar nicht gelesen. Ändert sich „name“, rechnet das „computed“ nicht neu, weil es davon gerade nicht abhängt. Erst wenn „showDetails“ auf „true“ wechselt, wird „name“ gelesen und damit zur Abhängigkeit.\n\nTritt in der Funktion ein Fehler auf, merkt sich das „computed“ diesen Fehler und wirft ihn beim Lesen erneut.\n\nEin „computed“ darf nicht asynchron sein. Nach einem „await“ ist der reaktive Kontext vorbei, und gelesene Signals werden nicht mehr erfasst. Für asynchrones Laden gibt es „resource“ und „httpResource“.",
+          "diagram": {
+            "kind": "code",
+            "title": "dynamische Abhängigkeit",
+            "text": "const showDetails = signal(false);\nconst name = signal('Ada');\n\nconst label = computed(() =>\n  showDetails() ? name() : '-');\n\nlabel();          // '-'\nname.set('Bob'); // kein Lauf\nshowDetails.set(true);\nlabel();          // 'Bob'"
+          }
+        },
+        {
+          "type": "content",
+          "title": "linkedSignal: abgeleitet, aber änderbar",
+          "bullets": [
+            "Problem: Auswahl hängt von der Liste ab",
+            [
+              "Neue Liste: Auswahl soll zurückspringen",
+              1
+            ],
+            [
+              "Benutzer soll trotzdem selbst wählen können",
+              1
+            ],
+            "computed: nicht schreibbar – signal: folgt der Liste nicht",
+            "linkedSignal verbindet beides: berechnet und mit set() änderbar",
+            "Ein gesetzter Wert gilt bis zur nächsten Änderung der Quelle"
+          ],
+          "notes": "Folie: „linkedSignal: abgeleitet, aber änderbar“.\n\nManchmal braucht man einen Wert, der aus einem anderen folgt, den der Benutzer aber trotzdem ändern darf. Ein Beispiel ist die Auswahl in einer Liste. Wenn eine neue Liste kommt, soll die Auswahl auf das erste Element zurückspringen. Der Benutzer soll aber jederzeit ein anderes Element wählen können.\n\nEin „computed“ passt nicht, denn man kann es nicht setzen. Ein normales „signal“ passt auch nicht, denn es folgt der Liste nicht von selbst. „linkedSignal“ verbindet beides. Es wird aus der Quelle berechnet und kann zusätzlich mit „set“ oder „update“ geändert werden.\n\nDas Diagramm zeigt den Ablauf: Ein gesetzter Wert gilt so lange, bis sich die Quelle wieder ändert. Dann wird neu berechnet.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Liste ändert sich",
+              "linkedSignal rechnet:\nerstes Element",
+              "Benutzer wählt:\nselected.set(c)",
+              "Wert gilt bis zur\nnächsten Liste"
+            ],
+            "highlight_last": true
           }
         },
         {
           "type": "code",
-          "title": "linkedSignal: abgeleitet, aber änderbar",
-          "code": "customers = input.required<Customer[]>();\n\n// Auswahl springt auf das erste Element, sobald sich die Liste ändert,\n// kann aber vom Benutzer überschrieben werden\nselected = linkedSignal(() => this.customers()[0]);\n\nonPick(c: Customer) {\n  this.selected.set(c);\n}\n\n// Ersetzt das Muster \"ein effect setzt ein Signal anhand eines anderen zurück\"",
-          "notes": "Codefolie „linkedSignal: abgeleitet, aber änderbar“.\n\n„linkedSignal“ ist ein Wert, der aus anderen Werten abgeleitet wird, den man aber trotzdem selbst setzen kann. Im Beispiel kommt die Kundenliste als Eingang. Die Auswahl ist ein „linkedSignal“ und startet mit dem ersten Kunden der Liste. Wenn der Benutzer einen anderen Kunden anklickt, setzt die Methode „onPick“ die Auswahl mit „set“.\n\nÄndert sich später die Liste, berechnet das „linkedSignal“ die Auswahl neu und springt wieder auf das erste Element. Früher hat man dafür oft einen „effect“ geschrieben, der ein Signal zurücksetzt. Das ist mit „linkedSignal“ nicht mehr nötig und weniger fehleranfällig."
+          "title": "linkedSignal: Kurzform",
+          "code": "customers = input.required<Customer[]>();\n\n// Kurzform: nur eine Berechnungsfunktion\n// Auswahl springt auf das erste Element, sobald sich die Liste ändert\nselected = linkedSignal(() => this.customers()[0]);\n\nonPick(c: Customer) {\n  this.selected.set(c);          // Benutzer überschreibt den Wert\n}\n\n// Typ: WritableSignal<Customer> – lesen mit selected(), schreiben mit set/update\n\n// Ersetzt das Muster:\n//   selected = signal<Customer | undefined>(undefined);\n//   effect(() => this.selected.set(this.customers()[0]));   // effect setzt Signal",
+          "notes": "Codefolie „linkedSignal: Kurzform“.\n\nDie Kurzform von „linkedSignal“ bekommt nur eine Berechnungsfunktion, ähnlich wie „computed“. Hier liest sie die Kundenliste aus einer Eingabe und liefert das erste Element. Jedes Mal, wenn eine neue Liste kommt, springt die Auswahl auf den ersten Kunden.\n\nWählt der Benutzer einen anderen Kunden, ruft die Methode „onPick“ einfach „set“ auf. Das Ergebnis ist also ein schreibbares Signal.\n\nUnten steht, was „linkedSignal“ ersetzt: ein normales Signal plus einen „effect“, der es bei jeder neuen Liste zurücksetzt. Diese Lösung ist umständlicher und läuft einen Schritt verzögert."
+        },
+        {
+          "type": "code",
+          "title": "linkedSignal: Langform",
+          "code": "selected = linkedSignal<Customer[], Customer | undefined>({\n  // source: was beobachtet wird\n  source: this.customers,\n\n  // computation: Angular ruft sie auf, wenn sich source ändert\n  computation: (newList, previous) => {\n    // previous ist beim ersten Lauf undefined,\n    // danach { source: alte Liste, value: bisherige Auswahl }\n    const keep = newList.find(c => c.id === previous?.value?.id);\n    return keep ?? newList[0];    // Auswahl behalten, sonst erstes Element\n  },\n\n  // optional: equal: (a, b) => a?.id === b?.id\n});",
+          "notes": "Codefolie „linkedSignal: Langform“.\n\nDie Langform bekommt ein Objekt mit zwei Teilen. „source“ ist die Quelle, die beobachtet wird, hier die Kundenliste. „computation“ ist die Berechnungsfunktion. Die spitzen Klammern am Anfang nennen zwei Typen: den Typ der Quelle und den Typ des Ergebnisses.\n\nAngular ruft „computation“ auf, wenn sich die Quelle ändert, und übergibt zwei Werte. Der erste ist der neue Wert der Quelle, hier die neue Liste. Der zweite heißt hier „previous“ und beschreibt den vorherigen Stand.\n\nIm Beispiel wird damit die bisherige Auswahl behalten, wenn derselbe Kunde auch in der neuen Liste vorkommt. Nur wenn er fehlt, springt die Auswahl auf das erste Element. Das kann die Kurzform nicht, denn sie kennt den alten Wert nicht."
+        },
+        {
+          "type": "content",
+          "title": "Die Parameter von computation",
+          "bullets": [
+            "Aufrufer: Angular, beim ersten Lesen und nach Änderung von source",
+            "1. Parameter: aktueller Wert von source (hier die neue Liste)",
+            "2. Parameter previous: vorheriger Stand oder undefined",
+            [
+              "previous.source: alter Wert der Quelle",
+              1
+            ],
+            [
+              "previous.value: letzter Wert, auch einer per set()",
+              1
+            ],
+            "Rückgabe: neuer Wert des linkedSignal",
+            "Namen frei wählbar, Reihenfolge ist fest"
+          ],
+          "notes": "Folie: „Die Parameter von computation“.\n\nDie Funktion „computation“ ruft man nicht selbst auf. Angular ruft sie auf: beim ersten Lesen des Signals und danach jedes Mal, wenn sich die Quelle „source“ geändert hat.\n\nDer erste Parameter ist der aktuelle Wert der Quelle. Der zweite Parameter beschreibt den vorherigen Stand. Beim allerersten Aufruf gibt es noch keinen vorherigen Stand, dann ist er „undefined“. Danach ist er ein Objekt mit zwei Feldern: „source“ ist der alte Wert der Quelle, „value“ ist der letzte Wert des linkedSignal. Das kann auch ein Wert sein, den der Benutzer mit „set“ gesetzt hat.\n\nWas die Funktion zurückgibt, wird der neue Wert. Die Namen der Parameter darf man frei wählen. Die Reihenfolge ist aber fest: zuerst die Quelle, dann der vorherige Stand.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "source ändert sich",
+              "Angular ruft auf:\ncomputation(neu, previous)",
+              "previous = { source,\nvalue } oder undefined",
+              "Rückgabe = neuer Wert"
+            ],
+            "highlight_last": true
+          }
         },
         {
           "type": "content",
@@ -237,112 +717,374 @@
             [
               "Imperativer DOM-Zugriff, der nicht per Binding möglich ist",
               1
-            ]
+            ],
+            "Kein guter Grund: ein anderes Signal setzen"
           ],
-          "notes": "Folie: „Nebenwirkungen und effect()“.\n\nEine „Nebenwirkung“ ist eine Handlung, die etwas außerhalb des Systems der Signals verändert. Ein „effect“ ist der Baustein dafür. Er läuft automatisch, wenn sich ein Signal ändert, das er liest.\n\nEs gibt vier gute Gründe für einen „effect“. Erstens das Sichern von Zustand im „localStorage“ oder „sessionStorage“ des Browsers. Das sind kleine Speicher im Browser. Zweitens Protokollierung und Auswertung der Nutzung. Drittens das Versorgen einer Fremdbibliothek, zum Beispiel für ein Diagramm oder eine Karte, mit Daten. Viertens ein direkter Zugriff auf das DOM, der mit einer Bindung nicht möglich ist."
+          "notes": "Folie: „Nebenwirkungen und effect()“.\n\nEine „Nebenwirkung“ ist eine Wirkung außerhalb des Signal-Graphen. Sie verändert etwas, das Angular nicht selbst verwaltet. Dafür gibt es „effect“. Ein „effect“ ist eine Funktion, die Angular automatisch erneut ausführt, wenn sich ein Signal ändert, das sie liest.\n\nGute Gründe für einen „effect“ sind: einen Wert im Speicher des Browsers sichern, zum Beispiel in „localStorage“, Protokollieren und Auswerten von Nutzung, eine fremde Bibliothek für Diagramme oder Karten mit Daten versorgen, oder direkte Arbeit am Seitenelement, die mit einer Bindung im Template nicht möglich ist.\n\nKein guter Grund ist es, damit ein anderes Signal zu setzen. Dafür gibt es bessere Werkzeuge, die später gezeigt werden."
         },
         {
           "type": "code",
-          "title": "effect: Beispiele",
-          "code": "constructor() {\n  // Filtertext im Browser sichern, sobald er sich ändert\n  effect(() => {\n    localStorage.setItem('customerFilter', this.filterText());\n  });\n\n  // Aufräumen mit onCleanup, bevor der effect erneut läuft oder zerstört wird\n  effect((onCleanup) => {\n    const id = setInterval(() => this.refresh(), this.pollMs());\n    onCleanup(() => clearInterval(id));\n  });\n}\n// untracked(() => ...): Lesen ohne Abhängigkeit\n// Ein effect muss im Injection Context entstehen (Konstruktor, Feldinitialisierer)",
-          "notes": "Codefolie „effect: Beispiele“.\n\nDas erste Beispiel ist ein typischer Einsatz: Ein „effect“ speichert den Filtertext im „localStorage“. Jedes Mal, wenn sich der Filtertext ändert, wird der neue Wert gespeichert.\n\nDas zweite Beispiel zeigt das Aufräumen. Der „effect“ startet einen Zeitgeber, der regelmäßig „refresh“ aufruft. Mit „onCleanup“ gibt man eine Funktion an, die den alten Zeitgeber stoppt, bevor der „effect“ erneut läuft oder zerstört wird. Ohne dieses Aufräumen würden sich Zeitgeber ansammeln.\n\nMit „untracked“ kann man ein Signal lesen, ohne dass der „effect“ davon abhängig wird. Ein „effect“ muss in einem sogenannten „Injection Context“ erzeugt werden, zum Beispiel im Konstruktor oder bei der Initialisierung eines Feldes."
+          "title": "effect: Grundbeispiel aus Übung 32",
+          "code": "const FILTER_STORAGE_KEY = 'customerFilter';\n\nfunction saveFilter(text: string): void {\n  try {\n    localStorage.setItem(FILTER_STORAGE_KEY, text);\n  } catch { /* localStorage fehlt oder ist gesperrt: ignorieren */ }\n}\n\nexport class CustomerListComponent {\n  filterText = signal(loadFilter());       // Startwert aus dem Speicher\n\n  constructor() {\n    // Angular ruft die Funktion einmal auf und danach bei jeder Änderung von filterText\n    effect(() => saveFilter(this.filterText()));\n  }\n}",
+          "notes": "Codefolie „effect: Grundbeispiel aus Übung 32“.\n\nDas ist der „effect“ aus der Musterlösung von Übung 32. Die Hilfsfunktion „saveFilter“ schreibt den Filtertext in den Speicher des Browsers. Weil dieser Speicher fehlen oder gesperrt sein kann, zum Beispiel im privaten Modus, steht der Zugriff in einem „try“ und „catch“. Ein Fehler wird dann einfach ignoriert.\n\nDas Signal „filterText“ bekommt seinen Startwert aus dem Speicher. Im Konstruktor steht der „effect“. Er liest den Filtertext und übergibt ihn an „saveFilter“. Weil er „filterText“ liest, ist das Signal seine Abhängigkeit.\n\nAngular führt die Funktion einmal am Anfang aus und danach jedes Mal, wenn sich der Filtertext ändert. Der „effect“ schreibt nur nach außen und setzt kein Signal. Deshalb ist er ein legitimer „effect“."
         },
         {
           "type": "content",
-          "title": "Wann kein effect?",
+          "title": "effect(): Signatur und Rückgabewert",
           "bullets": [
-            "Wert aus anderen Signals berechnen: besser computed",
-            "Signal bei Änderung einer Quelle zurücksetzen: besser linkedSignal",
-            "Auf Klick oder Eingabe reagieren: besser Event-Handler, z. B. (click)",
-            "Daten laden, wenn sich eine id ändert: besser resource oder rxResource",
-            "Beim Start einmal etwas tun: besser Konstruktor oder afterNextRender",
-            "Faustregel: Wenn der effect ein Signal schreibt, gibt es fast immer eine bessere Lösung",
+            "Parameter 1: die Effekt-Funktion, Angular ruft sie auf",
             [
-              "Technisch erlaubt (seit Version 19), aber ein Warnsignal",
+              "Sie bekommt einen Parameter: onCleanup",
               1
-            ]
+            ],
+            "Parameter 2: Optionen (injector, manualCleanup, debugName)",
+            "Rückgabe: EffectRef mit der Methode destroy()",
+            "Erster Lauf: kurz nach dem Erzeugen, nicht sofort",
+            "Weitere Läufe: nach Änderung eines gelesenen Signals"
           ],
-          "notes": "Folie: „Wann kein effect?“.\n\nEin „effect“ wird oft benutzt, obwohl es einen besseren Baustein gibt. Die Folie zeigt fünf Fälle. Soll ein Wert aus anderen Signals berechnet werden, nimmt man „computed“. Soll ein Signal zurückgesetzt werden, wenn sich eine Quelle ändert, nimmt man „linkedSignal“. Soll etwas auf einen Klick oder eine Eingabe passieren, nimmt man einen normalen Event-Handler. Sollen Daten geladen werden, wenn sich eine Kennung ändert, nimmt man „resource“ oder „rxResource“. Soll beim Start einmal etwas passieren, nimmt man den Konstruktor oder „afterNextRender“.\n\nDie Faustregel lautet: Wenn ein „effect“ ein Signal beschreibt, gibt es fast immer eine bessere Lösung. Seit Angular 19 ist das technisch erlaubt, aber es ist ein Warnsignal."
+          "notes": "Folie: „effect(): Signatur und Rückgabewert“.\n\nRechts steht die Signatur, also die Beschreibung der Parameter und des Rückgabewerts. Der erste Parameter ist die Effekt-Funktion. Man ruft sie nicht selbst auf, das macht Angular. Angular übergibt ihr dabei einen Wert, der hier „onCleanup“ heißt. Was das ist, erklärt die nächste Folie.\n\nDer zweite Parameter ist optional. Er enthält Optionen wie „injector“ und „manualCleanup“. Zurück bekommt man ein Objekt vom Typ „EffectRef“. Es hat die Methode „destroy“, mit der man den „effect“ beenden kann.\n\nDen ersten Lauf führt Angular nicht sofort beim Erzeugen aus, sondern kurz danach, gesteuert von Angular selbst. Weitere Läufe folgen, wenn sich ein Signal ändert, das beim letzten Lauf gelesen wurde.",
+          "diagram": {
+            "kind": "code",
+            "title": "Signatur (vereinfacht)",
+            "text": "function effect(\n  effectFn: (onCleanup:\n    EffectCleanupRegisterFn)\n    => void,\n  options?: CreateEffectOptions\n): EffectRef;\n\ntype EffectCleanupRegisterFn =\n  (cleanupFn: () => void)\n    => void;"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was ist onCleanup?",
+          "bullets": [
+            "Angular ruft die Effekt-Funktion auf und übergibt onCleanup",
+            "onCleanup ist selbst eine Funktion (EffectCleanupRegisterFn)",
+            "Aufruf onCleanup(fn): meldet eine Aufräumfunktion fn an",
+            "Angular ruft fn auf:",
+            [
+              "vor dem nächsten Lauf des effect",
+              1
+            ],
+            [
+              "beim Zerstören (Komponente weg oder destroy())",
+              1
+            ],
+            "Name frei wählbar, Parameter darf auch fehlen"
+          ],
+          "notes": "Folie: „Was ist onCleanup?“.\n\nWenn Angular die Effekt-Funktion aufruft, übergibt es ihr genau einen Wert. Dieser Wert ist selbst eine Funktion. Ihr Typ heißt „EffectCleanupRegisterFn“, auf Deutsch etwa „Funktion zum Anmelden einer Aufräumfunktion“. Im Code nennt man den Parameter meist „onCleanup“.\n\nRuft man „onCleanup“ auf und übergibt eine eigene Funktion, meldet man damit eine Aufräumfunktion an. Angular führt sie nicht sofort aus. Angular ruft sie erst später auf, und zwar in zwei Fällen: kurz bevor der „effect“ das nächste Mal läuft, und wenn der „effect“ zerstört wird. Zerstört wird er, wenn die Komponente verschwindet oder wenn man „destroy“ aufruft.\n\nDer Name „onCleanup“ ist frei gewählt. Braucht ein „effect“ nichts aufzuräumen, lässt man den Parameter einfach weg, wie im Beispiel davor.",
+          "diagram": {
+            "kind": "code",
+            "title": "Wer ruft wen?",
+            "text": "effect((onCleanup) => {\n  // Angular hat diese\n  // Funktion aufgerufen und\n  // onCleanup übergeben\n\n  onCleanup(() => {\n    // Angular ruft das\n    // später auf\n  });\n});"
+          }
+        },
+        {
+          "type": "code",
+          "title": "onCleanup im Einsatz: Polling",
+          "code": "export class DashboardComponent {\n  pollMs = signal(5000);                 // Abfrage-Intervall in Millisekunden\n\n  constructor() {\n    effect((onCleanup) => {\n      const ms = this.pollMs();                            // Abhängigkeit\n      const id = setInterval(() => this.refresh(), ms);    // Nebenwirkung starten\n      console.log('Timer gestartet', id, ms);\n\n      onCleanup(() => {                                    // Aufräumen anmelden\n        clearInterval(id);\n        console.log('Timer gestoppt', id);\n      });\n    });\n  }\n\n  refresh() { /* Daten neu laden */ }\n}",
+          "notes": "Codefolie „onCleanup im Einsatz: Polling“.\n\n„Polling“ bedeutet: in festen Abständen immer wieder nachfragen, ob es neue Daten gibt. Das Intervall steht im Signal „pollMs“, hier 5000 Millisekunden, also 5 Sekunden.\n\nDer „effect“ liest „pollMs“ und startet mit „setInterval“ einen Zeitgeber, der regelmäßig „refresh“ aufruft. Danach meldet er mit „onCleanup“ eine Aufräumfunktion an. Diese stoppt genau diesen Zeitgeber mit „clearInterval“.\n\nOhne Aufräumen gäbe es ein Problem: Bei jeder Änderung des Intervalls würde ein zusätzlicher Zeitgeber starten, und die alten liefen weiter. Auch nach dem Schließen der Komponente würden sie weiterlaufen. Mit „onCleanup“ läuft immer genau ein Zeitgeber."
+        },
+        {
+          "type": "content",
+          "title": "Ablauf: Läufe und Aufräumen",
+          "bullets": [
+            "Lauf 1: Timer A starten, Cleanup A anmelden",
+            "pollMs.set(1000): effect ist veraltet",
+            "Vor Lauf 2: Angular ruft Cleanup A, Timer A stoppt",
+            "Lauf 2: Timer B starten, Cleanup B anmelden",
+            "Komponente wird zerstört: Angular ruft Cleanup B",
+            "Ergebnis: nie zwei Timer gleichzeitig, kein Leck"
+          ],
+          "notes": "Folie: „Ablauf: Läufe und Aufräumen“.\n\nDas Diagramm zeigt den zeitlichen Ablauf für das Polling-Beispiel. Im ersten Lauf startet der „effect“ den Zeitgeber A und meldet die Aufräumfunktion A an.\n\nDann setzt jemand das Intervall auf 1000 Millisekunden. Der „effect“ ist dadurch veraltet und wird neu eingeplant. Bevor Angular ihn erneut ausführt, ruft es die Aufräumfunktion A auf. Zeitgeber A stoppt. Im zweiten Lauf startet Zeitgeber B, und die Aufräumfunktion B wird angemeldet.\n\nWird die Komponente später zerstört, zum Beispiel weil der Benutzer die Seite wechselt, ruft Angular die Aufräumfunktion B auf. Es laufen also nie zwei Zeitgeber gleichzeitig, und es bleibt nichts im Speicher zurück. Man nennt so einen Rest ein „Speicherleck“.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Lauf 1: Timer A",
+              "pollMs ändert sich",
+              "Cleanup A: Timer A stoppt",
+              "Lauf 2: Timer B",
+              "Komponente zerstört",
+              "Cleanup B: Timer B stoppt"
+            ],
+            "highlight_last": true
+          }
         },
         {
           "type": "content",
           "title": "Wie ein effect ausgeführt wird",
           "bullets": [
-            "Läuft mindestens einmal, danach bei jeder Änderung der gelesenen Signals",
-            "Läuft asynchron, nicht sofort nach set(): Angular plant ihn bei der Change Detection ein",
-            "Mehrere Änderungen hintereinander ergeben nur einen Lauf (Batching)",
-            "Aufräumen über onCleanup",
-            "Muss im Injection Context entstehen (Konstruktor, Feldinitialisierer) oder mit injector",
-            "untracked(): Lesen ohne Abhängigkeit"
+            "Läuft mindestens einmal, danach bei Änderung gelesener Signals",
+            "Läuft asynchron, nicht direkt nach set()",
+            [
+              "Angular plant ihn ein und führt ihn im nächsten Durchlauf aus",
+              1
+            ],
+            "Mehrere Änderungen hintereinander: nur ein Lauf",
+            "Effect einer Komponente: lebt so lange wie die Komponente",
+            "Effect in einem Service (root): lebt so lange wie die Anwendung"
           ],
-          "notes": "Folie: „Wie ein effect ausgeführt wird“.\n\nEin „effect“ läuft mindestens einmal. Danach läuft er jedes Mal, wenn sich ein Signal ändert, das er gelesen hat. Er läuft nicht sofort nach einem „set“, sondern asynchron, denn Angular plant ihn bei der Änderungsprüfung ein. Ändert man mehrere Signals kurz nacheinander, läuft er nur einmal. Das nennt man „Batching“, also Bündeln.\n\nZum Aufräumen verwendet man „onCleanup“. Ein „effect“ muss in einem „Injection Context“ erzeugt werden, zum Beispiel im Konstruktor einer Komponente. Alternativ übergibt man einen „injector“. Mit „untracked“ liest man einen Wert, ohne eine Abhängigkeit zu erzeugen.",
+          "notes": "Folie: „Wie ein effect ausgeführt wird“.\n\nEin „effect“ läuft mindestens einmal. Danach läuft er immer dann, wenn sich eines der Signals ändert, die er beim letzten Lauf gelesen hat.\n\nEr läuft nicht sofort nach „set“. Angular merkt sich nur, dass der „effect“ veraltet ist, und führt ihn im nächsten Durchlauf der Aktualisierung aus. Setzt man ein Signal dreimal hintereinander, läuft der „effect“ deshalb nur einmal, mit dem letzten Wert. Das Diagramm rechts zeigt das.\n\nWie lange ein „effect“ lebt, hängt davon ab, wo er erzeugt wurde. Ein „effect“ in einer Komponente wird zusammen mit der Komponente zerstört. Ein „effect“ in einem Service, der für die ganze Anwendung gilt, lebt so lange wie die Anwendung.",
           "diagram": {
             "kind": "flow",
             "steps": [
-              "signal.set(...)",
-              "Angular merkt vor",
-              "Change Detection",
-              "effect läuft (einmal)"
+              "set(1); set(2); set(3)",
+              "Angular: effect\nist veraltet",
+              "nächster Durchlauf",
+              "effect läuft einmal\nmit Wert 3"
             ],
             "highlight_last": true,
             "note": "Mehrere set() ergeben einen Lauf"
           }
         },
         {
-          "type": "code",
-          "title": "Stolperfalle 1: Mutation statt neuer Referenz",
-          "code": "list = signal<Customer[]>([]);\n\nthis.list().push(c);                 // Falsch: Signal merkt nichts\nthis.list.update(l => [...l, c]);    // Richtig: neue Referenz\n\n// Eintrag ändern, ebenfalls mit neuer Referenz\nthis.list.update(l => l.map(x => x.id === c.id ? { ...x, ...changes } : x));\n\n// Signals vergleichen mit ===: gleiches Array bedeutet \"keine Änderung\"\n// Gilt auch für Objekte in Signals und für input()-Werte",
-          "notes": "Codefolie „Stolperfalle 1: Mutation statt neuer Referenz“.\n\nDie erste Stolperfalle ist die Veränderung eines Wertes an Ort und Stelle. Im Beispiel wird mit „push“ ein Kunde an die bestehende Liste angehängt. Das Signal merkt davon nichts, denn es ist immer noch dasselbe Array. Signals vergleichen mit dem Gleichheitszeichen „===“. Dasselbe Array bedeutet für sie: keine Änderung. Die Oberfläche wird also nicht aktualisiert.\n\nRichtig ist, mit „update“ eine neue Liste zu erzeugen, zum Beispiel mit dem Spread-Operator, den drei Punkten. Auch beim Ändern eines einzelnen Eintrags erzeugt man ein neues Objekt. Das gilt auch für Objekte in Signals und für Werte von „input()“."
+          "type": "content",
+          "title": "Injection Context: wo effect() erlaubt ist",
+          "bullets": [
+            "Injection Context: Phase, in der inject() funktioniert",
+            "effect braucht ihn: holt sich den Injector",
+            [
+              "daraus: wann aufräumen (DestroyRef) und Zeitplanung",
+              1
+            ],
+            "Erlaubt: Konstruktor, Feldinitialisierer, Provider-Factory",
+            "Nicht erlaubt: ngOnInit, Klick-Handler, setTimeout, subscribe",
+            [
+              "Fehler NG0203",
+              1
+            ],
+            "Ausweg: Option injector oder runInInjectionContext"
+          ],
+          "notes": "Folie: „Injection Context: wo effect() erlaubt ist“.\n\nDer „Injection Context“ ist die Phase, in der Angular gerade ein Objekt erzeugt und „inject“ deshalb funktioniert. Ein „effect“ braucht diesen Kontext. Er holt sich darüber den „Injector“, also die Stelle, die Abhängigkeiten bereitstellt. Daraus erfährt er, wann er aufräumen muss, und wie er eingeplant wird.\n\nErlaubt ist das im Konstruktor, in Feldinitialisierern, also bei Klassenfeldern mit Gleichheitszeichen, und in Factory-Funktionen von Providern. Nicht erlaubt ist es zum Beispiel in „ngOnInit“, in einem Klick-Handler, in „setTimeout“ oder in „subscribe“. Dort meldet Angular den Fehler „NG0203“.\n\nBraucht man trotzdem später einen „effect“, übergibt man den Injector über die Option „injector“ oder nutzt „runInInjectionContext“.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Erlaubt",
+              "items": [
+                "constructor()",
+                "Feld = effect(...)",
+                "Provider-Factory"
+              ]
+            },
+            "right": {
+              "title": "Fehler NG0203",
+              "items": [
+                "ngOnInit()",
+                "(click)-Handler",
+                "setTimeout / subscribe"
+              ]
+            }
+          }
         },
         {
           "type": "code",
-          "title": "Stolperfalle 2: Zyklen und Ketten",
-          "code": "// Falsch: der erste effect schreibt in b, der zweite liest b und schreibt in a ...\neffect(() => this.b.set(this.a() * 2));\neffect(() => this.a.set(this.b() + 1));   // Endlosschleife, schwer nachzuvollziehen\n\n// Besser: eine Quelle und ein computed\na = signal(1);\nb = computed(() => this.a() * 2);\n\n// Schreiben auf Signals in einem computed ist verboten (Fehler NG0600)",
-          "notes": "Codefolie „Stolperfalle 2: Zyklen und Ketten“.\n\nDie zweite Stolperfalle sind Ketten und Zyklen. Im Beispiel schreibt der erste „effect“ in das Signal „b“. Der zweite „effect“ liest „b“ und schreibt wieder in „a“. So stoßen sich die beiden gegenseitig immer wieder an. Das ist eine Endlosschleife und sehr schwer zu untersuchen.\n\nBesser ist es, nur eine Quelle zu haben und alles andere mit „computed“ daraus abzuleiten. Im Beispiel ist „b“ dann einfach „a“ mal zwei. Außerdem ist das Schreiben auf Signals innerhalb eines „computed“ verboten. Angular meldet dann den Fehler mit dem Code „NG0600“."
+          "title": "effect: Optionen und destroy()",
+          "code": "@Injectable({ providedIn: 'root' })\nexport class FilterLogger {\n  private store = inject(FilterStore);\n  private injector = inject(Injector);      // im Injection Context merken\n  private ref?: EffectRef;\n\n  start() {                                 // normale Methode: kein Injection Context\n    this.ref = effect(\n      () => console.log('Filter:', this.store.filter()),\n      { injector: this.injector, debugName: 'filterLog' }\n    );\n  }\n  stop() {\n    this.ref?.destroy();                    // effect sofort beenden, Cleanup läuft\n  }\n}\n// manualCleanup: true – effect endet nur durch destroy(), nicht mit der Komponente",
+          "notes": "Codefolie „effect: Optionen und destroy()“.\n\nHier wird ein „effect“ erst in der Methode „start“ erzeugt, also außerhalb des Injection Context. Damit das funktioniert, merkt sich die Klasse im Feldinitialisierer den „Injector“ und übergibt ihn als Option „injector“. Die Option „debugName“ gibt dem „effect“ einen Namen, der in den Angular DevTools erscheint.\n\n„effect“ gibt ein Objekt vom Typ „EffectRef“ zurück. Die Klasse speichert es. In der Methode „stop“ ruft sie „destroy“ auf. Damit endet der „effect“ sofort, und eine angemeldete Aufräumfunktion läuft ein letztes Mal.\n\nUnten steht die Option „manualCleanup“. Mit „true“ wird der „effect“ nicht mehr automatisch mit der Komponente beendet, sondern nur noch durch „destroy“. Das braucht man selten. Vergisst man „destroy“, bleibt der „effect“ für immer aktiv."
         },
         {
           "type": "code",
-          "title": "Stolperfalle 3: Methoden im Template",
-          "code": "<!-- Normale Methode: wird bei jeder Change Detection aufgerufen -->\n{{ expensiveSum() }}\n\n<!-- computed: rechnet nur neu, wenn sich Abhängigkeiten ändern -->\n{{ total() }}\n\n<!-- Ausnahme: reine, billige Aufrufe. Im Zweifel computed oder eine reine Pipe -->",
-          "notes": "Codefolie „Stolperfalle 3: Methoden im Template“.\n\nDie dritte Stolperfalle sind normale Methoden im Template. Eine Methode wie „expensiveSum“ wird bei jeder Änderungsprüfung neu aufgerufen, auch wenn sich nichts geändert hat. Wenn sie aufwendig rechnet, verschwendet das Zeit.\n\nEin „computed“ wie „total“ ist dagegen zwischengespeichert. Es rechnet nur dann neu, wenn sich eine seiner Abhängigkeiten ändert. Reine und sehr billige Aufrufe sind eine Ausnahme. Im Zweifel nimmt man ein „computed“ oder eine reine Pipe."
+          "title": "untracked(): lesen ohne Abhängigkeit",
+          "code": "export class AuditComponent {\n  currentUser = input.required<User>();\n  settings = signal({ verbose: false });\n  private logger = inject(Logger);\n\n  constructor() {\n    effect(() => {\n      const user = this.currentUser();              // Abhängigkeit: Lauf bei neuem User\n\n      untracked(() => {   // Lesen ohne Abhängigkeit: settings löst KEINEN Lauf aus\n        const verbose = this.settings().verbose;\n        this.logger.log(`Benutzer: ${user.name}`, verbose);  // liest evtl. selbst Signals\n      });\n    });\n  }\n}\n// Kurzform für einen einzelnen Wert: const v = untracked(this.settings);",
+          "notes": "Codefolie „untracked(): lesen ohne Abhängigkeit“.\n\nManchmal soll ein „effect“ nur auf ein bestimmtes Signal reagieren, obwohl er noch andere Signals liest. Hier soll er nur laufen, wenn ein neuer Benutzer kommt. Die Einstellungen in „settings“ werden zwar gelesen, aber eine Änderung daran soll keinen neuen Lauf auslösen.\n\nDafür gibt es „untracked“. Es bekommt eine Funktion, ruft sie sofort auf und gibt ihr Ergebnis zurück. Alles, was innerhalb dieser Funktion gelesen wird, wird nicht als Abhängigkeit erfasst.\n\nDas ist auch beim Aufruf fremder Methoden wichtig, hier beim „logger“. Liest dieser Service intern selbst Signals, würden diese sonst unbemerkt zu Abhängigkeiten des „effect“. Unten steht die Kurzform: Man übergibt ein Signal direkt und bekommt seinen Wert ohne Abhängigkeit."
         },
         {
           "type": "content",
-          "title": "Stolperfalle 4: Brücke zu RxJS",
+          "title": "afterRenderEffect: nach dem Zeichnen",
           "bullets": [
-            "toSignal(obs$) ohne initialValue liefert T | undefined – im Template behandeln",
-            "toSignal abonniert automatisch und räumt auf (Injection Context nötig)",
-            "Fehler im Observable werden beim Lesen des Signals erneut geworfen: vorher catchError",
-            "Zeit und Ereignisströme (debounce, switchMap, Retry): RxJS bleibt die bessere Wahl",
-            "Zustand: Signals"
+            "Für DOM-Arbeit, die das fertig gezeichnete Element braucht",
+            [
+              "Größen messen, Canvas zeichnen, Drittbibliothek",
+              1
+            ],
+            "Läuft nach dem Rendern und nur, wenn gelesene Signals sich ändern",
+            "Läuft nur im Browser, nicht beim Server-Rendering",
+            "Für einmalige Arbeit: afterNextRender",
+            "Normale Nebenwirkungen ohne DOM: effect"
           ],
-          "notes": "Folie: „Stolperfalle 4: Brücke zu RxJS“.\n\nDie vierte Stolperfalle betrifft die Verbindung zu RxJS. Die Funktion „toSignal“ wandelt einen Datenstrom, ein „Observable“, in ein Signal um. Gibt man keinen Startwert „initialValue“ an, kann das Signal auch „undefined“ sein. Das muss man im Template berücksichtigen.\n\n„toSignal“ meldet sich selbst an und wieder ab. Dafür muss es in einem „Injection Context“ aufgerufen werden. Tritt im Datenstrom ein Fehler auf, wird dieser Fehler beim Lesen des Signals erneut ausgelöst. Deshalb fängt man ihn vorher mit „catchError“ ab.\n\nFür Zeit und Ereignisströme, zum Beispiel Verzögern, Abbrechen oder Wiederholen, bleibt RxJS die bessere Wahl. Für Zustand nimmt man Signals."
+          "notes": "Folie: „afterRenderEffect: nach dem Zeichnen“.\n\n„afterRenderEffect“ ist eine besondere Form von „effect“. Er ist für Arbeit am Seitenelement gedacht, die das fertig gezeichnete Element braucht. Beispiele sind das Messen von Größen, das Zeichnen auf einer Zeichenfläche „Canvas“ oder eine fremde Diagramm-Bibliothek.\n\nAngular führt ihn aus, nachdem die Oberfläche gezeichnet wurde. Wie ein „effect“ läuft er nur erneut, wenn sich ein gelesenes Signal geändert hat. Er läuft nur im Browser und nicht, wenn die Seite auf dem Server vorbereitet wird.\n\nFür einmalige Arbeit nach dem ersten Zeichnen gibt es „afterNextRender“. Für normale Nebenwirkungen ohne Seitenelement bleibt man beim normalen „effect“.",
+          "diagram": {
+            "kind": "code",
+            "title": "chart.component.ts",
+            "text": "canvas = viewChild.required<\n  ElementRef<HTMLCanvasElement>\n>('c');\ndata = input.required<number[]>();\n\nconstructor() {\n  afterRenderEffect(() => {\n    drawChart(\n      this.canvas().nativeElement,\n      this.data());\n  });\n}"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Wann kein effect?",
+          "bullets": [
+            "Wert aus anderen Signals berechnen: computed",
+            "Signal bei Änderung einer Quelle zurücksetzen: linkedSignal",
+            "Auf Klick oder Eingabe reagieren: Event-Handler, z. B. (click)",
+            "Daten laden, wenn sich eine id ändert: resource oder httpResource",
+            "Beim Start einmal etwas tun: Konstruktor oder afterNextRender",
+            "Faustregel: effect schreibt ein Signal? Fast immer gibt es Besseres",
+            [
+              "Technisch erlaubt (seit Version 19), aber ein Warnsignal",
+              1
+            ]
+          ],
+          "notes": "Folie: „Wann kein effect?“.\n\nEin „effect“ wird oft eingesetzt, wo es bessere Werkzeuge gibt. Soll ein Wert aus anderen Signals berechnet werden, nimmt man „computed“. Soll ein Signal bei einer Änderung zurückspringen, nimmt man „linkedSignal“. Auf einen Klick oder eine Eingabe reagiert man direkt im Event-Handler. Daten, die von einer Kennung abhängen, lädt man mit „resource“ oder „httpResource“. Und was nur einmal beim Start passieren soll, gehört in den Konstruktor oder in „afterNextRender“.\n\nDie Faustregel lautet: Wenn ein „effect“ ein Signal schreibt, gibt es fast immer eine bessere Lösung. Seit Version 19 ist das technisch erlaubt, früher brauchte man dafür eine Sonderoption. Es bleibt aber ein Warnsignal, weil dabei Ketten und zusätzliche Durchläufe entstehen."
+        },
+        {
+          "type": "code",
+          "title": "effect ersetzen: vorher und nachher",
+          "code": "// Vorher: effect setzt ein Signal (abgeleiteter Zustand in Verkleidung)\nfullName = signal('');\nconstructor() {\n  effect(() => this.fullName.set(`${this.first()} ${this.last()}`));\n}\n// Nachher: computed – kein zusätzlicher Lauf, nichts aufzuräumen\nfullName = computed(() => `${this.first()} ${this.last()}`);\n\n// Vorher: Seite bei neuem Suchbegriff per effect zurücksetzen\npage = signal(1);\nconstructor() {\n  effect(() => { this.query(); this.page.set(1); });\n}\n// Nachher: linkedSignal – folgt query, bleibt mit set() änderbar\npage = linkedSignal({ source: this.query, computation: () => 1 });",
+          "notes": "Codefolie „effect ersetzen: vorher und nachher“.\n\nIm ersten Beispiel setzt ein „effect“ den vollständigen Namen aus Vorname und Nachname. Das ist abgeleiteter Zustand, der nur wie ein „effect“ aussieht. Mit „computed“ ist es kürzer. Es gibt keinen zusätzlichen Durchlauf, keinen Moment mit veraltetem Wert und nichts aufzuräumen.\n\nIm zweiten Beispiel soll die Seitennummer auf 1 zurückspringen, wenn ein neuer Suchbegriff kommt. Der „effect“ liest dafür den Suchbegriff nur, um davon abzuhängen, und setzt dann die Seite. Mit „linkedSignal“ ist das klarer: Die Quelle ist der Suchbegriff, und die Berechnung liefert immer 1. Der Benutzer kann trotzdem mit „set“ auf eine andere Seite blättern."
+        },
+        {
+          "type": "content",
+          "title": "toSignal(): Observable wird Signal",
+          "bullets": [
+            "Observable: Datenstrom aus RxJS (Router, Formulare, HttpClient)",
+            "toSignal(obs$) abonniert sofort beim Aufruf",
+            "Jeder neue Wert des Stroms wird der Wert des Signals",
+            "Abmelden automatisch, wenn die Komponente zerstört wird",
+            [
+              "dafür nötig: Injection Context",
+              1
+            ],
+            "Ohne Startwert: Typ T | undefined"
+          ],
+          "notes": "Folie: „toSignal(): Observable wird Signal“.\n\nEin „Observable“ ist ein Datenstrom aus der Bibliothek RxJS. Er liefert über die Zeit mehrere Werte. Viele Teile von Angular liefern solche Ströme, zum Beispiel der Router, die Formulare und der „HttpClient“.\n\n„toSignal“ macht aus einem solchen Strom ein Signal. Es meldet sich sofort beim Aufruf an. Das nennt man „abonnieren“. Jeder neue Wert des Stroms wird dann der Wert des Signals. Wenn die Komponente zerstört wird, meldet „toSignal“ sich automatisch wieder ab. Dafür braucht es den Injection Context, genau wie „effect“.\n\nSolange der Strom noch keinen Wert geliefert hat, ist das Signal „undefined“. Deshalb ist der Typ ohne Startwert „T oder undefined“. Das Diagramm zeigt den Ablauf.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Observable\n(z. B. paramMap)",
+              "toSignal: abonniert",
+              "neuer Wert → Signal",
+              "Template liest Signal",
+              "Komponente zerstört:\nabmelden"
+            ],
+            "highlight_last": false
+          }
+        },
+        {
+          "type": "code",
+          "title": "toSignal(): die Optionen im Code",
+          "code": "private route = inject(ActivatedRoute);\nprivate http = inject(HttpClient);\n\n// 1) ohne Option: Typ Signal<ParamMap | undefined>\nparams = toSignal(this.route.paramMap);\n\n// 2) initialValue: gilt, bis der erste Wert kommt -> Signal<Customer[]>\ncustomers = toSignal(this.http.get<Customer[]>('api/customer'), { initialValue: [] });\n\n// 3) requireSync: Observable liefert sofort beim Abonnieren -> kein undefined\nprivate state$ = new BehaviorSubject<string>('start');\nstate = toSignal(this.state$, { requireSync: true });      // Signal<string>\n\n// 4) außerhalb des Injection Context\nload() {\n  return toSignal(this.http.get<Customer[]>('api/customer'), { injector: this.injector });\n}",
+          "notes": "Codefolie „toSignal(): die Optionen im Code“.\n\nDas erste Beispiel nutzt keine Option. Das Signal ist am Anfang „undefined“, deshalb enthält sein Typ auch „undefined“.\n\nIm zweiten Beispiel gibt „initialValue“ einen Startwert an, hier eine leere Liste. Er gilt, bis die Antwort des Servers da ist. Der Typ enthält dann kein „undefined“ mehr.\n\nIm dritten Beispiel steht „requireSync“. Das bedeutet: Der Strom liefert garantiert sofort beim Abonnieren einen Wert. Ein „BehaviorSubject“ tut das, denn es hat immer einen aktuellen Wert. Auch hier entfällt „undefined“.\n\nDas vierte Beispiel ruft „toSignal“ in einer normalen Methode auf. Dort gibt es keinen Injection Context. Deshalb übergibt man den Injector als Option."
+        },
+        {
+          "type": "content",
+          "title": "toSignal()-Optionen erklärt",
+          "bullets": [
+            "initialValue: Startwert bis zum ersten Wert des Stroms",
+            "requireSync: true – Strom liefert sofort synchron",
+            [
+              "Liefert er nicht sofort: Fehler NG0601",
+              1
+            ],
+            "injector: für Aufrufe außerhalb des Injection Context",
+            "manualCleanup: true – Abo endet erst mit dem Strom selbst",
+            "equal: eigene Vergleichsfunktion wie bei signal",
+            "Fehler im Strom: werden beim Lesen des Signals geworfen"
+          ],
+          "notes": "Folie: „toSignal()-Optionen erklärt“.\n\n„initialValue“ ist der Startwert. Er gilt, bis der Strom seinen ersten Wert liefert. „requireSync“ verspricht, dass der Strom sofort und ohne Wartezeit liefert. Hält der Strom das Versprechen nicht, meldet Angular den Fehler „NG0601“. Man nimmt also entweder „initialValue“ oder „requireSync“, nicht beides.\n\n„injector“ braucht man außerhalb des Injection Context. Mit „manualCleanup“ meldet sich „toSignal“ nicht mehr automatisch mit der Komponente ab. Das Abo endet dann erst, wenn der Strom selbst endet. „equal“ ist eine eigene Vergleichsfunktion, wie bei „signal“.\n\nWichtig ist der Umgang mit Fehlern: Endet der Strom mit einem Fehler, wirft das Signal diesen Fehler beim nächsten Lesen. Im Template bricht dann die Anzeige ab. Deshalb fängt man Fehler vorher im Strom ab."
+        },
+        {
+          "type": "content",
+          "title": "toObservable(): Signal wird Observable",
+          "bullets": [
+            "Für RxJS-Operatoren: debounceTime, switchMap, retry",
+            "Intern ein effect: braucht den Injection Context",
+            "Erster Wert: der aktuelle Wert des Signals",
+            "Werte kommen asynchron, nicht direkt nach set()",
+            [
+              "Mehrere set() hintereinander: nur der letzte Wert",
+              1
+            ],
+            "Option injector wie bei effect"
+          ],
+          "notes": "Folie: „toObservable(): Signal wird Observable“.\n\n„toObservable“ ist die Gegenrichtung. Es macht aus einem Signal einen Datenstrom. Das braucht man, wenn man Werkzeuge aus RxJS nutzen will, zum Beispiel um auf eine Pause beim Tippen zu warten oder eine laufende Anfrage abzubrechen.\n\nInnen arbeitet „toObservable“ mit einem „effect“. Deshalb braucht es ebenfalls den Injection Context oder die Option „injector“. Der erste Wert des Stroms ist der aktuelle Wert des Signals. Neue Werte kommen nicht sofort nach „set“, sondern wie bei einem „effect“ etwas später. Wird das Signal mehrmals hintereinander gesetzt, liefert der Strom nur den letzten Wert.\n\nRechts sieht man das: Das Signal wird zweimal gesetzt, der Strom meldet nur den Wert 2.",
+          "diagram": {
+            "kind": "code",
+            "title": "toObservable",
+            "text": "const count = signal(0);\nconst count$ =\n  toObservable(count);\n\ncount$.subscribe(v =>\n  console.log(v));\n// später: 0\n\ncount.set(1);\ncount.set(2);\n// später nur: 2"
+          }
         },
         {
           "type": "code",
           "title": "Brücke zu RxJS: Filter mit Verzögerung",
-          "code": "// Signal in einen Datenstrom umwandeln, verzögern, wieder als Signal bereitstellen\nfilter$ = toObservable(this.filterText).pipe(\n  debounceTime(300),\n  distinctUntilChanged()\n);\ndebounced = toSignal(this.filter$, { initialValue: '' });\n\n// debounceTime(300): erst weiterreichen, wenn 300 ms keine neue Eingabe kam\n// distinctUntilChanged(): gleiche Werte hintereinander ignorieren",
-          "notes": "Codefolie „Brücke zu RxJS: Filter mit Verzögerung“.\n\nDas Beispiel zeigt, wie man Signals und RxJS zusammen einsetzt. Der Filtertext ist ein Signal. Mit „toObservable“ wird er in einen Datenstrom umgewandelt. „debounceTime“ mit 300 Millisekunden sorgt dafür, dass ein Wert erst weitergereicht wird, wenn 300 Millisekunden lang keine neue Eingabe kam. „distinctUntilChanged“ ignoriert gleiche Werte, die hintereinander kommen.\n\nMit „toSignal“ wird der verzögerte Datenstrom wieder zu einem Signal. Der Startwert ist hier ein leerer Text. So nutzt man RxJS für die Zeit und Signals für den Zustand."
+          "code": "filterText = signal('');\n\n// Signal in einen Datenstrom umwandeln, verzögern, wieder als Signal bereitstellen\nprivate filter$ = toObservable(this.filterText).pipe(\n  debounceTime(300),            // erst weiterreichen, wenn 300 ms keine Eingabe kam\n  distinctUntilChanged()        // gleiche Werte hintereinander ignorieren\n);\ndebounced = toSignal(this.filter$, { initialValue: '' });\n\n// Treffer: rechnet erst nach der Tipp-Pause neu\nvisible = computed(() =>\n  this.customers().filter(c => c.lastname.includes(this.debounced()))\n);",
+          "notes": "Codefolie „Brücke zu RxJS: Filter mit Verzögerung“.\n\nDieses Beispiel nutzt beide Richtungen. Der Filtertext ist ein Signal. Mit „toObservable“ wird daraus ein Datenstrom. Darauf wirken zwei Werkzeuge aus RxJS. „debounceTime“ mit 300 reicht einen Wert erst weiter, wenn 300 Millisekunden lang keine neue Eingabe kam. „distinctUntilChanged“ ignoriert einen Wert, wenn er gleich dem vorherigen ist.\n\nMit „toSignal“ wird der Strom wieder zu einem Signal. Der Startwert ist ein leerer Text. Das „computed“ für die Trefferliste liest dieses verzögerte Signal. Es rechnet also erst neu, wenn der Benutzer eine kurze Pause beim Tippen macht. So wird nicht bei jedem einzelnen Buchstaben gefiltert."
+        },
+        {
+          "type": "content",
+          "title": "Stolperfallen der Brücke zu RxJS",
+          "bullets": [
+            "toSignal ohne initialValue: T | undefined im Template behandeln",
+            "toSignal in ngOnInit oder Methode: NG0203 ohne injector",
+            "Fehler im Strom: Signal wirft beim Lesen – vorher catchError",
+            "toSignal abonniert sofort: HTTP-Anfrage startet beim Erzeugen",
+            "Zeit und Ereignisströme: RxJS – Zustand: Signals"
+          ],
+          "notes": "Folie: „Stolperfallen der Brücke zu RxJS“.\n\nErste Stolperfalle: Ohne Startwert kann das Signal „undefined“ sein. Das muss man im Template berücksichtigen, zum Beispiel mit „@if“. Zweite Stolperfalle: Ruft man „toSignal“ in „ngOnInit“ oder in einer normalen Methode auf, fehlt der Injection Context, und Angular meldet den Fehler „NG0203“. Grund: „toSignal“ muss wissen, wann es sich wieder abmelden soll.\n\nDritte Stolperfalle: Ein Fehler im Strom wird beim Lesen des Signals erneut ausgelöst. Deshalb fängt man ihn vorher mit „catchError“ ab. Vierte Stolperfalle: „toSignal“ meldet sich sofort an. Eine HTTP-Anfrage startet also schon beim Erzeugen des Signals, nicht erst beim ersten Lesen.\n\nAls Richtschnur gilt: Für Zeit und Ereignisströme, zum Beispiel Verzögern, Abbrechen oder Wiederholen, bleibt RxJS die bessere Wahl. Für Zustand nimmt man Signals."
         },
         {
           "type": "code",
-          "title": "Stolperfalle 5: zu grobe Signals",
-          "code": "state = signal({\n  customers: [],\n  filter: '',\n  selectedId: null,\n  loading: false\n});\n// Jede Änderung an irgendeinem Feld invalidiert ALLE, die state() lesen\n\n// Besser: mehrere kleine Signals, daraus computed für Ausschnitte\ncustomers = signal<Customer[]>([]);\nfilter = signal('');\nselectedId = signal<number | null>(null);",
-          "notes": "Codefolie „Stolperfalle 5: zu grobe Signals“.\n\nDie fünfte Stolperfalle ist ein zu grobes Signal. Im Beispiel liegt der gesamte Zustand in einem einzigen Signal, mit Kunden, Filter, Auswahl und Ladezustand. Ändert sich nur ein einziges Feld, gilt der ganze Wert als geändert. Dann müssen alle Stellen neu rechnen, die dieses Signal lesen, auch wenn sie sich nur für ein anderes Feld interessieren.\n\nBesser sind mehrere kleine Signals. Aus ihnen bildet man mit „computed“ die Ausschnitte, die eine Komponente braucht. Die Auswirkungen auf die Geschwindigkeit der Darstellung werden im Kapitel zur Performance behandelt."
+          "title": "Stolperfalle 1: Mutation statt Kopie",
+          "code": "list = signal<Customer[]>([]);\n\nthis.list().push(c);                   // Falsch: gleiches Array, Signal merkt nichts\nthis.list.update(l => [...l, c]);      // Richtig: neues Array, neue Referenz\n\n// Eintrag ändern, ebenfalls mit neuer Referenz\nthis.list.update(l => l.map(x => x.id === c.id ? { ...x, ...changes } : x));\n\n// Eintrag entfernen\nthis.list.update(l => l.filter(x => x.id !== id));\n\n// Warum? Signals vergleichen mit Object.is: gleiches Array = \"keine Änderung\".\n// push ändert den Inhalt, aber nicht die Referenz -> keine Benachrichtigung,\n// computed und Template behalten ihren alten Stand.",
+          "notes": "Codefolie „Stolperfalle 1: Mutation statt Kopie“.\n\nDie erste Stolperfalle ist das Verändern eines Wertes an Ort und Stelle, auf Englisch „Mutation“. Im Beispiel wird mit „push“ ein Kunde an die bestehende Liste angehängt. Das Signal merkt davon nichts, denn es ist immer noch dasselbe Array.\n\nDer Grund: Signals vergleichen alten und neuen Wert mit „Object.is“. Bei Arrays und Objekten zählt dabei nur die Referenz, also die Frage, ob es dasselbe Objekt ist. „push“ ändert den Inhalt, aber nicht die Referenz. Deshalb gibt es keine Benachrichtigung, und „computed“ und Template bleiben beim alten Stand.\n\nRichtig ist, mit „update“ eine neue Liste zu erzeugen, zum Beispiel mit dem Spread-Operator, den drei Punkten. Auch beim Ändern oder Entfernen eines Eintrags entsteht mit „map“ oder „filter“ eine neue Liste."
+        },
+        {
+          "type": "code",
+          "title": "Stolperfalle 2: Zyklen und Ketten",
+          "code": "// Falsch: der erste effect schreibt b, der zweite liest b und schreibt a ...\neffect(() => this.b.set(this.a() * 2));\neffect(() => this.a.set(this.b() + 1));    // Endlosschleife\n\n// Warum? Jeder Schreibvorgang macht den anderen effect veraltet,\n// beide planen sich gegenseitig immer wieder ein.\n\n// Besser: eine Quelle und ein computed\na = signal(1);\nb = computed(() => this.a() * 2);\n\n// Schreiben auf Signals in einem computed ist verboten (Fehler NG0600)\nb2 = computed(() => { this.a.set(5); return 1; });      // NG0600",
+          "notes": "Codefolie „Stolperfalle 2: Zyklen und Ketten“.\n\nDie zweite Stolperfalle sind Ketten und Kreise. Im Beispiel schreibt der erste „effect“ in das Signal „b“. Der zweite „effect“ liest „b“ und schreibt wieder in „a“. Weil „a“ sich ändert, wird der erste „effect“ wieder veraltet und läuft erneut. So stoßen sich die beiden gegenseitig immer wieder an. Das ist eine Endlosschleife und sehr schwer zu untersuchen.\n\nBesser ist es, nur eine Quelle zu haben und alles andere mit „computed“ daraus abzuleiten. Im Beispiel ist „b“ dann einfach „a“ mal zwei.\n\nUnten steht noch eine Regel: Innerhalb eines „computed“ darf man kein Signal schreiben. Angular meldet dann den Fehler mit dem Code „NG0600“. So verhindert Angular, dass ein Berechnen selbst neue Änderungen auslöst."
+        },
+        {
+          "type": "code",
+          "title": "Stolperfalle 3: Methoden im Template",
+          "code": "<!-- Normale Methode: wird bei jeder Change Detection aufgerufen -->\n<p>Summe: {{ expensiveSum() }}</p>\n\n<!-- computed: rechnet nur neu, wenn sich Abhängigkeiten ändern -->\n<p>Summe: {{ total() }}</p>\n\n// Klasse\nexpensiveSum() { return this.items().reduce((s, i) => s + i.price, 0); }\ntotal = computed(() => this.items().reduce((s, i) => s + i.price, 0));\n\n// Warum? Angular weiß nicht, ob eine Methode ihr Ergebnis geändert hat,\n// also ruft es sie bei jeder Prüfung erneut auf.\n// Ein computed weiß es: Es kennt seine Abhängigkeiten und hat einen Speicher.\n// Ausnahme: reine, sehr billige Aufrufe. Im Zweifel computed oder reine Pipe.",
+          "notes": "Codefolie „Stolperfalle 3: Methoden im Template“.\n\nDie dritte Stolperfalle sind normale Methoden im Template. Beide Varianten zeigen dieselbe Summe an. Die Methode „expensiveSum“ wird aber bei jeder Prüfung der Oberfläche neu aufgerufen, auch wenn sich nichts geändert hat.\n\nDer Grund: Angular weiß nicht, ob eine normale Methode ein anderes Ergebnis liefern würde. Also ruft es sie sicherheitshalber jedes Mal auf. Ein „computed“ wie „total“ kennt dagegen seine Abhängigkeiten und hat einen Speicher. Es rechnet nur dann neu, wenn sich die Liste „items“ geändert hat.\n\nReine und sehr billige Aufrufe sind eine Ausnahme. Im Zweifel nimmt man ein „computed“ oder eine reine Pipe."
+        },
+        {
+          "type": "code",
+          "title": "Stolperfalle 4: zu grobe Signals",
+          "code": "// Ein großes Signal für alles\nstate = signal({\n  customers: [] as Customer[], filter: '', selectedId: 0, loading: false\n});\n\nstate.update(s => ({ ...s, loading: true }));    // nur loading geändert ...\n// ... aber JEDER, der state() liest, gilt als veraltet: Liste, Filter, Auswahl\n\n// Warum? Die Abhängigkeit hängt am ganzen Signal, nicht an einzelnen Feldern.\n\n// Besser: mehrere kleine Signals, daraus computed für Ausschnitte\ncustomers = signal<Customer[]>([]);\nfilter = signal('');\nselectedId = signal<number | null>(null);\nloading = signal(false);\nselected = computed(() => this.customers().find(c => c.id === this.selectedId()));",
+          "notes": "Codefolie „Stolperfalle 4: zu grobe Signals“.\n\nDie vierte Stolperfalle ist ein einziges großes Signal für den ganzen Zustand. Im Beispiel enthält „state“ die Kundenliste, den Filter, die Auswahl und einen Ladezustand.\n\nÄndert man nur den Ladezustand, entsteht trotzdem ein neues Gesamtobjekt. Alle, die „state“ lesen, gelten als veraltet, auch die Liste und die Auswahl. Der Grund: Angular verfolgt Abhängigkeiten pro Signal, nicht pro Feld in einem Objekt.\n\nBesser sind mehrere kleine Signals, eines pro Fakt. Was man aus mehreren braucht, setzt man mit „computed“ zusammen, hier den ausgewählten Kunden aus Liste und Kennung."
+        },
+        {
+          "type": "content",
+          "title": "Stolperfalle 5: kleine Fehler, große Wirkung",
+          "bullets": [
+            "Klammern vergessen: if (this.loading) ist immer wahr",
+            [
+              "Richtig: if (this.loading())",
+              1
+            ],
+            "Lesen nach await im effect: keine Abhängigkeit mehr",
+            [
+              "Signals vor dem ersten await lesen",
+              1
+            ],
+            "input() setzen wollen: input ist schreibgeschützt",
+            [
+              "lokalen Zustand mit linkedSignal ableiten",
+              1
+            ],
+            "effect in ngOnInit: Fehler NG0203"
+          ],
+          "notes": "Folie: „Stolperfalle 5: kleine Fehler, große Wirkung“.\n\nVergisst man die Klammern beim Lesen, prüft man nicht den Wert, sondern das Signal selbst. Ein Signal ist eine Funktion, und eine Funktion gilt in einer Bedingung immer als wahr. Die Bedingung ist dann immer erfüllt.\n\nIn einem asynchronen „effect“ endet der reaktive Kontext beim ersten „await“. Signals, die danach gelesen werden, sind keine Abhängigkeiten. Man liest sie deshalb vorher und speichert die Werte in Variablen.\n\nEin „input“ kann die Komponente nicht selbst setzen, denn es ist schreibgeschützt. Braucht man einen änderbaren Wert, der von einer Eingabe ausgeht, nimmt man „linkedSignal“ mit dem „input“ als Quelle. Und ein „effect“ in „ngOnInit“ führt zum Fehler „NG0203“, weil dort der Injection Context fehlt."
         },
         {
           "type": "content",
           "title": "Nachvollziehbare Datenflüsse",
           "bullets": [
-            "Eltern zu Kind: input() – Daten nach unten",
-            "Kind zu Eltern: output() – Ereignisse nach oben",
-            "Komponente, Service oder Store, Signal, alle Leser aktualisieren sich",
-            "Regeln: eine Richtung, ein Besitzer pro Zustand",
-            "Änderungen nur über benannte Methoden („Aktionen“)",
-            "Debugging: Angular DevTools zeigen den Signal-Graph und die Werte",
-            "Im Zweifel temporär effect(() => console.log(x()))"
+            "Eltern zu Kind: input(), Daten nach unten",
+            "Kind zu Eltern: output(), Ereignisse nach oben",
+            "Gemeinsamer Zustand: Service oder Store",
+            "Eine Richtung, ein Besitzer pro Zustand",
+            "Ändern nur über benannte Methoden",
+            "Fehlersuche: Angular DevTools zeigen den Signal-Graphen"
           ],
-          "notes": "Folie: „Nachvollziehbare Datenflüsse“.\n\nEin Datenfluss ist gut nachvollziehbar, wenn er immer in eine feste Richtung läuft. Daten fließen von der Eltern-Komponente zur Kind-Komponente über „input()“. Ereignisse fließen von der Kind-Komponente zur Eltern-Komponente über „output()“. Gemeinsamer Zustand liegt in einem Service oder Store als Signal, und alle, die das Signal lesen, aktualisieren sich.\n\nDie Regeln sind: eine Richtung, ein Besitzer für jeden Zustand, und Änderungen nur über Methoden mit klaren Namen. Solche Methoden nennt man „Aktionen“. Zum Untersuchen helfen die „Angular DevTools“. Sie zeigen den Signal-Graph und die aktuellen Werte. Im Notfall kann man vorübergehend einen „effect“ mit einer Ausgabe in die Konsole einbauen."
+          "notes": "Folie: „Nachvollziehbare Datenflüsse“.\n\nDiese Folie fasst die Regeln für den Datenfluss zusammen. Von der Eltern-Komponente zum Kind fließen Daten über „input“ nach unten. Vom Kind zur Eltern-Komponente fließen Ereignisse über „output“ nach oben. Zustand, den mehrere Komponenten brauchen, liegt in einem Service oder Store mit Signals. Wer ihn liest, wird automatisch aktualisiert.\n\nJeder Zustand hat genau einen Besitzer, und Daten fließen in eine Richtung. Geändert wird der Zustand nur über Methoden mit klaren Namen, sogenannte „Aktionen“, zum Beispiel „addToCart“.\n\nZur Fehlersuche zeigen die Angular DevTools, eine Erweiterung für den Browser, den Signal-Graphen und die aktuellen Werte. Im Zweifel hilft auch kurzzeitig ein „effect“, der einen Wert in die Konsole schreibt.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Eltern-Komponente",
+              "input() ↓    ↑ output()",
+              "Kind-Komponente",
+              "Service / Store (Signals)"
+            ],
+            "note": "eine Richtung, ein Besitzer"
+          }
         },
         {
           "type": "content",
@@ -351,48 +1093,56 @@
             "1. Kommt der Wert vom Benutzer oder von einem Ereignis? Dann signal",
             "2. Folgt er aus anderen Werten? Dann computed",
             [
-              "Soll er überschreibbar sein: linkedSignal",
+              "Soll er trotzdem überschreibbar sein? Dann linkedSignal",
               1
             ],
             "3. Kommt er asynchron vom Server? Dann resource oder httpResource",
             "4. Muss etwas außerhalb von Angular passieren? Dann effect",
-            "5. Geht es um Zeit und Ereignisströme (Debounce, Abbrechen, Wiederholen)? Dann RxJS",
+            [
+              "Braucht es das gezeichnete DOM? Dann afterRenderEffect",
+              1
+            ],
+            "5. Geht es um Zeit und Ereignisströme? Dann RxJS",
             [
               "Am Rand der Komponente mit toSignal in ein Signal wandeln",
               1
             ]
           ],
-          "notes": "Folie: „Entscheidungsbaum: Welcher Baustein?“.\n\nZum Abschluss die Frage: Welchen Baustein nehme ich wann? Man geht fünf Fragen der Reihe nach durch. Kommt der Wert vom Benutzer oder von einem Ereignis? Dann ist es ein „signal“. Folgt er aus anderen Werten? Dann ist es ein „computed“, oder ein „linkedSignal“, wenn er überschreibbar sein soll.\n\nKommt der Wert asynchron vom Server? Dann nimmt man „resource“ oder „httpResource“. Muss etwas außerhalb von Angular passieren? Nur dann nimmt man einen „effect“. Geht es um Zeit oder Ereignisströme, etwa Verzögern, Abbrechen oder Wiederholen? Dann nimmt man RxJS und wandelt das Ergebnis am Rand mit „toSignal“ in ein Signal."
+          "notes": "Folie: „Entscheidungsbaum: Welcher Baustein?“.\n\nDiese Folie hilft bei der Wahl des passenden Bausteins. Man stellt die Fragen der Reihe nach. Kommt ein Wert direkt vom Benutzer oder von einem Ereignis, nimmt man „signal“. Folgt er aus anderen Werten, nimmt man „computed“. Soll er trotzdem von Hand überschreibbar sein, nimmt man „linkedSignal“.\n\nKommt ein Wert asynchron vom Server, nimmt man „resource“ oder „httpResource“. Muss etwas außerhalb von Angular passieren, nimmt man „effect“. Braucht diese Arbeit das fertig gezeichnete Seitenelement, nimmt man „afterRenderEffect“.\n\nGeht es um Zeit und Ereignisströme, also Verzögern, Abbrechen oder Wiederholen, bleibt RxJS die beste Wahl. Am Rand der Komponente wandelt man das Ergebnis mit „toSignal“ in ein Signal um."
         },
         {
           "type": "exercise",
           "title": "Übung 32: Reaktivitäts-Fallen finden",
           "bullets": [
-            "Teil A: filteredCustomers() und customers in computed umbauen",
+            "Teil A: customers und filteredCustomers() in CustomerListComponent zu computed umbauen",
             [
-              "Prüfen: Ein console.log im computed erscheint nur bei geänderten Abhängigkeiten",
+              "Prüfen: console.log im computed erscheint nur bei geänderten Abhängigkeiten",
               1
             ],
-            "Teil B: Filtertext per effect in localStorage sichern und beim Start wiederherstellen",
-            "Teil C: Patch von der nächsten Folie in CustomerListComponent einfügen",
+            "Teil B: Filtertext per effect in localStorage sichern (Schlüssel customerFilter)",
             [
-              "Je Zeile benennen: Was ist falsch? Welche Regel wird verletzt?",
+              "Beim Start als Startwert des Signals wiederherstellen, Zugriff mit try/catch",
+              1
+            ],
+            "Teil C: Patch von der nächsten Folie einfügen, Button „Demo-Kunde hinzufügen“ testen",
+            [
+              "Je Nummer benennen: Was ist falsch? Welche Regel wird verletzt?",
               1
             ],
             [
-              "Beheben: (1) computed, (2) neue Referenz im Zustand, (3) computed",
+              "Beheben: (1) und (3) mit computed, (2) mit signal plus update und Spread",
               1
             ],
             "Reflexion: Welche Fehler hätte ein Test gefunden, welche nur ein Review?",
             "Musterlösung: 32_reaktivitaet (baut auf 31_komponenten_aufteilen auf)"
           ],
-          "notes": "Folie: „Übung 32: Reaktivitäts-Fallen finden“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 32 im Ordner 32_reaktivitaet. Sie baut auf dem Ergebnis von Übung 31 auf.\n\nIn Teil A bauen die Teilnehmer die Methode zum Filtern und die Funktion für die Kunden in „computed“ um. Eine Ausgabe in der Konsole zeigt, dass die Berechnung nur bei geänderten Abhängigkeiten läuft. In Teil B sichern sie den Filtertext mit einem „effect“ im „localStorage“ und stellen ihn beim Start wieder her. In Teil C fügen sie einen Patch mit drei absichtlichen Fehlern ein, der auf der nächsten Folie steht. Sie benennen den Fehler je Zeile, beheben ihn und überlegen, welche Fehler ein Test gefunden hätte."
+          "notes": "Folie: „Übung 32: Reaktivitäts-Fallen finden“.\n\nErklärung für die Dolmetscherin:\nDie Übung hat drei Teile. In Teil A werden die Kundenliste und die gefilterte Liste zu „computed“ umgebaut. Mit einer Ausgabe in der Konsole prüft man, dass nur noch gerechnet wird, wenn sich wirklich etwas geändert hat, und nicht bei jedem Mausklick.\n\nIn Teil B sichert ein „effect“ den Filtertext im Speicher des Browsers. Beim Neuladen der Seite wird er als Startwert wiederhergestellt. Weil der Speicher gesperrt sein kann, steht der Zugriff in „try“ und „catch“.\n\nIn Teil C fügt man Code mit drei absichtlichen Fehlern ein, sucht sie, benennt die verletzte Regel und behebt sie. Zum Schluss überlegt man, welche Fehler ein Test gefunden hätte."
         },
         {
           "type": "code",
           "title": "Übung 32: Patch für Teil C",
-          "code": "// (1)\nselectedName = signal('');\neffect(() => this.selectedName.set(this.selectedCustomer()?.firstname ?? ''));\n// (2)\naddDemo() { this.customers().push(new Customer('Neu', 'Demo')); }\n// (3)\ntotal = signal(0);\neffect(() => this.total.set(this.filteredCustomers().length));\n// Aufgabe: Was ist je Nummer falsch? Welche Regel wird verletzt?",
-          "notes": "Codefolie „Übung 32: Patch für Teil C“.\n\nDieser Code ist der Patch für Teil C von Übung 32. Er enthält absichtlich drei Fehler. Im Abschnitt 1 schreibt ein „effect“ einen Wert, der sich einfach ableiten ließe. Das ist ein Fall für „computed“. Im Abschnitt 2 fügt die Methode mit „push“ einen Kunden direkt in die bestehende Liste ein. Das Signal bemerkt das nicht, es fehlt eine neue Referenz. Im Abschnitt 3 schreibt wieder ein „effect“ einen abgeleiteten Wert, auch hier ist „computed“ richtig.\n\nAbschnitt 2 lässt sich nicht einfach reparieren, weil die Kunden aus einer Resource kommen. Der Zustand müsste lokal gehalten werden, das folgt im nächsten Abschnitt. Hier genügt die Erklärung, warum „push“ nichts auslöst."
+          "code": "// --- Klassenfelder ---\nselectedName = signal('');\ntotal = signal(0);\n\n// --- Konstruktor (der effect aus Teil B steht dort schon) ---\nconstructor() {\n  effect(() => this.selectedName.set(this.selectedCustomer()?.firstname ?? ''));  // (1)\n  effect(() => this.total.set(this.filteredCustomers().length));                   // (3)\n}\n\n// --- Methode ---\naddDemo() { this.customers().push(new Customer('Neu', 'Demo')); }                  // (2)\n\n<!-- Template, nach </ul> -->\n<p>Treffer: {{ total() }} · Ausgewählt: {{ selectedName() || '-' }}</p>\n<button (click)=\"addDemo()\">Demo-Kunde hinzufügen</button>",
+          "notes": "Codefolie „Übung 32: Patch für Teil C“.\n\nDas ist der Code, den die Teilnehmer in Teil C in die Kundenliste einfügen. Er enthält drei absichtliche Fehler, die mit den Nummern 1 bis 3 markiert sind. Der erste Block gehört in die Klasse, der zweite ans Ende des Templates nach der Liste.\n\nFehler 1 und Fehler 3 sind jeweils ein „effect“, der nur ein anderes Signal setzt, also abgeleiteter Zustand in Verkleidung. Fehler 2 hängt mit „push“ einen Kunden an ein Array an, ohne eine neue Referenz zu erzeugen. Beim Klick auf den Button passiert deshalb in der Liste nichts.\n\nDie Teilnehmer sollen die Fehler zuerst selbst finden und benennen. Die Lösungen stehen in den Lösungshinweisen der Aufgabe und im Ordner der Musterlösung."
         }
       ]
     }
