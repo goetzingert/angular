@@ -970,7 +970,7 @@
     {
      "type": "code",
      "title": "Card verwenden: Inhalt in die Slots",
-     "code": "<!-- customer-details.component.html (CardComponent im imports-Array) -->\n<app-card>\n  <span card-header>\n    Kundendetails: {{ customer()?.firstname }} {{ customer()?.lastname }}\n  </span>\n\n  <form id=\"customer-form\" #customerForm=\"ngForm\" (ngSubmit)=\"onSubmit(customerForm)\">\n    <!-- Eingabefelder … landen im Default-Slot -->\n  </form>\n\n  <div card-footer>\n    <button type=\"submit\" form=\"customer-form\"\n            [disabled]=\"customerForm.invalid\">Speichern</button>\n    <button type=\"button\" (click)=\"goBack()\">Zurück zur Liste</button>\n  </div>\n</app-card>",
+     "code": "<!-- customer-details.component.html -->\n<app-card>\n  <span card-header>\n    Kundendetails: {{ customer()?.firstname }}\n  </span>\n\n  <form id=\"customer-form\" #customerForm=\"ngForm\"\n        (ngSubmit)=\"onSubmit(customerForm)\">\n    <!-- Eingabefelder … landen im Default-Slot -->\n  </form>\n  <div card-footer>\n    <button type=\"submit\" form=\"customer-form\"\n            [disabled]=\"customerForm.invalid\">Speichern</button>\n    <button type=\"button\" (click)=\"goBack()\">Zurück zur Liste</button>\n  </div>\n</app-card>",
      "notes": "Codefolie „Card verwenden: Inhalt in die Slots“.\n\nDie Detailansicht verwendet die Karte. Zwischen dem öffnenden und dem schließenden Tag von „app-card“ steht der Inhalt. Das Element mit dem Attribut „card-header“ landet im Kopf der Karte. Das Formular hat kein solches Attribut und landet deshalb im Standard-Slot. Das Element mit „card-footer“ landet im Fuß.\n\nEine Besonderheit: Der Speichern-Knopf steht im Fuß und damit außerhalb des Formulars. Damit er das Formular trotzdem abschickt, bekommt das Formular eine „id“ und der Knopf das Attribut „form“ mit dieser „id“. Die Template-Variable „customerForm“ ist auch im Fuß sichtbar, weil alles im selben Template der Elternkomponente steht. Damit wird der Knopf gesperrt, solange das Formular ungültig ist."
     },
     {
@@ -1038,7 +1038,7 @@
     {
      "type": "code",
      "title": "contentChild: Projizierten Inhalt abfragen",
-     "code": "// card.component.ts\n@Component({\n  selector: 'app-card',\n  template: `\n    <div class=\"card\">\n      <div class=\"card-header\" [hidden]=\"!hasHeader()\">\n        <ng-content select=\"[card-header]\" />\n      </div>\n      <div class=\"card-body\"><ng-content /></div>\n    </div>`\n})\nexport class CardComponent {\n  header = contentChild<ElementRef>('header');   // sucht #header im Content\n  hasHeader = computed(() => !!this.header());\n}\n\n<!-- Verwendung -->\n<app-card><h3 #header card-header>Kunde</h3> … </app-card>",
+     "code": "@Component({\n  selector: 'app-card',\n  template: `\n    <div class=\"card\">\n      <div class=\"card-header\" [hidden]=\"!hasHeader()\">\n        <ng-content select=\"[card-header]\" />\n      </div>\n      <div class=\"card-body\"><ng-content /></div>\n    </div>`\n})\nexport class CardComponent {\n  header = contentChild<ElementRef>('header');  // #header im Content\n  hasHeader = computed(() => !!this.header());\n}\n<!-- Verwendung -->\n<app-card><h3 #header card-header>Kunde</h3> … </app-card>",
      "notes": "Codefolie „contentChild: Projizierten Inhalt abfragen“.\n\nDieses Beispiel verbindet Content Projection mit einer Signal Query. Die Karte soll den Kopfbereich mit Rahmen und Hintergrund nur zeigen, wenn die Elternkomponente auch eine Überschrift mitliefert.\n\nDafür sucht „contentChild“ im hineingereichten Inhalt ein Element mit der Template-Variable „#header“. Das „computed“ „hasHeader“ ist wahr, wenn eins gefunden wurde. Im Template wird der Kopfbereich mit „hidden“ ausgeblendet, solange dieses Signal falsch ist. Das „ng-content“ selbst steht bewusst nicht in einem „@if“, wie die vorige Folie erklärt.\n\nUnten sieht man die Verwendung: Die Überschrift trägt sowohl die Template-Variable „#header“ als auch das Attribut „card-header“ für den Slot. Die Musterlösung der Übung 29 braucht diese Abfrage nicht, sie ist eine mögliche Erweiterung."
     },
     {
@@ -1158,8 +1158,7 @@
      "type": "content",
      "title": "Incremental Hydration mit @defer",
      "bullets": [
-      "Problem: Hydration der ganzen Seite lädt viel JavaScript",
-      "Incremental Hydration: Bereiche erst bei Bedarf hydrieren",
+      "Bereiche erst bei Bedarf hydrieren statt alles auf einmal",
       [
        "Server rendert den Block trotzdem sofort als HTML",
        1
@@ -1168,9 +1167,9 @@
        "JavaScript des Blocks lädt erst beim Auslöser",
        1
       ],
-      "Auslöser: hydrate on viewport, interaction, idle, hover, timer",
+      "Auslöser: on viewport, interaction, idle, hover, timer",
       "hydrate never: bleibt dauerhaft statisches HTML",
-      "Aktivieren: provideClientHydration(withIncrementalHydration())"
+      "Aktivieren: withIncrementalHydration()"
      ],
      "notes": "Folie: „Incremental Hydration mit @defer“.\n\nBei der normalen Hydration lädt der Browser das JavaScript für die ganze Seite auf einmal. Bei großen Seiten ist das viel. „Incremental Hydration“, also schrittweise Hydration, löst das: Einzelne Bereiche werden erst hydriert, wenn sie gebraucht werden.\n\nMan kennzeichnet einen Bereich mit „@defer“ und einem „hydrate“-Auslöser. Der Server rendert den Bereich trotzdem sofort als HTML, man sieht ihn also. Sein JavaScript lädt aber erst, wenn der Auslöser eintritt: zum Beispiel wenn der Bereich in den sichtbaren Teil scrollt, bei einer Interaktion, wenn der Browser nichts zu tun hat, beim Darüberfahren mit der Maus oder nach einer Zeit. Mit „hydrate never“ bleibt der Bereich reines HTML.\n\nEingeschaltet wird das in „app.config.ts“ mit „withIncrementalHydration“. Damit ist auch das Nachspielen von Klicks aktiv.",
      "diagram": {
@@ -1217,7 +1216,7 @@
     {
      "type": "code",
      "title": "afterNextRender: Browser-Code sicher ausführen",
-     "code": "import { afterNextRender, inject, PLATFORM_ID, signal } from '@angular/core';\nimport { isPlatformBrowser } from '@angular/common';\n\nexport class CustomerListComponent {\n  private readonly platformId = inject(PLATFORM_ID);\n  filterText = signal('');\n\n  constructor() {\n    // Läuft nur im Browser, einmal nach dem ersten Rendern – nie auf dem Server\n    afterNextRender(() => {\n      this.filterText.set(localStorage.getItem('customerFilter') ?? '');\n    });\n  }\n\n  saveFilter(): void {\n    if (isPlatformBrowser(this.platformId)) {\n      localStorage.setItem('customerFilter', this.filterText());\n    }\n  }\n}",
+     "code": "// Imports: afterNextRender, inject, PLATFORM_ID (core), isPlatformBrowser (common)\nexport class CustomerListComponent {\n  private readonly platformId = inject(PLATFORM_ID);\n  filterText = signal('');\n\n  constructor() {\n    // nur im Browser, einmal nach dem ersten Rendern – nie auf dem Server\n    afterNextRender(() => {\n      this.filterText.set(localStorage.getItem('customerFilter') ?? '');\n    });\n  }\n\n  saveFilter(): void {\n    if (isPlatformBrowser(this.platformId)) {\n      localStorage.setItem('customerFilter', this.filterText());\n    }\n  }\n}",
      "notes": "Codefolie „afterNextRender: Browser-Code sicher ausführen“.\n\nDie Komponente soll den letzten Filtertext im Speicher des Browsers merken. Den gibt es auf dem Server nicht.\n\nIm Konstruktor wird eine Funktion an „afterNextRender“ übergeben. Angular ruft sie einmal auf, nachdem die Komponente im Browser zum ersten Mal gerendert wurde. Auf dem Server ruft Angular sie nie auf. Deshalb darf sie „localStorage“ verwenden. Sie liest den gespeicherten Text und setzt das Signal.\n\nDie Methode „saveFilter“ kann zu jeder Zeit aufgerufen werden. Deshalb prüft sie vorher mit „isPlatformBrowser“, ob der Code gerade im Browser läuft. „PLATFORM_ID“ ist ein von Angular bereitgestellter Wert, der sagt, ob man auf dem Server oder im Browser ist. Es gibt auch „afterEveryRender“ für Code, der nach jedem Rendern laufen soll."
     },
     {
