@@ -495,7 +495,7 @@
     },
     {
      "type": "content",
-     "title": "Drei Varianten: resource, rxResource, httpResource",
+     "title": "Drei Varianten der Resource API",
      "bullets": [
       "resource({ params, loader })",
       [
@@ -517,7 +517,7 @@
        1
       ]
      ],
-     "notes": "Folie: „Drei Varianten: resource, rxResource, httpResource“.\n\nEs gibt drei Varianten. „resource“ ist die Grundform. Sie bekommt eine Funktion „loader“, die ein „Promise“ liefert. Ein „Promise“ ist ein Versprechen auf einen Wert, der später kommt, zum Beispiel aus der Browser-Funktion „fetch“.\n\n„rxResource“ arbeitet mit „Observables“ aus der Bibliothek „RxJS“. Statt „loader“ heißt die Funktion hier „stream“. Diese Variante passt gut, wenn es schon Services gibt, die Observables liefern, so wie unser „CustomerService“.\n\n„httpResource“ ist die bequemste Variante für Server-Anfragen. Man gibt nur eine Funktion an, die die Adresse liefert. Intern nutzt sie den „HttpClient“, deshalb laufen auch alle Interceptors.",
+     "notes": "Folie: „Drei Varianten der Resource API“.\n\nEs gibt drei Varianten. „resource“ ist die Grundform. Sie bekommt eine Funktion „loader“, die ein „Promise“ liefert. Ein „Promise“ ist ein Versprechen auf einen Wert, der später kommt, zum Beispiel aus der Browser-Funktion „fetch“.\n\n„rxResource“ arbeitet mit „Observables“ aus der Bibliothek „RxJS“. Statt „loader“ heißt die Funktion hier „stream“. Diese Variante passt gut, wenn es schon Services gibt, die Observables liefern, so wie unser „CustomerService“.\n\n„httpResource“ ist die bequemste Variante für Server-Anfragen. Man gibt nur eine Funktion an, die die Adresse liefert. Intern nutzt sie den „HttpClient“, deshalb laufen auch alle Interceptors.",
      "diagram": {
       "kind": "tree",
       "root": "Resource API",
@@ -564,7 +564,7 @@
     {
      "type": "code",
      "title": "resource() mit loader und abortSignal",
-     "code": "import { Component, input, resource } from '@angular/core';\n\nexport class CustomerDetailsComponent {\n  id = input<string>();\n\n  customer = resource({\n    // 1. Parameter: reaktiv, undefined = nichts laden\n    params: () => this.id() ? { id: this.id()! } : undefined,\n\n    // 2. Loader: Angular ruft ihn bei jeder Parameter-Änderung auf\n    loader: async ({ params, abortSignal }) => {\n      const res = await fetch(`api/customer/${params.id}`, { signal: abortSignal });\n      if (!res.ok) {\n        throw new Error(`HTTP ${res.status}`);   // → Zustand error\n      }\n      return (await res.json()) as Customer;     // → Zustand resolved\n    }\n  });\n}",
+     "code": "export class CustomerDetailsComponent {\n  id = input<string>();\n\n  customer = resource({\n    // 1. Parameter: reaktiv, undefined = nichts laden\n    params: () => this.id() ? { id: this.id()! } : undefined,\n\n    // 2. Loader: Angular ruft ihn bei jeder Parameter-Änderung auf\n    loader: async ({ params, abortSignal }) => {\n      const res = await fetch(`api/customer/${params.id}`, { signal: abortSignal });\n      if (!res.ok) {\n        throw new Error(`HTTP ${res.status}`);   // → Zustand error\n      }\n      return (await res.json()) as Customer;     // → Zustand resolved\n    }\n  });\n}",
      "notes": "Codefolie „resource() mit loader und abortSignal“.\n\nDie Komponente bekommt die Kunden-Nummer als Input. Die Resource hat zwei Teile. Die Funktion „params“ liefert ein Objekt mit der Nummer. Gibt es keine Nummer, liefert sie „undefined“, und es wird nichts geladen.\n\nDie Funktion „loader“ ist mit „async“ gekennzeichnet, sie arbeitet also asynchron und liefert ein „Promise“. Angular ruft sie bei jeder Änderung der Parameter auf und übergibt die Parameter und das Abbruchsignal. Der Loader holt die Daten mit „fetch“ und gibt das Abbruchsignal an „fetch“ weiter. Ist die Antwort nicht in Ordnung, wirft er einen Fehler, dann geht die Resource in den Zustand „error“. Sonst gibt er den Kunden zurück, und die Resource geht in den Zustand „resolved“.\n\nWeil hier „fetch“ statt „HttpClient“ verwendet wird, laufen keine Interceptors. Das Beispiel zeigt nur das Prinzip."
     },
     {
@@ -592,9 +592,9 @@
     },
     {
      "type": "code",
-     "title": "httpResource und rxResource im Kursprojekt",
+     "title": "Resources im Kursprojekt",
      "code": "// customer-list.component.ts – Liste per httpResource\nprivate readonly customerResource = httpResource<ResponseArray>(() => 'api/customer');\ncustomers = () => this.customerResource.value()?.data ?? [];\nisLoading = this.customerResource.isLoading;\nerror = this.customerResource.error;\n\n// customer-details.component.ts – Details per rxResource\nid = input<string>();\nprivate readonly customerResource = rxResource({\n  params: () => this.id(),\n  stream: ({ params }) => {\n    if (!params) { throw new Error('Keine Customer-Id angegeben'); }\n    return this.customerService.getById(params);   // Observable<Customer>\n  }\n});\ncustomer = this.customerResource.value;\nisLoading = this.customerResource.isLoading;",
-     "notes": "Codefolie „httpResource und rxResource im Kursprojekt“.\n\nOben steht die Kundenliste. „httpResource“ bekommt eine Funktion, die die Adresse „api/customer“ liefert. Der Server antwortet mit einem Objekt, in dem die Liste im Feld „data“ steckt. Deshalb holt „customers“ die Liste aus dem Wert heraus und liefert eine leere Liste, solange nichts geladen ist. Ladezustand und Fehler werden direkt aus der Resource übernommen.\n\nUnten steht die Detailansicht. Hier wird „rxResource“ verwendet, weil der „CustomerService“ schon eine Methode „getById“ hat, die ein Observable liefert. „params“ liest den Input „id“. Die Funktion „stream“ bekommt die Nummer und ruft den Service auf. Fehlt die Nummer, wirft sie einen Fehler. Ändert sich die Nummer, lädt Angular automatisch den neuen Kunden. Den früheren „effect“ mit „subscribe“ braucht man nicht mehr."
+     "notes": "Codefolie „Resources im Kursprojekt“.\n\nOben steht die Kundenliste. „httpResource“ bekommt eine Funktion, die die Adresse „api/customer“ liefert. Der Server antwortet mit einem Objekt, in dem die Liste im Feld „data“ steckt. Deshalb holt „customers“ die Liste aus dem Wert heraus und liefert eine leere Liste, solange nichts geladen ist. Ladezustand und Fehler werden direkt aus der Resource übernommen.\n\nUnten steht die Detailansicht. Hier wird „rxResource“ verwendet, weil der „CustomerService“ schon eine Methode „getById“ hat, die ein Observable liefert. „params“ liest den Input „id“. Die Funktion „stream“ bekommt die Nummer und ruft den Service auf. Fehlt die Nummer, wirft sie einen Fehler. Ändert sich die Nummer, lädt Angular automatisch den neuen Kunden. Den früheren „effect“ mit „subscribe“ braucht man nicht mehr."
     },
     {
      "type": "content",
@@ -1037,9 +1037,9 @@
     },
     {
      "type": "code",
-     "title": "contentChild: Projizierten Inhalt abfragen",
+     "title": "contentChild in der Card",
      "code": "@Component({\n  selector: 'app-card',\n  template: `\n    <div class=\"card\">\n      <div class=\"card-header\" [hidden]=\"!hasHeader()\">\n        <ng-content select=\"[card-header]\" />\n      </div>\n      <div class=\"card-body\"><ng-content /></div>\n    </div>`\n})\nexport class CardComponent {\n  header = contentChild<ElementRef>('header');  // #header im Content\n  hasHeader = computed(() => !!this.header());\n}\n<!-- Verwendung -->\n<app-card><h3 #header card-header>Kunde</h3> … </app-card>",
-     "notes": "Codefolie „contentChild: Projizierten Inhalt abfragen“.\n\nDieses Beispiel verbindet Content Projection mit einer Signal Query. Die Karte soll den Kopfbereich mit Rahmen und Hintergrund nur zeigen, wenn die Elternkomponente auch eine Überschrift mitliefert.\n\nDafür sucht „contentChild“ im hineingereichten Inhalt ein Element mit der Template-Variable „#header“. Das „computed“ „hasHeader“ ist wahr, wenn eins gefunden wurde. Im Template wird der Kopfbereich mit „hidden“ ausgeblendet, solange dieses Signal falsch ist. Das „ng-content“ selbst steht bewusst nicht in einem „@if“, wie die vorige Folie erklärt.\n\nUnten sieht man die Verwendung: Die Überschrift trägt sowohl die Template-Variable „#header“ als auch das Attribut „card-header“ für den Slot. Die Musterlösung der Übung 29 braucht diese Abfrage nicht, sie ist eine mögliche Erweiterung."
+     "notes": "Codefolie „contentChild in der Card“.\n\nDieses Beispiel verbindet Content Projection mit einer Signal Query. Die Karte soll den Kopfbereich mit Rahmen und Hintergrund nur zeigen, wenn die Elternkomponente auch eine Überschrift mitliefert.\n\nDafür sucht „contentChild“ im hineingereichten Inhalt ein Element mit der Template-Variable „#header“. Das „computed“ „hasHeader“ ist wahr, wenn eins gefunden wurde. Im Template wird der Kopfbereich mit „hidden“ ausgeblendet, solange dieses Signal falsch ist. Das „ng-content“ selbst steht bewusst nicht in einem „@if“, wie die vorige Folie erklärt.\n\nUnten sieht man die Verwendung: Die Überschrift trägt sowohl die Template-Variable „#header“ als auch das Attribut „card-header“ für den Slot. Die Musterlösung der Übung 29 braucht diese Abfrage nicht, sie ist eine mögliche Erweiterung."
     },
     {
      "type": "exercise",
@@ -1215,9 +1215,9 @@
     },
     {
      "type": "code",
-     "title": "afterNextRender: Browser-Code sicher ausführen",
-     "code": "// Imports: afterNextRender, inject, PLATFORM_ID (core), isPlatformBrowser (common)\nexport class CustomerListComponent {\n  private readonly platformId = inject(PLATFORM_ID);\n  filterText = signal('');\n\n  constructor() {\n    // nur im Browser, einmal nach dem ersten Rendern – nie auf dem Server\n    afterNextRender(() => {\n      this.filterText.set(localStorage.getItem('customerFilter') ?? '');\n    });\n  }\n\n  saveFilter(): void {\n    if (isPlatformBrowser(this.platformId)) {\n      localStorage.setItem('customerFilter', this.filterText());\n    }\n  }\n}",
-     "notes": "Codefolie „afterNextRender: Browser-Code sicher ausführen“.\n\nDie Komponente soll den letzten Filtertext im Speicher des Browsers merken. Den gibt es auf dem Server nicht.\n\nIm Konstruktor wird eine Funktion an „afterNextRender“ übergeben. Angular ruft sie einmal auf, nachdem die Komponente im Browser zum ersten Mal gerendert wurde. Auf dem Server ruft Angular sie nie auf. Deshalb darf sie „localStorage“ verwenden. Sie liest den gespeicherten Text und setzt das Signal.\n\nDie Methode „saveFilter“ kann zu jeder Zeit aufgerufen werden. Deshalb prüft sie vorher mit „isPlatformBrowser“, ob der Code gerade im Browser läuft. „PLATFORM_ID“ ist ein von Angular bereitgestellter Wert, der sagt, ob man auf dem Server oder im Browser ist. Es gibt auch „afterEveryRender“ für Code, der nach jedem Rendern laufen soll."
+     "title": "afterNextRender: nur im Browser",
+     "code": "// afterNextRender, PLATFORM_ID: @angular/core\n// isPlatformBrowser: @angular/common\nexport class CustomerListComponent {\n  private readonly platformId = inject(PLATFORM_ID);\n  filterText = signal('');\n\n  constructor() {\n    // nur im Browser, einmal nach dem ersten Rendern\n    afterNextRender(() => {\n      this.filterText.set(localStorage.getItem('filter') ?? '');\n    });\n  }\n  saveFilter(): void {\n    if (isPlatformBrowser(this.platformId)) {\n      localStorage.setItem('filter', this.filterText());\n    }\n  }\n}",
+     "notes": "Codefolie „afterNextRender: nur im Browser“.\n\nDie Komponente soll den letzten Filtertext im Speicher des Browsers merken. Den gibt es auf dem Server nicht.\n\nIm Konstruktor wird eine Funktion an „afterNextRender“ übergeben. Angular ruft sie einmal auf, nachdem die Komponente im Browser zum ersten Mal gerendert wurde. Auf dem Server ruft Angular sie nie auf. Deshalb darf sie „localStorage“ verwenden. Sie liest den gespeicherten Text und setzt das Signal.\n\nDie Methode „saveFilter“ kann zu jeder Zeit aufgerufen werden. Deshalb prüft sie vorher mit „isPlatformBrowser“, ob der Code gerade im Browser läuft. „PLATFORM_ID“ ist ein von Angular bereitgestellter Wert, der sagt, ob man auf dem Server oder im Browser ist. Es gibt auch „afterEveryRender“ für Code, der nach jedem Rendern laufen soll."
     },
     {
      "type": "content",
