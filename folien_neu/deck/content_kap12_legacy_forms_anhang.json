@@ -6,24 +6,1476 @@
       "slides": [
         {
           "type": "divider",
+          "title": "Legacy: Angular-Module (NgModule)",
+          "notes": "Kapitelübergangsfolie „Legacy: Angular-Module (NgModule)“ – Hier beginnt das Legacy-Kapitel. „Legacy“ bedeutet: ältere Technik, die man noch kennen muss, die man aber für neuen Code nicht mehr verwendet. Alles in diesem Kapitel ist NICHT mehr der heutige Standard. Es zeigt, wie Angular-Projekte vor der Umstellung auf Standalone-Komponenten organisiert waren. Das ist wichtig für alle, die in bestehenden, älteren Projekten arbeiten. Am Ende des Kapitels steht Übung 30 im Projektordner 30_modules_legacy."
+        },
+        {
+          "type": "content",
+          "title": "Warum dieses Kapitel?",
+          "bullets": [
+            "Viele Bestandsprojekte sind mit NgModules gebaut",
+            "Ältere Bibliotheken, Doku und Forenbeiträge nutzen sie",
+            "NgModules werden weiterhin unterstützt",
+            [
+              "Mischbetrieb mit Standalone ist möglich",
+              1
+            ],
+            "Neuer Code: immer Standalone",
+            "Ziel: alten Code lesen, pflegen und migrieren"
+          ],
+          "notes": "Folie: „Warum dieses Kapitel?“.\n\nDie Teilnehmer schreiben im Kurs ausschließlich Standalone-Komponenten. In der Praxis treffen sie aber oft auf ältere Projekte, die mit sogenannten „NgModules“ aufgebaut sind. Auch ältere Bibliotheken, Anleitungen und Forenbeiträge verwenden diesen Stil.\n\nAngular unterstützt NgModules weiterhin, und beide Stile können in einem Projekt gemischt werden. Für neuen Code verwendet man trotzdem immer Standalone. Ziel des Kapitels ist, alten Code lesen, pflegen und Schritt für Schritt umstellen zu können.\n\nDas Diagramm zeigt die zeitliche Entwicklung: Bis Angular 13 gab es nur NgModules. Mit Version 14 kamen Standalone-Komponenten als Vorschau, mit Version 15 wurden sie stabil, ab Version 17 erzeugt die Kommandozeile neue Projekte standardmäßig ohne Module, und seit Version 19 ist „standalone“ der automatische Standardwert.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Bis v13: nur NgModules",
+              "v14: Standalone (Vorschau)",
+              "v15: Standalone stabil",
+              "v17: ng new ohne Module",
+              "v19: standalone = Standard"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was ist ein NgModule?",
+          "bullets": [
+            "Eine Klasse mit dem Dekorator @NgModule",
+            "Fasst Komponenten, Direktiven und Pipes zusammen",
+            "Legt fest, was im Template sichtbar ist",
+            "Kann Services bereitstellen (providers)",
+            "Nicht dasselbe wie ein ES-Modul (Datei mit import/export)",
+            [
+              "Beides wird parallel verwendet",
+              1
+            ]
+          ],
+          "notes": "Folie: „Was ist ein NgModule?“.\n\nEin „NgModule“ ist eine TypeScript-Klasse, die mit dem Dekorator „@NgModule“ versehen ist. Ein Dekorator ist eine Markierung mit dem @-Zeichen, die einer Klasse zusätzliche Informationen für Angular mitgibt. Das NgModule fasst Komponenten, Direktiven und Pipes zu einer Einheit zusammen und legt fest, welche Bausteine in den Templates dieser Einheit verwendet werden dürfen. Außerdem kann es Services bereitstellen.\n\nWichtig: Ein NgModule ist etwas anderes als ein ES-Modul. Ein ES-Modul ist einfach eine Datei mit „import“ und „export“, das prüft TypeScript. Ein NgModule ist ein Angular-Konzept, das der Angular-Compiler auswertet. In einem NgModule-Projekt braucht man beides gleichzeitig. Das Diagramm stellt die beiden Begriffe gegenüber.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "ES-Modul (Datei)",
+              "items": [
+                "import / export",
+                "Sichtbarkeit von Symbolen",
+                "prüft TypeScript"
+              ]
+            },
+            "right": {
+              "title": "NgModule (Angular)",
+              "items": [
+                "Klasse mit @NgModule",
+                "Sichtbarkeit im Template",
+                "prüft Angular-Compiler"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Warum gab es Module?",
+          "bullets": [
+            "Kompromiss zwischen zwei Extremen",
+            [
+              "AngularJS 1: alles global, „einfach reinwerfen“",
+              1
+            ],
+            [
+              "Vorabversionen von Angular 2: jede Abhängigkeit an jeder Komponente",
+              1
+            ],
+            "Kapselung: Feature-Bereiche als Einheit",
+            "Bibliotheken mit einem Import einbinden (z. B. FormsModule)",
+            "Lazy Loading ganzer Bereiche über Module",
+            "Nachteile: viel Boilerplate, indirekte Abhängigkeiten, schwer zu überblicken"
+          ],
+          "notes": "Folie: „Warum gab es Module?“.\n\nNgModules waren ein Kompromiss zwischen zwei Extremen. Im Vorgänger „AngularJS 1“ war alles global verfügbar, man konnte einfach alles hineinwerfen, verlor aber den Überblick. In frühen Vorabversionen von Angular 2 musste man dagegen an jeder einzelnen Komponente jede Abhängigkeit angeben.\n\nModule boten Kapselung: Ein Fachbereich wie „Trainings“ wurde zu einer Einheit. Bibliotheken ließen sich mit einem einzigen Import einbinden, zum Beispiel das „FormsModule“. Und ganze Bereiche konnten später nachgeladen werden, das nennt man „Lazy Loading“.\n\nDer Preis dafür war viel zusätzlicher Code ohne eigentliche Funktion, sogenannter „Boilerplate“. Außerdem waren die Abhängigkeiten indirekt: Man sah einer Komponente nicht an, woher ihre Bausteine kamen. Genau das lösen Standalone-Komponenten, weil jede Komponente ihre Abhängigkeiten selbst auflistet."
+        },
+        {
+          "type": "content",
+          "title": "Aufbau von @NgModule",
+          "bullets": [
+            "declarations: eigene Bausteine des Moduls",
+            "imports: andere Module, deren Exporte man nutzt",
+            "exports: was andere Module nutzen dürfen",
+            "providers: Services für Dependency Injection",
+            "bootstrap: Startkomponente, nur im AppModule",
+            "Alle Felder sind Arrays und optional"
+          ],
+          "notes": "Folie: „Aufbau von @NgModule“.\n\nDer Dekorator „@NgModule“ bekommt ein Objekt mit bis zu fünf wichtigen Feldern. Das Diagramm zeigt sie als Äste unter dem Dekorator.\n\n„declarations“ heißt Deklarationen und listet die eigenen Komponenten, Direktiven und Pipes des Moduls. „imports“ listet andere Module, deren exportierte Bausteine man verwenden möchte. „exports“ legt fest, welche Bausteine andere Module verwenden dürfen, wenn sie dieses Modul importieren. „providers“ stellt Services für die Dependency Injection bereit, also für das automatische Übergeben von Abhängigkeiten. „bootstrap“ nennt die Startkomponente der Anwendung und steht nur im Hauptmodul „AppModule“.\n\nAlle Felder sind Arrays, also Listen in eckigen Klammern, und alle sind optional. Ein Modul enthält nur die Felder, die es braucht.",
+          "diagram": {
+            "kind": "tree",
+            "root": "@NgModule({ … })",
+            "children": [
+              "declarations",
+              "imports",
+              "exports",
+              "providers",
+              "bootstrap"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "AppModule im Projekt 30_modules_legacy",
+          "code": "// src/app/app.module.ts\nimport { NgModule } from '@angular/core';\nimport { BrowserModule } from '@angular/platform-browser';\nimport { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';\nimport { AppComponent } from './app.component';\nimport { TrainingsModule } from './trainings/trainings.module';\nimport { AppRoutingModule } from './app-routing.module';\n\n@NgModule({\n  declarations: [AppComponent],\n  imports: [BrowserModule, TrainingsModule, AppRoutingModule],\n  providers: [provideHttpClient(withInterceptorsFromDi())],\n  bootstrap: [AppComponent]\n})\nexport class AppModule { }",
+          "notes": "Codefolie „AppModule im Projekt 30_modules_legacy“.\n\nDas ist das Hauptmodul aus dem Übungsprojekt, nur übersichtlicher formatiert. Oben stehen die normalen TypeScript-Imports der Dateien. Darunter folgt die Klasse „AppModule“ mit dem Dekorator „@NgModule“.\n\nIn „declarations“ steht die eigene Komponente „AppComponent“. In „imports“ stehen drei Module: das „BrowserModule“, das die Grundlagen für den Browser liefert, das eigene Fachmodul „TrainingsModule“ und das Modul mit den Routen „AppRoutingModule“. In „providers“ wird der HTTP-Client bereitgestellt, hier schon mit der modernen Funktion „provideHttpClient“. Das zeigt: Auch in einem Modul-Projekt kann man moderne Bereitstellungsfunktionen verwenden. In „bootstrap“ steht die Komponente, mit der die Anwendung startet.\n\nDie Klasse selbst ist leer. Sie dient nur als Träger für die Informationen im Dekorator."
+        },
+        {
+          "type": "content",
+          "title": "Die Felder im Detail (1/2)",
+          "bullets": [
+            "declarations",
+            [
+              "Komponenten, Direktiven, Pipes mit standalone: false",
+              1
+            ],
+            [
+              "Jeder Baustein gehört zu genau einem Modul",
+              1
+            ],
+            "imports",
+            [
+              "NgModules oder Standalone-Bausteine",
+              1
+            ],
+            [
+              "Deren Exporte sind in den eigenen Templates nutzbar",
+              1
+            ],
+            "exports",
+            [
+              "Eigene Bausteine oder importierte Module weitergeben",
+              1
+            ],
+            [
+              "Nicht exportiert = privat im Modul",
+              1
+            ]
+          ],
+          "notes": "Folie: „Die Felder im Detail“, Teil 1 von 2.\n\nIn „declarations“ stehen Komponenten, Direktiven und Pipes, die zu diesem Modul gehören. Sie müssen „standalone: false“ haben. Jeder Baustein darf nur in genau einem Modul deklariert werden. Steht er in zwei Modulen, meldet Angular einen Fehler.\n\nIn „imports“ stehen andere NgModules oder auch Standalone-Komponenten. Alles, was diese exportieren, darf man in den Templates des eigenen Moduls verwenden.\n\nIn „exports“ steht, was das Modul nach außen weitergibt. Das können eigene Bausteine sein oder auch importierte Module, die man durchreicht. Was nicht exportiert wird, bleibt privat und ist nur innerhalb des Moduls sichtbar."
+        },
+        {
+          "type": "content",
+          "title": "Die Felder im Detail (2/2)",
+          "bullets": [
+            "providers",
+            [
+              "Services für den Injector, z. B. [TrainingService]",
+              1
+            ],
+            [
+              "Bei normal importierten Modulen: anwendungsweit eine Instanz",
+              1
+            ],
+            "bootstrap",
+            [
+              "Startkomponente(n), nur im AppModule",
+              1
+            ],
+            [
+              "Ihr Selector muss in index.html stehen",
+              1
+            ],
+            "BrowserModule nur im AppModule importieren",
+            [
+              "Feature-Module importieren stattdessen CommonModule",
+              1
+            ]
+          ],
+          "notes": "Folie: „Die Felder im Detail“, Teil 2 von 2.\n\nIn „providers“ stehen Services, die der Injector bereitstellen soll. Der Injector ist der Teil von Angular, der Objekte erzeugt und an Komponenten übergibt. Bei Modulen, die normal importiert und nicht nachgeladen werden, landen diese Services im Wurzel-Injector. Dann gibt es in der ganzen Anwendung genau eine Instanz.\n\nIn „bootstrap“ steht die Startkomponente. Das gibt es nur im Hauptmodul. Der Selector dieser Komponente, also ihr HTML-Name, muss in der Datei „index.html“ vorkommen.\n\nDas „BrowserModule“ darf nur einmal im Hauptmodul importiert werden. Fachmodule importieren stattdessen das „CommonModule“, das die gemeinsamen Direktiven und Pipes wie „DatePipe“ enthält."
+        },
+        {
+          "type": "content",
+          "title": "Sichtbarkeit zwischen Modulen",
+          "bullets": [
+            "Ein Template sieht nur, was sein Modul kennt",
+            [
+              "eigene declarations",
+              1
+            ],
+            [
+              "Exporte der importierten Module",
+              1
+            ],
+            "Fehlt ein Glied der Kette, meldet Angular:",
+            [
+              "„'training-list' is not a known element“",
+              1
+            ],
+            "Prüfen: deklariert? exportiert? importiert?"
+          ],
+          "notes": "Folie: „Sichtbarkeit zwischen Modulen“.\n\nIm Modul-Stil sieht ein Template nur die Bausteine, die sein eigenes Modul kennt. Das sind die eigenen Deklarationen und alles, was die importierten Module exportieren.\n\nDas Diagramm zeigt die Kette am Beispiel des Übungsprojekts: Das „TrainingsModule“ deklariert die „TrainingListComponent“ und exportiert sie. Das „AppModule“ importiert das „TrainingsModule“. Erst dadurch darf das Template der „AppComponent“ das Element „training-list“ verwenden.\n\nFehlt ein Glied dieser Kette, erscheint die bekannte Fehlermeldung „is not a known element“, auf Deutsch: kein bekanntes Element. Dann prüft man der Reihe nach: Ist die Komponente deklariert? Wird sie exportiert? Wird ihr Modul importiert?",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "TrainingsModule\ndeclarations: TrainingList",
+              "TrainingsModule\nexports: TrainingList",
+              "AppModule\nimports: TrainingsModule",
+              "AppComponent-Template\n<training-list>"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Feature-Modul: TrainingsModule",
+          "code": "// src/app/trainings/trainings.module.ts\n@NgModule({\n  declarations: [\n    TrainingListComponent,\n    TrainingDetailsComponent,\n    TakePlaceSoonPipe\n  ],\n  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],\n  providers: [TrainingService],\n  exports: [TrainingListComponent, TrainingDetailsComponent]\n})\nexport class TrainingsModule { }",
+          "notes": "Codefolie „Feature-Modul: TrainingsModule“.\n\nEin Feature-Modul, auf Deutsch Fachmodul, bündelt alles zu einem Fachbereich, hier zu den Trainings. Die TypeScript-Imports oben sind aus Platzgründen weggelassen.\n\nIn „declarations“ stehen zwei Komponenten und eine eigene Pipe. In „imports“ stehen die Module, deren Bausteine die Templates brauchen: „CommonModule“ für allgemeine Direktiven und Pipes, „FormsModule“ und „ReactiveFormsModule“ für Formulare und „RouterModule“ für Links wie „routerLink“. In „providers“ wird der „TrainingService“ bereitgestellt. In „exports“ stehen die beiden Komponenten, damit das Hauptmodul sie verwenden kann. Die Pipe wird nicht exportiert, sie ist also nur innerhalb dieses Moduls nutzbar."
+        },
+        {
+          "type": "content",
+          "title": "Dateien eines NgModule-Projekts",
+          "bullets": [
+            "index.html: Seite mit <app-root>",
+            "main.ts: startet das AppModule",
+            "app.module.ts: Hauptmodul",
+            "app-routing.module.ts: Routen",
+            "app.component.ts/.html/.css: Startkomponente",
+            "trainings.module.ts: Feature-Modul",
+            "Neu gegenüber Standalone: die *.module.ts-Dateien"
+          ],
+          "notes": "Folie: „Dateien eines NgModule-Projekts“.\n\nDas Diagramm zeigt die Ordnerstruktur des Übungsprojekts. Die Datei „index.html“ ist die Seite, die der Browser lädt; sie enthält das Element „app-root“. Die Datei „main.ts“ startet die Anwendung mit dem Hauptmodul.\n\nDazu kommen die Moduldateien: „app.module.ts“ ist das Hauptmodul, „app-routing.module.ts“ enthält die Routen, und „trainings.module.ts“ ist das Modul für den Fachbereich Trainings. Die Komponenten bestehen wie heute aus TypeScript-Klasse, HTML-Template und CSS-Datei, dazu kommen Testdateien mit der Endung „spec.ts“.\n\nDer sichtbare Unterschied zu einem Standalone-Projekt sind also die Dateien mit der Endung „module.ts“ und die Datei „app.config.ts“, die es hier noch nicht gibt.",
+          "diagram": {
+            "kind": "code",
+            "title": "src/",
+            "text": "index.html\nmain.ts\napp/\n  app.module.ts\n  app-routing.module.ts\n  app.component.ts / .html\n  trainings/\n    trainings.module.ts\n    training.service.ts\n    training-list/\n    training-details/"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Komponenten im Modul: standalone: false",
+          "bullets": [
+            "@Component wie gewohnt: selector, templateUrl",
+            "Seit v19 ist standalone: true der Standard",
+            [
+              "Modul-Komponenten brauchen standalone: false",
+              1
+            ],
+            "Kein imports-Array an der Komponente",
+            [
+              "Abhängigkeiten kommen über das Modul",
+              1
+            ],
+            "Selector entscheidet, wo sie erscheint"
+          ],
+          "notes": "Folie: „Komponenten im Modul: standalone: false“.\n\nEine Komponente sieht im Modul-Stil fast genauso aus wie heute: Sie hat den Dekorator „@Component“ mit „selector“, also dem HTML-Namen, sowie Template- und Style-Dateien. Das Diagramm zeigt die Startkomponente aus dem Übungsprojekt.\n\nSeit Angular 19 sind Komponenten automatisch „standalone“. Eine Komponente, die in einem Modul deklariert werden soll, muss deshalb ausdrücklich „standalone: false“ angeben. Fehlt diese Angabe, meldet Angular beim Deklarieren einen Fehler.\n\nEine Modul-Komponente hat kein eigenes „imports“-Array. Welche anderen Bausteine sie im Template nutzen darf, bestimmt ihr Modul.",
+          "diagram": {
+            "kind": "code",
+            "title": "app.component.ts",
+            "text": "@Component({\n  selector: 'app-root',\n  standalone: false,\n  templateUrl: './app.component.html',\n  styleUrls: ['./app.component.css']\n})\nexport class AppComponent {\n  title = 'invoice-app';\n}"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Klassischer Stil: Konstruktor-Injektion",
+          "code": "// src/app/app.component.ts (Projekt 30_modules_legacy)\nexport class AppComponent {\n  title = 'invoice-app';\n  public nextTraining?: Training;\n\n  constructor(private trainingService: TrainingService) {\n    trainingService.getNext().subscribe(nextTr => {\n      this.nextTraining = nextTr;\n    });\n  }\n}\n\n// Heute üblich:\n// private readonly trainingService = inject(TrainingService);",
+          "notes": "Codefolie „Klassischer Stil: Konstruktor-Injektion“.\n\nIn älteren Projekten bekommt eine Komponente ihre Services fast immer über den Konstruktor. Der Konstruktor ist die Funktion, die beim Erzeugen eines Objekts aufgerufen wird. Hier steht dort der Parameter „trainingService“ mit dem Typ „TrainingService“.\n\nIm Konstruktor wird die Methode „getNext“ aufgerufen. Sie liefert ein Observable, also einen Datenstrom. Mit „subscribe“ meldet man sich an, und die übergebene Funktion bekommt das nächste Training als Parameter „nextTr“ und speichert es im Feld „nextTraining“.\n\nDie letzte Zeile zeigt zum Vergleich den heutigen Stil mit der Funktion „inject“. Beide Wege funktionieren auch in Angular 21."
+        },
+        {
+          "type": "content",
+          "title": "Konstruktor-Injektion erklärt",
+          "bullets": [
+            "„private trainingService: TrainingService“",
+            [
+              "TypeScript-Kurzform: Parameter wird zum Feld",
+              1
+            ],
+            "Angular liest den Typ als Token",
+            [
+              "Token = Schlüssel, unter dem der Injector sucht",
+              1
+            ],
+            "Injector findet Provider, liefert Instanz",
+            "Aufrufer: Angular selbst beim Erzeugen",
+            "Heute: inject() im Feld-Initialisierer"
+          ],
+          "notes": "Folie: „Konstruktor-Injektion erklärt“.\n\nDer Parameter „private trainingService: TrainingService“ ist eine TypeScript-Kurzform. Das Wort „private“ vor dem Parameter bewirkt, dass automatisch ein Feld mit diesem Namen angelegt und mit dem übergebenen Wert gefüllt wird.\n\nWer ruft den Konstruktor auf? Nicht der eigene Code, sondern Angular, wenn es die Komponente erzeugt. Angular liest dabei den Typ des Parameters und verwendet ihn als „Token“. Ein Token ist der Schlüssel, unter dem der Injector nach einem passenden Provider sucht. Der Provider ist das Rezept, wie das Objekt erzeugt wird. Das Ergebnis, die Instanz, übergibt Angular als Argument an den Konstruktor. Das Diagramm zeigt diesen Ablauf.\n\nHeute schreibt man stattdessen „inject“ direkt bei der Felddeklaration. Das Ergebnis ist dasselbe.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Angular erzeugt AppComponent",
+              "liest Parametertyp\nTrainingService",
+              "Injector sucht Provider",
+              "Instanz wird übergeben"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Bootstrapping mit Modul: main.ts",
+          "bullets": [
+            "platformBrowserDynamic()",
+            [
+              "erzeugt die Plattform für den Browser",
+              1
+            ],
+            "bootstrapModule(AppModule)",
+            [
+              "übergibt das Hauptmodul als Klasse",
+              1
+            ],
+            [
+              "liefert ein Promise auf das gestartete Modul",
+              1
+            ],
+            ".catch(err => …)",
+            [
+              "fängt Fehler beim Start ab",
+              1
+            ]
+          ],
+          "notes": "Folie: „Bootstrapping mit Modul: main.ts“.\n\n„Bootstrapping“ bedeutet: die Anwendung starten. Das Diagramm zeigt die Datei „main.ts“ aus dem Übungsprojekt. Die Funktion „platformBrowserDynamic“ erzeugt eine Plattform, also die Laufzeitumgebung von Angular im Browser.\n\nAuf dieser Plattform wird „bootstrapModule“ aufgerufen. Übergeben wird die Klasse „AppModule“, also nicht ein Objekt, sondern die Klasse selbst. Der Aufruf liefert ein „Promise“. Ein Promise ist ein Versprechen auf ein späteres Ergebnis. Geht beim Start etwas schief, wird die Funktion in „catch“ mit dem Fehler als Parameter „err“ aufgerufen und gibt ihn in der Konsole aus.\n\nDer Block mit „enableProdMode“ stammt aus älteren Versionen. Heute steuert die Build-Konfiguration den Produktionsmodus.",
+          "diagram": {
+            "kind": "code",
+            "title": "src/main.ts",
+            "text": "if (environment.production) {\n  enableProdMode();\n}\n\nplatformBrowserDynamic()\n  .bootstrapModule(AppModule)\n  .catch(err =>\n    console.error(err));"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ablauf des Startvorgangs",
+          "bullets": [
+            "main.ts ruft bootstrapModule(AppModule) auf",
+            "Angular liest den Dekorator von AppModule",
+            "Feld bootstrap nennt AppComponent",
+            "Angular liest deren selector: app-root",
+            "Sucht <app-root> in index.html",
+            "Erzeugt die Komponente und rendert sie dort"
+          ],
+          "notes": "Folie: „Ablauf des Startvorgangs“.\n\nDas Diagramm zeigt den gesamten Startvorgang im Modul-Stil. Der Browser lädt die Seite „index.html“ und das gebaute JavaScript. Darin läuft „main.ts“ und ruft „bootstrapModule“ mit dem Hauptmodul auf.\n\nAngular liest den Dekorator des Hauptmoduls. Im Feld „bootstrap“ steht die Klasse „AppComponent“. Daher weiß Angular, mit welcher Komponente die Anwendung startet. Angular liest dann den „selector“ dieser Komponente, hier „app-root“, und sucht ein Element mit diesem Namen in der Seite.\n\nWird das Element gefunden, erzeugt Angular die Komponente und zeigt ihr Template an dieser Stelle an. Fehlt das Element, bricht der Start mit einer Fehlermeldung ab.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "index.html lädt main.js",
+              "bootstrapModule(AppModule)",
+              "bootstrap: [AppComponent]",
+              "selector app-root suchen",
+              "AppComponent rendern"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "index.html: der Einstiegspunkt",
+          "bullets": [
+            "Enthält nur den Platzhalter <app-root>",
+            "Skripte fügt der Build automatisch ein",
+            "<base href=\"/\"> für das Routing",
+            "Gleich wie im Standalone-Projekt",
+            "Fehlt <app-root>: Fehler beim Start",
+            [
+              "„The selector \"app-root\" did not match any elements“",
+              1
+            ]
+          ],
+          "notes": "Folie: „index.html: der Einstiegspunkt“.\n\nDie Datei „index.html“ ist im Modul-Projekt praktisch dieselbe wie im Standalone-Projekt. Das Diagramm zeigt den wichtigen Teil. Im Körper der Seite steht nur ein leeres Element „app-root“. Es ist der Platzhalter, an dem Angular die Startkomponente anzeigt.\n\nDie Skriptdateien muss man nicht selbst eintragen, das macht der Build automatisch. Das Element „base href“ im Kopf der Seite braucht der Router, um Adressen richtig aufzulösen.\n\nFehlt das Element „app-root“ oder ist es falsch geschrieben, findet Angular keinen Platz für die Startkomponente. Dann erscheint die Fehlermeldung, dass der Selector zu keinem Element passt.",
+          "diagram": {
+            "kind": "code",
+            "title": "src/index.html",
+            "text": "<!doctype html>\n<html lang=\"de\">\n<head>\n  <base href=\"/\">\n  <title>InvoiceApp</title>\n</head>\n<body>\n  <app-root></app-root>\n</body>\n</html>"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Start: bootstrapModule und bootstrapApplication",
+          "bullets": [
+            "Alt: Startpunkt ist ein Modul",
+            [
+              "globale Provider im AppModule",
+              1
+            ],
+            "Neu: Startpunkt ist eine Komponente",
+            [
+              "globale Provider in app.config.ts",
+              1
+            ],
+            "Ablauf danach gleich: selector suchen, rendern",
+            "Migration stellt main.ts automatisch um"
+          ],
+          "notes": "Folie: „Start: bootstrapModule und bootstrapApplication“.\n\nDas Diagramm stellt den alten und den neuen Start gegenüber. Im alten Stil startet man ein Modul mit „bootstrapModule“. Das Modul nennt im Feld „bootstrap“ die Startkomponente, und die globalen Provider stehen im Modul.\n\nIm neuen Stil startet man direkt eine Komponente mit „bootstrapApplication“. Als zweites Argument übergibt man ein Konfigurationsobjekt, meist aus der Datei „app.config.ts“. Dort stehen die globalen Provider, zum Beispiel für Router und HTTP-Client.\n\nAb dem Erzeugen der Startkomponente ist der Ablauf gleich: Selector suchen, Komponente erzeugen, Template anzeigen. Die automatische Migration, die später gezeigt wird, stellt die Datei „main.ts“ selbst um.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "NgModule (alt)",
+              "items": [
+                "bootstrapModule(AppModule)",
+                "AppModule: bootstrap",
+                "providers im AppModule"
+              ]
+            },
+            "right": {
+              "title": "Standalone (heute)",
+              "items": [
+                "bootstrapApplication(App, appConfig)",
+                "kein AppModule",
+                "providers in app.config.ts"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Module und Komponenten generieren",
+          "bullets": [
+            "ng generate module trainings (kurz: ng g m)",
+            [
+              "erzeugt trainings.module.ts mit CommonModule",
+              1
+            ],
+            [
+              "wird NICHT automatisch importiert: selbst eintragen",
+              1
+            ],
+            [
+              "oder Option --module app verwenden",
+              1
+            ],
+            "ng g c trainings/training-info --standalone=false",
+            [
+              "trägt die Komponente in declarations des nächsten Moduls ein",
+              1
+            ],
+            "Ohne --standalone=false entsteht eine Standalone-Komponente"
+          ],
+          "notes": "Folie: „Module und Komponenten generieren“.\n\nDie Angular-Kommandozeile kann Module erzeugen. Der Befehl „ng generate module“ mit einem Namen legt eine Moduldatei an, die bereits das „CommonModule“ importiert. Wichtiger Stolperstein: Das neue Modul wird nicht automatisch im übergeordneten Modul eingetragen. Das muss man selbst im „imports“-Array erledigen oder beim Erzeugen die Option „--module“ mit dem Zielmodul angeben.\n\nFür eine Modul-Komponente verwendet man „ng generate component“ mit der Option „--standalone=false“. Dann erzeugt die Kommandozeile eine Komponente mit „standalone: false“ und trägt sie in die Deklarationen des nächstgelegenen Moduls ein. Ohne diese Option entsteht in Angular 21 eine Standalone-Komponente. Genau das üben die Teilnehmer in Übung 30."
+        },
+        {
+          "type": "content",
+          "title": "Pipes und Direktiven im Modul",
+          "bullets": [
+            "Pipes und Direktiven werden wie Komponenten deklariert",
+            "Nur exportierte Pipes sind in anderen Modulen nutzbar",
+            "Eingebaute Pipes (DatePipe, …) kommen aus CommonModule",
+            "Heute: Pipe direkt im imports-Array der Komponente",
+            [
+              "imports: [HasLikesPipe, DatePipe]",
+              1
+            ]
+          ],
+          "notes": "Folie: „Pipes und Direktiven im Modul“.\n\nPipes und Direktiven werden im Modul-Stil genauso behandelt wie Komponenten. Das Diagramm zeigt die Pipe „HasLikesPipe“: Sie steht in „declarations“, damit sie zum Modul gehört, und in „exports“, damit andere Module sie verwenden können.\n\nEine Pipe, die nicht exportiert wird, ist nur in den Templates des eigenen Moduls verwendbar. Die eingebauten Pipes wie „DatePipe“ für Datumsformate kommen gesammelt über das „CommonModule“.\n\nHeute importiert man eine Pipe direkt im „imports“-Array der Komponente, die sie benutzt. Dadurch sieht man sofort, woher sie kommt.",
+          "diagram": {
+            "kind": "code",
+            "title": "shared.module.ts",
+            "text": "@NgModule({\n  declarations: [HasLikesPipe],\n  exports: [HasLikesPipe]\n})\nexport class SharedModule { }"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Legacy-DI: providers am Modul",
+          "bullets": [
+            "Woher weiß Angular, was zu injizieren ist?",
+            [
+              "Antwort: aus einem Provider",
+              1
+            ],
+            "Alt: providers-Array im @NgModule",
+            [
+              "Service mit @Injectable() ohne providedIn",
+              1
+            ],
+            "Eingebundenes Modul: eine Instanz für die App",
+            "Lazy geladenes Modul: eigener Injector, eigene Instanz"
+          ],
+          "notes": "Folie: „Legacy-DI: providers am Modul“.\n\nDependency Injection, kurz DI, bedeutet: Eine Komponente bekommt ihre Abhängigkeiten von Angular geliefert, statt sie selbst zu erzeugen. Angular muss dafür wissen, wie ein Objekt erzeugt wird. Diese Information heißt „Provider“.\n\nIm alten Stil trägt man den Service im „providers“-Array eines Moduls ein. Der Service selbst hat dann nur „@Injectable“ ohne die Angabe „providedIn“, so wie der „TrainingService“ im Übungsprojekt. Das Diagramm zeigt die Kette: Injector, Provider, Instanz.\n\nWird das Modul normal importiert, gibt es eine einzige Instanz für die ganze Anwendung. Wird das Modul dagegen später nachgeladen, bekommt es einen eigenen Injector und damit eine eigene Instanz. Das war in alten Projekten eine häufige Fehlerquelle.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Komponente braucht\nTrainingService",
+              "Injector sucht Provider",
+              "Provider aus\n@NgModule.providers",
+              "Instanz erzeugen\noder wiederverwenden"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Provider-Objekte: provide und Rezept",
+          "bullets": [
+            "Kurzform [ConsoleLogger] bedeutet:",
+            [
+              "{ provide: ConsoleLogger, useClass: ConsoleLogger }",
+              1
+            ],
+            "provide: Token, unter dem gesucht wird",
+            "Rezept, wie das Objekt entsteht:",
+            [
+              "useClass: Klasse mit new erzeugen",
+              1
+            ],
+            [
+              "useValue: fertigen Wert verwenden",
+              1
+            ],
+            [
+              "useFactory: Funktion liefert das Objekt",
+              1
+            ],
+            [
+              "useExisting: auf anderes Token verweisen",
+              1
+            ]
+          ],
+          "notes": "Folie: „Provider-Objekte: provide und Rezept“.\n\nSteht in „providers“ nur ein Klassenname, ist das eine Kurzform. Ausgeschrieben ist es ein Objekt mit zwei Teilen. Der erste Teil, „provide“, ist das Token, also der Schlüssel, unter dem der Injector sucht. Der zweite Teil ist das Rezept, wie das Objekt entsteht.\n\nEs gibt vier Rezepte. „useClass“ erzeugt ein neues Objekt der angegebenen Klasse. „useValue“ verwendet einen fertigen Wert, zum Beispiel ein Konfigurationsobjekt. „useFactory“ ruft eine Funktion auf, deren Rückgabewert das Objekt ist. „useExisting“ verweist auf ein anderes Token, sodass beide Tokens dasselbe Objekt liefern.\n\nIm Diagramm bekommt man unter dem Token „Logger“ dieselbe Instanz wie unter „ConsoleLogger“. Diese Provider-Objekte gelten unverändert auch heute, nur stehen sie meist in „app.config.ts“ oder an der Komponente.",
+          "diagram": {
+            "kind": "code",
+            "title": "track.module.ts",
+            "text": "@NgModule({\n  providers: [\n    { provide: ConsoleLogger,\n      useClass: ConsoleLogger },\n    { provide: Logger,\n      useExisting: ConsoleLogger }\n  ]\n})\nexport class TrackModule { }"
+          }
+        },
+        {
+          "type": "content",
+          "title": "DI heute: providedIn und provide-Funktionen",
+          "bullets": [
+            "Services meist mit providedIn: 'root'",
+            [
+              "kein Eintrag in einem Modul nötig",
+              1
+            ],
+            [
+              "nicht benutzte Services fallen beim Build weg",
+              1
+            ],
+            "Globale Provider in app.config.ts",
+            "Lokale Provider im providers-Array der Komponente",
+            "Provider-Objekte bleiben gleich"
+          ],
+          "notes": "Folie: „DI heute: providedIn und provide-Funktionen“.\n\nDas Diagramm stellt alten und neuen Stil gegenüber. Heute schreibt man an den Service meist „@Injectable“ mit „providedIn: 'root'“. Dann stellt Angular ihn automatisch für die ganze Anwendung bereit. Ein Eintrag in einem Modul ist nicht nötig. Zusätzlicher Vorteil: Wird der Service nirgends verwendet, entfernt ihn der Build aus dem fertigen Programm. Das nennt man „Tree-Shaking“.\n\nGlobale Einstellungen wie Router oder HTTP-Client stehen als „provide“-Funktionen in „app.config.ts“. Soll eine Komponente eine eigene Instanz bekommen, trägt man den Service in ihr eigenes „providers“-Array ein. Die Provider-Objekte mit „useClass“ und den anderen Rezepten funktionieren unverändert.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Alt",
+              "items": [
+                "@Injectable()",
+                "providers im NgModule",
+                "HttpClientModule importieren"
+              ]
+            },
+            "right": {
+              "title": "Heute",
+              "items": [
+                "providedIn: 'root'",
+                "providers in app.config.ts",
+                "provideHttpClient()"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Legacy-Routing: RouterModule.forRoot",
+          "bullets": [
+            "Routen stehen in einem eigenen AppRoutingModule",
+            "RouterModule.forRoot(routes)",
+            [
+              "registriert Router-Service und Routen",
+              1
+            ],
+            [
+              "nur einmal in der ganzen Anwendung",
+              1
+            ],
+            "exports: [RouterModule]",
+            [
+              "router-outlet und routerLink im AppModule nutzbar",
+              1
+            ],
+            "AppModule importiert AppRoutingModule"
+          ],
+          "notes": "Folie: „Legacy-Routing: RouterModule.forRoot“.\n\nIm alten Stil stehen die Routen meist in einem eigenen Modul namens „AppRoutingModule“. Dort wird „RouterModule.forRoot“ mit der Liste der Routen aufgerufen. Diese Methode liefert das Router-Modul zusammen mit den Providern für den Router-Service. Sie darf deshalb nur ein einziges Mal in der Anwendung verwendet werden, sonst entstehen zwei Router.\n\nDas Routing-Modul exportiert das „RouterModule“ wieder. Dadurch kann das Hauptmodul, das das Routing-Modul importiert, im Template „router-outlet“ und „routerLink“ verwenden. Das Diagramm zeigt diese Kette.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "routes: Routes",
+              "RouterModule.forRoot(routes)",
+              "AppRoutingModule\nexports RouterModule",
+              "AppModule importiert\nAppRoutingModule"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "AppRoutingModule im Projekt",
+          "code": "// src/app/app-routing.module.ts\nexport const routes: Routes = [\n  { path: 'trainings', component: TrainingListComponent },\n  { path: 'trainings/:id', component: TrainingDetailsComponent },\n  { path: '**', redirectTo: '/trainings' }\n];\n\n@NgModule({\n  imports: [CommonModule, RouterModule.forRoot(routes)],\n  exports: [RouterModule]\n})\nexport class AppRoutingModule { }\n\n// Heute: provideRouter(routes) in app.config.ts",
+          "notes": "Codefolie „AppRoutingModule im Projekt“.\n\nDas ist das Routing-Modul aus dem Übungsprojekt. Die Liste „routes“ ist genauso aufgebaut wie heute. Die erste Route zeigt unter der Adresse „trainings“ die Liste an. Die zweite Route hat den Parameter „id“, erkennbar am Doppelpunkt, und zeigt die Details eines Trainings. Die dritte Route mit zwei Sternchen fängt alle anderen Adressen ab und leitet auf die Liste um.\n\nNeu gegenüber heute ist nur die Verpackung: Die Routen werden mit „RouterModule.forRoot“ im „imports“-Array registriert, und das „RouterModule“ wird exportiert. Heute ersetzt der Aufruf „provideRouter“ in „app.config.ts“ dieses ganze Modul."
+        },
+        {
+          "type": "content",
+          "title": "forRoot und forChild",
+          "bullets": [
+            "Statische Methoden, liefern Modul plus Provider",
+            "forRoot(routes): Router-Service und Wurzelrouten",
+            [
+              "genau einmal, im AppModule bzw. AppRoutingModule",
+              1
+            ],
+            "forChild(routes): nur zusätzliche Routen",
+            [
+              "in Feature-Modulen, v. a. bei Lazy Loading",
+              1
+            ],
+            "forRoot im Feature-Modul: zweiter Router, Fehler",
+            "Heute: loadChildren lädt Routen-Dateien direkt"
+          ],
+          "notes": "Folie: „forRoot und forChild“.\n\n„forRoot“ und „forChild“ sind statische Methoden. Das heißt, man ruft sie direkt an der Klasse „RouterModule“ auf, ohne ein Objekt zu erzeugen. Beide liefern das Router-Modul zusammen mit Providern zurück.\n\n„forRoot“ liefert den Router-Service und die Wurzelrouten. Es wird genau einmal verwendet, im Hauptmodul oder im zugehörigen Routing-Modul. „forChild“ liefert nur zusätzliche Routen ohne neuen Router-Service. Es wird in Feature-Modulen verwendet, besonders wenn diese erst später nachgeladen werden.\n\nVerwendet man aus Versehen „forRoot“ in einem Feature-Modul, entsteht ein zweiter Router, und das Routing funktioniert nicht mehr richtig. Heute lädt man mit „loadChildren“ einfach eine Datei mit Routen nach, ganz ohne Modul. Das Diagramm stellt beide Methoden gegenüber.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "forRoot(routes)",
+              "items": [
+                "Router-Service + Routen",
+                "genau einmal",
+                "AppRoutingModule"
+              ]
+            },
+            "right": {
+              "title": "forChild(routes)",
+              "items": [
+                "nur Routen",
+                "beliebig oft",
+                "Feature-Module"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Location-Strategie im Modul",
+          "bullets": [
+            "PathLocationStrategy (Standard): /trainings/7",
+            [
+              "braucht <base href=\"/\"> in index.html",
+              1
+            ],
+            [
+              "Server muss unbekannte Pfade auf index.html leiten",
+              1
+            ],
+            "HashLocationStrategy: /#/trainings/7",
+            [
+              "einfacher zu hosten, Standard in AngularJS 1",
+              1
+            ],
+            "Alt: RouterModule.forRoot(routes, { useHash: true })",
+            "Heute: provideRouter(routes, withHashLocation())"
+          ],
+          "notes": "Folie: „Location-Strategie im Modul“.\n\nDie Location-Strategie legt fest, wie die Adresse im Browser aussieht. Standard ist die „PathLocationStrategy“. Dann sieht die Adresse aus wie ein normaler Pfad, etwa „/trainings/7“. Das ist lesbar und gut für Suchmaschinen. Dafür braucht die Seite das Element „base href“, und der Webserver muss alle unbekannten Pfade auf die Datei „index.html“ umleiten.\n\nDie „HashLocationStrategy“ setzt ein Rautezeichen vor den Pfad. Der Teil nach der Raute wird nie an den Server geschickt, daher ist das Hosting einfacher. Diese Variante war der Standard im alten AngularJS.\n\nIm Modul-Stil schaltet man sie über ein zweites Argument von „forRoot“ ein, ein Objekt mit „useHash: true“. Heute übergibt man „withHashLocation“ an „provideRouter“."
+        },
+        {
+          "type": "code",
+          "title": "Legacy: Routenparameter mit ActivatedRoute",
+          "code": "export class TrainingDetailsComponent implements OnInit, OnDestroy {\n  training?: Training;\n  private subscription?: Subscription;\n\n  constructor(private route: ActivatedRoute,\n              private trainingService: TrainingService) {}\n\n  ngOnInit(): void {\n    this.subscription = this.route.params.subscribe(params => {\n      const id = Number(params['id']);\n      this.trainingService.getById(id)\n        .subscribe(training => this.training = training);\n    });\n  }\n\n  ngOnDestroy(): void { this.subscription?.unsubscribe(); }\n}",
+          "notes": "Codefolie „Legacy: Routenparameter mit ActivatedRoute“.\n\nSo liest eine Komponente im alten Stil einen Parameter aus der Adresse, hier die Nummer eines Trainings. Über den Konstruktor bekommt sie „ActivatedRoute“, das ist ein Objekt mit Informationen über die aktuell angezeigte Route, und den „TrainingService“.\n\nIn „ngOnInit“, also nach dem Erzeugen der Komponente, meldet sie sich mit „subscribe“ an „route.params“ an. Die übergebene Funktion wird bei jedem neuen Parameterwert aufgerufen. Sie liest die „id“, wandelt sie in eine Zahl um und lädt das passende Training.\n\nDas Ergebnis von „subscribe“ ist ein „Subscription“-Objekt, also eine Anmeldung. In „ngOnDestroy“, wenn die Komponente entfernt wird, meldet die Komponente sich mit „unsubscribe“ wieder ab."
+        },
+        {
+          "type": "content",
+          "title": "params.subscribe erklärt",
+          "bullets": [
+            "route.params ist ein Observable<Params>",
+            "Callback-Parameter params: Objekt, z. B. { id: '7' }",
+            [
+              "Werte sind immer Strings: Number() nötig",
+              1
+            ],
+            "Aufruf bei jedem Parameterwechsel",
+            [
+              "auch /trainings/7 → /trainings/8 ohne neue Komponente",
+              1
+            ],
+            "subscribe liefert eine Subscription",
+            [
+              "unsubscribe in ngOnDestroy als Gewohnheit",
+              1
+            ]
+          ],
+          "notes": "Folie: „params.subscribe erklärt“.\n\n„route.params“ ist ein Observable, also ein Datenstrom, der Objekte vom Typ „Params“ liefert. Die Funktion, die man an „subscribe“ übergibt, ruft Angular mit diesem Objekt als Parameter auf. Es enthält alle Routenparameter, zum Beispiel „id“ mit dem Wert „7“. Die Werte sind immer Zeichenketten, deshalb wandelt man sie bei Bedarf in Zahlen um.\n\nDas Diagramm zeigt den Ablauf. Warum ein Datenstrom und nicht ein einfacher Wert? Wechselt die Adresse von Training 7 auf Training 8, verwendet Angular dieselbe Komponente weiter und erzeugt keine neue. Nur der Datenstrom liefert dann den neuen Wert.\n\nBei „ActivatedRoute“ räumt der Router seine Datenströme selbst auf. Trotzdem war das Abmelden in „ngOnDestroy“ eine wichtige Gewohnheit, denn bei anderen Datenströmen entstehen sonst Speicherlecks.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "URL /trainings/8",
+              "Router aktualisiert\nActivatedRoute",
+              "params liefert { id: '8' }",
+              "Callback lädt Training 8"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Heute: Input Binding statt subscribe",
+          "bullets": [
+            "Router übergibt Parameter als Input",
+            [
+              "id = input<string>()",
+              1
+            ],
+            [
+              "einschalten: withComponentInputBinding()",
+              1
+            ],
+            "Reaktion auf Wechsel: computed, effect oder resource",
+            "Kein subscribe, kein ngOnDestroy nötig",
+            "Projekt 30 nutzt noch den alten Weg"
+          ],
+          "notes": "Folie: „Heute: Input Binding statt subscribe“.\n\nDas Diagramm vergleicht den alten und den heutigen Weg. Heute kann der Router Routenparameter direkt als Eingabe an die Komponente übergeben. Die Komponente deklariert dafür ein Signal-Input mit dem Namen des Parameters, also „id“. Eingeschaltet wird das mit „withComponentInputBinding“ beim Aufruf von „provideRouter“.\n\nWechselt der Parameter, ändert sich das Signal. Darauf reagiert man mit „computed“, „effect“ oder einer „resource“, die automatisch neu lädt. Eine Anmeldung mit „subscribe“ und das Abmelden in „ngOnDestroy“ entfallen.\n\nDas Übungsprojekt 30 verwendet noch den alten Weg mit „subscribe“. Die Teilnehmer erkennen ihn dort in der Detail-Komponente wieder.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Alt",
+              "items": [
+                "ActivatedRoute injizieren",
+                "params.subscribe(…)",
+                "unsubscribe in ngOnDestroy"
+              ]
+            },
+            "right": {
+              "title": "Heute",
+              "items": [
+                "id = input<string>()",
+                "withComponentInputBinding()",
+                "computed / resource"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Legacy: HttpClientModule",
+          "bullets": [
+            "Angular 2 bis 4: HttpModule aus @angular/http",
+            "Ab 4.3: HttpClientModule im AppModule importieren",
+            [
+              "seit Angular 18 als veraltet markiert",
+              1
+            ],
+            "Heute: provideHttpClient() als Provider",
+            [
+              "funktioniert auch im providers-Array eines NgModule",
+              1
+            ],
+            "withInterceptorsFromDi(): klassenbasierte Interceptors",
+            "HttpClient selbst: gleiche API wie heute"
+          ],
+          "notes": "Folie: „Legacy: HttpClientModule“.\n\nIn den ersten Angular-Versionen hieß das Modul für HTTP-Anfragen „HttpModule“. Ab Version 4.3 kam der heutige „HttpClient“. Dafür musste man das „HttpClientModule“ im Hauptmodul importieren. Dieses Modul ist seit Angular 18 als veraltet markiert.\n\nHeute stellt man den HTTP-Client mit der Funktion „provideHttpClient“ bereit. Das funktioniert auch im „providers“-Array eines Moduls, so wie im Übungsprojekt. Die Zusatzfunktion „withInterceptorsFromDi“ sorgt dafür, dass ältere Interceptors in Klassenform weiter funktionieren. Ein Interceptor ist ein Baustein, der jede Anfrage abfangen und verändern kann.\n\nDer „HttpClient“ selbst hat dieselben Methoden wie heute. Das Diagramm zeigt beide Wege.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Alt",
+              "items": [
+                "imports: [HttpClientModule]",
+                "HTTP_INTERCEPTORS-Klassen"
+              ]
+            },
+            "right": {
+              "title": "Heute",
+              "items": [
+                "provideHttpClient()",
+                "withInterceptors([fn])"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "HttpClient im Service (klassisch)",
+          "bullets": [
+            "get<T>(url) liefert ein Observable<T>",
+            [
+              "Anfrage startet erst bei subscribe",
+              1
+            ],
+            "pipe(map(…)) formt die Antwort um",
+            [
+              "Parameter von map: die geparste JSON-Antwort",
+              1
+            ],
+            "Ergebnis: Observable<Training>",
+            "Heute oft: httpResource oder rxResource"
+          ],
+          "notes": "Folie: „HttpClient im Service (klassisch)“.\n\nDas Diagramm zeigt die Methode „getById“ aus dem „TrainingService“ des Übungsprojekts. Der „HttpClient“ kommt über den Konstruktor. Die Methode „get“ bekommt die Adresse und als Typangabe die erwartete Form der Antwort. Sie liefert ein Observable. Wichtig: Die Anfrage wird erst abgeschickt, wenn sich jemand mit „subscribe“ anmeldet.\n\nMit „pipe“ und dem Operator „map“ formt man die Antwort um. Die Funktion in „map“ bekommt die bereits in ein Objekt umgewandelte JSON-Antwort als Parameter „res“. Sie gibt nur den Teil „data“ zurück. Das Ergebnis ist ein Observable, das ein Training liefert.\n\nIn modernen Komponenten verwendet man für das Laden oft „httpResource“ oder „rxResource“, die das Anmelden und Abmelden selbst übernehmen.",
+          "diagram": {
+            "kind": "code",
+            "title": "training.service.ts",
+            "text": "@Injectable()\nexport class TrainingService {\n  constructor(\n    private http: HttpClient) {}\n\n  getById(id: number) {\n    const url = 'api/training/' + id;\n    return this.http.get<Res>(url)\n      .pipe(map(res => res.data));\n  }\n}"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Mischbetrieb: Standalone und NgModule",
+          "bullets": [
+            "Standalone-Komponente in einem NgModule",
+            [
+              "in imports eintragen, NICHT in declarations",
+              1
+            ],
+            "NgModule in einer Standalone-Komponente",
+            [
+              "imports: [SomeLegacyModule]",
+              1
+            ],
+            "Beides gleichzeitig im selben Projekt möglich",
+            "Erlaubt Migration in kleinen Schritten"
+          ],
+          "notes": "Folie: „Mischbetrieb: Standalone und NgModule“.\n\nStandalone-Komponenten und Module lassen sich in beide Richtungen kombinieren. Eine Standalone-Komponente kann in einem Modul verwendet werden. Sie wird dann im „imports“-Array des Moduls eingetragen und nicht in „declarations“, denn sie gehört zu keinem Modul. Das Diagramm zeigt das.\n\nUmgekehrt kann eine Standalone-Komponente ein altes Modul in ihr eigenes „imports“-Array aufnehmen. Dann darf sie alles verwenden, was dieses Modul exportiert.\n\nDas ist bewusst so gestaltet. So kann man ein großes Projekt in kleinen Schritten umstellen, statt alles auf einmal ändern zu müssen. Genau diesen Mischbetrieb üben die Teilnehmer in Übung 30.",
+          "diagram": {
+            "kind": "code",
+            "title": "trainings.module.ts",
+            "text": "@NgModule({\n  declarations: [\n    TrainingListComponent\n  ],\n  imports: [\n    CommonModule,\n    // Standalone:\n    TrainingBadgeComponent\n  ]\n})\nexport class TrainingsModule { }"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Migration: ng generate @angular/core:standalone",
+          "bullets": [
+            "Automatische Migration der Angular-Kommandozeile",
+            "Läuft in drei Durchgängen, jeweils mit Auswahl",
+            [
+              "1. Bausteine auf standalone umstellen",
+              1
+            ],
+            [
+              "2. Überflüssige NgModules entfernen",
+              1
+            ],
+            [
+              "3. Start auf bootstrapApplication umstellen",
+              1
+            ],
+            "Nach jedem Durchgang: bauen, testen, committen",
+            "Danach von Hand nacharbeiten"
+          ],
+          "notes": "Folie: „Migration: ng generate @angular/core:standalone“.\n\nAngular bietet eine automatische Migration an. Man startet sie mit dem Befehl „ng generate @angular/core:standalone“. Sie läuft in drei Durchgängen. Bei jedem Aufruf wählt man aus, welcher Durchgang ausgeführt werden soll.\n\nIm ersten Durchgang werden alle Komponenten, Direktiven und Pipes auf Standalone umgestellt. Sie bekommen ihr eigenes „imports“-Array. Im zweiten Durchgang werden Module entfernt, die danach nicht mehr gebraucht werden. Im dritten Durchgang wird der Start in „main.ts“ auf „bootstrapApplication“ umgestellt.\n\nNach jedem Durchgang sollte man die Anwendung bauen, die Tests laufen lassen und den Stand in der Versionsverwaltung sichern. Manche Stellen muss man danach von Hand nacharbeiten.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "1. Bausteine standalone",
+              "2. NgModules entfernen",
+              "3. bootstrapApplication",
+              "Bauen, testen, committen"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Nach der Migration: weitere Modernisierung",
+          "bullets": [
+            "Control Flow: ng generate @angular/core:control-flow",
+            [
+              "*ngIf / *ngFor werden zu @if / @for",
+              1
+            ],
+            "inject(): ng generate @angular/core:inject",
+            [
+              "Konstruktor-Injektion wird zu inject()",
+              1
+            ],
+            "Von Hand: provideRouter, provideHttpClient",
+            "Von Hand: Input Binding, Signals, resource",
+            "Schritt für Schritt, mit Tests absichern"
+          ],
+          "notes": "Folie: „Nach der Migration: weitere Modernisierung“.\n\nDie Standalone-Migration entfernt die Module, aber der Code ist danach noch nicht modern. Für weitere Schritte gibt es eigene automatische Migrationen. Die Migration „control-flow“ ersetzt die alten Strukturdirektiven wie „ngIf“ und „ngFor“ durch die neuen Blöcke „@if“ und „@for“. Die Migration „inject“ wandelt die Konstruktor-Injektion in Aufrufe der Funktion „inject“ um.\n\nAndere Schritte macht man von Hand: zum Beispiel die Provider-Funktionen für Router und HTTP-Client, das Input Binding für Routenparameter sowie Signals und Ressourcen für das Laden von Daten.\n\nAuch hier gilt: lieber viele kleine Schritte, jeweils mit laufenden Tests, als eine große Umstellung auf einmal."
+        },
+        {
+          "type": "content",
+          "title": "Gegenüberstellung: alt und neu",
+          "bullets": [
+            "Organisation: @NgModule → imports an der Komponente",
+            "Start: bootstrapModule(AppModule) → bootstrapApplication(App, appConfig)",
+            "Komponente: standalone: false → Standard (standalone)",
+            "DI: providers im Modul, Konstruktor → providedIn: 'root', inject()",
+            "Routing: RouterModule.forRoot / forChild → provideRouter, loadChildren",
+            "Parameter: params.subscribe → input() mit withComponentInputBinding()",
+            "HTTP: HttpClientModule → provideHttpClient()",
+            "Template: *ngIf / *ngFor → @if / @for"
+          ],
+          "notes": "Folie: „Gegenüberstellung: alt und neu“.\n\nDiese Folie fasst das Kapitel zusammen. In jeder Zeile steht links der alte Stil und rechts nach dem Pfeil der heutige Stil.\n\nStatt Modulen listet jede Komponente ihre Abhängigkeiten selbst auf. Statt ein Modul zu starten, startet man direkt die Startkomponente mit einer Konfiguration. Komponenten sind heute automatisch standalone. Services stellt man mit „providedIn“ bereit und holt sie mit „inject“. Das Routing wird mit „provideRouter“ eingerichtet, und Bereiche werden mit „loadChildren“ nachgeladen. Routenparameter kommen als Eingabe in die Komponente. Den HTTP-Client stellt „provideHttpClient“ bereit. Und im Template ersetzen „@if“ und „@for“ die alten Strukturdirektiven.\n\nWer diese Paare kennt, findet sich in alten und neuen Projekten zurecht."
+        },
+        {
+          "type": "content",
+          "title": "Stolperfallen in Legacy-Projekten",
+          "bullets": [
+            "„is not a known element“: Deklaration, Export oder Import fehlt",
+            "Baustein in zwei Modulen deklariert: Fehler beim Kompilieren",
+            "standalone: false vergessen: Komponente nicht deklarierbar",
+            "BrowserModule gehört nur ins AppModule, sonst CommonModule",
+            "forRoot im Feature-Modul: zweiter Router",
+            "Service in providers eines Lazy-Moduls: zweite Instanz",
+            "Neues Modul nicht im Elternmodul importiert"
+          ],
+          "notes": "Folie: „Stolperfallen in Legacy-Projekten“.\n\nDiese typischen Fehler begegnen einem in älteren Projekten immer wieder. Die Meldung „is not a known element“ heißt: Eine Komponente wird im Template verwendet, aber Deklaration, Export oder Import fehlt. Ein Baustein, der in zwei Modulen deklariert ist, führt zu einem Fehler beim Kompilieren. Fehlt bei einer Modul-Komponente die Angabe „standalone: false“, kann sie nicht deklariert werden.\n\nDas „BrowserModule“ gehört nur ins Hauptmodul; in einem nachgeladenen Fachmodul führt es zu einem Fehler. Fachmodule nehmen das „CommonModule“. „forRoot“ in einem Fachmodul erzeugt einen zweiten Router. Ein Service im „providers“-Array eines nachgeladenen Moduls bekommt eine zweite Instanz, und dadurch sind Daten plötzlich nicht mehr gemeinsam.\n\nUnd schließlich: Ein neu erzeugtes Modul muss man selbst im übergeordneten Modul importieren."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 30: Legacy – Angular Module (1/2)",
+          "bullets": [
+            "Öffne das Projekt 30_modules_legacy (NgModule-basiert)",
+            "1. Backend starten: Ordner server im Kursverzeichnis, npm install, node server.js",
+            "2. App starten: ng serve --proxy-config dev.proxy.json",
+            "3. Aufbau analysieren",
+            [
+              "main.ts: platformBrowserDynamic().bootstrapModule(AppModule)",
+              1
+            ],
+            [
+              "AppModule: declarations, imports, providers, bootstrap",
+              1
+            ],
+            [
+              "TrainingsModule: declarations, providers, exports",
+              1
+            ],
+            [
+              "AppRoutingModule: RouterModule.forRoot(routes), exports",
+              1
+            ],
+            "Projektordner: 30_modules_legacy (eigenständiges NgModule-Projekt)"
+          ],
+          "notes": "Folie: „Übung 30: Legacy – Angular Module“, Teil 1 von 2.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 30 im Ordner 30_modules_legacy. Das Projekt ist ein eigenständiges, älteres Projekt im Modul-Stil und baut nicht auf den vorherigen Übungen auf.\n\nZuerst starten die Teilnehmer das Backend im Ordner „server“ des Kursverzeichnisses und danach die Anwendung mit der Proxy-Konfiguration. Dann lesen sie den Code und finden die Teile wieder, die in diesem Kapitel erklärt wurden: den Start in „main.ts“, die Felder des Hauptmoduls, das Fachmodul für die Trainings und das Routing-Modul mit „forRoot“."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 30: Legacy – Angular Module (2/2)",
+          "bullets": [
+            "4. Klassische Komponente erzeugen",
+            [
+              "ng g c trainings/training-info --standalone=false",
+              1
+            ],
+            [
+              "Prüfen: In welchem Modul steht sie in declarations? Exportieren?",
+              1
+            ],
+            "5. Mischbetrieb: eine Standalone-Komponente erzeugen",
+            [
+              "in imports des TrainingsModule eintragen (nicht declarations)",
+              1
+            ],
+            [
+              "im Template einer Modul-Komponente verwenden",
+              1
+            ],
+            "6. Optional: ng generate @angular/core:standalone",
+            [
+              "Durchgänge einzeln ausführen, Ergebnis mit 23_communication vergleichen",
+              1
+            ],
+            "Projektordner: 30_modules_legacy (eigenständiges NgModule-Projekt)"
+          ],
+          "notes": "Folie: „Übung 30: Legacy – Angular Module“, Teil 2 von 2.\n\nErklärung für die Dolmetscherin:\nIm zweiten Teil erweitern die Teilnehmer das Projekt. Zuerst erzeugen sie mit der Kommandozeile eine klassische Komponente mit der Option „standalone=false“. Sie prüfen, in welchem Modul die Kommandozeile sie eingetragen hat und ob sie exportiert werden muss, damit sie dort verwendbar ist, wo sie gebraucht wird.\n\nDann probieren sie den Mischbetrieb aus: Eine Standalone-Komponente wird im „imports“-Array eines Moduls eingetragen und im Template einer Modul-Komponente verwendet.\n\nOptional führen sie die automatische Migration aus, Durchgang für Durchgang, und vergleichen das Ergebnis mit dem Standalone-Projekt aus Übung 23."
+        },
+        {
+          "type": "divider",
           "title": "Wahlthema: Reactive Forms",
           "notes": "Kapitelübergangsfolie „Wahlthema: Reactive Forms“ – Ab hier folgt ein optionaler Abschnitt über „Reactive Forms“. Dabei wird das Formular nicht im Template, sondern in der Klasse mit „FormGroup“, „FormControl“ und „FormBuilder“ aufgebaut. Der Abschnitt gehört nicht zum Hauptpfad, denn dort verwenden wir ein Template-Driven Form. Er ist für Teilnehmer gedacht, die in ihrem Projekt Reactive Forms einsetzen oder das Thema vertiefen wollen. Die Wahlübung heißt Z1 und liegt im Ordner Z1_reactive_forms."
+        },
+        {
+          "type": "content",
+          "title": "Reactive Forms: die Idee",
+          "bullets": [
+            "Formularmodell entsteht in der Klasse",
+            "Template verbindet nur Eingabefelder mit dem Modell",
+            "Werte und Zustand jederzeit synchron lesbar",
+            "Prüfregeln als Funktionen in TypeScript",
+            "Gut für dynamische Felder und komplexe Regeln",
+            "Logik ohne Template testbar"
+          ],
+          "notes": "Folie: „Reactive Forms: die Idee“.\n\nBei Reactive Forms baut man das Formular als Objektmodell in der TypeScript-Klasse auf. Das Template verbindet dann nur noch die Eingabefelder mit diesem Modell. Das Diagramm stellt das dem Template-Driven Form aus dem Hauptpfad gegenüber, bei dem Angular das Modell aus den Angaben im Template selbst erzeugt.\n\nVorteile: Man kann Werte und Zustand des Formulars jederzeit direkt in der Klasse lesen. Prüfregeln sind normale Funktionen in TypeScript. Felder lassen sich zur Laufzeit hinzufügen oder entfernen. Und die Logik lässt sich testen, ohne das Template zu rendern.\n\nDer Preis ist etwas mehr Code. Für einfache Formulare reicht oft die Template-Variante.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Template-Driven",
+              "items": [
+                "Modell aus dem Template",
+                "ngModel, HTML-Attribute",
+                "FormsModule"
+              ]
+            },
+            "right": {
+              "title": "Reactive",
+              "items": [
+                "Modell in der Klasse",
+                "FormGroup, FormControl",
+                "ReactiveFormsModule"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Der Formular-Baum",
+          "bullets": [
+            "FormControl: ein einzelnes Feld (Blatt)",
+            "FormGroup: Objekt aus benannten Controls",
+            "FormArray: Liste gleichartiger Controls",
+            "Das Formular selbst ist eine FormGroup",
+            "Zustand wird nach oben zusammengefasst",
+            [
+              "ein Kind ungültig → Gruppe ungültig",
+              1
+            ]
+          ],
+          "notes": "Folie: „Der Formular-Baum“.\n\nEin Reactive Form ist ein Baum aus drei Arten von Bausteinen. Ein „FormControl“ steht für ein einzelnes Eingabefeld, zum Beispiel den Vornamen. Es ist ein Blatt des Baums. Eine „FormGroup“ fasst mehrere benannte Controls zu einem Objekt zusammen, zum Beispiel alle Felder einer Adresse. Ein „FormArray“ ist eine Liste gleichartiger Controls, zum Beispiel beliebig viele Telefonnummern.\n\nDas ganze Formular ist selbst wieder eine FormGroup, die Wurzel des Baums. Das Diagramm zeigt den Kundenbaum. Der Wert einer Gruppe ist ein Objekt aus den Werten ihrer Kinder. Ihr Zustand ergibt sich ebenfalls aus den Kindern: Ist ein einziges Kind ungültig, ist die ganze Gruppe ungültig.",
+          "diagram": {
+            "kind": "tree",
+            "root": "FormGroup customerForm",
+            "children": [
+              "FormControl\nfirstname",
+              "FormControl\nlastname",
+              "FormGroup\naddress",
+              "FormArray\nphones"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Gemeinsame Basis: AbstractControl",
+          "bullets": [
+            "Alle drei erben von AbstractControl",
+            "value: aktueller Wert",
+            "status: VALID, INVALID, PENDING, DISABLED",
+            "valid / invalid, errors",
+            "touched / untouched, dirty / pristine",
+            "Methoden: setValue, patchValue, reset, disable",
+            "Beobachtbar: valueChanges, statusChanges"
+          ],
+          "notes": "Folie: „Gemeinsame Basis: AbstractControl“.\n\n„FormControl“, „FormGroup“ und „FormArray“ erben von einer gemeinsamen Basisklasse namens „AbstractControl“. Deshalb haben alle drei dieselben Eigenschaften und Methoden.\n\n„value“ ist der aktuelle Wert. „status“ ist der Prüfstatus: gültig, ungültig, wartend, wenn eine Prüfung noch läuft, oder deaktiviert. „valid“ und „invalid“ sind die passenden Wahrheitswerte, und „errors“ enthält die Fehler. „touched“ bedeutet, dass der Benutzer das Feld schon einmal verlassen hat. „dirty“ bedeutet, dass er den Wert verändert hat.\n\nMit Methoden wie „setValue“, „patchValue“ und „reset“ ändert man Werte aus dem Code heraus. Über „valueChanges“ und „statusChanges“ kann man auf Änderungen reagieren. Diese Begriffe werden auf den folgenden Folien genauer erklärt."
+        },
+        {
+          "type": "code",
+          "title": "FormGroup und FormControl anlegen",
+          "code": "import { Component } from '@angular/core';\nimport { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';\n\n@Component({\n  selector: 'customer-details',\n  imports: [ReactiveFormsModule],\n  templateUrl: './customer-details.component.html'\n})\nexport class CustomerDetailsComponent {\n  customerForm = new FormGroup({\n    firstname: new FormControl('', { nonNullable: true }),\n    lastname: new FormControl('', { nonNullable: true }),\n    zip: new FormControl('', { nonNullable: true }),\n    lastOrderDate: new FormControl<string | null>(null)\n  });\n}",
+          "notes": "Codefolie „FormGroup und FormControl anlegen“.\n\nZuerst wird das „ReactiveFormsModule“ im „imports“-Array der Komponente eingetragen. Es liefert die Direktiven, mit denen das Template die Felder verbindet.\n\nIn der Klasse entsteht das Feld „customerForm“. Es ist eine neue „FormGroup“. Ihr wird ein Objekt übergeben: Die Schlüssel sind die Feldnamen, die Werte sind die einzelnen Controls. Jedes „FormControl“ bekommt als ersten Parameter den Startwert, hier eine leere Zeichenkette. Der zweite Parameter ist ein Optionsobjekt. „nonNullable: true“ bedeutet, dass das Feld nie den Wert „null“ annimmt. Das Datumsfeld bekommt dagegen ausdrücklich den Typ „Zeichenkette oder null“ mit dem Startwert „null“.\n\nTypeScript leitet aus diesem Aufbau den genauen Typ des Formulars ab."
+        },
+        {
+          "type": "content",
+          "title": "Typisierte Formulare und nonNullable",
+          "bullets": [
+            "Seit Angular 14 sind Formulare streng typisiert",
+            "Ohne Option: FormControl<string | null>",
+            [
+              "reset() setzt den Wert auf null",
+              1
+            ],
+            "Mit nonNullable: true: FormControl<string>",
+            [
+              "reset() setzt auf den Startwert zurück",
+              1
+            ],
+            "form.value: Partial, deaktivierte Felder fehlen",
+            "form.getRawValue(): vollständiges Objekt"
+          ],
+          "notes": "Folie: „Typisierte Formulare und nonNullable“.\n\nSeit Angular 14 kennt TypeScript den genauen Aufbau eines Reactive Forms. Schreibt man einen falschen Feldnamen, meldet der Editor sofort einen Fehler.\n\nOhne weitere Angabe hat ein „FormControl“ mit dem Startwert leere Zeichenkette den Typ „Zeichenkette oder null“. Der Grund: Die Methode „reset“ setzt das Feld standardmäßig auf „null“. Mit der Option „nonNullable: true“ setzt „reset“ dagegen auf den Startwert zurück, und der Typ ist nur noch „Zeichenkette“. Das Diagramm zeigt beide Fälle.\n\nAuch beim Lesen gibt es einen Unterschied. „value“ hat einen Typ, bei dem alle Felder optional sind, weil deaktivierte Felder darin fehlen. „getRawValue“ liefert immer das vollständige Objekt mit allen Feldern.",
+          "diagram": {
+            "kind": "code",
+            "title": "Typen",
+            "text": "new FormControl('')\n// FormControl<string | null>\n\nnew FormControl('',\n  { nonNullable: true })\n// FormControl<string>\n\nform.value\n// Partial<{ firstname: … }>\nform.getRawValue()\n// { firstname: string; … }"
+          }
+        },
+        {
+          "type": "content",
+          "title": "FormBuilder: kürzer schreiben",
+          "bullets": [
+            "inject(FormBuilder) liefert einen Helfer",
+            "fb.nonNullable.group({ … }): alle Felder nonNullable",
+            "Feld als Array: [Startwert, Validatoren]",
+            "Ergebnis: dieselbe typisierte FormGroup",
+            "Alternative: inject(NonNullableFormBuilder)",
+            "Z1-Projekt: fb.group({ firstname: [''], … })"
+          ],
+          "notes": "Folie: „FormBuilder: kürzer schreiben“.\n\nDer „FormBuilder“ ist ein Service, der das Anlegen von Formularen abkürzt. Man holt ihn mit „inject“. Seine Methode „group“ erzeugt eine FormGroup, „control“ ein einzelnes Feld und „array“ ein FormArray.\n\nÜber die Eigenschaft „nonNullable“ bekommt man eine Variante, bei der alle Felder automatisch „nonNullable“ sind. Ein Feld schreibt man als kleines Array: An erster Stelle steht der Startwert, an zweiter Stelle optional die Prüfregeln. Das Ergebnis ist dieselbe typisierte FormGroup wie auf der vorigen Codefolie. Das Diagramm zeigt das Beispiel.\n\nIm Projekt der Wahlübung Z1 wird der FormBuilder bereits verwendet, dort noch ohne „nonNullable“.",
+          "diagram": {
+            "kind": "code",
+            "title": "customer-details.component.ts",
+            "text": "private fb = inject(FormBuilder);\n\ncustomerForm =\n  this.fb.nonNullable.group({\n    firstname: [''],\n    lastname: [''],\n    street: [''],\n    zip: [''],\n    city: ['']\n  });"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Template: formGroup und formControlName",
+          "code": "<form [formGroup]=\"customerForm\" (ngSubmit)=\"save()\">\n  <label for=\"firstname\">Vorname</label>\n  <input id=\"firstname\" type=\"text\" formControlName=\"firstname\">\n\n  <label for=\"lastname\">Nachname</label>\n  <input id=\"lastname\" type=\"text\" formControlName=\"lastname\">\n\n  <label for=\"zip\">PLZ</label>\n  <input id=\"zip\" type=\"text\" [formControl]=\"customerForm.controls.zip\">\n\n  <label for=\"date\">Letzte Bestellung</label>\n  <input id=\"date\" type=\"date\" formControlName=\"lastOrderDate\">\n\n  <button type=\"submit\" [disabled]=\"customerForm.invalid\">Speichern</button>\n</form>",
+          "notes": "Codefolie „Template: formGroup und formControlName“.\n\nAm Element „form“ verbindet „[formGroup]“ das ganze Formular mit dem Objekt „customerForm“ aus der Klasse. Das Ereignis „ngSubmit“ wird ausgelöst, wenn das Formular abgeschickt wird, und ruft dann die Methode „save“ auf.\n\nDie Eingabefelder für Vorname, Nachname und Datum werden mit „formControlName“ verbunden. Der Wert ist der Name des Feldes in der Gruppe als Zeichenkette. Beim Feld für die Postleitzahl ist die zweite Schreibweise gezeigt: „[formControl]“ bekommt direkt das Control-Objekt aus der Gruppe.\n\nDer Button hat den Typ „submit“ und schickt damit das Formular ab. Solange das Formular ungültig ist, ist er deaktiviert."
+        },
+        {
+          "type": "content",
+          "title": "Template-Bindung erklärt",
+          "bullets": [
+            "[formGroup]: bindet das FormGroup-Objekt",
+            "formControlName=\"…\": sucht Control per Name",
+            [
+              "Tippfehler → „Cannot find control with name“",
+              1
+            ],
+            "[formControl]: bindet ein Control-Objekt direkt",
+            "Werte fließen in beide Richtungen",
+            "(ngSubmit): kein Neuladen der Seite",
+            "Nicht mit [(ngModel)] mischen"
+          ],
+          "notes": "Folie: „Template-Bindung erklärt“.\n\nDie Direktive „formGroup“ bekommt das FormGroup-Objekt aus der Klasse. „formControlName“ bekommt nur einen Namen als Zeichenkette. Angular sucht dann in der umgebenden Gruppe das Control mit diesem Namen. Ist der Name falsch geschrieben, erscheint der Fehler „Cannot find control with name“. Ein typischer Fehler ist auch, „formGroupName“ statt „formControlName“ zu schreiben. „formControl“ in eckigen Klammern bekommt dagegen direkt ein Control-Objekt.\n\nDas Diagramm zeigt den Ablauf: Tippt der Benutzer, schreibt Angular den Wert in das Control. Ändert der Code den Wert, zeigt das Eingabefeld ihn an.\n\n„ngSubmit“ verhindert, dass der Browser die Seite beim Absenden neu lädt. „ngModel“ aus den Template-Driven Forms sollte man nicht zusätzlich an dasselbe Feld hängen.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "<form [formGroup]=\"customerForm\">",
+              "formControlName=\"firstname\"",
+              "Control in der Gruppe finden",
+              "Wert und Zustand synchron"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Werte setzen: setValue und patchValue",
+          "bullets": [
+            "setValue(obj): alle Felder müssen dabei sein",
+            "patchValue(obj): nur angegebene Felder",
+            "Typisch: Daten vom Service mit patchValue",
+            "Datum für <input type=\"date\">: Text JJJJ-MM-TT",
+            [
+              "toISOString().substring(0, 10)",
+              1
+            ],
+            "reset(): Startwerte, pristine, untouched"
+          ],
+          "notes": "Folie: „Werte setzen: setValue und patchValue“.\n\nUm Werte aus dem Code ins Formular zu schreiben, gibt es zwei Methoden. „setValue“ erwartet ein Objekt mit allen Feldern der Gruppe. Fehlt eines, gibt es einen Fehler. „patchValue“ übernimmt nur die Felder, die im Objekt vorkommen, und ignoriert den Rest.\n\nTypisch ist, die Daten eines Kunden vom Service mit „patchValue“ einzutragen, wie im Diagramm. Ein Datumsfeld vom Typ „date“ erwartet aber keinen Datumswert, sondern einen Text in der Form Jahr, Monat, Tag. Deshalb wird das Datum mit „toISOString“ in Text umgewandelt, und davon werden die ersten zehn Zeichen genommen.\n\n„reset“ setzt die Felder auf ihre Startwerte zurück und markiert sie wieder als unverändert und unberührt.",
+          "diagram": {
+            "kind": "code",
+            "title": "Kunde ins Formular laden",
+            "text": "const c = this.customer;\nthis.customerForm.patchValue({\n  firstname: c.firstname,\n  lastname: c.lastname,\n  zip: c.zip ?? '',\n  lastOrderDate: c.lastOrderDate\n    ?.toISOString()\n    .substring(0, 10) ?? null\n});"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Werte übernehmen beim Speichern",
+          "bullets": [
+            "(ngSubmit) ruft save() auf",
+            "Ungültig? Felder markieren und abbrechen",
+            [
+              "markAllAsTouched() zeigt alle Fehler",
+              1
+            ],
+            "getRawValue(): vollständige Werte",
+            "Datum zurück: new Date(text)",
+            "Object.assign überträgt Werte ins Objekt",
+            "Danach Service aufrufen"
+          ],
+          "notes": "Folie: „Werte übernehmen beim Speichern“.\n\nDas Diagramm zeigt die Methode „save“, die das Formular beim Absenden aufruft. Zuerst prüft sie, ob das Formular ungültig ist. Wenn ja, markiert „markAllAsTouched“ alle Felder als berührt. Dadurch erscheinen alle Fehlermeldungen, und die Methode bricht ab.\n\nIst das Formular gültig, holt „getRawValue“ alle Werte als ein Objekt. Das Datum ist dort noch ein Text und wird mit „new Date“ wieder in ein Datum umgewandelt. „Object.assign“ kopiert die Werte in das vorhandene Kundenobjekt. Danach kann man den Service aufrufen, der die Daten speichert.",
+          "diagram": {
+            "kind": "code",
+            "title": "save()",
+            "text": "save(): void {\n  if (this.customerForm.invalid) {\n    this.customerForm\n      .markAllAsTouched();\n    return;\n  }\n  const v =\n    this.customerForm.getRawValue();\n  Object.assign(this.customer, {\n    ...v,\n    lastOrderDate: v.lastOrderDate\n      ? new Date(v.lastOrderDate)\n      : undefined\n  });\n}"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Validators: eingebaute Prüfregeln",
+          "bullets": [
+            "Validators.required: Pflichtfeld",
+            "Validators.minLength(n) / maxLength(n)",
+            "Validators.min(n) / max(n) für Zahlen",
+            "Validators.email: E-Mail-Format",
+            "Validators.pattern(regex): regulärer Ausdruck",
+            "Mehrere Regeln als Array",
+            [
+              "früher: Validators.compose([…])",
+              1
+            ]
+          ],
+          "notes": "Folie: „Validators: eingebaute Prüfregeln“.\n\nDie Klasse „Validators“ enthält fertige Prüfregeln. „required“ macht ein Feld zur Pflicht. „minLength“ und „maxLength“ prüfen die Länge eines Textes, „min“ und „max“ den Bereich einer Zahl. „email“ prüft das Format einer E-Mail-Adresse. „pattern“ prüft gegen einen regulären Ausdruck, also ein Textmuster.\n\nManche Regeln stehen ohne Klammern da, zum Beispiel „Validators.required“. Das ist die Prüffunktion selbst. Andere werden mit einem Wert aufgerufen, zum Beispiel „minLength(3)“. Dieser Aufruf liefert erst die eigentliche Prüffunktion zurück.\n\nMehrere Regeln für ein Feld übergibt man als Array. In älterem Code sieht man dafür noch „Validators.compose“."
+        },
+        {
+          "type": "code",
+          "title": "Validatoren im Formular",
+          "code": "customerForm = this.fb.nonNullable.group({\n  firstname: ['', Validators.required],\n  lastname: ['', [Validators.required, Validators.minLength(2)]],\n  city: ['', Validators.maxLength(30)],\n  zip: ['', Validators.pattern('[0-9]{5}')],\n  email: ['', [Validators.required, Validators.email]]\n});\n\n// Ohne FormBuilder: zweiter Parameter bzw. Optionsobjekt\nfirstname = new FormControl('', {\n  nonNullable: true,\n  validators: [Validators.required]\n});",
+          "notes": "Codefolie „Validatoren im Formular“.\n\nMit dem FormBuilder stehen die Prüfregeln an zweiter Stelle im Array eines Feldes. Der Vorname ist ein Pflichtfeld. Der Nachname ist Pflicht und muss mindestens zwei Zeichen haben, deshalb stehen hier zwei Regeln in einem Array. Die Stadt darf höchstens 30 Zeichen lang sein. Die Postleitzahl muss aus genau fünf Ziffern bestehen. Die E-Mail-Adresse ist Pflicht und muss ein gültiges Format haben.\n\nUnten ist gezeigt, wie man ohne FormBuilder Prüfregeln angibt: im Optionsobjekt eines FormControl unter dem Schlüssel „validators“.\n\nBei „pattern“ mit einer Zeichenkette ergänzt Angular selbst Anfang und Ende, das Muster muss also auf den ganzen Wert passen."
+        },
+        {
+          "type": "content",
+          "title": "Feldzustände und CSS-Klassen",
+          "bullets": [
+            "pristine → dirty: Benutzer hat den Wert geändert",
+            "untouched → touched: Feld hat den Fokus verloren",
+            "valid / invalid / pending: Ergebnis der Prüfung",
+            "Gilt für Feld, Gruppe und ganzes Formular",
+            "Angular setzt passende CSS-Klassen",
+            [
+              "ng-valid, ng-invalid, ng-pending",
+              1
+            ],
+            [
+              "ng-pristine, ng-dirty, ng-untouched, ng-touched",
+              1
+            ]
+          ],
+          "notes": "Folie: „Feldzustände und CSS-Klassen“.\n\nJedes Feld hat mehrere voneinander unabhängige Zustände. Am Anfang ist es „pristine“, also unverändert, und „untouched“, also unberührt. Sobald der Benutzer den Wert ändert, wird es „dirty“, also verändert. Sobald er das Feld verlässt, wird es „touched“, also berührt. Unabhängig davon ist das Ergebnis der Prüfung: gültig, ungültig oder wartend, wenn eine Prüfung im Hintergrund läuft. Das Diagramm zeigt diese Reihenfolge.\n\nDiese Zustände gibt es auch für Gruppen und das ganze Formular. Zusätzlich setzt Angular passende CSS-Klassen an die Elemente, zum Beispiel „ng-invalid“ und „ng-touched“. Damit kann man ungültige Felder per CSS rot umranden, ohne eine Zeile TypeScript.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Start: pristine,\nuntouched",
+              "Benutzer tippt:\ndirty",
+              "Feld verlassen:\ntouched",
+              "Prüfung: valid\noder invalid"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Das errors-Objekt",
+          "bullets": [
+            "errors: ValidationErrors | null",
+            [
+              "null = keine Fehler",
+              1
+            ],
+            "Ein Schlüssel pro verletzter Regel",
+            [
+              "required: true",
+              1
+            ],
+            [
+              "minlength: { requiredLength, actualLength }",
+              1
+            ],
+            [
+              "pattern: { requiredPattern, actualValue }",
+              1
+            ],
+            "Abfrage: control.hasError('required')"
+          ],
+          "notes": "Folie: „Das errors-Objekt“.\n\nDie Eigenschaft „errors“ eines Controls ist entweder „null“, dann gibt es keinen Fehler, oder ein Objekt vom Typ „ValidationErrors“. In diesem Objekt gibt es für jede verletzte Prüfregel einen Schlüssel.\n\nDer Schlüssel heißt wie die Regel, in Kleinbuchstaben. Bei „required“ ist der Wert einfach „true“. Bei „minlength“ ist der Wert ein Objekt mit der verlangten und der tatsächlichen Länge. Bei „pattern“ enthält es das Muster und den geprüften Wert. Diese Zusatzinformationen kann man in Fehlermeldungen einsetzen, wie das Diagramm zeigt.\n\nAm einfachsten fragt man einen bestimmten Fehler mit der Methode „hasError“ und dem Namen des Schlüssels ab.",
+          "diagram": {
+            "kind": "code",
+            "title": "lastname.errors",
+            "text": "// Feld leer:\n{ required: true }\n\n// Wert \"M\":\n{ minlength: {\n    requiredLength: 2,\n    actualLength: 1 } }\n\n// gültig:\nnull"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Fehlermeldungen mit @if",
+          "code": "<input id=\"lastname\" formControlName=\"lastname\"\n       [class.has-error]=\"lastname.invalid && lastname.touched\">\n\n@if (lastname.touched && lastname.hasError('required')) {\n  <p class=\"error\">Nachname ist ein Pflichtfeld.</p>\n}\n@if (lastname.hasError('minlength')) {\n  <p class=\"error\">\n    Mindestens {{ lastname.getError('minlength').requiredLength }} Zeichen.\n  </p>\n}\n@if (zip.dirty && zip.hasError('pattern')) {\n  <p class=\"error\">Die PLZ besteht aus fünf Ziffern.</p>\n}\n\n<!-- in der Klasse: lastname = this.customerForm.controls.lastname; -->",
+          "notes": "Codefolie „Fehlermeldungen mit @if“.\n\nDie letzte Zeile zeigt eine Vorbereitung in der Klasse: Das Feld „lastname“ verweist direkt auf das Control des Nachnamens. Das hält das Template kurz. Für die Postleitzahl gibt es entsprechend ein Feld „zip“.\n\nOben bekommt das Eingabefeld die CSS-Klasse „has-error“, sobald es ungültig ist und der Benutzer es schon verlassen hat. Darunter stehen drei Blöcke mit „@if“. Der erste zeigt die Pflichtfeld-Meldung, wenn das Feld berührt und leer ist. Der zweite zeigt die Mindestlänge an. Mit „getError“ liest er die verlangte Länge aus dem Fehlerobjekt. Der dritte zeigt eine Meldung zur Postleitzahl, sobald der Benutzer dort etwas geändert hat und das Muster nicht passt."
+        },
+        {
+          "type": "content",
+          "title": "Fehlerzustand im Template erklärt",
+          "bullets": [
+            "Fehler nicht sofort beim leeren Formular zeigen",
+            [
+              "Bedingung mit touched oder dirty kombinieren",
+              1
+            ],
+            "hasError('key'): true, wenn diese Regel verletzt ist",
+            "getError('key'): Zusatzdaten der Regel",
+            "Submit-Button: [disabled]=\"customerForm.invalid\"",
+            "Oder beim Absenden markAllAsTouched()",
+            "Früher: [hidden] und *ngIf statt @if"
+          ],
+          "notes": "Folie: „Fehlerzustand im Template erklärt“.\n\nEin leeres Pflichtfeld ist schon beim ersten Anzeigen ungültig. Würde man die Meldung sofort zeigen, wäre das Formular voller Fehler, bevor der Benutzer etwas getan hat. Deshalb kombiniert man die Fehlerprüfung mit „touched“ oder „dirty“.\n\n„hasError“ bekommt den Namen einer Regel und liefert „true“, wenn genau diese Regel verletzt ist. „getError“ liefert die Zusatzdaten dieser Regel.\n\nUm das Absenden zu verhindern, gibt es zwei Wege: Den Button deaktivieren, solange das Formular ungültig ist, oder beim Absenden alle Felder als berührt markieren und abbrechen. In älterem Code findet man statt „@if“ noch das Attribut „hidden“ oder die Direktive „ngIf“."
+        },
+        {
+          "type": "content",
+          "title": "Eigene Validatorfunktion: Konzept",
+          "bullets": [
+            "ValidatorFn: (control: AbstractControl) =>",
+            [
+              "ValidationErrors | null",
+              1
+            ],
+            "Angular ruft sie bei jeder Wertänderung auf",
+            "Parameter control: das geprüfte Feld",
+            [
+              "control.value ist der aktuelle Wert",
+              1
+            ],
+            "Rückgabe null: gültig",
+            "Rückgabe { schluessel: … }: ungültig"
+          ],
+          "notes": "Folie: „Eigene Validatorfunktion: Konzept“.\n\nReichen die eingebauten Regeln nicht, schreibt man eine eigene Prüffunktion. Sie hat den Typ „ValidatorFn“. Das ist eine Funktion mit genau einem Parameter, üblicherweise „control“ genannt, und einem Rückgabewert.\n\nDen Parameter übergibt nicht der eigene Code, sondern Angular. Jedes Mal, wenn sich der Wert eines Feldes ändert, ruft Angular alle Prüffunktionen dieses Feldes auf und übergibt das Feld selbst, also das Control-Objekt. Über „control.value“ liest die Funktion den aktuellen Wert.\n\nGibt die Funktion „null“ zurück, ist der Wert gültig. Gibt sie ein Objekt zurück, ist er ungültig. Angular trägt dieses Objekt dann in „errors“ ein. Das Diagramm zeigt den Ablauf.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Benutzer ändert Wert",
+              "Angular ruft\nvalidator(control)",
+              "Funktion liest\ncontrol.value",
+              "null → valid\n{…} → invalid, errors"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Eigener Validator: nur Ziffern",
+          "code": "import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';\n\n// 1. Direkt als Prüffunktion\nexport function digitsOnly(control: AbstractControl): ValidationErrors | null {\n  const value = control.value as string;\n  if (!value) { return null; }          // leer prüft required\n  return /^[0-9]+$/.test(value) ? null : { digitsOnly: { actual: value } };\n}\n\n// 2. Mit Parameter: Fabrikfunktion liefert die Prüffunktion\nexport function exactLength(n: number): ValidatorFn {\n  return (control) => !control.value || control.value.length === n\n    ? null\n    : { exactLength: { required: n, actual: control.value.length } };\n}\n\n// Verwendung: zip: ['', [Validators.required, digitsOnly, exactLength(5)]]",
+          "notes": "Codefolie „Eigener Validator: nur Ziffern“.\n\nDer erste Teil zeigt eine Prüffunktion namens „digitsOnly“. Sie bekommt das Control, liest dessen Wert und gibt bei leerem Feld „null“ zurück. Ob ein Feld leer sein darf, entscheidet nämlich eine eigene Regel, „required“. Sonst prüft ein regulärer Ausdruck, ob der Wert nur aus Ziffern besteht. Wenn ja, kommt „null“ zurück, sonst ein Fehlerobjekt mit dem Schlüssel „digitsOnly“.\n\nDer zweite Teil zeigt eine Regel mit Parameter. „exactLength“ ist eine sogenannte Fabrikfunktion: Man ruft sie mit der gewünschten Länge auf, und sie gibt die eigentliche Prüffunktion zurück. So funktionieren auch die eingebauten Regeln wie „minLength“.\n\nDie letzte Zeile zeigt die Verwendung: Die erste Funktion wird ohne Klammern übergeben, die zweite mit Klammern aufgerufen."
+        },
+        {
+          "type": "content",
+          "title": "Eigener Validator erklärt",
+          "bullets": [
+            "control: AbstractControl, das geprüfte Feld",
+            [
+              "bei Gruppen-Validatoren: die ganze FormGroup",
+              1
+            ],
+            "Ohne Klammern übergeben: digitsOnly",
+            "Mit Klammern aufrufen: exactLength(5) → ValidatorFn",
+            "Schlüssel im Fehlerobjekt frei wählbar",
+            [
+              "Abfrage im Template: hasError('digitsOnly')",
+              1
+            ],
+            "Felder vergleichen: Validator an der FormGroup"
+          ],
+          "notes": "Folie: „Eigener Validator erklärt“.\n\nDer Parameter „control“ hat den Typ „AbstractControl“. Bei einer Regel für ein einzelnes Feld ist es das FormControl dieses Feldes. Hängt man eine Regel an eine ganze FormGroup, bekommt sie die Gruppe und kann mehrere Felder vergleichen, zum Beispiel Passwort und Passwort-Wiederholung.\n\nWichtig ist der Unterschied zwischen Übergeben und Aufrufen. „digitsOnly“ wird ohne Klammern übergeben, denn Angular soll die Funktion später selbst aufrufen. „exactLength(5)“ wird sofort aufgerufen, denn erst das Ergebnis dieses Aufrufs ist die Prüffunktion.\n\nDen Schlüssel im Fehlerobjekt wählt man selbst. Unter genau diesem Namen fragt man den Fehler im Template mit „hasError“ ab. Es gibt außerdem asynchrone Prüffunktionen, die zum Beispiel beim Server nachfragen. Solange sie laufen, ist der Status „PENDING“, also wartend."
+        },
+        {
+          "type": "content",
+          "title": "Auf Änderungen reagieren: valueChanges",
+          "bullets": [
+            "valueChanges: Observable mit jedem neuen Wert",
+            [
+              "Callback-Parameter: der neue Wert des Controls",
+              1
+            ],
+            "statusChanges: VALID, INVALID, PENDING …",
+            "takeUntilDestroyed() meldet automatisch ab",
+            [
+              "im Konstruktor aufrufen (Injection Context)",
+              1
+            ],
+            "Als Signal: toSignal(control.valueChanges)",
+            "Beispiel: Stadt zur PLZ nachschlagen"
+          ],
+          "notes": "Folie: „Auf Änderungen reagieren: valueChanges“.\n\nJedes Control hat die Eigenschaft „valueChanges“. Das ist ein Observable, also ein Datenstrom, der bei jeder Änderung den neuen Wert liefert. Die Funktion, die man an „subscribe“ übergibt, bekommt diesen neuen Wert als Parameter. Entsprechend liefert „statusChanges“ jeden neuen Prüfstatus.\n\nDas Diagramm zeigt ein Beispiel: Ändert sich die Postleitzahl, wird der neue Wert ausgegeben. Der Operator „takeUntilDestroyed“ beendet die Anmeldung automatisch, wenn die Komponente entfernt wird. Ohne Argument muss er im Konstruktor oder bei der Felddeklaration stehen, weil er dort den Zusammenhang der Komponente kennt.\n\nWer lieber mit Signals arbeitet, wandelt den Datenstrom mit „toSignal“ in ein Signal um. Ein typischer Einsatz: Zur eingegebenen Postleitzahl automatisch die Stadt nachschlagen.",
+          "diagram": {
+            "kind": "code",
+            "title": "constructor()",
+            "text": "constructor() {\n  this.customerForm.controls.zip\n    .valueChanges\n    .pipe(takeUntilDestroyed())\n    .subscribe(zip =>\n      console.log('PLZ:', zip));\n}\n\nzipValue = toSignal(\n  this.customerForm.controls\n    .zip.valueChanges);"
+          }
+        },
+        {
+          "type": "content",
+          "title": "FormArray: Listen von Feldern",
+          "bullets": [
+            "Anzahl der Felder steht erst zur Laufzeit fest",
+            "fb.array([…]) als Feld in der FormGroup",
+            "push(control) fügt hinzu, removeAt(i) entfernt",
+            "controls: Array der einzelnen Controls",
+            "Template: formArrayName + @for",
+            [
+              "[formControlName]=\"$index\"",
+              1
+            ]
+          ],
+          "notes": "Folie: „FormArray: Listen von Feldern“.\n\nManchmal steht die Zahl der Felder erst zur Laufzeit fest, zum Beispiel bei beliebig vielen Telefonnummern. Dafür gibt es das „FormArray“. Mit dem FormBuilder legt man es über „array“ an und setzt es wie ein normales Feld in die FormGroup, hier unter dem Namen „phones“. Eine kleine Getter-Methode „phones“ macht es im Template bequem erreichbar.\n\nMit „push“ fügt man ein neues Control hinzu, mit „removeAt“ und einer Position entfernt man eines. Die Eigenschaft „controls“ ist das Array der einzelnen Controls.\n\nIm Template verbindet „formArrayName“ den umgebenden Bereich mit dem Array. Darin erzeugt eine „@for“-Schleife für jedes Control ein Eingabefeld. Da die Controls im Array keinen Namen haben, sondern eine Position, bindet man „formControlName“ an die Schleifenvariable „$index“. Das Diagramm zeigt Klasse und Template.",
+          "diagram": {
+            "kind": "code",
+            "title": "Telefonnummern",
+            "text": "customerForm = this.fb.nonNullable\n  .group({\n    firstname: [''],\n    phones: this.fb.array([''])\n  });\nget phones() {\n  return this.customerForm\n    .controls.phones;\n}\n<div formArrayName=\"phones\">\n @for (p of phones.controls;\n      track $index) {\n  <input [formControlName]=\"$index\">\n }\n</div>"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Best Practices für Reactive Forms",
+          "bullets": [
+            "nonNullable verwenden, Werte mit getRawValue() lesen",
+            "Fehlermeldungen erst nach touched oder dirty zeigen",
+            "Eigene Regeln als kleine, testbare Funktionen",
+            "Subscriptions mit takeUntilDestroyed() beenden",
+            "Nicht ngModel und formControlName am selben Feld",
+            "Server prüft trotzdem: Client-Prüfung ist nur Komfort",
+            "Ausblick: Angular 21 enthält experimentelle Signal Forms"
+          ],
+          "notes": "Folie: „Best Practices für Reactive Forms“.\n\nDie Folie fasst die wichtigsten Empfehlungen zusammen. Man verwendet „nonNullable“ und liest Werte mit „getRawValue“. Fehlermeldungen erscheinen erst, wenn der Benutzer das Feld berührt oder verändert hat. Eigene Prüfregeln schreibt man als kleine Funktionen, die sich einzeln testen lassen. Anmeldungen an Datenströme beendet man mit „takeUntilDestroyed“. Und man mischt nicht beide Formulararten am selben Feld.\n\nDie Prüfung im Browser verbessert nur die Bedienung. Aus Sicherheitsgründen muss der Server die Daten immer noch einmal prüfen.\n\nAls Ausblick: Angular 21 enthält eine experimentelle neue Formular-Variante namens „Signal Forms“, die auf Signals aufbaut. Experimentell bedeutet, dass sich die Schnittstelle noch ändern kann. Für Projekte im Betrieb nimmt man deshalb weiterhin Reactive oder Template-Driven Forms."
+        },
+        {
+          "type": "exercise",
+          "title": "Wahlübung Z1: Reactive Form mit FormBuilder",
+          "bullets": [
+            "Öffne das Projekt Z1_reactive_forms, arbeite in CustomerDetailsComponent",
+            "1. ReactiveFormsModule im imports-Array importieren",
+            "2. Typisiertes Formular: inject(FormBuilder), fb.nonNullable.group({ … })",
+            [
+              "Felder: firstname, lastname, street, zip, city, lastOrderDate",
+              1
+            ],
+            "3. Formular mit den Kundendaten füllen: patchValue(…)",
+            [
+              "Datum: lastOrderDate.toISOString().substring(0, 10)",
+              1
+            ],
+            "4. Template: [formGroup] am <form>, formControlName an jedem <input>",
+            "5. Speichern: (ngSubmit), getRawValue(), Object.assign, new Date(…)",
+            "Musterlösung: Z1_reactive_forms, Schritt 1–4 (baut auf 21_dynamic_routes auf)"
+          ],
+          "notes": "Folie: „Wahlübung Z1: Reactive Form mit FormBuilder“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für die Wahlübung Z1 im Ordner Z1_reactive_forms. Sie gehört zum Wahlthema „Reactive Forms“ und nicht zum Hauptpfad. Im Hauptpfad bearbeiten die Teilnehmer den Kunden in Übung 22 mit einem Template-Driven Form.\n\nDie Teilnehmer binden das „ReactiveFormsModule“ ein und bauen in „CustomerDetailsComponent“ ein typisiertes Formular mit dem FormBuilder auf. Sie füllen es mit den Daten des Kunden; das Datum muss dafür in Text umgewandelt werden. Im Template verbinden sie das Formular und jedes Eingabefeld. Zum Schluss übernehmen sie beim Absenden die Werte zurück in das Kundenobjekt. Der Ordner enthält bereits den Aufbau des Formulars, das Speichern ist der Teil zum Selbermachen."
+        },
+        {
+          "type": "exercise",
+          "title": "Wahlübung Z1: Validierung (Reactive Forms)",
+          "bullets": [
+            "Weiter in CustomerDetailsComponent (Z1_reactive_forms)",
+            "1. Vor- und Nachname als Pflichtfelder: Validators.required",
+            "2. PLZ als Text, nur Ziffern: Validators.pattern('[0-9]*')",
+            [
+              "optional: eigene Prüffunktion digitsOnly",
+              1
+            ],
+            "3. Fehlermeldung je ungültigem Feld mit @if",
+            [
+              "z. B. zip.dirty && zip.hasError('pattern')",
+              1
+            ],
+            "4. Absenden verhindern: [disabled]=\"customerForm.invalid\" am Submit-Button",
+            "5. Im Browser testen: leere Felder, Buchstaben in der PLZ",
+            "Musterlösung: keine, Validierung ist der Teil zum Selbermachen"
+          ],
+          "notes": "Folie: „Wahlübung Z1: Validierung (Reactive Forms)“.\n\nErklärung für die Dolmetscherin:\nDies ist die Fortsetzung der Wahlübung Z1 im Ordner Z1_reactive_forms. In „CustomerDetailsComponent“ werden Vorname und Nachname als Pflichtfelder geprüft. Die Postleitzahl ist ein Text, der nur Ziffern enthalten darf; wer möchte, schreibt dafür eine eigene Prüffunktion.\n\nFür jedes ungültige Feld erscheint mit „@if“ eine Fehlermeldung, aber erst, wenn der Benutzer das Feld verändert hat. Das Absenden eines ungültigen Formulars wird verhindert, indem der Button deaktiviert ist. Zum Schluss testen die Teilnehmer im Browser mit leeren Feldern und mit Buchstaben in der Postleitzahl. Der Ordner enthält diese Validierung absichtlich nicht."
         }
       ]
     }
   ],
   "ops": [
     {
-      "op": "move",
-      "from": 222,
-      "to": 226,
-      "after": 291
-    },
-    {
-      "op": "move",
-      "from": 217,
-      "to": 219,
-      "after": 291
+      "op": "delete",
+      "slides": [
+        217,
+        218,
+        219,
+        222,
+        223,
+        224,
+        225,
+        226,
+        269,
+        270,
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291
+      ]
     },
     {
       "op": "edit",
@@ -72,40 +1524,6 @@
         ]
       ],
       "notes": "Folie: „2-fache Validierung ist nicht redundant“.\n\nEine zweifache Validierung, im Client und im Server, ist nicht überflüssig, sondern hat unterschiedliche Zwecke. Die Prüfung im Client verbessert die Bedienung, weil der Benutzer sofort eine Rückmeldung bekommt. Die Prüfung im Server ist aus Sicherheitsgründen zwingend nötig, denn dem Client kann man nie vollständig vertrauen.\n\nBei den Prüfregeln, den „Validatoren“, unterscheidet man eingebaute und selbst geschriebene. Im Hauptpfad des Kurses verwenden wir HTML-Attribute am Eingabefeld. Bei den Reactive Forms im Wahlthema legt man die Prüfregeln dagegen in der Klasse an."
-    },
-    {
-      "op": "edit",
-      "slide": 219,
-      "notes": "Folie: „Wahlübung Z1: Reactive Form mit FormBuilder“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für die Wahlübung Z1 im Ordner Z1_reactive_forms. Sie gehört zum Wahlthema „Reactive Forms“ und nicht zum Hauptpfad. Im Hauptpfad bearbeiten die Teilnehmer den Kunden in Übung 22 mit einem Template-Driven Form.\n\nIn dieser Wahlübung wird die Anwendung für die Forms-Schnittstelle vorbereitet, indem „ReactiveFormsModule“ im „imports“-Array von „CustomerDetailsComponent“ eingebunden wird. Danach wird dort ein Formular mit „FormGroup“ und „FormControl“ oder mit dem „FormBuilder“ aufgebaut, mit dem die Kundendaten bearbeitet und gespeichert werden können."
-    },
-    {
-      "op": "replace_text",
-      "slide": 219,
-      "old": "Übung 22: FormBuilder",
-      "new": "Wahlübung Z1: Reactive Form mit FormBuilder",
-      "include_notes": false
-    },
-    {
-      "op": "edit",
-      "slide": 226,
-      "notes": "Folie: „Wahlübung Z1: Validierung (Reactive Forms)“.\n\nErklärung für die Dolmetscherin:\nDies ist die Fortsetzung der Wahlübung Z1 im Ordner Z1_reactive_forms. In „CustomerDetailsComponent“ werden Vorname und Nachname als Pflichtfelder geprüft. Die Postleitzahl ist ein Text, der nur Ziffern enthalten darf. Für jedes ungültige Feld erscheint eine Fehlermeldung, und das Absenden eines ungültigen Formulars wird verhindert. Das geschieht hier mit den Prüfregeln der Forms-Schnittstelle in der Klasse."
-    },
-    {
-      "op": "replace_text",
-      "slide": 226,
-      "old": "Übung 22: Validierung",
-      "new": "Wahlübung Z1: Validierung (Reactive Forms)",
-      "include_notes": false
-    },
-    {
-      "op": "edit",
-      "slide": 269,
-      "notes": "Kapitelübergangsfolie „Legacy: Angular Module (NgModule)“ – markiert deutlich den Beginn des Legacy-Kapitels. Wichtiger Hinweis an die Gruppe: Alles Folgende ist NICHT mehr der heutige Standard, sondern zeigt, wie Angular-Projekte vor der Standalone-Umstellung (bis Angular 14) organisiert waren. Relevant vor allem für alle, die in bestehenden, älteren Projekten arbeiten müssen (siehe auch Projektordner 30_modules_legacy)."
-    },
-    {
-      "op": "edit",
-      "slide": 291,
-      "notes": "Übung 30 (Legacy – Angular Module): Das mitgelieferte, NgModule-basierte Beispielprojekt „30_modules_legacy“ wird geöffnet, Backend und App gestartet und der Aufbau analysiert (main.ts mit „bootstrapModule“, AppModule mit declarations/imports/providers/bootstrap). Zusätzlich soll eine eigene, klassisch deklarierte Komponente im Modul erstellt werden, eine Standalone-Komponente per „imports: []“ in ein NgModule eingebunden werden (Mischbetrieb beider Ansätze), und optional kann das Projekt per „ng generate @angular/core:standalone“ automatisiert migriert werden."
     }
   ]
 }
