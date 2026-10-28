@@ -1,0 +1,225 @@
+{
+  "blocks": [
+    {
+      "after": 267,
+      "order": 30,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Anwendungsstruktur und Zustandsverwaltung",
+          "notes": "Kapitelübergangsfolie „Anwendungsstruktur und Zustandsverwaltung“ – In diesem Abschnitt geht es darum, wie man eine wachsende Anwendung in Ordner und Schichten gliedert und wie man den Zustand der Anwendung sauber verwaltet. Es werden einfache Services mit Signals, der „Signal Store“ von NgRx und die Kriterien für den Wechsel zwischen beiden gezeigt. Der Abschnitt endet mit Übung 33. Danach folgt eine Vertiefung zu NgRx im Deck „State Management“."
+        },
+        {
+          "type": "content",
+          "title": "Wie Zustand wächst",
+          "bullets": [
+            "Phase 1: eine Komponente, 3 Felder – signal() genügt",
+            "Phase 2: 3 Komponenten teilen sich Daten – Service",
+            "Phase 3: Daten, Filter, Auswahl, Laden und Fehler – Store-Muster",
+            "Phase 4: viele Teams, Nachvollziehbarkeit nötig – Redux-Muster (NgRx)",
+            "Nicht jede Anwendung braucht Phase 4",
+            "Zu früh strukturieren kostet Boilerplate, zu spät strukturieren kostet Umbau"
+          ],
+          "notes": "Folie: „Wie Zustand wächst“.\n\nDer Zustand einer Anwendung wächst meistens in vier Phasen. Phase 1: eine Komponente mit wenigen Feldern, dafür genügt ein „signal“. Phase 2: mehrere Komponenten teilen sich Daten, dann braucht man einen Service. Phase 3: Daten, Filter, Auswahl und Ladezustand hängen zusammen, dann lohnt sich ein „Store“. Ein Store ist ein Speicher, der Zustand und zugehörige Logik an einer Stelle bündelt.\n\nPhase 4: viele Teams arbeiten zusammen und jede Änderung muss nachvollziehbar sein. Dafür gibt es das „Redux-Muster“ mit der Bibliothek „NgRx“. Nicht jede Anwendung braucht Phase 4. Wer zu früh strukturiert, schreibt unnötig viel Code. Wer zu spät strukturiert, muss aufwendig umbauen.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "signal() in einer Komponente",
+              "Service für mehrere Komponenten",
+              "Store-Muster (Signal Store)",
+              "Redux-Muster (NgRx)"
+            ],
+            "highlight_last": false,
+            "note": "Nur so weit gehen, wie nötig"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Anwendung strukturieren: Ordner und Zuständigkeiten",
+          "code": "src/app/\n  customer/              <- Feature\n    customer-list/       <- Container\n    customer-details/\n    ui/                  <- Darstellungskomponenten\n    customer.store.ts    <- Zustand und Fachlogik\n    customer.api.ts      <- HTTP-Zugriff\n    customer.model.ts\n  auth/\n  shared/                <- nur wirklich Allgemeines (Card, Pipes)\n\n// Ein Feature kennt andere Features nur über Schnittstellen (Service, Route)\n// Abhängigkeitsrichtung: Features nutzen shared, nie umgekehrt",
+          "notes": "Codefolie „Anwendung strukturieren: Ordner und Zuständigkeiten“.\n\nDie Folie zeigt eine mögliche Ordnerstruktur. Im Ordner „app“ liegt für jeden Fachbereich ein eigener Ordner, hier „customer“ und „auth“. Ein solcher Fachbereich heißt „Feature“.\n\nIm Feature „customer“ liegen die Container-Komponenten, zum Beispiel die Liste und die Details. Die Darstellungskomponenten liegen im Unterordner „ui“. Dazu kommen der Store mit Zustand und Fachlogik, der API-Zugriff und das Datenmodell. Der Ordner „shared“ enthält nur wirklich Allgemeines, zum Beispiel die Card-Komponente oder Pipes.\n\nEin Feature soll andere Features nur über klare Schnittstellen kennen, also über einen Service oder eine Route. Die Abhängigkeit zeigt immer in eine Richtung: Features dürfen „shared“ nutzen, aber „shared“ kennt keine Features."
+        },
+        {
+          "type": "content",
+          "title": "Drei Schichten: Zustand, Logik, Darstellung",
+          "bullets": [
+            "Zustand: Daten halten und ableiten – Signals im Store",
+            "Logik: Regeln, Befehle, Laden – Methoden im Store oder Service",
+            "Darstellung: Anzeigen und Eingaben weitergeben – Komponenten und Templates",
+            "Komponenten lesen Signals und rufen Methoden auf",
+            "Sie entscheiden nicht, wie der Zustand aussieht"
+          ],
+          "notes": "Folie: „Drei Schichten: Zustand, Logik, Darstellung“.\n\nEine Anwendung hat drei Schichten. Die Schicht „Zustand“ hält die Daten und leitet daraus andere Werte ab. Sie besteht aus Signals im Store. Die Schicht „Logik“ enthält die Regeln, die Befehle und das Laden von Daten. Sie besteht aus Methoden im Store oder in einem Service. Die Schicht „Darstellung“ zeigt Daten an und gibt Eingaben weiter. Sie besteht aus Komponenten und Templates.\n\nKomponenten lesen die Signals und rufen Methoden auf. Sie entscheiden aber nicht selbst, wie der Zustand aufgebaut ist oder wie er sich ändert. Das übernimmt der Store.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Darstellung\nKomponenten, Templates",
+              "Logik\nMethoden im Store",
+              "Zustand\nSignals im Store"
+            ],
+            "note": "Komponenten lesen und rufen auf"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Service mit Signals als einfacher Store",
+          "code": "@Injectable({ providedIn: 'root' })\nexport class CustomerStore {\n  private readonly api = inject(CustomerService);\n  // privat schreibbar, öffentlich nur lesbar\n  private readonly _customers = signal<Customer[]>([]);\n  private readonly _filter = signal('');\n  readonly customers = this._customers.asReadonly();\n  readonly filter = this._filter.asReadonly();\n  readonly filtered = computed(() => {\n    const f = this._filter().toLowerCase();\n    return this._customers().filter(c => c.firstname.toLowerCase().includes(f));\n  });\n\n  setFilter(text: string) { this._filter.set(text); }\n  async load() { this._customers.set(await firstValueFrom(this.api.getAll())); }\n}",
+          "notes": "Codefolie „Service mit Signals als einfacher Store“.\n\nDas Beispiel zeigt einen einfachen Store als Service mit Signals. Die Daten und der Filtertext liegen in privaten Signals mit einem Unterstrich im Namen. Nach außen gibt der Store nur lesbare Versionen heraus, die man mit „asReadonly“ erzeugt. Von außen kann man die Werte also nicht direkt ändern.\n\nDie gefilterte Liste ist ein „computed“. Sie rechnet sich automatisch neu, wenn sich die Kunden oder der Filter ändern. Geändert wird der Zustand nur über Methoden: „setFilter“ setzt den Filtertext, „load“ lädt die Kunden vom Server. Diese Methoden heißen auch „Aktionen“.\n\nDas ist übersichtlicher als eine Lösung mit RxJS-Subjects im Service. Der Zustand ist sofort lesbar, und es gibt keine Anmeldungen, die man verwalten muss."
+        },
+        {
+          "type": "code",
+          "title": "Asynchronen Zustand modellieren",
+          "code": "type LoadState<T> =\n  | { status: 'idle' }\n  | { status: 'loading' }\n  | { status: 'error'; message: string }\n  | { status: 'loaded'; data: T };\n\n// Unmögliche Kombinationen (loading UND error) sind nicht darstellbar\n// Alternative: resource liefert value(), isLoading(), error() fertig (Übung 26)\n// Regel: Server-Daten (geladen, gecacht) von UI-Zustand (Dialog offen, Tab) trennen",
+          "notes": "Codefolie „Asynchronen Zustand modellieren“.\n\nBeim Laden von Daten gibt es mehrere mögliche Zustände. Der Typ „LoadState“ beschreibt genau vier: „idle“, also noch nichts passiert, „loading“, es wird geladen, „error“ mit einer Fehlermeldung und „loaded“ mit den geladenen Daten.\n\nDer Vorteil: Unmögliche Kombinationen, zum Beispiel „lädt“ und „Fehler“ gleichzeitig, kann man gar nicht ausdrücken. Alternativ liefert eine „resource“ aus Übung 26 die Werte „value“, „isLoading“ und „error“ bereits fertig.\n\nEine weitere Regel: Daten vom Server und Zustand der Oberfläche, zum Beispiel ein geöffneter Dialog oder ein gewählter Reiter, werden getrennt behandelt. Sie haben unterschiedliche Eigenschaften."
+        },
+        {
+          "type": "content",
+          "title": "Wachsende Zustandskomplexität beherrschen",
+          "bullets": [
+            "Normalisieren: Entitäten nach id in einer Map halten, Listen enthalten nur IDs",
+            "Ableiten statt kopieren: ausgewählter Kunde = computed aus selectedId und customers",
+            "Änderungen als benannte Befehle: addCustomer, renameCustomer statt überall set()",
+            "Unveränderlich aktualisieren (neue Referenzen), siehe Kapitel Reaktivität",
+            "Zustand klein halten: nur speichern, was nicht berechenbar ist"
+          ],
+          "notes": "Folie: „Wachsende Zustandskomplexität beherrschen“.\n\nWenn der Zustand wächst, helfen fünf Regeln. Erstens: Normalisieren. Man speichert jede Sache, hier Kunden, nur einmal in einer Tabelle, in der man sie über die Kennung findet. Listen enthalten dann nur die Kennungen. Zweitens: Ableiten statt kopieren. Der ausgewählte Kunde ist ein „computed“, das aus der Kennung der Auswahl und der Kundenliste berechnet wird.\n\nDrittens: Änderungen sind Befehle mit klaren Namen, zum Beispiel „addCustomer“ oder „renameCustomer“, und nicht ein „set“ an vielen Stellen. Viertens: Zustand wird unveränderlich aktualisiert, es entstehen also neue Objekte. Fünftens: Man hält den Zustand klein und speichert nur, was man nicht berechnen kann."
+        },
+        {
+          "type": "content",
+          "title": "Wann strukturierten Zustand einführen? (1/2)",
+          "bullets": [
+            "Konsumenten: Service bei 1–3 Komponenten, Store bei vielen, verteilt über Features",
+            "Zustandsarten: Service bei 1–2, Store bei mehreren zusammenhängenden (Daten, Filter, Status)",
+            "Seiteneffekte: Service bei wenigen, Store bei vielen, die voneinander abhängen",
+            "Nachvollziehbarkeit: Service, wenn unwichtig; Store, wenn Änderungen protokolliert werden"
+          ],
+          "notes": "Folie: „Wann strukturierten Zustand einführen? (1/2)“.\n\nDie Folie vergleicht, wann ein einfacher Service mit Signals genügt und wann sich ein strukturierter Store lohnt. Es gibt sieben Kriterien, die auf zwei Folien verteilt sind.\n\nErstens die Zahl der Konsumenten: Wenn eine bis drei Komponenten den Zustand nutzen, genügt ein Service. Nutzen viele Komponenten in mehreren Features den Zustand, lohnt sich ein Store. Zweitens die Zustandsarten: Bei ein bis zwei Arten reicht ein Service. Gibt es mehrere zusammenhängende, etwa Daten, Filter und Status, ist ein Store besser. Drittens die Seiteneffekte: Bei wenigen reicht ein Service, bei vielen voneinander abhängigen ein Store. Viertens die Nachvollziehbarkeit: Wenn sie egal ist, genügt ein Service. Müssen Änderungen protokolliert oder untersucht werden, ist ein Store besser.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Service reicht",
+              "items": [
+                "1-3 Komponenten",
+                "1-2 Zustandsarten"
+              ]
+            },
+            "right": {
+              "title": "Store lohnt sich",
+              "items": [
+                "viele Konsumenten",
+                "Daten, Filter, Status"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Wann strukturierten Zustand einführen? (2/2)",
+          "bullets": [
+            "Teamgröße: Service bei 1–3 Personen, Store bei mehreren Teams mit einheitlichen Mustern",
+            "Wiederverwendung: Service im Einzelfall, Store bei gleichen Mustern in vielen Features",
+            "Testaufwand: Service bei geringem Aufwand, Store bei gezielten Tests der Zustandslogik",
+            "Ergebnis: Starte einfach (Service mit Signals)",
+            [
+              "Strukturiere erst, wenn ein Kriterium zum Problem wird",
+              1
+            ]
+          ],
+          "notes": "Folie: „Wann strukturierten Zustand einführen? (2/2)“.\n\nDies ist der zweite Teil der Kriterien. Fünftens die Teamgröße: Bei ein bis drei Personen genügt ein Service. Arbeiten mehrere Teams zusammen und brauchen sie einheitliche Muster, lohnt sich ein Store. Sechstens die Wiederverwendung: Im Einzelfall reicht ein Service. Wiederholen sich gleiche Muster in vielen Features, ist ein Store besser. Siebtens der Testaufwand: Ist er gering, genügt ein Service. Sollen gezielt die Regeln des Zustands getestet werden, hilft ein Store.\n\nDas Ergebnis für den Kurs lautet: Starte einfach mit einem Service und Signals. Wechsle zu einem strukturierten Store erst, wenn eines der Kriterien zum Problem wird."
+        },
+        {
+          "type": "code",
+          "title": "NgRx Signal Store: Muster als Bibliothek",
+          "code": "export const CustomerStore = signalStore(\n  { providedIn: 'root' },\n  withState({ customers: [] as Customer[], filter: '' }),\n  withComputed(({ customers, filter }) => ({\n    filtered: computed(() => customers().filter(\n      c => c.firstname.toLowerCase().includes(filter().toLowerCase()))),\n  })),\n  withMethods((store, api = inject(CustomerService)) => ({\n    setFilter(filter: string) { patchState(store, { filter }); },\n    async load() {\n      patchState(store, { customers: await firstValueFrom(api.getAll()) });\n    },\n  })),\n);\n\n// In der Komponente:\n// store = inject(CustomerStore);   -> store.filtered(), store.setFilter(...)",
+          "notes": "Codefolie „NgRx Signal Store: Muster als Bibliothek“.\n\nDer „Signal Store“ aus dem Paket „@ngrx/signals“ bietet dasselbe Muster wie der selbst geschriebene Store, aber als fertige, standardisierte Bibliothek. Der Aufbau ist fast gleich wie auf der Folie zuvor.\n\n„withState“ legt den Zustand fest, hier Kunden und Filter. „withComputed“ definiert abgeleitete Werte, hier die gefilterte Liste. „withMethods“ definiert die Aktionen. „patchState“ ändert den Zustand, indem es einzelne Teile ersetzt.\n\nDer Vorteil ist, dass alle Stores gleich aufgebaut sind und man sie mit weiteren Bausteinen erweitern kann, zum Beispiel für Listen von Entitäten oder für RxJS. Die Komponente holt sich den Store mit „inject“ und liest Werte wie „store.filtered()“. Sie ruft Methoden wie „store.setFilter“ auf."
+        },
+        {
+          "type": "content",
+          "title": "Klassisches NgRx im Vergleich",
+          "bullets": [
+            "State (Zustand): im Signal Store withState",
+            "Selector (Ableitung): im Signal Store withComputed",
+            "Action (Absicht): im Signal Store eine Methode",
+            "Reducer (Zustandsübergang): im Signal Store patchState in einer Methode",
+            "Effect (asynchrone Nebenwirkung): im Signal Store eine Methode oder rxMethod",
+            "Klassisches NgRx: mehr Zeremonie, dafür Action-Log, Time-Travel und strikte Trennung",
+            "Sinnvoll bei sehr großen Anwendungen mit vielen Teams",
+            "Vertiefung: folgendes Deck „State Management“"
+          ],
+          "notes": "Folie: „Klassisches NgRx im Vergleich“.\n\nNeben dem „Signal Store“ gibt es das klassische „NgRx“ mit mehr Bausteinen. Die Folie ordnet jeden Baustein dem Gegenstück im Signal Store zu. Der „State“ ist der Zustand und entspricht „withState“. Ein „Selector“ leitet Werte ab, das entspricht „withComputed“. Eine „Action“ beschreibt eine Absicht, im Signal Store ist das eine Methode.\n\nEin „Reducer“ führt den Zustandsübergang aus, das entspricht „patchState“. Ein „Effect“ behandelt asynchrone Nebenwirkungen und entspricht einer Methode oder „rxMethod“. Das klassische NgRx hat mehr Aufwand, bietet dafür ein Protokoll aller Aktionen und strikte Trennung. Das lohnt sich bei sehr großen Anwendungen. Die Vertiefung folgt im Deck „State Management“."
+        },
+        {
+          "type": "content",
+          "title": "Typische Fehlentscheidungen",
+          "bullets": [
+            "Alles in den Store: UI-Details (Tab offen, Tooltip) gehören in die Komponente",
+            "God Store: ein Store für die ganze Anwendung – besser einer pro Feature",
+            "Doppelte Wahrheit: Daten im Store und zusätzlich kopiert in der Komponente",
+            "Server-Cache mit Client-Zustand verwechseln",
+            [
+              "Server-Daten haben Alter, Invalidierung und Fehler: resource oder Caching-Strategie bedenken",
+              1
+            ],
+            "Framework-Entscheidung statt Problem: erst die Schwierigkeit benennen, dann das Werkzeug wählen"
+          ],
+          "notes": "Folie: „Typische Fehlentscheidungen“.\n\nDie Folie nennt typische Fehlentscheidungen. Erstens: alles in den Store legen. Kleine Details der Oberfläche, wie ein geöffneter Reiter, gehören in die Komponente. Zweitens: ein „God Store“, also ein einziger Store für die ganze Anwendung. Besser ist ein Store pro Feature. Drittens: die „doppelte Wahrheit“, bei der Daten im Store und als Kopie in der Komponente liegen.\n\nViertens: Daten vom Server mit Zustand der Oberfläche verwechseln. Serverdaten werden älter und können Fehler haben. Fünftens: erst ein Werkzeug auswählen und dann ein Problem suchen. Richtig ist es umgekehrt."
+        },
+        {
+          "type": "content",
+          "title": "Testbarkeit des Zustands",
+          "bullets": [
+            "Store = Klasse oder Funktion mit klarer Schnittstelle: ohne Oberfläche testbar",
+            "Test: Methode aufrufen, dann das Signal prüfen",
+            "Kein fixture, kein DOM nötig",
+            "Vertiefung im Kapitel zur Testbarkeit"
+          ],
+          "notes": "Folie: „Testbarkeit des Zustands“.\n\nEin Vorteil eines Stores ist die gute Testbarkeit. Der Store ist eine Klasse oder Funktion mit einer klaren Schnittstelle. Man kann ihn testen, ohne eine Oberfläche aufzubauen.\n\nDer Test ruft eine Methode auf, zum Beispiel „setFilter“, und prüft danach den Wert des Signals. Man braucht dafür kein „fixture“, das ist die Testhülle für eine Komponente, und kein DOM. Das macht die Tests kurz und schnell. Die Vertiefung folgt im Kapitel zur Testbarkeit."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 33: CustomerStore einführen",
+          "bullets": [
+            "1. CustomerService zur reinen API-Schicht machen, dann customer.store.ts anlegen",
+            [
+              "Zustand: customers, filter, selectedId; abgeleitet: filtered, selected",
+              1
+            ],
+            [
+              "Methoden: load(), setFilter(), select()",
+              1
+            ],
+            "2. CustomerListComponent nutzt nur noch den Store (keine eigene Filterlogik)",
+            "3. Der localStorage-Effect aus Übung 32 wandert in den Store – wohin gehört er?",
+            "4. Zusatz: Variante mit signalStore aus @ngrx/signals (npm install @ngrx/signals)",
+            "5. Reflexion: War der Store hier nach den Kriterien nötig? Begründung in 3 Sätzen",
+            "Musterlösung: 33_state_store (baut auf 32_reaktivitaet auf)"
+          ],
+          "notes": "Folie: „Übung 33: CustomerStore einführen“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 33 im Ordner 33_state_store. Sie baut auf dem Ergebnis von Übung 32 auf.\n\nDie Teilnehmer verlagern die Zustandslogik in einen Store. Zuerst machen sie den vorhandenen „CustomerService“ zu einer reinen Schicht für den Zugriff auf den Server. Dann legen sie die Datei „customer.store.ts“ als Service mit Signals an. Der Zustand besteht aus Kunden, Filter und der Kennung des ausgewählten Kunden. Abgeleitet werden die gefilterte Liste und der ausgewählte Kunde, beide als „computed“. Dazu kommen die Methoden Laden, Filter setzen und Auswählen. Nach außen gibt der Store mit „asReadonly“ nur lesbare Signals heraus.\n\nDie Kundenliste benutzt danach nur noch den Store. Auch der „effect“ aus Übung 32 zieht um. Leistungsstarke Gruppen bauen zusätzlich eine Variante mit „signalStore“. Zum Schluss begründen alle in drei Sätzen, ob der Store hier schon nötig war."
+        }
+      ]
+    },
+    {
+      "after": 268,
+      "order": 30,
+      "slides": [
+        {
+          "type": "content",
+          "title": "Rückblick-Übung: Technologieentscheidung",
+          "bullets": [
+            "Zeitpunkt: am Kursende, etwa 10 Minuten – jetzt ist das nötige Wissen vorhanden",
+            "Szenario: Ein Versicherer plant ein Kundenportal",
+            [
+              "8 Entwickler, 10 Jahre Laufzeit, 3 bestehende Backend-Teams",
+              1
+            ],
+            "Fragen: Passt Angular? Welche Teile aus dem Kurs sprechen dafür, welche Risiken gibt es?",
+            "Ergebnis: je Gruppe (auch zu zweit oder allein) 3 Argumente dafür und 3 Risiken",
+            "Es gibt keine richtige Antwort",
+            "Ziel: Entscheidungskriterien ausdrücklich benennen, z. B. Skills, Lebensdauer, Teamgröße"
+          ],
+          "notes": "Folie: „Rückblick-Übung: Technologieentscheidung“.\n\nDies ist eine kurze Rückblick-Übung am Ende des Kurses. Sie dauert etwa zehn Minuten und enthält keinen Code. Erst jetzt ist sie sinnvoll, weil die Teilnehmer genug über Angular wissen.\n\nDas Szenario: Ein Versicherer plant ein Kundenportal mit acht Entwicklern, zehn Jahren Laufzeit und drei bestehenden Backend-Teams. Passt Angular dazu? Jede Gruppe sammelt drei Argumente dafür und drei Risiken. Eine Gruppe kann auch aus einer oder zwei Personen bestehen. Es gibt keine richtige Antwort. Ziel ist, Entscheidungskriterien klar auszusprechen, zum Beispiel Fähigkeiten im Team, Lebensdauer und Teamgröße."
+        }
+      ]
+    }
+  ]
+}

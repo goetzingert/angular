@@ -1,0 +1,111 @@
+{
+  "blocks": [
+    {
+      "after": 291,
+      "order": 0,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Wahlthema: Reactive Forms",
+          "notes": "Kapitelübergangsfolie „Wahlthema: Reactive Forms“ – Ab hier folgt ein optionaler Abschnitt über „Reactive Forms“. Dabei wird das Formular nicht im Template, sondern in der Klasse mit „FormGroup“, „FormControl“ und „FormBuilder“ aufgebaut. Der Abschnitt gehört nicht zum Hauptpfad, denn dort verwenden wir ein Template-Driven Form. Er ist für Teilnehmer gedacht, die in ihrem Projekt Reactive Forms einsetzen oder das Thema vertiefen wollen. Die Wahlübung heißt Z1 und liegt im Ordner Z1_reactive_forms."
+        }
+      ]
+    }
+  ],
+  "ops": [
+    {
+      "op": "move",
+      "from": 222,
+      "to": 226,
+      "after": 291
+    },
+    {
+      "op": "move",
+      "from": 217,
+      "to": 219,
+      "after": 291
+    },
+    {
+      "op": "edit",
+      "slide": 215,
+      "notes": "Kapitelübergangsfolie „Formulare in Angular“ – leitet über zum eigentlichen, Angular-spezifischen Formular-Konzept. Im Hauptpfad des Kurses behandeln wir „Template-Driven Forms“, bei denen das Formular im Template beschrieben wird. Die zweite Art, „Reactive Forms“, folgt als Wahlthema am Ende des Kurses."
+    },
+    {
+      "op": "edit",
+      "slide": 216,
+      "bullets": [
+        "Ein Formular = Gruppe von Feldern + Submit-Aktion",
+        "Der Zustand der Gruppe hängt von den enthaltenen Feldern ab",
+        [
+          "z. B. Gruppe ungültig, falls mindestens ein Feld ungültig ist",
+          1
+        ],
+        "Ein Feld ist ein Wert + weitere Zustände: dirty, touched, valid",
+        "Zwei Arten in Angular: Template-Driven Forms (Hauptpfad), Reactive Forms (Wahlthema)"
+      ],
+      "notes": "Folie „Formulare, Gruppen, Felder“.\n\nEin Formular besteht aus einer Gruppe von Feldern plus einer Aktion zum Absenden. Der Zustand der Gruppe hängt vom Zustand der enthaltenen Felder ab. Zum Beispiel ist die gesamte Gruppe „invalid“, also ungültig, sobald mindestens ein enthaltenes Feld ungültig ist. Ein einzelnes Feld besteht im Kern aus einem Wert plus weiterem Zustand, zum Beispiel „dirty“ für verändert, „touched“ für schon angeklickt und „valid“ für gültig.\n\nIn Angular gibt es zwei Arten, ein Formular zu beschreiben: „Template-Driven Forms“ und „Reactive Forms“. Im Hauptpfad des Kurses verwenden wir die einfachere Variante, bei der das Formular im Template steht. Die Reactive Forms folgen als Wahlthema."
+    },
+    {
+      "op": "edit",
+      "slide": 221,
+      "bullets": [
+        "2-fache Validierung ist nicht redundant",
+        "Client-seitig Validierung für User Experience",
+        "Server-seitig Validierung für Sicherheit",
+        "Validatoren",
+        [
+          "Built-in (required, pattern, minlength, maxlength, email)",
+          1
+        ],
+        [
+          "Custom",
+          1
+        ],
+        "Verwendung",
+        [
+          "Template-Driven Forms: mittels HTML-Attributen bzw. Direktiven (Hauptpfad)",
+          1
+        ],
+        [
+          "Reactive Forms: mit Hilfe der Forms API (Wahlthema)",
+          1
+        ]
+      ],
+      "notes": "Folie: „2-fache Validierung ist nicht redundant“.\n\nEine zweifache Validierung, im Client und im Server, ist nicht überflüssig, sondern hat unterschiedliche Zwecke. Die Prüfung im Client verbessert die Bedienung, weil der Benutzer sofort eine Rückmeldung bekommt. Die Prüfung im Server ist aus Sicherheitsgründen zwingend nötig, denn dem Client kann man nie vollständig vertrauen.\n\nBei den Prüfregeln, den „Validatoren“, unterscheidet man eingebaute und selbst geschriebene. Im Hauptpfad des Kurses verwenden wir HTML-Attribute am Eingabefeld. Bei den Reactive Forms im Wahlthema legt man die Prüfregeln dagegen in der Klasse an."
+    },
+    {
+      "op": "edit",
+      "slide": 219,
+      "notes": "Folie: „Wahlübung Z1: Reactive Form mit FormBuilder“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für die Wahlübung Z1 im Ordner Z1_reactive_forms. Sie gehört zum Wahlthema „Reactive Forms“ und nicht zum Hauptpfad. Im Hauptpfad bearbeiten die Teilnehmer den Kunden in Übung 22 mit einem Template-Driven Form.\n\nIn dieser Wahlübung wird die Anwendung für die Forms-Schnittstelle vorbereitet, indem „ReactiveFormsModule“ im „imports“-Array von „CustomerDetailsComponent“ eingebunden wird. Danach wird dort ein Formular mit „FormGroup“ und „FormControl“ oder mit dem „FormBuilder“ aufgebaut, mit dem die Kundendaten bearbeitet und gespeichert werden können."
+    },
+    {
+      "op": "replace_text",
+      "slide": 219,
+      "old": "Übung 22: FormBuilder",
+      "new": "Wahlübung Z1: Reactive Form mit FormBuilder",
+      "include_notes": false
+    },
+    {
+      "op": "edit",
+      "slide": 226,
+      "notes": "Folie: „Wahlübung Z1: Validierung (Reactive Forms)“.\n\nErklärung für die Dolmetscherin:\nDies ist die Fortsetzung der Wahlübung Z1 im Ordner Z1_reactive_forms. In „CustomerDetailsComponent“ werden Vorname und Nachname als Pflichtfelder geprüft. Die Postleitzahl ist ein Text, der nur Ziffern enthalten darf. Für jedes ungültige Feld erscheint eine Fehlermeldung, und das Absenden eines ungültigen Formulars wird verhindert. Das geschieht hier mit den Prüfregeln der Forms-Schnittstelle in der Klasse."
+    },
+    {
+      "op": "replace_text",
+      "slide": 226,
+      "old": "Übung 22: Validierung",
+      "new": "Wahlübung Z1: Validierung (Reactive Forms)",
+      "include_notes": false
+    },
+    {
+      "op": "edit",
+      "slide": 269,
+      "notes": "Kapitelübergangsfolie „Legacy: Angular Module (NgModule)“ – markiert deutlich den Beginn des Legacy-Kapitels. Wichtiger Hinweis an die Gruppe: Alles Folgende ist NICHT mehr der heutige Standard, sondern zeigt, wie Angular-Projekte vor der Standalone-Umstellung (bis Angular 14) organisiert waren. Relevant vor allem für alle, die in bestehenden, älteren Projekten arbeiten müssen (siehe auch Projektordner 30_modules_legacy)."
+    },
+    {
+      "op": "edit",
+      "slide": 291,
+      "notes": "Übung 30 (Legacy – Angular Module): Das mitgelieferte, NgModule-basierte Beispielprojekt „30_modules_legacy“ wird geöffnet, Backend und App gestartet und der Aufbau analysiert (main.ts mit „bootstrapModule“, AppModule mit declarations/imports/providers/bootstrap). Zusätzlich soll eine eigene, klassisch deklarierte Komponente im Modul erstellt werden, eine Standalone-Komponente per „imports: []“ in ein NgModule eingebunden werden (Mischbetrieb beider Ansätze), und optional kann das Projekt per „ng generate @angular/core:standalone“ automatisiert migriert werden."
+    }
+  ]
+}
