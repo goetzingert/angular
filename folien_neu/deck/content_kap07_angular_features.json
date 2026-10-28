@@ -1,12 +1,1280 @@
 {
-  "blocks": [],
-  "ops": [
+ "blocks": [
+  {
+   "after": 267,
+   "order": 5,
+   "slides": [
     {
-      "op": "replace_text",
-      "slide": 266,
-      "old": "<form [formGroup]=\"form\">",
-      "new": "<form #form=\"ngForm\">",
-      "include_notes": false
+     "type": "content",
+     "title": "Eigene Direktiven: Wozu?",
+     "bullets": [
+      "Direktive: Klasse, die einem vorhandenen Element Verhalten gibt",
+      "Komponente = Direktive mit eigenem Template",
+      "Attribut-Direktive: ändert Aussehen oder Verhalten",
+      [
+       "Beispiele: Hervorheben, Tooltip, Autofokus",
+       1
+      ],
+      "Strukturelle Direktive: fügt Elemente hinzu oder entfernt sie",
+      [
+       "Heute meist durch @if / @for ersetzt",
+       1
+      ],
+      "Wiederverwendbar: einmal schreiben, überall als Attribut nutzen"
+     ],
+     "notes": "Folie: „Eigene Direktiven: Wozu?“.\n\nEine „Direktive“ ist eine TypeScript-Klasse, die einem bereits vorhandenen HTML-Element zusätzliches Verhalten gibt. Eine Komponente ist eigentlich auch eine Direktive, sie hat aber zusätzlich ein eigenes Template, also eigenes HTML. Eine Direktive hat kein eigenes Template, sie arbeitet mit dem Element, auf dem sie sitzt.\n\nMan unterscheidet zwei Arten. Eine „Attribut-Direktive“ ändert das Aussehen oder das Verhalten eines Elements, zum Beispiel eine Hervorhebung, einen Hinweistext beim Darüberfahren oder einen automatischen Fokus. Eine „strukturelle Direktive“ fügt Elemente hinzu oder entfernt sie. Dafür nimmt man heute meist die eingebaute Ablaufsteuerung „@if“ und „@for“.\n\nDer Vorteil: Man schreibt das Verhalten einmal und kann es überall als Attribut verwenden.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "Komponente",
+       "items": [
+        "eigenes Template",
+        "Selector: Element",
+        "<app-card>"
+       ]
+      },
+      "right": {
+       "title": "Direktive",
+       "items": [
+        "kein Template",
+        "Selector: Attribut",
+        "<p appHighlight>"
+       ]
+      }
+     }
+    },
+    {
+     "type": "content",
+     "title": "Direktive erzeugen und einbinden",
+     "bullets": [
+      "Erzeugen: ng generate directive highlight",
+      "@Directive({ selector: '[appHighlight]' })",
+      [
+       "Eckige Klammern: CSS-Selector für ein Attribut",
+       1
+      ],
+      "Einbinden: Klasse im imports-Array der Komponente",
+      "Angular erzeugt pro passendem Element eine eigene Instanz",
+      "inject(ElementRef) liefert das Element, auf dem sie sitzt"
+     ],
+     "notes": "Folie: „Direktive erzeugen und einbinden“.\n\nMit dem Befehl „ng generate directive highlight“ erzeugt die Angular-Kommandozeile eine neue Direktive. Die Klasse bekommt den Dekorator „@Directive“. Darin steht der „selector“. Die eckigen Klammern um „appHighlight“ bedeuten: Die Direktive wird auf jedes Element angewendet, das ein Attribut mit diesem Namen hat. Das ist dieselbe Schreibweise wie bei CSS-Selektoren.\n\nDamit eine Komponente die Direktive verwenden kann, trägt man die Klasse in das „imports“-Array der Komponente ein. Beim Übersetzen des Templates erkennt Angular jedes passende Element und erzeugt dafür eine eigene Instanz der Direktive. Über „inject(ElementRef)“ bekommt die Instanz Zugriff auf genau das Element, auf dem sie sitzt.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "<p appHighlight>",
+       "Compiler erkennt den Selector",
+       "Neue Instanz pro Element",
+       "inject(ElementRef): DOM-Element"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "code",
+     "title": "Direktive: einfaches Beispiel",
+     "code": "import { Directive, ElementRef, inject } from '@angular/core';\n\n@Directive({\n  selector: '[appHighlight]'\n})\nexport class HighlightDirective {\n  // Referenz auf das Element, auf dem die Direktive sitzt\n  private readonly el = inject(ElementRef<HTMLElement>);\n\n  constructor() {\n    this.el.nativeElement.style.backgroundColor = 'yellow';\n  }\n}\n\n// Verwendung (HighlightDirective im imports-Array):\n// <p appHighlight>Dieser Text wird gelb hinterlegt</p>",
+     "notes": "Codefolie „Direktive: einfaches Beispiel“.\n\nDie Klasse „HighlightDirective“ hat den Selector „appHighlight“ in eckigen Klammern, wird also als Attribut verwendet. Mit „inject(ElementRef)“ holt sie sich eine Referenz auf das Element. „ElementRef“ ist eine kleine Hülle um das echte Element im Browser. Das echte Element steckt in der Eigenschaft „nativeElement“.\n\nIm Konstruktor setzt die Direktive die Hintergrundfarbe des Elements auf Gelb. Unten steht, wie man sie verwendet: Man schreibt einfach das Attribut „appHighlight“ auf ein Element. Ein vollständiges Beispiel steht in der offiziellen Dokumentation unter angular.dev, Bereich „attribute directives“.\n\nDieser direkte Zugriff auf das Element funktioniert, ist aber nicht der beste Weg. Die nächsten Folien zeigen die bessere Variante mit Host-Bindings."
+    },
+    {
+     "type": "content",
+     "title": "Lebenszyklus einer Direktive",
+     "bullets": [
+      "Direktiven haben denselben Lebenszyklus wie Komponenten",
+      "constructor: inject() möglich, Inputs noch nicht gesetzt",
+      "ngOnInit: Inputs haben ihren ersten Wert",
+      "ngOnChanges: ein Input hat sich geändert",
+      "ngOnDestroy / DestroyRef: Element verschwindet, aufräumen",
+      "Mit input() statt Hooks: computed() oder effect() nutzen"
+     ],
+     "notes": "Folie: „Lebenszyklus einer Direktive“.\n\nEine Direktive durchläuft dieselben Lebensphasen wie eine Komponente. Zuerst ruft Angular den Konstruktor auf. Dort kann man mit „inject()“ Dienste holen. Die Eingabewerte, also die „Inputs“, sind dort aber noch nicht gesetzt.\n\nDanach ruft Angular „ngOnInit“ auf. Jetzt haben die Inputs ihren ersten Wert. „ngOnChanges“ wird aufgerufen, wenn sich ein Input ändert. Wenn das Element aus der Seite verschwindet, zum Beispiel weil ein „@if“ falsch wird, ruft Angular „ngOnDestroy“ auf. Alternativ meldet man sich mit „DestroyRef“ für das Aufräumen an.\n\nWenn man Inputs mit der Funktion „input()“ anlegt, sind sie Signals. Dann braucht man die meisten dieser Methoden nicht mehr: Man liest das Signal in einem „computed“ oder „effect“, und Angular reagiert automatisch auf Änderungen.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "constructor()",
+       "ngOnInit()",
+       "ngOnChanges() bei Änderung",
+       "ngOnDestroy()"
+      ],
+      "note": "Signal-Inputs: Hooks meist unnötig"
+     }
+    },
+    {
+     "type": "code",
+     "title": "Direktive mit input() und Host-Bindings",
+     "code": "import { Directive, input, signal } from '@angular/core';\n\n@Directive({\n  selector: '[appHighlight]',\n  host: {\n    '[style.backgroundColor]': 'active() ? highlightColor() : null',\n    '(mouseenter)': 'active.set(true)',\n    '(mouseleave)': 'active.set(false)'\n  }\n})\nexport class HighlightDirective {\n  highlightColor = input('yellow');     // Farbe von außen, Standard gelb\n  protected active = signal(false);     // Maus gerade über dem Element?\n}\n\n// Verwendung:\n// <p appHighlight>gelb beim Darüberfahren</p>\n// <p appHighlight highlightColor=\"lightblue\">hellblau</p>",
+     "notes": "Codefolie „Direktive mit input() und Host-Bindings“.\n\nDas ist die moderne Form der Hervorhebungs-Direktive. Statt das Element direkt anzufassen, beschreibt die Direktive im Feld „host“, was am Element passieren soll. Das „Host-Element“ ist das Element, auf dem die Direktive sitzt.\n\nDie erste Zeile im „host“-Objekt bindet die Hintergrundfarbe: Ist das Signal „active“ wahr, wird die Farbe aus dem Input gesetzt, sonst keine. Die zweite und dritte Zeile reagieren auf Ereignisse des Elements: Fährt die Maus darauf, wird „active“ auf wahr gesetzt, verlässt sie es, auf falsch.\n\nDie Farbe kommt über „input“ von außen, mit Gelb als Standardwert. Unten sieht man zwei Verwendungen: einmal ohne Farbangabe, einmal mit hellblauer Farbe."
+    },
+    {
+     "type": "content",
+     "title": "Host-Bindings erklärt",
+     "bullets": [
+      "host: { … } beschreibt Bindungen am Element der Direktive",
+      "'[eigenschaft]': 'ausdruck' – wie [ ] im Template",
+      [
+       "z. B. '[class.active]', '[attr.aria-label]', '[style.color]'",
+       1
+      ],
+      "'(ereignis)': 'anweisung' – wie ( ) im Template",
+      [
+       "z. B. '(click)', '(keydown.enter)', '(window:resize)'",
+       1
+      ],
+      "Vorteil: kein direkter DOM-Zugriff, funktioniert auch bei SSR",
+      "@HostBinding / @HostListener: ältere Schreibweise"
+     ],
+     "notes": "Folie: „Host-Bindings erklärt“.\n\nDas Feld „host“ im Dekorator beschreibt Bindungen am Element, auf dem die Direktive sitzt. Die Schreibweise ist dieselbe wie im Template. Ein Schlüssel in eckigen Klammern bindet eine Eigenschaft, zum Beispiel eine CSS-Klasse, ein Attribut für Barrierefreiheit oder eine Stilangabe. Rechts steht der Ausdruck, der den Wert liefert.\n\nEin Schlüssel in runden Klammern reagiert auf ein Ereignis, zum Beispiel einen Klick, die Eingabetaste oder eine Größenänderung des Fensters. Rechts steht die Anweisung, die dann ausgeführt wird.\n\nDer Vorteil gegenüber dem direkten Zugriff über „ElementRef“: Angular kümmert sich selbst um das Element. Das ist sicherer und funktioniert auch beim Rendern auf dem Server. Ältere Projekte nutzen dafür die Dekoratoren „@HostBinding“ und „@HostListener“. Sie funktionieren weiter, empfohlen ist heute aber das Feld „host“.",
+     "diagram": {
+      "kind": "code",
+      "title": "host-Objekt",
+      "text": "host: {\n  '[class.active]': 'active()',\n  '[attr.role]': \"'button'\",\n  '(click)': 'toggle()',\n  '(keydown.enter)': 'toggle()'\n}"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Route Guards: Wozu?",
+     "bullets": [
+      "Guard: Funktion, die der Router vor einer Navigation fragt",
+      "Typische Fragen: Ist der Nutzer angemeldet? Hat er die Rolle?",
+      "canActivate: darf die Route betreten werden?",
+      "canDeactivate: darf sie verlassen werden (ungespeichert)?",
+      "canMatch: darf diese Route überhaupt passen?",
+      "Nur Komfort: Der Server muss Zugriffe selbst prüfen"
+     ],
+     "notes": "Folie: „Route Guards: Wozu?“.\n\nEin „Route Guard“, auf Deutsch etwa „Wächter für eine Route“, ist eine Funktion, die der Router vor einer Navigation fragt: Darf diese Navigation stattfinden? Typische Fragen sind: Ist der Nutzer angemeldet? Hat er die nötige Rolle?\n\nEs gibt mehrere Arten. „canActivate“ entscheidet, ob eine Route betreten werden darf. „canDeactivate“ entscheidet, ob man eine Seite verlassen darf, zum Beispiel wenn ein Formular noch nicht gespeichert ist. „canMatch“ entscheidet, ob eine Route überhaupt zur Adresse passen darf.\n\nWichtig: Ein Guard im Browser ist nur Bedienkomfort. Ein Angreifer kann den Code im Browser verändern. Der Server muss deshalb jeden Zugriff auf Daten selbst prüfen.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Klick auf Link / URL eingeben",
+       "Router findet passende Route",
+       "Router ruft den Guard auf",
+       "Ergebnis entscheidet"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "content",
+     "title": "Guard-Ablauf und Rückgabewerte",
+     "bullets": [
+      "Der Router wartet auf das Ergebnis des Guards",
+      "true: Navigation geht weiter, Komponente wird angezeigt",
+      "false: Navigation wird abgebrochen, Seite bleibt",
+      "UrlTree: Abbruch und Umleitung auf eine andere Adresse",
+      "Auch asynchron: Observable oder Promise mit diesen Werten",
+      "Mehrere Guards im Array: alle müssen zustimmen"
+     ],
+     "notes": "Folie: „Guard-Ablauf und Rückgabewerte“.\n\nDer Router ruft den Guard auf und wartet auf sein Ergebnis. Gibt der Guard „true“ zurück, also wahr, geht die Navigation weiter und die Komponente wird angezeigt. Gibt er „false“ zurück, also falsch, wird die Navigation abgebrochen und der Nutzer bleibt auf der aktuellen Seite.\n\nGibt der Guard einen „UrlTree“ zurück, bricht der Router die Navigation ab und leitet stattdessen auf eine andere Adresse um. Ein „UrlTree“ ist eine vom Router erzeugte Beschreibung einer Adresse.\n\nDer Guard darf auch asynchron antworten, also später: mit einem „Observable“ oder einem „Promise“, das einen dieser Werte liefert. Stehen mehrere Guards im Array, müssen alle zustimmen.",
+     "diagram": {
+      "kind": "tree",
+      "root": "Guard-Ergebnis",
+      "children": [
+       "true: Route aktiv",
+       "false: Abbruch",
+       "UrlTree: Umleitung",
+       "Observable / Promise"
+      ]
+     }
+    },
+    {
+     "type": "code",
+     "title": "Funktionaler Guard: authGuard",
+     "code": "import { inject } from '@angular/core';\nimport { CanActivateFn, Router } from '@angular/router';\nimport { AuthService } from './auth.service';\n\nexport const authGuard: CanActivateFn = (route, state) => {\n  const authService = inject(AuthService);\n  const router = inject(Router);\n\n  if (authService.isLoggedIn()) {\n    return true;\n  }\n  // Umleitung zur Login-Seite, Ziel-URL für später merken\n  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });\n};\n\n// app.routes.ts – Guard ohne Klammern eintragen:\n{ path: 'customer', component: CustomerListComponent, canActivate: [authGuard] }",
+     "notes": "Codefolie „Funktionaler Guard: authGuard“.\n\nDer Guard ist eine einfache Funktion, die in einer Konstante gespeichert wird. Der Typ „CanActivateFn“ legt fest, welche Parameter sie bekommt und was sie zurückgeben darf. Früher brauchte man dafür eine ganze Klasse mit einem Interface, heute reicht diese Funktion.\n\nMit „inject()“ holt sich der Guard den „AuthService“ und den „Router“. Ist der Nutzer angemeldet, gibt er „true“ zurück. Sonst erzeugt er mit „createUrlTree“ eine Umleitung zur Login-Seite. Die ursprünglich gewünschte Adresse hängt er als Parameter „returnUrl“ an, damit die Login-Seite danach dorthin zurückspringen kann.\n\nIn den Routen trägt man den Guard im Array „canActivate“ ein, und zwar ohne runde Klammern. Man übergibt also die Funktion selbst, der Router ruft sie später auf."
+    },
+    {
+     "type": "content",
+     "title": "Parameter route und state erklärt",
+     "bullets": [
+      "Der Router ruft den Guard bei jeder Navigation zur Route auf",
+      "route: Schnappschuss der Zielroute (ActivatedRouteSnapshot)",
+      [
+       "route.params, route.queryParams, route.data",
+       1
+      ],
+      "state: Zustand des gesamten Ziels (RouterStateSnapshot)",
+      [
+       "state.url: komplette Ziel-Adresse als Text",
+       1
+      ],
+      "Nicht benötigte Parameter darf man weglassen: () => …",
+      "inject() geht, weil der Router im Injection Context aufruft"
+     ],
+     "notes": "Folie: „Parameter route und state erklärt“.\n\nDer Router ruft die Guard-Funktion bei jeder Navigation zu dieser Route auf und übergibt zwei Werte. Der erste Parameter „route“ ist ein Schnappschuss der Zielroute. Ein Schnappschuss ist ein fester Zustand zu diesem Zeitpunkt. Darin stehen zum Beispiel die Parameter aus der Adresse, etwa die Kunden-Nummer, die Abfrage-Parameter und zusätzliche Daten aus der Routen-Konfiguration im Feld „data“, etwa eine benötigte Rolle.\n\nDer zweite Parameter „state“ beschreibt das gesamte Navigationsziel. Besonders nützlich ist „state.url“, die komplette Zieladresse als Text. Braucht man die Parameter nicht, darf man sie in der Funktion einfach weglassen, so wie in der Musterlösung.\n\n„inject()“ funktioniert in dieser Funktion, weil der Router sie in einem sogenannten „Injection Context“ aufruft. Das ist ein Moment, in dem Angular weiß, woher es Dienste holen kann.",
+     "diagram": {
+      "kind": "code",
+      "title": "Signatur von CanActivateFn",
+      "text": "type CanActivateFn = (\n  route: ActivatedRouteSnapshot,\n  state: RouterStateSnapshot\n) => MaybeAsync<GuardResult>;\n\n// GuardResult:\n//   boolean | UrlTree\n//   | RedirectCommand"
+     }
+    },
+    {
+     "type": "content",
+     "title": "UrlTree statt router.navigate",
+     "bullets": [
+      "Möglich: router.navigate(['/login']) und dann return false",
+      [
+       "Startet eine zweite Navigation, während die erste noch läuft",
+       1
+      ],
+      "Besser: return router.createUrlTree(['/login'])",
+      [
+       "Router bricht ab und leitet in einem Schritt um",
+       1
+      ],
+      [
+       "Bei mehreren Guards entscheidet der Router sauber",
+       1
+      ],
+      [
+       "Leicht testbar: Rückgabewert prüfen statt Aufruf",
+       1
+      ],
+      "Musterlösung 25 nutzt navigate – beides funktioniert"
+     ],
+     "notes": "Folie: „UrlTree statt router.navigate“.\n\nFür die Umleitung gibt es zwei Wege. Der erste: Der Guard ruft selbst „router.navigate“ auf und gibt danach „false“ zurück. Dabei startet er eine zweite Navigation, während der Router mit der ersten noch beschäftigt ist.\n\nDer zweite und empfohlene Weg: Der Guard gibt einen „UrlTree“ zurück, erzeugt mit „createUrlTree“. Dann bricht der Router die aktuelle Navigation ab und leitet in einem einzigen Schritt um. Bei mehreren Guards kann der Router so sauber entscheiden, welche Umleitung gilt. Außerdem ist der Guard leichter zu testen, weil man nur den Rückgabewert prüfen muss.\n\nDie Musterlösung von Übung 25 verwendet den ersten Weg. Er funktioniert auch. Wer möchte, kann ihn in der Übung auf den „UrlTree“ umstellen.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "UrlTree",
+       "items": [
+        "ein Schritt",
+        "Router entscheidet",
+        "gut testbar"
+       ]
+      },
+      "right": {
+       "title": "navigate + false",
+       "items": [
+        "zwei Navigationen",
+        "Guard steuert selbst",
+        "Seiteneffekt"
+       ]
+      }
+     }
+    },
+    {
+     "type": "content",
+     "title": "HTTP-Interceptors: Wozu?",
+     "bullets": [
+      "Interceptor: Funktion, durch die jede HttpClient-Anfrage läuft",
+      "Querschnittsaufgaben an einer zentralen Stelle:",
+      [
+       "Token in den Authorization-Header schreiben",
+       1
+      ],
+      [
+       "Anfragen und Antwortzeiten protokollieren",
+       1
+      ],
+      [
+       "Fehler zentral behandeln, z. B. 401 → Login",
+       1
+      ],
+      [
+       "Ladeanzeige ein- und ausschalten",
+       1
+      ],
+      "Komponenten und Services bleiben frei davon"
+     ],
+     "notes": "Folie: „HTTP-Interceptors: Wozu?“.\n\nEin „Interceptor“, auf Deutsch etwa „Abfänger“, ist eine Funktion, durch die jede Anfrage des „HttpClient“ läuft. Der „HttpClient“ ist der Angular-Dienst für Anfragen an einen Server. Man kann sich den Interceptor wie eine Kontrollstelle vorstellen, die jede ausgehende Anfrage und jede eingehende Antwort sieht.\n\nDamit löst man Aufgaben, die alle Anfragen betreffen, an einer einzigen Stelle. Beispiele sind: ein Anmelde-Token in jede Anfrage schreiben, Anfragen mit ihrer Dauer protokollieren, Fehler zentral behandeln, etwa bei Fehlercode 401 zur Login-Seite leiten, oder eine Ladeanzeige steuern.\n\nDie Komponenten und Services müssen sich dann um diese Dinge nicht mehr kümmern.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Service: http.get()",
+       "Interceptor 1: Logging",
+       "Interceptor 2: Auth-Header",
+       "Backend (Server)",
+       "Antwort läuft zurück"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "content",
+     "title": "Die Interceptor-Kette",
+     "bullets": [
+      "Reihenfolge = Reihenfolge im Array von withInterceptors",
+      "Anfrage läuft vorwärts: 1 → 2 → Backend",
+      "Antwort läuft rückwärts: Backend → 2 → 1 → Aufrufer",
+      "Jeder Interceptor entscheidet selbst:",
+      [
+       "unverändert weiterreichen: next(req)",
+       1
+      ],
+      [
+       "verändert weiterreichen: next(req.clone(…))",
+       1
+      ],
+      [
+       "Antwort beobachten oder umbauen: next(req).pipe(…)",
+       1
+      ]
+     ],
+     "notes": "Folie: „Die Interceptor-Kette“.\n\nMehrere Interceptors bilden eine Kette. Die Reihenfolge ist die Reihenfolge im Array bei der Registrierung. Die Anfrage läuft vorwärts durch die Kette: zuerst durch den ersten Interceptor, dann durch den zweiten, dann zum Server. Die Antwort läuft rückwärts: vom Server zuerst durch den zweiten, dann durch den ersten Interceptor und schließlich zum Aufrufer.\n\nJeder Interceptor entscheidet selbst, was er tut. Er kann die Anfrage unverändert weitergeben. Er kann eine veränderte Kopie weitergeben, zum Beispiel mit einem zusätzlichen Kopfeintrag. Oder er kann die Antwort beobachten oder umbauen, indem er Operatoren aus der Bibliothek „RxJS“ anhängt.",
+     "diagram": {
+      "kind": "code",
+      "title": "withInterceptors([logging, auth])",
+      "text": "Anfrage (vorwärts):\n  Aufrufer\n  → loggingInterceptor\n  → authInterceptor\n  → Backend\n\nAntwort (rückwärts):\n  Backend\n  → authInterceptor\n  → loggingInterceptor\n  → Aufrufer"
+     }
+    },
+    {
+     "type": "code",
+     "title": "Funktionaler Interceptor: Logging",
+     "code": "import { HttpInterceptorFn, HttpEventType } from '@angular/common/http';\nimport { tap } from 'rxjs';\n\nexport const loggingInterceptor: HttpInterceptorFn = (req, next) => {\n  const started = Date.now();\n  console.log(`[HTTP] ${req.method} ${req.url} gestartet`);\n\n  return next(req).pipe(\n    tap({\n      next: event => {\n        if (event.type === HttpEventType.Response) {\n          console.log(`[HTTP] ${req.url} ok (${Date.now() - started} ms)`);\n        }\n      },\n      error: err => console.log(`[HTTP] ${req.url} fehlgeschlagen`, err)\n    })\n  );\n};",
+     "notes": "Codefolie „Funktionaler Interceptor: Logging“.\n\nDer Interceptor ist eine Funktion vom Typ „HttpInterceptorFn“. Zu Beginn merkt er sich die Startzeit und schreibt eine Meldung in die Konsole: Methode und Adresse der Anfrage.\n\nDann ruft er „next(req)“ auf. Damit reicht er die Anfrage an das nächste Glied der Kette weiter. Das Ergebnis ist ein „Observable“, also ein Datenstrom, der später die Antwort liefert. Mit „pipe“ und dem Operator „tap“ beobachtet er diesen Strom, ohne ihn zu verändern.\n\nDer Strom liefert nicht nur die Antwort, sondern auch Zwischenereignisse, zum Beispiel „Anfrage wurde gesendet“. Deshalb prüft der Code den Ereignistyp und meldet nur bei der fertigen Antwort den Erfolg mit der Dauer. Bei einem Fehler wird der Fehler protokolliert. Die Musterlösung der Übung ist etwas kürzer und prüft den Typ nicht."
+    },
+    {
+     "type": "content",
+     "title": "Parameter req und next erklärt",
+     "bullets": [
+      "Der HttpClient ruft die Kette bei jeder Anfrage auf",
+      "req: die Anfrage (HttpRequest) – unveränderlich",
+      [
+       "method, url, headers, body, params",
+       1
+      ],
+      "next: Funktion für das nächste Glied (HttpHandlerFn)",
+      [
+       "next(req) liefert ein Observable mit den Antwort-Ereignissen",
+       1
+      ],
+      "Rückgabe: genau dieses Observable (ggf. mit pipe)",
+      "Registrierung: provideHttpClient(withInterceptors([…]))"
+     ],
+     "notes": "Folie: „Parameter req und next erklärt“.\n\nWer ruft den Interceptor auf? Der „HttpClient“, und zwar bei jeder Anfrage, zum Beispiel bei „http.get“. Er übergibt zwei Werte. Der erste Parameter „req“ ist die Anfrage mit Methode, Adresse, Kopfeinträgen, Inhalt und Parametern. Die Anfrage ist unveränderlich: Man kann sie nicht direkt ändern, sondern nur eine veränderte Kopie erzeugen.\n\nDer zweite Parameter „next“ ist eine Funktion. Sie steht für das nächste Glied der Kette: den nächsten Interceptor oder am Ende das eigentliche Senden an den Server. Ruft man „next(req)“ auf, bekommt man ein „Observable“, das die Ereignisse der Antwort liefert.\n\nDer Interceptor muss dieses „Observable“ zurückgeben, gern mit angehängten Operatoren. Registriert wird er in der Datei „main.ts“ oder „app.config.ts“ mit „provideHttpClient“ und „withInterceptors“.",
+     "diagram": {
+      "kind": "code",
+      "title": "Signatur von HttpInterceptorFn",
+      "text": "type HttpInterceptorFn = (\n  req: HttpRequest<unknown>,\n  next: HttpHandlerFn\n) => Observable<HttpEvent<unknown>>;\n\n// main.ts\nprovideHttpClient(\n  withInterceptors([\n    loggingInterceptor,\n    authInterceptor\n  ])\n)"
+     }
+    },
+    {
+     "type": "code",
+     "title": "Header ergänzen mit req.clone",
+     "code": "import { inject } from '@angular/core';\nimport { HttpInterceptorFn } from '@angular/common/http';\n\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(AuthService).token();   // angenommen: Token als Signal\n\n  // Nur eigene API-Aufrufe erhalten das Token\n  if (!token || !req.url.startsWith('api/')) {\n    return next(req);\n  }\n\n  // req ist unveränderlich: veränderte Kopie erzeugen\n  const authReq = req.clone({\n    setHeaders: { Authorization: `Bearer ${token}` }\n  });\n  return next(authReq);\n};",
+     "notes": "Codefolie „Header ergänzen mit req.clone“.\n\nDieses Beispiel schreibt ein Anmelde-Token in jede Anfrage an die eigene Schnittstelle. Wir nehmen an, dass der „AuthService“ das Token als Signal bereitstellt. Der „AuthService“ aus der Übung hat kein Token, er merkt sich nur, ob jemand angemeldet ist. Das Beispiel zeigt also eine typische Erweiterung.\n\nGibt es kein Token oder geht die Anfrage an einen fremden Server, wird sie unverändert weitergereicht. Sonst erzeugt „req.clone“ eine Kopie der Anfrage. Die Option „setHeaders“ ergänzt dabei einen Kopfeintrag „Authorization“ mit dem Token. Diese Kopie wird mit „next“ weitergereicht.\n\nWichtig ist die Prüfung der Adresse. Sonst würde das Token auch an fremde Server geschickt."
+    },
+    {
+     "type": "content",
+     "title": "Interceptors: Stolperfallen",
+     "bullets": [
+      "Immer next(…) aufrufen und das Observable zurückgeben",
+      "Anfrage nie direkt ändern, sondern req.clone({ … })",
+      "Reihenfolge im Array bewusst wählen (Auth vor Logging?)",
+      "Gilt nur für HttpClient – auch für httpResource, nicht für fetch()",
+      "Fehler zentral mit catchError behandeln, dann weiterwerfen",
+      "Alte Klassen-Interceptors: nur mit withInterceptorsFromDi()"
+     ],
+     "notes": "Folie: „Interceptors: Stolperfallen“.\n\nEin Interceptor muss immer „next“ aufrufen und das Ergebnis zurückgeben. Vergisst man das, kommt die Anfrage nie beim Server an. Die Anfrage darf man nicht direkt ändern, sondern man erzeugt mit „req.clone“ eine Kopie.\n\nDie Reihenfolge im Array ist wichtig. Soll das Protokoll zum Beispiel den fertigen Kopfeintrag sehen, muss der Logging-Interceptor nach dem Auth-Interceptor stehen. Interceptors gelten nur für den „HttpClient“. Das schließt „httpResource“ ein, weil es intern den „HttpClient“ nutzt. Ein direkter Aufruf der Browser-Funktion „fetch“ läuft nicht durch die Kette.\n\nFehler behandelt man zentral mit dem Operator „catchError“ und wirft sie danach weiter, damit der Aufrufer sie auch bemerkt. Ältere Interceptors als Klasse funktionieren nur noch, wenn man zusätzlich „withInterceptorsFromDi“ einträgt."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 25: Funktionale Guards & Interceptors",
+     "bullets": [
+      "1. AuthService: Login-Status als Signal mit isLoggedIn(), login(), logout()",
+      "2. authGuard (CanActivateFn): inject(AuthService) und inject(Router)",
+      [
+       "Nicht angemeldet: Umleitung zur Login-Seite (navigate + false oder UrlTree)",
+       1
+      ],
+      "3. In app.routes.ts: canActivate: [authGuard] für customer und customer/:id",
+      "4. LoginComponent: Button ruft login() auf und navigiert zur Kundenliste",
+      "5. loggingInterceptor (HttpInterceptorFn): Start, Erfolg, Fehler mit Dauer loggen",
+      "6. Registrieren in main.ts: provideHttpClient(withInterceptors([loggingInterceptor]))",
+      "Test: Kundenliste ohne Login aufrufen, Konsole beobachten",
+      "Musterlösung: 25_httpInterceptorGuard (baut auf 23_communication auf)"
+     ],
+     "notes": "Folie: „Übung 25: Funktionale Guards & Interceptors“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 25 im Ordner 25_httpInterceptorGuard. Sie baut auf Übung 23 mit der Anbindung an den Server auf und dauert etwa 30 Minuten.\n\nDie Teilnehmer schreiben zuerst einen „AuthService“, der sich in einem Signal merkt, ob jemand angemeldet ist. Dann schreiben sie den Guard „authGuard“, der die Kundenseiten schützt und nicht angemeldete Nutzer zur Login-Seite schickt. Dazu kommt eine einfache Login-Seite mit einem Knopf.\n\nZum Schluss schreiben sie einen Interceptor, der jede Anfrage mit Dauer in der Konsole protokolliert, und registrieren ihn in „main.ts“. Die Anmeldung ist nur eine Simulation im Browser, der Server prüft nichts."
+    },
+    {
+     "type": "content",
+     "title": "Resource API: Daten laden mit Signals",
+     "bullets": [
+      "Bisher: Service + Observable + subscribe() oder toSignal()",
+      [
+       "Ladezustand und Fehler in eigenen Variablen pflegen",
+       1
+      ],
+      [
+       "Bei neuer ID: effect() + erneutes subscribe()",
+       1
+      ],
+      "Resource: deklarativ beschreiben, was abhängig wovon geladen wird",
+      [
+       "Angular lädt, lädt neu und bricht alte Anfragen ab",
+       1
+      ],
+      [
+       "Ergebnis, Ladezustand und Fehler kommen als Signals",
+       1
+      ]
+     ],
+     "notes": "Folie: „Resource API: Daten laden mit Signals“.\n\nBisher sah das Laden von Daten so aus: Ein Service liefert ein „Observable“, also einen Datenstrom. Die Komponente abonniert ihn mit „subscribe“ oder wandelt ihn mit „toSignal“ in ein Signal um. Den Ladezustand und mögliche Fehler muss man in eigenen Variablen pflegen. Ändert sich die Kunden-Nummer, braucht man einen „effect“, der neu lädt.\n\nDie „Resource API“ dreht das um. Man beschreibt nur noch, was geladen werden soll und wovon das abhängt. Eine „Resource“ ist ein Objekt, das asynchron geladene Daten verwaltet. Angular startet das Laden, lädt bei Änderungen neu und bricht veraltete Anfragen ab. Das Ergebnis, der Ladezustand und der Fehler stehen als Signals bereit. Die Resource API gibt es seit Angular 19, sie wird seitdem schrittweise ausgebaut.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "Bisher",
+       "items": [
+        "subscribe / toSignal",
+        "isLoading von Hand",
+        "effect bei neuer ID"
+       ]
+      },
+      "right": {
+       "title": "Resource",
+       "items": [
+        "deklarativ",
+        "Signals inklusive",
+        "lädt selbst neu"
+       ]
+      }
+     }
+    },
+    {
+     "type": "content",
+     "title": "Zustände einer Resource",
+     "bullets": [
+      "status() liefert den aktuellen Zustand als Text:",
+      [
+       "idle: keine Parameter, es wird nichts geladen",
+       1
+      ],
+      [
+       "loading: erster Ladevorgang läuft",
+       1
+      ],
+      [
+       "resolved: Daten sind da",
+       1
+      ],
+      [
+       "error: Laden ist fehlgeschlagen",
+       1
+      ],
+      [
+       "reloading: reload() oder neue Parameter, alter Wert bleibt",
+       1
+      ],
+      [
+       "local: Wert wurde lokal mit set() / update() geändert",
+       1
+      ]
+     ],
+     "notes": "Folie: „Zustände einer Resource“.\n\nEine Resource ist immer in genau einem Zustand. Das Signal „status“ liefert ihn als Text. „idle“ bedeutet „untätig“: Es gibt keine Parameter, deshalb wird nichts geladen. „loading“ bedeutet: Der erste Ladevorgang läuft. „resolved“ bedeutet: Die Daten sind erfolgreich angekommen. „error“ bedeutet: Das Laden ist fehlgeschlagen.\n\n„reloading“ bedeutet: Es wird erneut geladen, zum Beispiel nach einem Aufruf von „reload“. Der alte Wert bleibt währenddessen sichtbar. „local“ bedeutet: Jemand hat den Wert im Programm selbst mit „set“ oder „update“ geändert.\n\nMeist braucht man den Status nicht direkt, sondern die bequemeren Signals „isLoading“, „hasValue“ und „error“ auf der nächsten Folie.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "idle (keine Parameter)",
+       "loading",
+       "resolved oder error",
+       "reloading (reload / neue Parameter)"
+      ],
+      "note": "set() / update() → local"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Was eine Resource bereitstellt",
+     "bullets": [
+      "value(): die geladenen Daten (vorher undefined)",
+      "hasValue(): true, wenn ein Wert vorliegt",
+      [
+       "Vor value() prüfen – im Zustand error wirft value()",
+       1
+      ],
+      "isLoading(): true bei loading und reloading",
+      "error(): der Fehler oder undefined",
+      "reload(): Laden mit denselben Parametern wiederholen",
+      "set() / update(): Wert lokal überschreiben"
+     ],
+     "notes": "Folie: „Was eine Resource bereitstellt“.\n\nEine Resource stellt mehrere Signals und Methoden bereit. „value“ enthält die geladenen Daten. Solange noch nichts geladen ist, ist der Wert „undefined“, also nicht vorhanden. „hasValue“ ist wahr, wenn ein Wert vorliegt. Diese Prüfung sollte man vor dem Lesen von „value“ machen, denn im Fehlerzustand wirft „value“ selbst einen Fehler.\n\n„isLoading“ ist wahr, solange geladen wird, also beim ersten Laden und beim erneuten Laden. „error“ enthält den Fehler, falls einer aufgetreten ist.\n\nMit „reload“ wiederholt man das Laden mit denselben Parametern, zum Beispiel nach dem Speichern. Mit „set“ und „update“ überschreibt man den Wert lokal, ohne den Server zu fragen.",
+     "diagram": {
+      "kind": "code",
+      "title": "Template",
+      "text": "@if (customer.isLoading()) {\n  <p>Lade…</p>\n} @else if (customer.error()) {\n  <p>Fehler beim Laden</p>\n} @else if (customer.hasValue()) {\n  <p>{{ customer.value().firstname }}</p>\n}"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Drei Varianten: resource, rxResource, httpResource",
+     "bullets": [
+      "resource({ params, loader })",
+      [
+       "loader liefert ein Promise, z. B. mit fetch() – @angular/core",
+       1
+      ],
+      "rxResource({ params, stream })",
+      [
+       "stream liefert ein Observable – @angular/core/rxjs-interop",
+       1
+      ],
+      [
+       "Ideal für bestehende Services mit Observables",
+       1
+      ],
+      "httpResource(() => url)",
+      [
+       "Nutzt HttpClient, Interceptors greifen – @angular/common/http",
+       1
+      ]
+     ],
+     "notes": "Folie: „Drei Varianten: resource, rxResource, httpResource“.\n\nEs gibt drei Varianten. „resource“ ist die Grundform. Sie bekommt eine Funktion „loader“, die ein „Promise“ liefert. Ein „Promise“ ist ein Versprechen auf einen Wert, der später kommt, zum Beispiel aus der Browser-Funktion „fetch“.\n\n„rxResource“ arbeitet mit „Observables“ aus der Bibliothek „RxJS“. Statt „loader“ heißt die Funktion hier „stream“. Diese Variante passt gut, wenn es schon Services gibt, die Observables liefern, so wie unser „CustomerService“.\n\n„httpResource“ ist die bequemste Variante für Server-Anfragen. Man gibt nur eine Funktion an, die die Adresse liefert. Intern nutzt sie den „HttpClient“, deshalb laufen auch alle Interceptors.",
+     "diagram": {
+      "kind": "tree",
+      "root": "Resource API",
+      "children": [
+       "resource: Promise",
+       "rxResource: Observable",
+       "httpResource: HttpClient"
+      ]
+     }
+    },
+    {
+     "type": "content",
+     "title": "Ablauf: params, loader und stream",
+     "bullets": [
+      "params: Funktion, die Signals liest und Parameter liefert",
+      [
+       "Läuft reaktiv wie computed()",
+       1
+      ],
+      [
+       "Liefert sie undefined: Zustand idle, kein Laden",
+       1
+      ],
+      "loader / stream: wird von Angular aufgerufen",
+      [
+       "bei jeder Änderung von params, Argument: { params, abortSignal }",
+       1
+      ],
+      "Laufender Ladevorgang wird dabei abgebrochen"
+     ],
+     "notes": "Folie: „Ablauf: params, loader und stream“.\n\nDie Funktion „params“ liest Signals, zum Beispiel die Kunden-Nummer, und liefert daraus die Parameter für das Laden. Sie läuft reaktiv wie ein „computed“: Ändert sich ein gelesenes Signal, wird sie neu ausgewertet. Liefert sie „undefined“, geht die Resource in den Zustand „idle“ und lädt nichts.\n\nDie Funktion „loader“ bzw. „stream“ schreibt man selbst, aufgerufen wird sie aber von Angular. Das passiert jedes Mal, wenn sich die Parameter ändern. Angular übergibt dabei ein Objekt mit den aktuellen Parametern und einem „abortSignal“, einem Abbruchsignal.\n\nLäuft noch ein alter Ladevorgang, bricht Angular ihn ab. So kann eine langsame alte Antwort nie eine neuere überschreiben.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Signal id() ändert sich",
+       "params() neu ausgewertet",
+       "alter Ladevorgang abgebrochen",
+       "loader({ params, abortSignal })",
+       "value() aktualisiert"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "code",
+     "title": "resource() mit loader und abortSignal",
+     "code": "import { Component, input, resource } from '@angular/core';\n\nexport class CustomerDetailsComponent {\n  id = input<string>();\n\n  customer = resource({\n    // 1. Parameter: reaktiv, undefined = nichts laden\n    params: () => this.id() ? { id: this.id()! } : undefined,\n\n    // 2. Loader: Angular ruft ihn bei jeder Parameter-Änderung auf\n    loader: async ({ params, abortSignal }) => {\n      const res = await fetch(`api/customer/${params.id}`, { signal: abortSignal });\n      if (!res.ok) {\n        throw new Error(`HTTP ${res.status}`);   // → Zustand error\n      }\n      return (await res.json()) as Customer;     // → Zustand resolved\n    }\n  });\n}",
+     "notes": "Codefolie „resource() mit loader und abortSignal“.\n\nDie Komponente bekommt die Kunden-Nummer als Input. Die Resource hat zwei Teile. Die Funktion „params“ liefert ein Objekt mit der Nummer. Gibt es keine Nummer, liefert sie „undefined“, und es wird nichts geladen.\n\nDie Funktion „loader“ ist mit „async“ gekennzeichnet, sie arbeitet also asynchron und liefert ein „Promise“. Angular ruft sie bei jeder Änderung der Parameter auf und übergibt die Parameter und das Abbruchsignal. Der Loader holt die Daten mit „fetch“ und gibt das Abbruchsignal an „fetch“ weiter. Ist die Antwort nicht in Ordnung, wirft er einen Fehler, dann geht die Resource in den Zustand „error“. Sonst gibt er den Kunden zurück, und die Resource geht in den Zustand „resolved“.\n\nWeil hier „fetch“ statt „HttpClient“ verwendet wird, laufen keine Interceptors. Das Beispiel zeigt nur das Prinzip."
+    },
+    {
+     "type": "content",
+     "title": "abortSignal erklärt",
+     "bullets": [
+      "AbortSignal: Standard-Objekt des Browsers zum Abbrechen",
+      "Angular erzeugt pro Ladevorgang ein neues Signal",
+      "Ausgelöst, wenn sich params ändert oder die Komponente endet",
+      "fetch(url, { signal: abortSignal }) bricht die Anfrage ab",
+      "rxResource / httpResource: Abbruch automatisch per Unsubscribe",
+      "Verhindert veraltete Antworten (Race Condition)"
+     ],
+     "notes": "Folie: „abortSignal erklärt“.\n\n„AbortSignal“ ist kein Angular-Signal, sondern ein Standard-Objekt des Browsers. Es dient dazu, eine laufende Aufgabe abzubrechen. Angular erzeugt für jeden Ladevorgang ein neues Abbruchsignal und übergibt es an den Loader.\n\nAngular löst das Abbruchsignal aus, wenn sich die Parameter ändern, bevor die alte Anfrage fertig ist, oder wenn die Komponente zerstört wird. Gibt man das Signal an „fetch“ weiter, bricht der Browser die Netzwerkanfrage dann wirklich ab.\n\nBei „rxResource“ und „httpResource“ muss man sich darum nicht kümmern. Dort beendet Angular einfach das Abonnement des Observables, und die Anfrage wird abgebrochen. Das verhindert eine sogenannte „Race Condition“, also ein Wettrennen, bei dem eine langsame alte Antwort eine neuere überschreibt.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Kunde 1 gewählt: Laden startet",
+       "Kunde 2 gewählt",
+       "abortSignal für Kunde 1",
+       "Nur Kunde 2 wird angezeigt"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "code",
+     "title": "httpResource und rxResource im Kursprojekt",
+     "code": "// customer-list.component.ts – Liste per httpResource\nprivate readonly customerResource = httpResource<ResponseArray>(() => 'api/customer');\ncustomers = () => this.customerResource.value()?.data ?? [];\nisLoading = this.customerResource.isLoading;\nerror = this.customerResource.error;\n\n// customer-details.component.ts – Details per rxResource\nid = input<string>();\nprivate readonly customerResource = rxResource({\n  params: () => this.id(),\n  stream: ({ params }) => {\n    if (!params) { throw new Error('Keine Customer-Id angegeben'); }\n    return this.customerService.getById(params);   // Observable<Customer>\n  }\n});\ncustomer = this.customerResource.value;\nisLoading = this.customerResource.isLoading;",
+     "notes": "Codefolie „httpResource und rxResource im Kursprojekt“.\n\nOben steht die Kundenliste. „httpResource“ bekommt eine Funktion, die die Adresse „api/customer“ liefert. Der Server antwortet mit einem Objekt, in dem die Liste im Feld „data“ steckt. Deshalb holt „customers“ die Liste aus dem Wert heraus und liefert eine leere Liste, solange nichts geladen ist. Ladezustand und Fehler werden direkt aus der Resource übernommen.\n\nUnten steht die Detailansicht. Hier wird „rxResource“ verwendet, weil der „CustomerService“ schon eine Methode „getById“ hat, die ein Observable liefert. „params“ liest den Input „id“. Die Funktion „stream“ bekommt die Nummer und ruft den Service auf. Fehlt die Nummer, wirft sie einen Fehler. Ändert sich die Nummer, lädt Angular automatisch den neuen Kunden. Den früheren „effect“ mit „subscribe“ braucht man nicht mehr."
+    },
+    {
+     "type": "content",
+     "title": "httpResource im Detail",
+     "bullets": [
+      "httpResource(() => url): Funktion, keine feste Adresse",
+      [
+       "Liest sie Signals, wird bei Änderung neu geladen",
+       1
+      ],
+      [
+       "Liefert sie undefined, wird nicht geladen",
+       1
+      ],
+      "Statt Adresse auch ein Anfrage-Objekt möglich",
+      [
+       "{ url, method, params, headers, body }",
+       1
+      ],
+      "Optionen: defaultValue, parse (z. B. Prüfung mit Zod)",
+      "Varianten: httpResource.text(), .blob(), .arrayBuffer()"
+     ],
+     "notes": "Folie: „httpResource im Detail“.\n\n„httpResource“ bekommt eine Funktion, nicht einfach eine feste Adresse. Diese Funktion läuft reaktiv. Liest sie Signals, zum Beispiel die Kunden-Nummer, dann lädt die Resource neu, sobald sich die Nummer ändert. Liefert die Funktion „undefined“, wird nicht geladen.\n\nStatt einer Adresse kann die Funktion auch ein Objekt liefern, mit Methode, Abfrage-Parametern, Kopfeinträgen und Inhalt. Als Optionen gibt es zum Beispiel „defaultValue“, einen Startwert statt „undefined“, und „parse“, eine Funktion, die die Antwort prüft und umwandelt, etwa mit einer Prüfbibliothek wie „Zod“.\n\nStandardmäßig wird die Antwort als JSON gelesen. Für Text oder Binärdaten gibt es eigene Varianten.",
+     "diagram": {
+      "kind": "code",
+      "title": "Abhängig von einem Signal",
+      "text": "id = input<string>();\n\ncustomer = httpResource<Customer>(\n  () => this.id()\n    ? `api/customer/${this.id()}`\n    : undefined\n);"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Resource: Grenzen und Best Practices",
+     "bullets": [
+      "Für das Lesen gedacht, nicht für Speichern (PUT/POST)",
+      [
+       "Speichern weiter über den Service, danach reload()",
+       1
+      ],
+      "Bearbeitbare Kopie mit linkedSignal() aus value() ableiten",
+      "value() nicht lesen, ohne hasValue() zu prüfen",
+      "params schlank halten: nur die Werte, die das Laden steuern",
+      "Teile der API sind noch als experimentell markiert"
+     ],
+     "notes": "Folie: „Resource: Grenzen und Best Practices“.\n\nDie Resource API ist für das Lesen von Daten gedacht. Zum Speichern, also für Anfragen mit „PUT“ oder „POST“, verwendet man weiter den Service mit dem „HttpClient“. Danach kann man mit „reload“ die Daten neu laden.\n\nSoll der Nutzer die geladenen Daten in einem Formular bearbeiten, leitet man mit „linkedSignal“ eine bearbeitbare Kopie ab. „linkedSignal“ ist ein Signal, das aus einem anderen Wert entsteht, aber zusätzlich überschrieben werden kann. So wird der geladene Wert selbst nie direkt verändert.\n\nVor dem Lesen von „value“ prüft man mit „hasValue“. In „params“ liest man nur die Signals, die das Laden wirklich steuern, sonst wird unnötig neu geladen. Teile der API sind noch als experimentell markiert, Details können sich also noch ändern.",
+     "diagram": {
+      "kind": "code",
+      "title": "Kopie für das Formular",
+      "text": "customer = this.res.value;\n\ndraft = linkedSignal(() => {\n  const c = this.customer();\n  return c ? { ...c } : undefined;\n});"
+     }
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 26: Resource API",
+     "bullets": [
+      "1. CustomerListComponent: toSignal(getAll()) durch httpResource() ersetzen",
+      "2. Mit isLoading() und error() Ladehinweis und Fehlermeldung anzeigen",
+      "3. CustomerDetailsComponent: effect() + subscribe() durch rxResource() ersetzen",
+      [
+       "params: () => this.id(), stream: ({ params }) => customerService.getById(params)",
+       1
+      ],
+      "4. Formular bleibt an draft (linkedSignal aus customer()), nur Ladehinweis neu",
+      "5. Speichern (update()) bleibt eine einmalige Mutation über CustomerService",
+      "Testen: zwischen Kunden wechseln und das automatische Nachladen beobachten",
+      "Musterlösung: 26_resourceApi (baut auf 25_httpInterceptorGuard auf)"
+     ],
+     "notes": "Folie: „Übung 26: Resource API“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 26 im Ordner 26_resourceApi. Sie dauert etwa 25 Minuten.\n\nIn der Kundenliste ersetzen die Teilnehmer das bisherige Laden mit „toSignal“ durch „httpResource“ und zeigen einen Ladehinweis und eine Fehlermeldung an. In der Detailansicht ersetzen sie den „effect“ mit dem manuellen Abonnement durch „rxResource“, das bei jeder neuen Kunden-Nummer automatisch neu lädt.\n\nDas Formular arbeitet weiter mit der bearbeitbaren Kopie „draft“. Das Speichern bleibt ein normaler Aufruf über den Service, weil die Resource API für das Lesen gedacht ist."
+    },
+    {
+     "type": "content",
+     "title": "Bilder und Web-Performance: LCP und CLS",
+     "bullets": [
+      "Core Web Vitals: Messwerte von Google für Nutzererlebnis",
+      "LCP (Largest Contentful Paint)",
+      [
+       "Zeit, bis das größte sichtbare Element gezeichnet ist",
+       1
+      ],
+      [
+       "Oft ein Bild – Ziel: unter 2,5 Sekunden",
+       1
+      ],
+      "CLS (Cumulative Layout Shift)",
+      [
+       "Summe aller unerwarteten Layout-Sprünge – Ziel: unter 0,1",
+       1
+      ],
+      [
+       "Ursache oft: Bild ohne Größenangabe",
+       1
+      ]
+     ],
+     "notes": "Folie: „Bilder und Web-Performance: LCP und CLS“.\n\nGoogle misst das Nutzererlebnis einer Webseite mit Kennzahlen, den „Core Web Vitals“. Zwei davon betreffen Bilder besonders.\n\n„LCP“ steht für „Largest Contentful Paint“. Das ist die Zeit, bis das größte sichtbare Element der Seite gezeichnet ist. Oft ist das ein großes Bild. Gut ist ein Wert unter 2,5 Sekunden.\n\n„CLS“ steht für „Cumulative Layout Shift“, also die Summe aller Layout-Verschiebungen. Ein Layout-Sprung entsteht, wenn ein Bild ohne Größenangabe nachgeladen wird: Der Browser kennt die Größe vorher nicht, und der Text darunter springt plötzlich nach unten. Dann klickt man leicht daneben. Gut ist ein Wert unter 0,1.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Text ist schon sichtbar",
+       "Bild ohne Größe kommt an",
+       "Text springt nach unten",
+       "Fehlklick, schlechter CLS"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "content",
+     "title": "NgOptimizedImage: Was die Direktive tut",
+     "bullets": [
+      "Direktive aus @angular/common, aktiv durch ngSrc statt src",
+      "Erzwingt width/height oder fill → Platz wird reserviert",
+      "Lädt standardmäßig lazy: erst wenn das Bild nahe am Sichtbereich ist",
+      "priority: sofort und mit hoher Priorität laden",
+      "Mit Bild-Loader (CDN): automatisches srcset",
+      "Warnungen im Entwicklungsmodus bei falschen Größen"
+     ],
+     "notes": "Folie: „NgOptimizedImage: Was die Direktive tut“.\n\n„NgOptimizedImage“ ist eine eingebaute Direktive aus dem Paket „@angular/common“. Sie wird aktiv, wenn man im Bild-Element „ngSrc“ statt „src“ schreibt.\n\nDie Direktive verlangt eine Breite und eine Höhe oder alternativ den Modus „fill“. So kann der Browser den Platz reservieren, bevor das Bild geladen ist, und nichts springt. Standardmäßig lädt sie Bilder „lazy“, also erst, wenn sie in die Nähe des sichtbaren Bereichs kommen. Mit „priority“ lädt ein wichtiges Bild sofort.\n\nIst ein Bild-Loader eingerichtet, zum Beispiel für einen Bilddienst im Internet, erzeugt die Direktive automatisch verschiedene Bildgrößen für verschiedene Bildschirme. Im Entwicklungsmodus warnt sie in der Konsole, wenn etwa das Seitenverhältnis nicht stimmt.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "<img src>",
+       "items": [
+        "Größe oft unbekannt",
+        "lädt sofort alles",
+        "keine Hinweise"
+       ]
+      },
+      "right": {
+       "title": "<img ngSrc>",
+       "items": [
+        "Platz reserviert",
+        "lazy / priority",
+        "Warnungen"
+       ]
+      }
+     }
+    },
+    {
+     "type": "code",
+     "title": "NgOptimizedImage im Kursprojekt",
+     "code": "// customer-details.component.ts\nimport { NgOptimizedImage } from '@angular/common';\n\n@Component({\n  selector: 'customer-details',\n  imports: [DatePipe, FormsModule, NgOptimizedImage],\n  templateUrl: './customer-details.component.html'\n})\nexport class CustomerDetailsComponent { … }\n\n<!-- customer-details.component.html -->\n@if (c.imageUrl) {\n  <img class=\"logo\" [ngSrc]=\"c.imageUrl\" width=\"200\" height=\"200\" priority>\n}",
+     "notes": "Codefolie „NgOptimizedImage im Kursprojekt“.\n\nZuerst importiert man „NgOptimizedImage“ aus „@angular/common“ und trägt es in das „imports“-Array der Komponente ein. Sonst kennt das Template die Direktive nicht.\n\nIm Template steht das Bild in einem „@if“. Das ist nötig, weil „ngSrc“ einen Text erwartet und nicht leer sein darf. Die Variable „c“ ist die bearbeitbare Kopie des Kunden. Statt „src“ steht „ngSrc“ mit der Bildadresse. Breite und Höhe sind 200 Pixel. Das Attribut „priority“ sagt: Dieses Bild ist wichtig und soll sofort geladen werden."
+    },
+    {
+     "type": "content",
+     "title": "ngSrc, width/height, fill und priority",
+     "bullets": [
+      "width / height: Größe in Pixeln, ergibt das Seitenverhältnis",
+      [
+       "Anzeigegröße kann per CSS abweichen",
+       1
+      ],
+      "fill: Bild füllt das Elternelement aus, ohne width/height",
+      [
+       "Eltern brauchen position: relative, absolute oder fixed",
+       1
+      ],
+      "priority: nur für das LCP-Bild, meist eins pro Seite",
+      "Ohne Größe oder fill: Fehler zur Laufzeit – gewollt"
+     ],
+     "notes": "Folie: „ngSrc, width/height, fill und priority“.\n\n„width“ und „height“ geben die Größe in Pixeln an. Daraus kennt der Browser das Seitenverhältnis und reserviert den Platz. Wie groß das Bild am Ende angezeigt wird, kann man trotzdem mit CSS festlegen.\n\nKennt man die Größe nicht, verwendet man „fill“. Dann füllt das Bild sein Elternelement aus. Das Elternelement braucht dafür eine CSS-Positionierung, zum Beispiel „position: relative“, und eine eigene Größe.\n\n„priority“ setzt man nur für das wichtigste Bild der Seite, meist das große Bild im sofort sichtbaren Bereich. Setzt man es überall, verliert es seine Wirkung. Fehlen sowohl Größe als auch „fill“, meldet Angular einen Fehler. Das ist Absicht, damit Layout-Sprünge gar nicht erst entstehen.",
+     "diagram": {
+      "kind": "code",
+      "title": "fill-Modus",
+      "text": "<div class=\"hero\">\n  <img ngSrc=\"banner.jpg\"\n       fill priority>\n</div>\n\n/* CSS */\n.hero {\n  position: relative;\n  height: 300px;\n}"
+     }
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 27: NgOptimizedImage",
+     "bullets": [
+      "1. NgOptimizedImage aus @angular/common in CustomerDetailsComponent importieren",
+      "2. [src]=\"c.imageUrl\" durch [ngSrc]=\"c.imageUrl\" ersetzen",
+      [
+       "Bild in @if (c.imageUrl) { … } setzen, da ngSrc einen String erwartet",
+       1
+      ],
+      "3. width und height ergänzen (oder fill mit positioniertem Elternelement)",
+      "4. Im Browser prüfen, dass die Bilder weiter korrekt angezeigt werden",
+      "5. Optional: priority für das sofort sichtbare Bild setzen",
+      "Musterlösung: 27_ngOptimizedImage (baut auf 26_resourceApi auf)"
+     ],
+     "notes": "Folie: „Übung 27: NgOptimizedImage“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 27 im Ordner 27_ngOptimizedImage. Sie dauert etwa 15 Minuten.\n\nDie Teilnehmer stellen das Kundenbild in der Detailansicht auf die Direktive „NgOptimizedImage“ um. Sie importieren die Direktive, schreiben „ngSrc“ statt „src“ und setzen das Bild in ein „@if“, weil „ngSrc“ einen Text braucht. Dann ergänzen sie Breite und Höhe. Zum Schluss prüfen sie im Browser, ob alles angezeigt wird. Wer möchte, setzt noch „priority“ für das sofort sichtbare Bild."
+    },
+    {
+     "type": "content",
+     "title": "Signal Queries: viewChild & contentChild",
+     "bullets": [
+      "Manchmal braucht die Klasse direkten Zugriff auf ein Element",
+      [
+       "Fokus setzen, Größe messen, Bibliothek anbinden",
+       1
+      ],
+      [
+       "Methode einer Kind-Komponente aufrufen",
+       1
+      ],
+      "viewChild() / viewChildren(): im eigenen Template",
+      "contentChild() / contentChildren(): im projizierten Inhalt",
+      "Ergebnis ist ein Signal – ersetzt @ViewChild und Co."
+     ],
+     "notes": "Folie: „Signal Queries: viewChild & contentChild“.\n\nMeist arbeitet man in Angular nur mit Bindungen im Template. Manchmal braucht die Klasse aber direkten Zugriff auf ein Element oder eine Kind-Komponente. Beispiele sind: den Tastatur-Fokus in ein Eingabefeld setzen, die Größe eines Elements messen, eine fremde Bibliothek für Diagramme an ein Element hängen oder eine Methode einer Kind-Komponente aufrufen.\n\nDafür gibt es „Queries“, also Abfragen. „viewChild“ sucht ein Element im eigenen Template, „viewChildren“ sucht alle passenden. „contentChild“ und „contentChildren“ suchen im Inhalt, den eine Elternkomponente hineinreicht.\n\nDas Ergebnis ist jeweils ein Signal. Früher gab es dafür Dekoratoren wie „@ViewChild“, und man musste auf die Methode „ngAfterViewInit“ warten.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "Neu (Signal)",
+       "items": [
+        "viewChild()",
+        "viewChildren()",
+        "contentChild()"
+       ]
+      },
+      "right": {
+       "title": "Alt (Dekorator)",
+       "items": [
+        "@ViewChild",
+        "@ViewChildren",
+        "@ContentChild"
+       ]
+      }
+     }
+    },
+    {
+     "type": "content",
+     "title": "View oder Content? Der Unterschied",
+     "bullets": [
+      "View: das eigene Template der Komponente",
+      [
+       "Steht in templateUrl bzw. template",
+       1
+      ],
+      [
+       "Abfrage mit viewChild()",
+       1
+      ],
+      "Content: was die Elternkomponente zwischen die Tags schreibt",
+      [
+       "Wird per <ng-content> angezeigt",
+       1
+      ],
+      [
+       "Abfrage mit contentChild()",
+       1
+      ]
+     ],
+     "notes": "Folie: „View oder Content? Der Unterschied“.\n\nAus Sicht einer Komponente gibt es zwei Bereiche. Die „View“ ist ihr eigenes Template, also das HTML, das in „templateUrl“ oder „template“ steht. Elemente daraus fragt man mit „viewChild“ ab.\n\nDer „Content“ ist das, was die Elternkomponente beim Verwenden zwischen das öffnende und das schließende Tag schreibt. Die Komponente zeigt diesen Inhalt an einer Stelle mit „ng-content“ an. Elemente daraus fragt man mit „contentChild“ ab.\n\nRechts sieht man das Beispiel einer Karte: Der Rahmen gehört zur View der Karte. Die Überschrift, die die Elternkomponente hineinschreibt, ist Content.",
+     "diagram": {
+      "kind": "code",
+      "title": "Aus Sicht von CardComponent",
+      "text": "<!-- card.component.html: View -->\n<div class=\"card\" #frame>\n  <ng-content />\n</div>\n\n<!-- Elterntemplate: Content -->\n<app-card>\n  <h3 #title>Kunde</h3>\n</app-card>\n\nframe = viewChild('frame');\ntitle = contentChild('title');"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Locator, required und read",
+     "bullets": [
+      "Erster Parameter (Locator): wonach wird gesucht?",
+      [
+       "Name einer Template-Variable: 'searchInput' für #searchInput",
+       1
+      ],
+      [
+       "Oder eine Klasse: viewChild(CustomerFilterComponent)",
+       1
+      ],
+      "Rückgabe: Signal<T | undefined> – kann leer sein",
+      "viewChild.required(…): Signal<T>, Fehler wenn nicht da",
+      "Option read: welches Objekt man erhält",
+      [
+       "z. B. { read: ElementRef } statt der Komponenten-Instanz",
+       1
+      ]
+     ],
+     "notes": "Folie: „Locator, required und read“.\n\nDer erste Parameter heißt „Locator“, also „Sucher“. Er sagt, wonach gesucht wird. Das kann der Name einer Template-Variable sein. Eine Template-Variable schreibt man im HTML mit einer Raute, zum Beispiel „#searchInput“. Oder man gibt eine Klasse an, zum Beispiel eine Kind-Komponente.\n\nDas Ergebnis ist ein Signal, das auch leer sein kann, also „undefined“. Ist man sicher, dass das Element immer da ist, verwendet man „viewChild.required“. Dann ist das Signal nie leer. Fehlt das Element doch, oder liest man das Signal zu früh, meldet Angular einen Fehler.\n\nMit der Option „read“ bestimmt man, welches Objekt man erhält. Sitzt die Template-Variable auf einer Komponente, bekommt man normalerweise die Komponente. Mit „read: ElementRef“ bekommt man stattdessen das HTML-Element.",
+     "diagram": {
+      "kind": "code",
+      "title": "Varianten",
+      "text": "input = viewChild<\n  ElementRef<HTMLInputElement>>(\n  'searchInput');\n\nfilter = viewChild.required(\n  CustomerFilterComponent);\n\nfilterEl = viewChild(\n  CustomerFilterComponent,\n  { read: ElementRef });"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Wann ist der Wert verfügbar?",
+     "bullets": [
+      "Im constructor noch nicht: das Template ist nicht gerendert",
+      "Nach dem ersten Rendern setzt Angular den Wert",
+      "Das Signal meldet die Änderung: computed()/effect() reagieren",
+      "Element in @if: verschwindet es, wird das Signal undefined",
+      "Einmalige DOM-Arbeit nach dem Rendern: afterNextRender()",
+      "Event-Handler (Klick) laufen später: Wert ist dann da"
+     ],
+     "notes": "Folie: „Wann ist der Wert verfügbar?“.\n\nIm Konstruktor ist das Signal noch leer, denn das Template ist zu diesem Zeitpunkt noch nicht gerendert, also noch nicht gezeichnet. Nach dem ersten Rendern setzt Angular den Wert. Weil es ein Signal ist, merken „computed“ und „effect“ das automatisch. Man muss nicht mehr auf eine bestimmte Lebenszyklus-Methode warten.\n\nSteht das Element in einem „@if“ und verschwindet, wird das Signal wieder leer. Es passt sich also immer dem aktuellen Zustand an.\n\nWill man einmalig etwas mit dem Element tun, sobald es gerendert ist, verwendet man „afterNextRender“. In Ereignis-Methoden, zum Beispiel nach einem Klick, ist das Template längst gerendert, dort ist der Wert also da.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "constructor: undefined",
+       "Template wird gerendert",
+       "Signal enthält Element",
+       "computed / effect reagieren",
+       "@if falsch: wieder undefined"
+      ]
+     }
+    },
+    {
+     "type": "code",
+     "title": "Beispiel: Suchfeld mit viewChild()",
+     "code": "<!-- customer-list.component.html -->\n<input #searchInput type=\"text\" placeholder=\"Nach Vorname filtern...\"\n       [value]=\"filterText()\" (input)=\"onFilterInput($event)\">\n<button (click)=\"clearFilter()\">Filter leeren &amp; fokussieren</button>\n\n// customer-list.component.ts\nsearchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput');\nfilterText = signal('');\n\nonFilterInput(event: Event) {\n  this.filterText.set((event.target as HTMLInputElement).value);\n}\n\nclearFilter() {\n  this.filterText.set('');\n  this.searchInput()?.nativeElement.focus();   // Fokus zurück ins Feld\n}",
+     "notes": "Codefolie „Beispiel: Suchfeld mit viewChild()“.\n\nOben steht das Template. Das Eingabefeld hat die Template-Variable „#searchInput“. Sein Wert ist an das Signal „filterText“ gebunden, und bei jeder Eingabe wird „onFilterInput“ aufgerufen. Daneben steht ein Knopf zum Leeren des Filters.\n\nUnten steht die Klasse. „viewChild“ sucht das Element mit dem Namen „searchInput“. Der Typ in spitzen Klammern sagt: Das Ergebnis ist eine „ElementRef“ um ein Eingabefeld. „onFilterInput“ liest den eingegebenen Text aus dem Ereignis und setzt das Signal.\n\n„clearFilter“ setzt den Filtertext zurück. Dann liest es das Signal „searchInput“, holt mit „nativeElement“ das echte Eingabefeld und setzt mit „focus“ den Tastatur-Fokus hinein. Das Fragezeichen schützt vor einem Fehler, falls das Element nicht vorhanden ist."
+    },
+    {
+     "type": "content",
+     "title": "Signal Queries: Best Practices",
+     "bullets": [
+      "Erst fragen: Geht es mit Bindungen im Template?",
+      [
+       "Werte über Signals setzen, nicht über nativeElement.value",
+       1
+      ],
+      "Direkten DOM-Zugriff auf wenige Fälle beschränken",
+      [
+       "Fokus, Scrollen, Messen, Drittbibliotheken",
+       1
+      ],
+      "Name im Locator muss exakt der Template-Variable entsprechen",
+      "Signal immer mit () lesen: this.searchInput()"
+     ],
+     "notes": "Folie: „Signal Queries: Best Practices“.\n\nBevor man ein Element direkt anfasst, sollte man fragen: Geht das auch mit einer Bindung im Template? Den Text im Suchfeld setzt man zum Beispiel über das Signal „filterText“ und nicht direkt über das Element. So bleibt der Zustand an einer Stelle.\n\nDirekten Zugriff braucht man nur in wenigen Fällen, zum Beispiel für den Fokus, zum Scrollen, zum Messen oder für fremde Bibliotheken. Der Name im Locator muss genau so geschrieben sein wie die Template-Variable, sonst bleibt das Signal leer. Und weil das Ergebnis ein Signal ist, liest man es immer mit runden Klammern."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 28: viewChild()",
+     "bullets": [
+      "1. Im Template von CustomerListComponent ein <input #searchInput> ergänzen",
+      "2. searchInput = viewChild<ElementRef<HTMLInputElement>>('searchInput')",
+      "3. filteredCustomers(): Kundenliste nach dem eingegebenen Text filtern",
+      "4. clearFilter(): Filtertext leeren, dann Fokus setzen",
+      [
+       "this.searchInput()?.nativeElement.focus()",
+       1
+      ],
+      "5. Im Template @for über filteredCustomers() statt customers()",
+      "Testen: filtern, Filter leeren, Cursor steht wieder im Feld",
+      "Musterlösung: 28_viewChild (baut auf 27_ngOptimizedImage auf)"
+     ],
+     "notes": "Folie: „Übung 28: viewChild()“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 28 im Ordner 28_viewChild. Sie dauert etwa 15 Minuten.\n\nDie Teilnehmer bauen ein Filterfeld in die Kundenliste ein und fragen es mit „viewChild“ ab. Eine Methode filtert die Liste nach dem eingegebenen Text. Eine zweite Methode leert den Filter und setzt danach den Tastatur-Fokus wieder in das Feld. Zum Schluss zeigt die Schleife im Template die gefilterte Liste an."
+    },
+    {
+     "type": "content",
+     "title": "Content Projection: Das Slot-Prinzip",
+     "bullets": [
+      "Komponente liefert den Rahmen, Elternteil den Inhalt",
+      "<ng-content> markiert die Stelle, an der Inhalt erscheint",
+      "Mehrere Stellen (Slots) mit select unterscheiden",
+      "Typisch: Card, Dialog, Tabs, Akkordeon, Layout",
+      "Trennt Aufbau und Gestaltung vom fachlichen Inhalt"
+     ],
+     "notes": "Folie: „Content Projection: Das Slot-Prinzip“.\n\n„Content Projection“ bedeutet: Eine Elternkomponente steckt eigenen HTML-Inhalt in eine Kindkomponente hinein. Man kann es mit einem Bilderrahmen vergleichen: Die Kindkomponente ist der Rahmen, die Elternkomponente liefert das Bild.\n\nDie Kindkomponente markiert mit dem Element „ng-content“ die Stelle, an der der Inhalt erscheinen soll. Eine solche Stelle nennt man auch „Slot“, auf Deutsch „Fach“ oder „Steckplatz“. Mit dem Attribut „select“ kann man mehrere Slots unterscheiden, zum Beispiel Kopf, Hauptteil und Fuß.\n\nTypische Beispiele sind Karten, Dialogfenster, Reiter und aufklappbare Bereiche. So trennt man den Aufbau und die Gestaltung vom fachlichen Inhalt.",
+     "diagram": {
+      "kind": "tree",
+      "root": "<app-card>",
+      "children": [
+       "Slot [card-header]",
+       "Default-Slot",
+       "Slot [card-footer]"
+      ]
+     }
+    },
+    {
+     "type": "code",
+     "title": "Card-Komponente mit drei Slots",
+     "code": "// shared/card/card.component.ts\n@Component({\n  selector: 'app-card',\n  templateUrl: './card.component.html',\n  styleUrls: ['./card.component.css']\n})\nexport class CardComponent {}\n\n<!-- shared/card/card.component.html -->\n<div class=\"card\">\n  <div class=\"card-header\"><ng-content select=\"[card-header]\" /></div>\n  <div class=\"card-body\"><ng-content /></div>\n  <div class=\"card-footer\"><ng-content select=\"[card-footer]\" /></div>\n</div>",
+     "notes": "Codefolie „Card-Komponente mit drei Slots“.\n\nDie Klasse der Karte ist leer. Sie braucht keine eigene Logik, sie liefert nur den Rahmen. Im Template stehen drei Bereiche: Kopf, Hauptteil und Fuß.\n\nIm Kopf steht ein „ng-content“ mit „select“ auf das Attribut „card-header“. Dort erscheint jedes Element, das die Elternkomponente mit diesem Attribut versieht. Im Fuß ist es genauso mit „card-footer“. Im Hauptteil steht ein „ng-content“ ohne „select“. Das ist der Standard-Slot. Dort erscheint aller Inhalt, der zu keinem anderen Slot passt."
+    },
+    {
+     "type": "code",
+     "title": "Card verwenden: Inhalt in die Slots",
+     "code": "<!-- customer-details.component.html (CardComponent im imports-Array) -->\n<app-card>\n  <span card-header>\n    Kundendetails: {{ customer()?.firstname }} {{ customer()?.lastname }}\n  </span>\n\n  <form id=\"customer-form\" #customerForm=\"ngForm\" (ngSubmit)=\"onSubmit(customerForm)\">\n    <!-- Eingabefelder … landen im Default-Slot -->\n  </form>\n\n  <div card-footer>\n    <button type=\"submit\" form=\"customer-form\"\n            [disabled]=\"customerForm.invalid\">Speichern</button>\n    <button type=\"button\" (click)=\"goBack()\">Zurück zur Liste</button>\n  </div>\n</app-card>",
+     "notes": "Codefolie „Card verwenden: Inhalt in die Slots“.\n\nDie Detailansicht verwendet die Karte. Zwischen dem öffnenden und dem schließenden Tag von „app-card“ steht der Inhalt. Das Element mit dem Attribut „card-header“ landet im Kopf der Karte. Das Formular hat kein solches Attribut und landet deshalb im Standard-Slot. Das Element mit „card-footer“ landet im Fuß.\n\nEine Besonderheit: Der Speichern-Knopf steht im Fuß und damit außerhalb des Formulars. Damit er das Formular trotzdem abschickt, bekommt das Formular eine „id“ und der Knopf das Attribut „form“ mit dieser „id“. Die Template-Variable „customerForm“ ist auch im Fuß sichtbar, weil alles im selben Template der Elternkomponente steht. Damit wird der Knopf gesperrt, solange das Formular ungültig ist."
+    },
+    {
+     "type": "content",
+     "title": "select, Default-Slot und ngProjectAs",
+     "bullets": [
+      "select nimmt einen CSS-Selector: [attr], tag, .klasse",
+      "Inhalt ohne passenden Slot landet im Default-Slot",
+      [
+       "Ohne Default-Slot wird er nicht angezeigt",
+       1
+      ],
+      "ngProjectAs: Wrapper tut so, als passe er zu einem Selector",
+      [
+       "Mehrere Elemente gemeinsam in einen Slot geben",
+       1
+      ],
+      "Standardinhalt im Slot: <ng-content>Text</ng-content>"
+     ],
+     "notes": "Folie: „select, Default-Slot und ngProjectAs“.\n\nDas Attribut „select“ nimmt einen CSS-Selector. Das kann ein Attribut in eckigen Klammern sein, ein Elementname oder eine Klasse mit Punkt. Inhalt, der zu keinem Slot passt, landet im Standard-Slot ohne „select“. Gibt es keinen Standard-Slot, wird dieser Inhalt gar nicht angezeigt.\n\nManchmal will man mehrere Elemente gemeinsam in einen Slot geben, ohne ein zusätzliches Element im HTML zu erzeugen. Dafür nimmt man „ng-container“, ein unsichtbares Hilfselement, und gibt ihm „ngProjectAs“. Dann behandelt Angular es so, als hätte es das passende Attribut.\n\nSeit Angular 18 kann „ng-content“ außerdem einen Standardinhalt enthalten. Er erscheint, wenn die Elternkomponente für diesen Slot nichts liefert.",
+     "diagram": {
+      "kind": "code",
+      "title": "ngProjectAs",
+      "text": "<app-card>\n  <ng-container\n      ngProjectAs=\"[card-header]\">\n    <h3>{{ title }}</h3>\n    <small>{{ sub }}</small>\n  </ng-container>\n  …\n</app-card>"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Wichtig: Projizierter Inhalt wird immer erzeugt",
+     "bullets": [
+      "Inhalt gehört zur Elternkomponente, nicht zur Card",
+      [
+       "Bindungen und Variablen aus dem Eltern-Template",
+       1
+      ],
+      "Er wird immer erzeugt – auch wenn die Card ihn nicht zeigt",
+      [
+       "<ng-content> nicht in @if setzen: Inhalt entsteht trotzdem",
+       1
+      ],
+      "Jeder Inhalt erscheint höchstens einmal",
+      "Bedingt oder mehrfach anzeigen: ng-template statt ng-content"
+     ],
+     "notes": "Folie: „Wichtig: Projizierter Inhalt wird immer erzeugt“.\n\nDer hineingereichte Inhalt gehört zur Elternkomponente. Deshalb kann er die Variablen und Bindungen aus dem Eltern-Template verwenden, zum Beispiel die Template-Variable des Formulars.\n\nDaraus folgt eine wichtige Regel: Der Inhalt wird immer von der Elternkomponente erzeugt, auch wenn die Karte ihn gar nicht anzeigt. Steht „ng-content“ in der Karte innerhalb eines „@if“, das falsch ist, sieht man den Inhalt nicht. Komponenten darin werden aber trotzdem erzeugt und laufen, sie laden zum Beispiel auch Daten. Deshalb setzt man „ng-content“ nicht in ein „@if“.\n\nAußerdem erscheint jeder Inhalt höchstens einmal. Will man Inhalt nur bei Bedarf oder mehrfach anzeigen, gibt die Elternkomponente eine Vorlage mit „ng-template“ hinein. Die Kindkomponente zeigt sie dann gezielt mit „ngTemplateOutlet“ an.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "<ng-content>",
+       "items": [
+        "immer erzeugt",
+        "höchstens einmal",
+        "einfach"
+       ]
+      },
+      "right": {
+       "title": "<ng-template>",
+       "items": [
+        "erst bei Bedarf",
+        "beliebig oft",
+        "ngTemplateOutlet"
+       ]
+      }
+     }
+    },
+    {
+     "type": "code",
+     "title": "contentChild: Projizierten Inhalt abfragen",
+     "code": "// card.component.ts\n@Component({\n  selector: 'app-card',\n  template: `\n    <div class=\"card\">\n      <div class=\"card-header\" [hidden]=\"!hasHeader()\">\n        <ng-content select=\"[card-header]\" />\n      </div>\n      <div class=\"card-body\"><ng-content /></div>\n    </div>`\n})\nexport class CardComponent {\n  header = contentChild<ElementRef>('header');   // sucht #header im Content\n  hasHeader = computed(() => !!this.header());\n}\n\n<!-- Verwendung -->\n<app-card><h3 #header card-header>Kunde</h3> … </app-card>",
+     "notes": "Codefolie „contentChild: Projizierten Inhalt abfragen“.\n\nDieses Beispiel verbindet Content Projection mit einer Signal Query. Die Karte soll den Kopfbereich mit Rahmen und Hintergrund nur zeigen, wenn die Elternkomponente auch eine Überschrift mitliefert.\n\nDafür sucht „contentChild“ im hineingereichten Inhalt ein Element mit der Template-Variable „#header“. Das „computed“ „hasHeader“ ist wahr, wenn eins gefunden wurde. Im Template wird der Kopfbereich mit „hidden“ ausgeblendet, solange dieses Signal falsch ist. Das „ng-content“ selbst steht bewusst nicht in einem „@if“, wie die vorige Folie erklärt.\n\nUnten sieht man die Verwendung: Die Überschrift trägt sowohl die Template-Variable „#header“ als auch das Attribut „card-header“ für den Slot. Die Musterlösung der Übung 29 braucht diese Abfrage nicht, sie ist eine mögliche Erweiterung."
+    },
+    {
+     "type": "exercise",
+     "title": "Übung 29: Content Projection",
+     "bullets": [
+      "1. Standalone-Komponente CardComponent in src/app/shared/card/ erstellen",
+      "2. Drei Slots: <ng-content select=\"[card-header]\">, Default, select=\"[card-footer]\"",
+      "3. Styling: Rahmen, Schatten, getrennte Bereiche für Header, Body, Footer",
+      "4. In CustomerDetailsComponent einbinden (imports-Array!):",
+      [
+       "Kundenname im Slot card-header, Formular aus Übung 22 im Default-Slot",
+       1
+      ],
+      [
+       "Buttons „Speichern“ und „Zurück zur Liste“ im Slot card-footer",
+       1
+      ],
+      [
+       "Tipp: Formular mit id, Button mit type=\"submit\" form=\"customer-form\"",
+       1
+      ],
+      "Musterlösung: 29_contentProjection (baut auf 28_viewChild auf)"
+     ],
+     "notes": "Folie: „Übung 29: Content Projection“.\n\nErklärung für die Dolmetscherin:\nDies ist die Aufgabenstellung für Übung 29 im Ordner 29_contentProjection. Sie dauert etwa 20 Minuten.\n\nDie Teilnehmer erstellen eine wiederverwendbare Karten-Komponente mit drei Slots: Kopf, Hauptteil und Fuß. Sie gestalten die Karte mit Rahmen und Schatten. Dann setzen sie die Detailansicht in die Karte: den Kundennamen in den Kopf, das Formular in den Hauptteil und die beiden Knöpfe in den Fuß.\n\nWeil der Speichern-Knopf dann außerhalb des Formulars steht, verbindet man ihn über eine „id“ und das Attribut „form“ mit dem Formular."
     }
-  ]
+   ]
+  },
+  {
+   "after": 268,
+   "order": 5,
+   "slides": [
+    {
+     "type": "content",
+     "title": "SSR: Warum Server-Side Rendering?",
+     "bullets": [
+      "Normale Single-Page-App (CSR): Server schickt fast leeres HTML",
+      [
+       "Inhalt erst sichtbar, wenn JavaScript geladen und gestartet ist",
+       1
+      ],
+      "SSR: Server rendert die Seite pro Anfrage zu fertigem HTML",
+      [
+       "Inhalt sofort sichtbar, gut für Suchmaschinen und Vorschauen",
+       1
+      ],
+      "Prerendering (SSG): HTML schon beim Build erzeugen",
+      "Einrichten: ng new --ssr oder ng add @angular/ssr"
+     ],
+     "notes": "Folie: „SSR: Warum Server-Side Rendering?“.\n\nEine normale Angular-Anwendung wird im Browser gerendert. Das nennt man „Client-Side Rendering“, abgekürzt CSR. Der Server schickt eine fast leere HTML-Seite. Erst wenn das JavaScript geladen und gestartet ist, sieht man Inhalt. Auf langsamen Geräten dauert das. Suchmaschinen und Link-Vorschauen sehen zunächst nur eine leere Seite.\n\nBeim „Server-Side Rendering“, abgekürzt SSR, führt der Server die Angular-Anwendung bei jeder Anfrage aus und schickt fertiges HTML. Der Inhalt ist sofort sichtbar. Beim „Prerendering“ wird das HTML sogar schon beim Bauen der Anwendung erzeugt, das passt für Seiten, die sich selten ändern.\n\nEingerichtet wird SSR beim Anlegen eines Projekts mit der Option „--ssr“ oder später mit „ng add @angular/ssr“.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "CSR",
+       "items": [
+        "leeres HTML",
+        "spät sichtbar",
+        "einfaches Hosting"
+       ]
+      },
+      "right": {
+       "title": "SSR",
+       "items": [
+        "fertiges HTML",
+        "sofort sichtbar",
+        "Node-Server nötig"
+       ]
+      }
+     }
+    },
+    {
+     "type": "content",
+     "title": "Ablauf: Vom Server-HTML zur lebendigen App",
+     "bullets": [
+      "1. Browser fordert eine Adresse an",
+      "2. Server führt Angular aus und rendert HTML",
+      "3. Browser zeigt das HTML sofort an – noch nicht bedienbar",
+      "4. JavaScript lädt im Hintergrund",
+      "5. Hydration: Angular übernimmt das vorhandene DOM",
+      "Danach verhält sich die Seite wie eine normale Angular-App"
+     ],
+     "notes": "Folie: „Ablauf: Vom Server-HTML zur lebendigen App“.\n\nDer Ablauf hat fünf Schritte. Zuerst fordert der Browser eine Adresse an. Dann führt der Server die Angular-Anwendung aus und rendert daraus HTML. Der Browser zeigt dieses HTML sofort an. Die Seite sieht fertig aus, reagiert aber noch nicht auf Klicks.\n\nWährenddessen lädt der Browser das JavaScript der Anwendung. Dann folgt die „Hydration“, auf Deutsch etwa „Bewässerung“: Angular startet im Browser, erkennt das vorhandene HTML wieder und hängt die Ereignisse und Bindungen daran. Das HTML wird dabei nicht neu gezeichnet, es flackert also nichts.\n\nDanach verhält sich die Seite wie jede normale Angular-Anwendung. Weitere Navigationen laufen im Browser.",
+     "diagram": {
+      "kind": "flow",
+      "steps": [
+       "Browser: GET /customer",
+       "Server rendert HTML",
+       "Browser zeigt HTML sofort",
+       "JavaScript lädt",
+       "Hydration: App wird bedienbar"
+      ],
+      "highlight_last": true
+     }
+    },
+    {
+     "type": "content",
+     "title": "Hydration und Event Replay",
+     "bullets": [
+      "provideClientHydration() in app.config.ts aktiviert Hydration",
+      "Angular nutzt das Server-DOM weiter, statt es neu zu bauen",
+      "withEventReplay(): Klicks vor der Hydration werden gemerkt",
+      [
+       "und danach automatisch nachgespielt",
+       1
+      ],
+      "HTTP-Antworten vom Server werden mitgeschickt (Transfer Cache)",
+      "Server- und Browser-DOM müssen gleich sein (sonst NG0500)"
+     ],
+     "notes": "Folie: „Hydration und Event Replay“.\n\nHydration wird in der Datei „app.config.ts“ mit „provideClientHydration“ eingeschaltet. Bei neuen Projekten mit SSR steht das schon dort. Angular verwendet dann das HTML vom Server weiter, statt alles neu zu bauen.\n\nMit „withEventReplay“ merkt sich Angular Klicks und Eingaben, die der Nutzer macht, bevor die Hydration fertig ist. Danach spielt Angular sie automatisch nach. So geht kein Klick verloren.\n\nAnfragen, die der „HttpClient“ schon auf dem Server gemacht hat, werden mit der Seite mitgeschickt. Der Browser muss sie nicht noch einmal stellen. Wichtig: Das HTML vom Server und das, was Angular im Browser erwartet, müssen gleich sein. Verändert Code das HTML direkt, meldet Angular einen Fehler, zum Beispiel mit der Nummer NG0500.",
+     "diagram": {
+      "kind": "code",
+      "title": "app.config.ts",
+      "text": "export const appConfig = {\n  providers: [\n    provideRouter(routes),\n    provideHttpClient(\n      withFetch()),\n    provideClientHydration(\n      withEventReplay())\n  ]\n};"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Incremental Hydration mit @defer",
+     "bullets": [
+      "Problem: Hydration der ganzen Seite lädt viel JavaScript",
+      "Incremental Hydration: Bereiche erst bei Bedarf hydrieren",
+      [
+       "Server rendert den Block trotzdem sofort als HTML",
+       1
+      ],
+      [
+       "JavaScript des Blocks lädt erst beim Auslöser",
+       1
+      ],
+      "Auslöser: hydrate on viewport, interaction, idle, hover, timer",
+      "hydrate never: bleibt dauerhaft statisches HTML",
+      "Aktivieren: provideClientHydration(withIncrementalHydration())"
+     ],
+     "notes": "Folie: „Incremental Hydration mit @defer“.\n\nBei der normalen Hydration lädt der Browser das JavaScript für die ganze Seite auf einmal. Bei großen Seiten ist das viel. „Incremental Hydration“, also schrittweise Hydration, löst das: Einzelne Bereiche werden erst hydriert, wenn sie gebraucht werden.\n\nMan kennzeichnet einen Bereich mit „@defer“ und einem „hydrate“-Auslöser. Der Server rendert den Bereich trotzdem sofort als HTML, man sieht ihn also. Sein JavaScript lädt aber erst, wenn der Auslöser eintritt: zum Beispiel wenn der Bereich in den sichtbaren Teil scrollt, bei einer Interaktion, wenn der Browser nichts zu tun hat, beim Darüberfahren mit der Maus oder nach einer Zeit. Mit „hydrate never“ bleibt der Bereich reines HTML.\n\nEingeschaltet wird das in „app.config.ts“ mit „withIncrementalHydration“. Damit ist auch das Nachspielen von Klicks aktiv.",
+     "diagram": {
+      "kind": "code",
+      "title": "Template",
+      "text": "<app-customer-header />\n\n@defer (hydrate on viewport) {\n  <app-order-history />\n} @placeholder {\n  <p>Bestellungen</p>\n}"
+     }
+    },
+    {
+     "type": "content",
+     "title": "Stolperfalle: Code läuft auch auf dem Server",
+     "bullets": [
+      "Komponenten, Services, Konstruktoren laufen auf dem Server",
+      "Dort gibt es kein window, localStorage, navigator",
+      [
+       "Zugriff wirft ReferenceError – Seite rendert nicht",
+       1
+      ],
+      "Kein direkter DOM-Zugriff: Bindungen, host, Renderer2",
+      "setInterval / endlose Observables halten den Server auf",
+      "Browser-Code in afterNextRender() oder mit isPlatformBrowser"
+     ],
+     "notes": "Folie: „Stolperfalle: Code läuft auch auf dem Server“.\n\nMit SSR läuft derselbe Code zuerst auf dem Server, in Node.js. Das betrifft Komponenten, Services und Konstruktoren. Auf dem Server gibt es aber keinen Browser. Objekte wie „window“ für das Fenster, „localStorage“ für den Speicher im Browser oder „navigator“ für Geräteinformationen fehlen. Greift Code darauf zu, gibt es einen Fehler, und die Seite wird nicht gerendert.\n\nDeshalb sollte man Elemente nicht direkt anfassen, sondern Bindungen, das „host“-Feld oder den Dienst „Renderer2“ verwenden. Wiederholte Zeitgeber oder Datenströme, die nie enden, halten den Server auf, weil Angular wartet, bis die Anwendung zur Ruhe kommt.\n\nCode, der nur im Browser laufen darf, steht in „afterNextRender“ oder hinter einer Prüfung mit „isPlatformBrowser“. Das zeigt die nächste Folie.",
+     "diagram": {
+      "kind": "compare",
+      "left": {
+       "title": "Server",
+       "items": [
+        "rendert HTML",
+        "kein window",
+        "kein localStorage"
+       ]
+      },
+      "right": {
+       "title": "Browser",
+       "items": [
+        "Hydration",
+        "window, DOM",
+        "afterNextRender"
+       ]
+      }
+     }
+    },
+    {
+     "type": "code",
+     "title": "afterNextRender: Browser-Code sicher ausführen",
+     "code": "import { afterNextRender, inject, PLATFORM_ID, signal } from '@angular/core';\nimport { isPlatformBrowser } from '@angular/common';\n\nexport class CustomerListComponent {\n  private readonly platformId = inject(PLATFORM_ID);\n  filterText = signal('');\n\n  constructor() {\n    // Läuft nur im Browser, einmal nach dem ersten Rendern – nie auf dem Server\n    afterNextRender(() => {\n      this.filterText.set(localStorage.getItem('customerFilter') ?? '');\n    });\n  }\n\n  saveFilter(): void {\n    if (isPlatformBrowser(this.platformId)) {\n      localStorage.setItem('customerFilter', this.filterText());\n    }\n  }\n}",
+     "notes": "Codefolie „afterNextRender: Browser-Code sicher ausführen“.\n\nDie Komponente soll den letzten Filtertext im Speicher des Browsers merken. Den gibt es auf dem Server nicht.\n\nIm Konstruktor wird eine Funktion an „afterNextRender“ übergeben. Angular ruft sie einmal auf, nachdem die Komponente im Browser zum ersten Mal gerendert wurde. Auf dem Server ruft Angular sie nie auf. Deshalb darf sie „localStorage“ verwenden. Sie liest den gespeicherten Text und setzt das Signal.\n\nDie Methode „saveFilter“ kann zu jeder Zeit aufgerufen werden. Deshalb prüft sie vorher mit „isPlatformBrowser“, ob der Code gerade im Browser läuft. „PLATFORM_ID“ ist ein von Angular bereitgestellter Wert, der sagt, ob man auf dem Server oder im Browser ist. Es gibt auch „afterEveryRender“ für Code, der nach jedem Rendern laufen soll."
+    },
+    {
+     "type": "content",
+     "title": "SSR: Render-Modi und Einordnung",
+     "bullets": [
+      "Render-Modus pro Route in app.routes.server.ts:",
+      [
+       "RenderMode.Server: bei jeder Anfrage auf dem Server",
+       1
+      ],
+      [
+       "RenderMode.Prerender: einmal beim Build",
+       1
+      ],
+      [
+       "RenderMode.Client: nur im Browser wie ohne SSR",
+       1
+      ],
+      "Lohnt sich: öffentliche Seiten, Suchmaschinen, langsame Geräte",
+      "Oft unnötig: interne Anwendungen hinter einem Login",
+      "Test: Seite mit abgeschaltetem JavaScript aufrufen"
+     ],
+     "notes": "Folie: „SSR: Render-Modi und Einordnung“.\n\nSeit Angular 19 kann man für jede Route einzeln festlegen, wie sie gerendert wird. Das steht in der Datei „app.routes.server.ts“. „Server“ bedeutet: bei jeder Anfrage auf dem Server rendern. „Prerender“ bedeutet: einmal beim Bauen rendern und als fertige Datei ausliefern. „Client“ bedeutet: nur im Browser rendern, wie ohne SSR.\n\nSSR lohnt sich vor allem für öffentliche Seiten, die Suchmaschinen finden sollen, und für Nutzer mit langsamen Geräten. Für interne Anwendungen hinter einem Login, wie unsere Kundenverwaltung, bringt es oft wenig und macht den Betrieb aufwendiger, weil ein Node-Server nötig ist.\n\nEin einfacher Test: Die Seite mit abgeschaltetem JavaScript aufrufen. Was man dann sieht, kommt vom Server.",
+     "diagram": {
+      "kind": "code",
+      "title": "app.routes.server.ts",
+      "text": "export const serverRoutes:\n    ServerRoute[] = [\n  { path: '',\n    renderMode:\n      RenderMode.Prerender },\n  { path: 'customer/**',\n    renderMode:\n      RenderMode.Client },\n  { path: '**',\n    renderMode:\n      RenderMode.Server }\n];"
+     }
+    }
+   ]
+  }
+ ],
+ "ops": [
+  {
+   "op": "delete",
+   "slides": [
+    250,
+    251,
+    252,
+    253,
+    254,
+    255,
+    256,
+    257,
+    258,
+    259,
+    260,
+    261,
+    262,
+    263,
+    264,
+    265,
+    266,
+    267,
+    268
+   ]
+  }
+ ]
 }
