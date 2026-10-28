@@ -1,1 +1,1024 @@
-{"blocks": [], "ops": []}
+{
+  "blocks": [
+    {
+      "after": 309,
+      "order": 10,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Anhang",
+          "notes": "Kapitelübergangsfolie „Anhang“ – Hier endet der eigentliche Angular-Teil des Kurses. Im Anhang folgt Hintergrundwissen zu „node.js“ und zum Paketmanager „npm“. Beides haben wir im Kurs ständig benutzt, zum Beispiel bei „npm install“ und „ng serve“. Der Anhang erklärt, was dabei im Hintergrund passiert."
+        },
+        {
+          "type": "divider",
+          "title": "node.js",
+          "notes": "Kapitelübergangsfolie „node.js“ – Der erste Teil des Anhangs behandelt „node.js“. Das ist die Laufzeitumgebung, also das Programm, das JavaScript außerhalb des Browsers ausführt. Das gesamte Werkzeug von Angular, also die Angular CLI, der Build und die Tests, läuft auf node.js."
+        },
+        {
+          "type": "content",
+          "title": "Was ist node.js?",
+          "bullets": [
+            "Laufzeitumgebung für JavaScript außerhalb des Browsers",
+            "Kern: Google V8 – dieselbe JavaScript-Engine wie in Chrome",
+            "libuv: Event Loop und Thread-Pool für Dateien, Netzwerk, Timer",
+            "Eigene Bibliotheken (Module): fs, http, path, crypto, …",
+            "Einsatz: Server, Kommandozeilen-Werkzeuge, Build-Tools",
+            "Doku: nodejs.org/docs"
+          ],
+          "notes": "Folie: „Was ist node.js?“.\n\n„node.js“ ist eine Laufzeitumgebung für JavaScript. Das heißt: Es ist ein Programm, das JavaScript-Code direkt auf dem Rechner ausführt, ohne Browser. Im Kern steckt „V8“. Das ist die JavaScript-Engine von Google, die auch im Browser Chrome den Code ausführt.\n\nDarunter liegt eine Bibliothek namens „libuv“. Sie kümmert sich um die „Event Loop“, also die Warteschleife für Ereignisse, und um Zugriffe auf Dateien und das Netzwerk. Darüber stellt node.js eigene Module bereit, zum Beispiel „fs“ für das Dateisystem und „http“ für Webserver.\n\nDas Diagramm zeigt die Schichten von oben nach unten: unser Code, die node-Module, libuv, V8 und ganz unten das Betriebssystem.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Dein JavaScript-Code",
+              "node-Module\nfs, http, path, …",
+              "libuv\nEvent Loop, Thread-Pool",
+              "V8-Engine\nführt JavaScript aus",
+              "Betriebssystem"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "node.js und Browser im Vergleich",
+          "bullets": [
+            "Gleiche Sprache, andere Umgebung",
+            "node.js hat kein Fenster, kein HTML-Dokument, kein DOM",
+            "Keine Browser-APIs wie window, document, localStorage",
+            "Dafür Zugriff auf Dateien, Prozesse, Netzwerk-Ports",
+            "Gemeinsam: console, setTimeout, fetch, Promise, JSON"
+          ],
+          "notes": "Folie: „node.js und Browser im Vergleich“.\n\nIn node.js und im Browser schreibt man dieselbe Sprache, nämlich JavaScript. Die Umgebung ist aber verschieden. node.js hat keine Oberfläche, kein HTML-Dokument und damit auch kein „DOM“. Das DOM ist die Baumstruktur der Webseite, die Angular im Browser verändert. Objekte wie „window“ oder „document“ gibt es in node.js deshalb nicht.\n\nDafür darf node.js Dinge, die der Browser aus Sicherheitsgründen verbietet: Dateien lesen und schreiben, andere Programme starten und einen Netzwerk-Port öffnen. Manche Funktionen gibt es in beiden Welten, zum Beispiel „console.log“, „setTimeout“, „Promise“ und in aktuellen Versionen auch „fetch“.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Browser",
+              "items": [
+                "DOM, window, document",
+                "Benutzer-Ereignisse",
+                "Sandbox: kein Dateizugriff"
+              ]
+            },
+            "right": {
+              "title": "node.js",
+              "items": [
+                "Kein DOM, keine Oberfläche",
+                "Dateien, Prozesse, Ports",
+                "Module: fs, http, path"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Nicht blockierendes I/O",
+          "bullets": [
+            "I/O = Ein- und Ausgabe: Datei lesen, Netzwerk, Datenbank",
+            "Blockierend: Programm wartet, bis die Daten da sind",
+            "Nicht blockierend: Auftrag abgeben, sofort weiterarbeiten",
+            "Ergebnis kommt später über einen Callback oder ein Promise",
+            "Ein JavaScript-Thread bedient so viele Anfragen gleichzeitig",
+            "Rechenintensive Aufgaben blockieren dagegen alles"
+          ],
+          "notes": "Folie: „Nicht blockierendes I/O“.\n\n„I/O“ steht für „Input/Output“, also Ein- und Ausgabe. Gemeint sind Zugriffe, bei denen man auf etwas warten muss, zum Beispiel auf eine Datei, auf das Netzwerk oder auf eine Datenbank.\n\nBlockierend heißt: Das Programm bleibt stehen, bis die Daten da sind. Nicht blockierend heißt: node.js gibt den Auftrag ab und arbeitet sofort weiter. Wenn die Daten da sind, ruft node.js eine Funktion auf, die man vorher übergeben hat. Diese Funktion heißt „Callback“, also Rückruf-Funktion. Alternativ bekommt man ein „Promise“, ein Versprechen auf ein späteres Ergebnis.\n\nSo kann ein einziger JavaScript-Thread sehr viele Anfragen gleichzeitig bedienen. Langes Rechnen im JavaScript-Code blockiert aber alle anderen Anfragen, weil es nur diesen einen Thread gibt.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Blockierend",
+              "items": [
+                "readFileSync()",
+                "wartet auf die Datei",
+                "nichts anderes läuft"
+              ]
+            },
+            "right": {
+              "title": "Nicht blockierend",
+              "items": [
+                "readFile(…, callback)",
+                "läuft sofort weiter",
+                "Callback bei Ergebnis"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Die Event Loop: Ablauf",
+          "bullets": [
+            "1. Code läuft von oben nach unten durch",
+            "2. Asynchrone Aufträge gehen an libuv bzw. das Betriebssystem",
+            "3. Fertige Aufträge landen in einer Warteschlange",
+            "4. Ist der Stapel leer, holt die Event Loop den nächsten Callback",
+            "5. Der Callback läuft vollständig, dann der nächste",
+            "Programm endet, wenn nichts mehr aussteht"
+          ],
+          "notes": "Folie: „Die Event Loop: Ablauf“.\n\nDie „Event Loop“ ist die Ereignis-Schleife von node.js. Zuerst läuft der eigene Code einmal von oben nach unten durch. Asynchrone Aufträge, zum Beispiel „Datei lesen“, gibt node.js an libuv oder das Betriebssystem weiter.\n\nIst ein Auftrag fertig, kommt sein Callback in eine Warteschlange. Sobald gerade kein anderer JavaScript-Code läuft, nimmt die Event Loop den nächsten Callback aus der Warteschlange und führt ihn vollständig aus. Danach kommt der nächste dran. Das Diagramm zeigt diesen Kreislauf.\n\nEin node-Programm endet erst, wenn keine Aufträge mehr ausstehen. Ein Webserver endet deshalb nicht von selbst, weil er dauerhaft auf neue Anfragen wartet. Den gleichen Mechanismus gibt es übrigens auch im Browser.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "Code ausführen",
+              "Auftrag an libuv / OS",
+              "Fertig: Callback in Queue",
+              "Event Loop holt Callback"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: Datei asynchron lesen",
+          "code": "// lesen.js – starten mit: node lesen.js\nconst fs = require('node:fs');\n\nconsole.log('1: Auftrag wird abgegeben');\n\nfs.readFile('daten.txt', 'utf8', (err, inhalt) => {\n  if (err) {\n    console.error('Fehler beim Lesen:', err.message);\n    return;\n  }\n  console.log('3: Datei gelesen, Länge:', inhalt.length);\n});\n\nconsole.log('2: Programm läuft weiter');\n\n// Ausgabe: 1, 2, 3 – der Callback kommt erst später dran",
+          "notes": "Codefolie „Beispiel: Datei asynchron lesen“.\n\nDas Programm lädt zuerst das eingebaute Modul „fs“, das ist das Dateisystem-Modul. Dann gibt es Text 1 aus. Danach wird „fs.readFile“ aufgerufen. Diese Funktion bekommt den Dateinamen, die Zeichenkodierung „utf8“ und als letzten Parameter eine Callback-Funktion.\n\n„readFile“ wartet nicht, sondern kehrt sofort zurück. Deshalb erscheint als Nächstes Text 2. Erst wenn die Datei gelesen ist, ruft node.js den Callback auf, und Text 3 erscheint. Die Reihenfolge der Ausgabe ist also 1, 2, 3, obwohl der Code anders angeordnet ist."
+        },
+        {
+          "type": "content",
+          "title": "Der Callback: wer ruft wann was auf?",
+          "bullets": [
+            "Wir übergeben die Funktion, node.js ruft sie auf",
+            "Zeitpunkt: wenn die Datei gelesen ist – nicht sofort",
+            "1. Parameter err: Fehlerobjekt oder null",
+            "2. Parameter inhalt: die Daten (hier ein String)",
+            "Regel „error first“: immer zuerst err prüfen",
+            "Rückgabewert des Callbacks wird ignoriert"
+          ],
+          "notes": "Folie: „Der Callback: wer ruft wann was auf?“.\n\nDen Callback schreiben wir selbst, aber wir rufen ihn nicht selbst auf. Wir übergeben ihn an „readFile“, und node.js ruft ihn später auf, nämlich dann, wenn die Datei gelesen ist.\n\nnode.js übergibt dabei zwei Werte. Der erste Parameter, hier „err“ genannt, ist ein Fehlerobjekt. Er ist „null“, wenn alles geklappt hat. Der zweite Parameter enthält den Dateiinhalt. Diese Reihenfolge, zuerst der Fehler, dann das Ergebnis, heißt „error first“ und gilt für fast alle klassischen node-Funktionen. Man prüft deshalb immer zuerst den Fehler.\n\nWas der Callback zurückgibt, wertet node.js nicht aus. Das Diagramm zeigt die Reihenfolge der Aufrufe.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Wir: readFile(name, cb)",
+              "node: liest im Hintergrund",
+              "node: cb(err, inhalt)",
+              "Wir: err prüfen, Daten nutzen"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Dasselbe mit Promise und await",
+          "code": "// lesen.mjs – ES-Modul, starten mit: node lesen.mjs\nimport { readFile } from 'node:fs/promises';\n\ntry {\n  const inhalt = await readFile('daten.txt', 'utf8');\n  console.log('Datei gelesen, Länge:', inhalt.length);\n} catch (err) {\n  console.error('Fehler beim Lesen:', err.message);\n}\n\n// readFile liefert hier ein Promise statt einen Callback zu erwarten.\n// await wartet auf das Ergebnis, ohne node.js zu blockieren.\n// Fehler kommen als Exception und landen im catch-Block.",
+          "notes": "Codefolie „Dasselbe mit Promise und await“.\n\nFür die meisten Funktionen gibt es heute eine Variante mit „Promise“. Das Modul „node:fs/promises“ bietet ein „readFile“, das keinen Callback erwartet, sondern ein Promise zurückgibt.\n\nMit „await“ wartet der Code auf das Ergebnis. Das blockiert node.js nicht: Während gewartet wird, kann die Event Loop andere Callbacks ausführen. Ein Fehler kommt hier nicht als Parameter, sondern als Ausnahme und wird im „catch“-Block behandelt.\n\nDie Datei endet auf „.mjs“. Damit weiß node.js, dass es ein ES-Modul mit „import“ ist. Das wird später im Anhang genauer erklärt."
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: Ein kompletter HTTP-Server",
+          "code": "// server.js – starten mit: node server.js\nconst http = require('node:http');\n\nconst server = http.createServer((req, res) => {\n  if (req.method === 'GET' && req.url === '/api/hallo') {\n    res.writeHead(200, { 'Content-Type': 'application/json' });\n    res.end(JSON.stringify({ text: 'Hallo von node.js' }));\n  } else {\n    res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });\n    res.end('Nicht gefunden');\n  }\n});\n\nserver.listen(6061, '127.0.0.1', () => {\n  console.log('Server läuft auf http://127.0.0.1:6061');\n});",
+          "notes": "Codefolie „Beispiel: Ein kompletter HTTP-Server“.\n\nDieses kleine Programm ist ein vollständiger Webserver, ganz ohne zusätzliche Bibliothek. Es nutzt nur das eingebaute Modul „http“.\n\n„createServer“ bekommt eine Funktion, die bei jeder eingehenden Anfrage aufgerufen wird. Fragt jemand mit der Methode „GET“ die Adresse „/api/hallo“ ab, antwortet der Server mit dem Status 200 und einem JSON-Text. Für alle anderen Adressen antwortet er mit dem Status 404, also „nicht gefunden“.\n\n„listen“ startet den Server auf Port 6061 auf dem eigenen Rechner. Sobald er bereit ist, gibt er eine Meldung in der Konsole aus. Im Browser kann man dann „http://127.0.0.1:6061/api/hallo“ aufrufen."
+        },
+        {
+          "type": "content",
+          "title": "HTTP-Server: was bei einer Anfrage passiert",
+          "bullets": [
+            "createServer(handler) registriert den Handler, ruft ihn noch nicht auf",
+            "listen() öffnet den Port, das Programm läuft dauerhaft",
+            "Pro Anfrage ruft node.js handler(req, res) auf",
+            "Der Handler wertet req aus und schreibt in res",
+            "res.end() schickt die Antwort ab – Pflicht!",
+            "Callback von listen(): einmal, wenn der Server bereit ist"
+          ],
+          "notes": "Folie: „HTTP-Server: was bei einer Anfrage passiert“.\n\n„createServer“ merkt sich nur die übergebene Funktion, den sogenannten „Handler“. Er wird noch nicht ausgeführt. Erst „listen“ öffnet den Netzwerk-Port. Ab dann wartet das Programm dauerhaft auf Anfragen.\n\nKommt eine Anfrage vom Browser, ruft node.js den Handler auf und übergibt zwei Objekte: „req“ für die Anfrage und „res“ für die Antwort. Der Handler liest aus „req“, was gewünscht ist, und schreibt die Antwort in „res“. Mit „res.end“ wird die Antwort abgeschickt. Fehlt dieser Aufruf, wartet der Browser vergeblich.\n\nDer Callback, der an „listen“ übergeben wird, läuft dagegen nur einmal, nämlich wenn der Server bereit ist.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Browser: GET /api/hallo",
+              "node.js: handler(req, res)",
+              "Handler: req lesen",
+              "res.end(Antwort)",
+              "Browser zeigt Antwort"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Die Parameter req und res",
+          "bullets": [
+            "req (IncomingMessage) – die Anfrage, nur lesen",
+            [
+              "req.method: GET, POST, …   req.url: Pfad mit Query",
+              1
+            ],
+            [
+              "req.headers: Kopfzeilen; Body kommt als Stream",
+              1
+            ],
+            "res (ServerResponse) – die Antwort, wird befüllt",
+            [
+              "res.writeHead(status, headers) oder res.statusCode / setHeader()",
+              1
+            ],
+            [
+              "res.write(teil): Daten senden, beliebig oft",
+              1
+            ],
+            [
+              "res.end(letzterTeil?): Antwort abschließen, genau einmal",
+              1
+            ],
+            "Für jede Anfrage gibt es ein neues Paar req / res"
+          ],
+          "notes": "Folie: „Die Parameter req und res“.\n\n„req“ ist die Abkürzung für „request“, also Anfrage. Das Objekt enthält die Methode, zum Beispiel „GET“ oder „POST“, die angefragte Adresse in „req.url“ und die Kopfzeilen, die „Header“. Den Inhalt einer POST-Anfrage, den „Body“, liest man stückweise als Datenstrom, als sogenannten „Stream“.\n\n„res“ ist die Abkürzung für „response“, also Antwort. Mit „writeHead“ setzt man den Statuscode und die Header. Mit „write“ sendet man Daten, auch in mehreren Teilen. Mit „end“ schließt man die Antwort ab. Das darf nur einmal pro Anfrage passieren.\n\nFür jede neue Anfrage erzeugt node.js ein neues Paar aus „req“ und „res“."
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: Statische Dateien ausliefern",
+          "code": "const http = require('node:http');\nconst fs = require('node:fs');\nconst path = require('node:path');\n\nconst ROOT = path.join(__dirname, 'static-content');\nconst TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript' };\n\nhttp.createServer((req, res) => {\n  const name = path.basename(req.url) || 'index.html';  // nur Dateiname, kein ../\n  const datei = path.join(ROOT, name);\n  const typ = TYPES[path.extname(datei)] ?? 'application/octet-stream';\n\n  const stream = fs.createReadStream(datei);\n  stream.on('open', () => res.writeHead(200, { 'Content-Type': typ }));\n  stream.on('error', () => { res.writeHead(404); res.end('Nicht gefunden'); });\n  stream.pipe(res);\n}).listen(6061, '127.0.0.1');",
+          "notes": "Codefolie „Beispiel: Statische Dateien ausliefern“.\n\nDieser Server liefert Dateien aus dem Ordner „static-content“ aus, zum Beispiel HTML-, CSS- und JavaScript-Dateien. Aus der angefragten Adresse wird mit „path.basename“ nur der Dateiname genommen. So kann niemand mit „../“ aus dem Ordner ausbrechen und fremde Dateien lesen.\n\nAnhand der Dateiendung wird der passende „Content-Type“ gewählt. Dann öffnet „createReadStream“ die Datei als Datenstrom. Wenn die Datei geöffnet werden konnte, wird der Status 200 gesendet. Wenn sie fehlt, kommt der Status 404.\n\n„pipe“ verbindet den Datenstrom der Datei direkt mit der Antwort. Die Datei wird also stückweise zum Browser geschickt und nie komplett in den Speicher geladen."
+        },
+        {
+          "type": "content",
+          "title": "Streams, pipe und Frameworks",
+          "bullets": [
+            "Stream: Daten kommen in Stücken, nicht alles auf einmal",
+            "pipe() leitet Lese-Stream in Schreib-Stream (hier: res)",
+            "Vorteil: wenig Speicher, auch bei großen Dateien",
+            "Sicherheit: Pfade aus der URL nie ungeprüft verwenden",
+            "In der Praxis: Framework wie Express statt reinem http",
+            "Unser Kurs-Backend server/server.js nutzt Express"
+          ],
+          "notes": "Folie: „Streams, pipe und Frameworks“.\n\nEin „Stream“ ist ein Datenstrom. Die Daten kommen in Stücken an und werden auch in Stücken weitergegeben. „pipe“ heißt übersetzt „Rohr“. Die Methode verbindet einen Lese-Strom mit einem Schreib-Strom. Hier fließt die Datei direkt in die Antwort „res“. Das spart Speicher, auch bei sehr großen Dateien.\n\nWichtig für die Sicherheit: Teile der Adresse dürfen nie ungeprüft als Dateipfad verwendet werden.\n\nIn echten Projekten schreibt man selten alles mit dem reinen „http“-Modul. Man nutzt ein Framework wie „Express“. Auch das Backend unseres Kurses im Ordner „server“ ist mit Express gebaut. Das Diagramm zeigt den Unterschied.",
+          "diagram": {
+            "kind": "code",
+            "title": "Express (Kurs-Backend)",
+            "text": "const express = require('express');\nconst app = express();\n\napp.get('/api/pigs', (req, res) => {\n  res.send({ data: pigArray });\n});\n\napp.listen(3000);"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Das Kurs-Backend im Zusammenspiel",
+          "bullets": [
+            "Terminal 1: cd server, npm install, node server.js",
+            [
+              "Express-Server auf Port 3000, Daten unter /api/…",
+              1
+            ],
+            "Terminal 2: ng serve --proxy-config dev.proxy.json",
+            [
+              "Dev-Server auf Port 4200, liefert die Angular-App",
+              1
+            ],
+            "Browser fragt nur Port 4200 an",
+            "Proxy leitet /api/… an Port 3000 weiter",
+            "Zwei node-Prozesse laufen gleichzeitig"
+          ],
+          "notes": "Folie: „Das Kurs-Backend im Zusammenspiel“.\n\nIn den Übungen laufen zwei node.js-Programme gleichzeitig. Im ersten Terminal startet man das Backend mit „node server.js“. Das ist ein Express-Server auf Port 3000, der die Daten unter „/api“ bereitstellt.\n\nIm zweiten Terminal startet man „ng serve“. Das ist der Entwicklungs-Server von Angular auf Port 4200. Der Browser spricht nur mit Port 4200. Die Datei „dev.proxy.json“ sorgt dafür, dass alle Anfragen an „/api“ an Port 3000 weitergeleitet werden. Ein „Proxy“ ist ein Vermittler, der Anfragen weiterreicht.\n\nDas Diagramm zeigt den Weg einer Anfrage vom Browser über den Proxy zum Backend.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Browser",
+              "ng serve :4200\n(Proxy für /api)",
+              "node server.js :3000\n(Express)"
+            ],
+            "note": "dev.proxy.json: /api → localhost:3000"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Installation von node.js",
+          "bullets": [
+            "Download: nodejs.org – Version mit „LTS“ wählen",
+            "LTS = Long Term Support: gerade Nummern, ca. 30 Monate gepflegt",
+            "Ungerade Nummern (Current) nur kurz unterstützt",
+            "Angular 21 braucht node ^20.19, ^22.12 oder ^24",
+            "node 20 wird seit April 2026 nicht mehr gepflegt",
+            "Empfehlung: aktuelle LTS, die Angular unterstützt (z. B. 24)",
+            "npm wird automatisch mitinstalliert"
+          ],
+          "notes": "Folie: „Installation von node.js“.\n\nnode.js lädt man von der Seite „nodejs.org“ herunter. Dort gibt es zwei Arten von Versionen. „LTS“ bedeutet „Long Term Support“, also lange Unterstützung. Das sind die Versionen mit gerader Nummer, zum Beispiel 22 und 24. Sie bekommen etwa zweieinhalb Jahre lang Fehlerkorrekturen und Sicherheitsupdates. Versionen mit ungerader Nummer werden nur kurz unterstützt und sind für Projekte nicht geeignet.\n\nAngular 21 funktioniert mit node.js ab 20.19, ab 22.12 oder mit Version 24. Version 20 bekommt seit April 2026 keine Updates mehr. Für neue Installationen nimmt man deshalb eine aktuelle LTS-Version, die Angular unterstützt, zum Beispiel 24. Welche Versionen genau unterstützt werden, steht in der Versionstabelle auf „angular.dev“.\n\nDer Paketmanager „npm“ wird bei der Installation automatisch mitinstalliert."
+        },
+        {
+          "type": "content",
+          "title": "Mehrere Versionen mit nvm",
+          "bullets": [
+            "Problem: Projekte brauchen verschiedene node-Versionen",
+            "nvm = Node Version Manager (macOS, Linux)",
+            "Windows: nvm-windows oder fnm (eigene Projekte)",
+            "Datei .nvmrc im Projekt hält die Version fest",
+            "nvm use liest .nvmrc und schaltet um",
+            "Globale Pakete gelten pro node-Version"
+          ],
+          "notes": "Folie: „Mehrere Versionen mit nvm“.\n\nOft arbeitet man an mehreren Projekten, die unterschiedliche node-Versionen brauchen. Dafür gibt es Versionsverwalter. „nvm“ steht für „Node Version Manager“ und läuft unter macOS und Linux. Unter Windows nutzt man „nvm-windows“ oder „fnm“. Das sind eigene Programme mit ähnlichen Befehlen.\n\nDer Kasten zeigt die wichtigsten Befehle: eine Version installieren, zu ihr wechseln und sie als Standard festlegen. In einer Datei „.nvmrc“ im Projekt kann man die passende Version eintragen. „nvm use“ liest diese Datei dann automatisch.\n\nAchtung: Global installierte Pakete, zum Beispiel die Angular CLI, gehören zu einer bestimmten node-Version. Nach einem Wechsel muss man sie eventuell neu installieren.",
+          "diagram": {
+            "kind": "code",
+            "title": "Terminal",
+            "text": "nvm install 24\nnvm use 24\nnvm alias default 24\nnvm ls\n\n# .nvmrc im Projekt:\n24\n\nnvm use   # liest .nvmrc"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Testen der Installation",
+          "code": "$ node -v\nv24.11.0                  # Beispiel – die genaue Nummer kann abweichen\n\n$ npm -v\n11.6.1\n\n$ node -e \"console.log('Hallo von node', process.version)\"\nHallo von node v24.11.0\n\n$ node                    # interaktive Konsole (REPL)\n> 1 + 2\n3\n> .exit\n\n$ ng version              # zeigt Angular CLI, node- und Paketversionen",
+          "notes": "Codefolie „Testen der Installation“.\n\nNach der Installation prüft man im Terminal, ob alles funktioniert. „node -v“ zeigt die installierte node-Version, „npm -v“ die Version von npm. Die Zahlen auf der Folie sind nur Beispiele.\n\nMit „node -e“ kann man ein kurzes Stück JavaScript direkt ausführen. Gibt man nur „node“ ein, startet die interaktive Konsole. Sie heißt „REPL“, das steht für „Read, Eval, Print, Loop“: Sie liest eine Eingabe, führt sie aus, gibt das Ergebnis aus und wartet auf die nächste Eingabe. Mit „.exit“ verlässt man sie.\n\nIn einem Angular-Projekt zeigt „ng version“ zusätzlich die Versionen der Angular-Pakete und warnt, wenn die node-Version nicht passt."
+        },
+        {
+          "type": "content",
+          "title": "Wofür Angular node.js braucht",
+          "bullets": [
+            "node.js läuft nur auf dem Entwickler-Rechner bzw. im Build-Server",
+            "Angular CLI (ng new, ng generate, ng serve, ng build)",
+            "Build: TypeScript und Templates übersetzen mit esbuild",
+            "Dev-Server: Vite liefert die App aus, lädt bei Änderungen neu",
+            "Tests: ng test startet Vitest",
+            "Im Browser läuft nur das Ergebnis: JavaScript, HTML, CSS"
+          ],
+          "notes": "Folie: „Wofür Angular node.js braucht“.\n\nEine Angular-Anwendung läuft im Browser. node.js braucht man trotzdem, aber nur bei der Entwicklung und beim Bauen. Die Angular CLI, also das Kommandozeilen-Werkzeug „ng“, ist ein node-Programm.\n\nBeim Bauen übersetzt das Werkzeug „esbuild“ den TypeScript-Code und die Templates in JavaScript. Bei „ng serve“ liefert ein Entwicklungs-Server auf Basis von „Vite“ die App an den Browser und lädt sie bei Änderungen automatisch neu. Auch die Tests mit „Vitest“ laufen in node.js.\n\nIm Browser kommt am Ende nur das Ergebnis an: JavaScript, HTML und CSS. Das Diagramm stellt Entwicklung und Laufzeit gegenüber.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Entwicklung (node.js)",
+              "items": [
+                "Angular CLI",
+                "esbuild: Build",
+                "Vite: Dev-Server",
+                "Vitest: Tests"
+              ]
+            },
+            "right": {
+              "title": "Laufzeit (Browser)",
+              "items": [
+                "main-….js, styles-….css",
+                "index.html",
+                "Signals, DOM, HTTP"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ablauf von ng serve",
+          "bullets": [
+            "ng serve startet die CLI als node-Prozess",
+            "esbuild übersetzt *.ts und Templates nach JavaScript",
+            "Vite-Dev-Server liefert die Dateien aus dem Speicher",
+            "Browser lädt localhost:4200",
+            "Datei geändert: nur betroffene Teile neu bauen",
+            "Browser lädt neu bzw. tauscht Teile aus (HMR)"
+          ],
+          "notes": "Folie: „Ablauf von ng serve“.\n\nGibt man „ng serve“ ein, startet die Angular CLI als node-Prozess. Sie übersetzt mit „esbuild“ alle TypeScript-Dateien und Templates in JavaScript. Die Ergebnisse liegen nur im Arbeitsspeicher, nicht als Dateien auf der Festplatte.\n\nEin Entwicklungs-Server auf Basis von „Vite“ liefert diese Dateien auf Port 4200 an den Browser aus.\n\nÄndert man eine Datei, baut die CLI nur die betroffenen Teile neu. Der Browser lädt dann neu oder tauscht bei Styles und Templates nur das geänderte Stück aus. Das nennt man „HMR“, „Hot Module Replacement“, also Austausch im laufenden Betrieb. Früher brauchte man dafür eigene Werkzeuge wie „Browsersync“.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "ng serve (node)",
+              "esbuild: TS → JS",
+              "Vite-Dev-Server :4200",
+              "Browser"
+            ],
+            "highlight_last": true,
+            "note": "Änderung → neu bauen → neu laden"
+          }
+        },
+        {
+          "type": "content",
+          "title": "ng build und der Betrieb",
+          "bullets": [
+            "ng build erzeugt dist/<projekt>/browser/",
+            "Inhalt: index.html, JavaScript- und CSS-Dateien, Assets",
+            "Dateien sind statisch: jeder Webserver kann sie ausliefern",
+            [
+              "z. B. nginx, Apache, IIS, CDN",
+              1
+            ],
+            "Im Betrieb ist dafür kein node.js nötig",
+            "Ausnahme: Server-Side Rendering (SSR) läuft auf node.js"
+          ],
+          "notes": "Folie: „ng build und der Betrieb“.\n\n„ng build“ baut die Anwendung für den Betrieb. Das Ergebnis liegt im Ordner „dist“, dort im Unterordner des Projekts und darin im Ordner „browser“. Er enthält die Datei „index.html“, die JavaScript- und CSS-Dateien und die Bilder.\n\nDiese Dateien sind statisch. Das heißt, sie werden nur ausgeliefert und nicht auf dem Server ausgeführt. Jeder normale Webserver kann das, zum Beispiel „nginx“ oder „Apache“. Auf dem Produktiv-Server braucht man dafür kein node.js.\n\nEine Ausnahme ist das „Server-Side Rendering“, abgekürzt „SSR“. Dabei erzeugt ein Server die HTML-Seite vorab. Dieser Server ist ein node-Programm.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Quellcode: *.ts, *.html, *.css",
+              "ng build (node.js, esbuild)",
+              "dist/…/browser: statische Dateien",
+              "Webserver → Browser"
+            ],
+            "note": "node.js nur beim Bauen (außer SSR)"
+          }
+        },
+        {
+          "type": "divider",
+          "title": "npm – Der Node Package Manager",
+          "notes": "Kapitelübergangsfolie „npm – Der Node Package Manager“ – Der nächste Teil des Anhangs behandelt „npm“. Das ist der Paketmanager von node.js. Ein Paketmanager lädt fremde Bibliotheken herunter und verwaltet ihre Versionen. Wir haben npm im Kurs von Anfang an benutzt, zum Beispiel mit „npm install“."
+        },
+        {
+          "type": "content",
+          "title": "Was ist npm?",
+          "bullets": [
+            "Paketmanager: lädt Bibliotheken und Werkzeuge (Pakete)",
+            "Wird mit node.js installiert, prüfen mit npm -v",
+            "Öffentliche Registry: registry.npmjs.org",
+            [
+              "Größte Sammlung von Software-Paketen",
+              1
+            ],
+            "Firmen: eigene Registry, z. B. Nexus, Artifactory",
+            [
+              "Einstellung in der Datei .npmrc (registry=…)",
+              1
+            ],
+            "Alternativen mit gleicher Idee: pnpm, Yarn"
+          ],
+          "notes": "Folie: „Was ist npm?“.\n\n„npm“ ist ein Paketmanager. Ein „Paket“ ist eine Bibliothek oder ein Werkzeug, das jemand veröffentlicht hat, zum Beispiel „@angular/core“ oder „rxjs“. npm wird mit node.js zusammen installiert. Mit „npm -v“ prüft man die Version.\n\nDie Pakete liegen in einer „Registry“, also einem zentralen Verzeichnis im Internet. Die öffentliche Registry ist die größte Sammlung von Software-Paketen. Viele Firmen betreiben eine eigene Registry, zum Beispiel mit „Nexus“ oder „Artifactory“. Die Adresse trägt man in die Konfigurationsdatei „.npmrc“ ein.\n\nDas Diagramm zeigt den Weg eines Pakets von der Registry in das Projekt. Andere Paketmanager wie „pnpm“ und „Yarn“ funktionieren nach dem gleichen Prinzip.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Registry\n(Internet / Firma)",
+              "npm install",
+              "Cache auf dem Rechner",
+              "node_modules/ im Projekt"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "npm-Befehle im Überblick",
+          "bullets": [
+            "npm install – Abhängigkeiten installieren oder Paket hinzufügen",
+            "npm ci – exakt nach package-lock.json installieren (CI, Build)",
+            "npm run <name> – Script aus package.json ausführen",
+            "npm outdated – zeigt veraltete Pakete",
+            "npm update – aktualisiert im erlaubten Versionsbereich",
+            "npm audit – prüft auf bekannte Sicherheitslücken",
+            "npx <paket> – Werkzeug ausführen, ohne global zu installieren",
+            "Hilfe: npm help <befehl>, npm <befehl> -h, docs.npmjs.com"
+          ],
+          "notes": "Folie: „npm-Befehle im Überblick“.\n\nnpm bedient man über die Kommandozeile. Die Folie zeigt die wichtigsten Befehle, die auf den nächsten Folien einzeln erklärt werden.\n\n„npm install“ installiert Abhängigkeiten. „npm ci“ installiert exakt den festgehaltenen Stand und ist für automatische Builds gedacht. „npm run“ startet ein Script aus der Datei „package.json“. „npm outdated“ zeigt veraltete Pakete, „npm update“ aktualisiert sie. „npm audit“ sucht nach bekannten Sicherheitslücken. Mit „npx“ startet man ein Werkzeug, ohne es fest zu installieren.\n\nZu jedem Befehl gibt es eine Hilfe, zum Beispiel mit „npm help install“, und ausführliche Online-Dokumentation."
+        },
+        {
+          "type": "code",
+          "title": "npm install: Varianten",
+          "code": "npm install                     # alle Abhängigkeiten aus package.json installieren\nnpm i                           # Kurzform\n\nnpm install rxjs                # Paket hinzufügen → \"dependencies\"\nnpm install -D vitest           # nur zum Entwickeln → \"devDependencies\"\nnpm install lodash@4.17.21      # bestimmte Version\nnpm install @angular/core@21    # neueste 21.x.x\n\nnpm uninstall lodash            # Paket entfernen\n\nnpm install -g @angular/cli     # global: Befehl \"ng\" überall verfügbar",
+          "notes": "Codefolie „npm install: Varianten“.\n\nOhne weiteren Namen installiert „npm install“ alle Abhängigkeiten, die in der Datei „package.json“ stehen. Das macht man nach dem Klonen eines Projekts. „npm i“ ist die Kurzform.\n\nMit einem Paketnamen fügt man ein neues Paket hinzu. npm trägt es automatisch in „package.json“ ein. Mit „-D“ landet es bei den Abhängigkeiten, die man nur zum Entwickeln braucht. Hinter dem „@“ kann man eine Version angeben. „npm uninstall“ entfernt ein Paket wieder.\n\nMit „-g“ wird ein Paket global installiert, also für den ganzen Rechner. Das nutzt man für Werkzeuge wie die Angular CLI."
+        },
+        {
+          "type": "content",
+          "title": "Was npm install im Detail macht",
+          "bullets": [
+            "1. package.json lesen: welche Pakete, welche Bereiche?",
+            "2. Mit package-lock.json abgleichen bzw. Versionen auflösen",
+            "3. Pakete laden (oder aus dem Cache nehmen)",
+            "4. Nach node_modules/ entpacken, Abhängigkeiten der Pakete mit",
+            "5. package-lock.json schreiben oder aktualisieren",
+            "Danach: offline arbeiten möglich"
+          ],
+          "notes": "Folie: „Was npm install im Detail macht“.\n\nZuerst liest npm die Datei „package.json“. Dort steht, welche Pakete in welchen Versionsbereichen gebraucht werden. Dann schaut npm in die Datei „package-lock.json“. Steht dort schon eine passende, genaue Version, wird diese genommen. Sonst sucht npm die neueste Version, die zum Bereich passt.\n\nDanach lädt npm die Pakete aus der Registry oder nimmt sie aus dem lokalen Zwischenspeicher, dem „Cache“. Die Pakete werden in den Ordner „node_modules“ entpackt. Auch die Abhängigkeiten dieser Pakete werden mit installiert.\n\nZum Schluss schreibt npm die genauen Versionen in „package-lock.json“. Ab jetzt liegen alle Pakete auf dem Rechner, und man kann ohne Internet weiterarbeiten.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "package.json",
+              "package-lock.json",
+              "Registry / Cache",
+              "node_modules/",
+              "Lock-Datei aktualisiert"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Lokal oder global installieren?",
+          "bullets": [
+            "Lokal (Standard): ./node_modules im Projekt",
+            [
+              "Für Bibliotheken und Werkzeuge des Projekts",
+              1
+            ],
+            [
+              "Version steht in package.json, alle nutzen dieselbe",
+              1
+            ],
+            "Global (-g): einmal pro Rechner bzw. node-Version",
+            [
+              "Für allgemeine Werkzeuge, z. B. @angular/cli",
+              1
+            ],
+            "ng im Projekt nutzt trotzdem die lokale CLI-Version",
+            "Alternative zu global: npx"
+          ],
+          "notes": "Folie: „Lokal oder global installieren?“.\n\nDer Normalfall ist die lokale Installation. Die Pakete landen im Ordner „node_modules“ des Projekts, und die Version steht in „package.json“. So arbeiten alle im Team mit denselben Versionen.\n\nGlobal installiert man nur allgemeine Werkzeuge, die man überall als Befehl aufrufen möchte, zum Beispiel die Angular CLI. Ruft man „ng“ in einem Angular-Projekt auf, verwendet die globale CLI aber automatisch die lokale CLI-Version des Projekts. So passt die Version immer zum Projekt.\n\nWer gar nichts global installieren möchte, nutzt „npx“. Das kommt gleich noch.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Lokal",
+              "items": [
+                "npm install rxjs",
+                "./node_modules",
+                "in package.json"
+              ]
+            },
+            "right": {
+              "title": "Global",
+              "items": [
+                "npm install -g @angular/cli",
+                "Ordner der node-Version",
+                "nicht in package.json"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "npm ci oder npm install?",
+          "bullets": [
+            "npm install: darf Lock-Datei anpassen, behält node_modules",
+            "npm ci (clean install): löscht node_modules zuerst",
+            [
+              "Installiert exakt package-lock.json",
+              1
+            ],
+            [
+              "Bricht ab, wenn package.json und Lock nicht passen",
+              1
+            ],
+            "Einsatz von npm ci: Build-Server, Pipeline, frischer Checkout",
+            "Beim Entwickeln: npm install"
+          ],
+          "notes": "Folie: „npm ci oder npm install?“.\n\nBeide Befehle installieren Abhängigkeiten, aber mit unterschiedlichem Ziel. „npm install“ ist für die Entwicklung gedacht. Es behält den vorhandenen Ordner „node_modules“ und darf die Lock-Datei anpassen.\n\n„npm ci“ steht für „clean install“, also saubere Installation. Es löscht zuerst den Ordner „node_modules“ und installiert dann genau die Versionen aus „package-lock.json“. Es ändert keine Dateien. Passen „package.json“ und Lock-Datei nicht zusammen, bricht es mit einem Fehler ab.\n\nDeshalb nimmt man „npm ci“ auf Build-Servern und in der Pipeline. So wird immer genau der Stand gebaut, der im Repository liegt.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "npm install",
+              "items": [
+                "Entwicklung",
+                "darf Lock ändern",
+                "behält node_modules"
+              ]
+            },
+            "right": {
+              "title": "npm ci",
+              "items": [
+                "Build / Pipeline",
+                "Lock ist Gesetz",
+                "löscht node_modules"
+              ]
+            }
+          }
+        },
+        {
+          "type": "code",
+          "title": "npm run: Scripts ausführen",
+          "code": "// package.json von 26_resourceApi/invoice-app\n\"scripts\": {\n  \"ng\": \"ng\",\n  \"start\": \"ng serve\",\n  \"build\": \"ng build\",\n  \"watch\": \"ng build --watch --configuration development\",\n  \"test\": \"ng test\"\n}\n\nnpm start                       # Kurzform von: npm run start  → ng serve\nnpm test                        # Kurzform von: npm run test   → ng test\nnpm run build                   # → ng build\nnpm run watch\nnpm run build -- --configuration development   # nach \"--\": Argumente an ng\nnpm run                         # listet alle Scripts",
+          "notes": "Codefolie „npm run: Scripts ausführen“.\n\nOben steht der Block „scripts“ aus der Datei „package.json“ eines Übungsprojekts. Jedes Script hat einen Namen und einen Befehl. Mit „npm run“ und dem Namen wird der Befehl ausgeführt. Für „start“ und „test“ gibt es Kurzformen ohne „run“.\n\nMöchte man dem Befehl zusätzliche Argumente mitgeben, schreibt man sie hinter zwei Bindestriche. Alles danach reicht npm unverändert an den Befehl weiter.\n\n„npm run“ ohne Namen listet alle Scripts des Projekts auf."
+        },
+        {
+          "type": "content",
+          "title": "Warum Scripts den lokalen ng finden",
+          "bullets": [
+            "npm run ergänzt den Suchpfad um node_modules/.bin",
+            "Dort liegen Befehle der installierten Pakete: ng, vitest, tsc",
+            "Also läuft immer die Projekt-Version – ohne globale Installation",
+            "Einheitliche Befehle im Team: npm start, npm test",
+            "Pipeline ruft dieselben Scripts auf",
+            "Eigene Scripts möglich, z. B. \"lint\": \"ng lint\""
+          ],
+          "notes": "Folie: „Warum Scripts den lokalen ng finden“.\n\nViele Pakete bringen Befehle mit, zum Beispiel bringt „@angular/cli“ den Befehl „ng“ mit und „vitest“ den Befehl „vitest“. npm legt diese Befehle in den Ordner „node_modules/.bin“.\n\nWenn „npm run“ ein Script startet, sucht es Befehle zuerst in diesem Ordner. Deshalb funktioniert „npm start“ auch dann, wenn die Angular CLI nicht global installiert ist. Und es läuft immer genau die Version, die zum Projekt gehört.\n\nScripts sind außerdem eine gute Vereinbarung im Team: Jeder startet und testet mit denselben Befehlen, und die Pipeline auch.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "npm start",
+              "Script \"start\": ng serve",
+              "node_modules/.bin/ng",
+              "lokale Angular CLI"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Pakete aktualisieren: outdated und update",
+          "code": "$ npm outdated\nPackage       Current   Wanted   Latest   Location\n@angular/core  21.0.1   21.0.6   21.0.6   node_modules/@angular/core\nrxjs            7.8.1    7.8.2    7.8.2   node_modules/rxjs\njsdom          28.0.0   28.1.0   29.0.0   node_modules/jsdom\n\n# Current: installiert   Wanted: höchste im erlaubten Bereich   Latest: neueste\n$ npm update                    # aktualisiert bis \"Wanted\", passt Lock-Datei an\n\n$ npm install -D jsdom@29       # Sprung auf neue Hauptversion: bewusst und einzeln\n\n# Für Angular-Pakete besser das Angular-Werkzeug (passt auch Code an):\n$ ng update @angular/core @angular/cli",
+          "notes": "Codefolie „Pakete aktualisieren: outdated und update“.\n\n„npm outdated“ zeigt eine Tabelle der veralteten Pakete. Die Zahlen auf der Folie sind nur Beispiele. Die Spalte „Current“ zeigt die installierte Version. „Wanted“ ist die höchste Version, die der Versionsbereich in „package.json“ erlaubt. „Latest“ ist die neueste veröffentlichte Version.\n\n„npm update“ aktualisiert alle Pakete bis zur Spalte „Wanted“. Einen Sprung auf eine neue Hauptversion macht npm dabei nicht. Den muss man bewusst mit „npm install“ und der neuen Version durchführen.\n\nFür Angular selbst nimmt man „ng update“. Dieser Befehl aktualisiert alle Angular-Pakete gemeinsam und passt bei Bedarf auch den Code an."
+        },
+        {
+          "type": "content",
+          "title": "npm audit: Sicherheitslücken finden",
+          "bullets": [
+            "Gleicht installierte Versionen mit einer Datenbank bekannter Lücken ab",
+            "Ausgabe: Paket, Schweregrad (low … critical), Abhilfe",
+            "npm audit fix: aktualisiert im erlaubten Versionsbereich",
+            "npm audit fix --force: auch neue Hauptversionen – Vorsicht!",
+            "Lücken in devDependencies betreffen meist nur die Entwicklung",
+            "Regelmäßig prüfen, z. B. automatisch in der Pipeline"
+          ],
+          "notes": "Folie: „npm audit: Sicherheitslücken finden“.\n\n„npm audit“ vergleicht die installierten Paketversionen mit einer Datenbank bekannter Sicherheitslücken. Für jede gefundene Lücke zeigt es das Paket, den Schweregrad von „low“, also niedrig, bis „critical“, also kritisch, und einen Vorschlag zur Behebung.\n\n„npm audit fix“ aktualisiert betroffene Pakete, solange das im erlaubten Versionsbereich möglich ist. Mit der Option „--force“ springt es auch auf neue Hauptversionen. Das kann die Anwendung kaputt machen. Diese Option sollte man deshalb nicht blind verwenden.\n\nLücken in Paketen, die nur zum Entwickeln dienen, erreichen den Browser meist nicht. Man sollte sie trotzdem beheben. Am besten prüft man regelmäßig, zum Beispiel automatisch in der Pipeline."
+        },
+        {
+          "type": "content",
+          "title": "npx: Werkzeuge ohne Installation",
+          "bullets": [
+            "npx führt den Befehl eines Pakets aus",
+            "Sucht zuerst in node_modules/.bin, sonst lädt es temporär",
+            "Neues Projekt ohne globale CLI",
+            "Bestimmte Version gezielt verwenden: paket@version",
+            "Bei unbekannten Paketen fragt npx vor dem Download"
+          ],
+          "notes": "Folie: „npx: Werkzeuge ohne Installation“.\n\n„npx“ wird zusammen mit npm installiert. Es führt den Befehl eines Pakets aus. Zuerst sucht es im Projekt im Ordner „node_modules/.bin“. Findet es den Befehl dort nicht, lädt es das Paket in einen Zwischenspeicher und führt es von dort aus.\n\nDer Kasten zeigt Beispiele. Mit „npx @angular/cli@21 new“ legt man ein neues Angular-Projekt an, ohne die CLI global zu installieren. Dabei wird genau die gewünschte Version verwendet. „npx ng version“ nutzt die CLI des aktuellen Projekts.\n\nBevor npx ein unbekanntes Paket herunterlädt, fragt es nach. Man sollte dort nur Pakete bestätigen, die man kennt.",
+          "diagram": {
+            "kind": "code",
+            "title": "Terminal",
+            "text": "# neues Projekt mit CLI 21\nnpx @angular/cli@21 new shop\n\n# lokale CLI des Projekts\nnpx ng version\n\n# lokales Vitest direkt\nnpx vitest --version"
+          }
+        },
+        {
+          "type": "divider",
+          "title": "Node-Modules und package.json",
+          "notes": "Kapitelübergangsfolie „Node-Modules und package.json“ – Der letzte Teil des Anhangs zeigt, wie ein Paket aufgebaut ist. Im Mittelpunkt steht die Datei „package.json“, die jedes Projekt und jedes Paket beschreibt. Danach geht es um den Ordner „node_modules“ und um die zwei Modulsysteme von JavaScript."
+        },
+        {
+          "type": "content",
+          "title": "Die package.json",
+          "bullets": [
+            "Beschreibt Projekt bzw. Paket im JSON-Format",
+            "name, version: Name und Version (SemVer)",
+            "private: true – verhindert versehentliches Veröffentlichen",
+            "scripts: Kurzbefehle für npm run",
+            "dependencies / devDependencies: benötigte Pakete",
+            "Weitere: description, author, license, main, type, engines"
+          ],
+          "notes": "Folie: „Die package.json“.\n\nDie Datei „package.json“ ist die zentrale Beschreibung eines Projekts. Sie ist im JSON-Format geschrieben. „name“ und „version“ geben Namen und Version an. „private: true“ bedeutet, dass das Projekt nicht in der öffentlichen Registry veröffentlicht werden darf. Das schützt vor Versehen.\n\nUnter „scripts“ stehen die Kurzbefehle für „npm run“. Unter „dependencies“ und „devDependencies“ stehen die benötigten Pakete mit ihren Versionsbereichen.\n\nDaneben gibt es weitere Felder, zum Beispiel für Beschreibung, Autor und Lizenz. „main“ nennt die Einstiegsdatei eines Pakets, „type“ das Modulsystem und „engines“ die benötigte node-Version.",
+          "diagram": {
+            "kind": "tree",
+            "root": "package.json",
+            "children": [
+              "name, version",
+              "scripts",
+              "dependencies",
+              "devDependencies",
+              "main, type, engines"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: package.json eines Übungsprojekts",
+          "code": "{\n  \"name\": \"invoice-app\",\n  \"version\": \"0.0.0\",\n  \"private\": true,\n  \"scripts\": { \"start\": \"ng serve\", \"build\": \"ng build\", \"test\": \"ng test\" },\n  \"dependencies\": {\n    \"@angular/core\": \"^21.0.0\",\n    \"@angular/router\": \"^21.0.0\",\n    \"rxjs\": \"^7.8.0\",\n    \"tslib\": \"^2.1.0\"\n  },\n  \"devDependencies\": {\n    \"@angular/build\": \"^21.0.0\",\n    \"@angular/cli\": \"^21.0.0\",\n    \"typescript\": \"~5.9.0\",\n    \"vitest\": \"~4.0.18\"\n  }\n}",
+          "notes": "Codefolie „Beispiel: package.json eines Übungsprojekts“.\n\nDas ist eine gekürzte Fassung der Datei „package.json“ aus dem Übungsprojekt „26_resourceApi“. Das Projekt heißt „invoice-app“ und ist als privat markiert. Die Scripts starten, bauen und testen die Anwendung.\n\nUnter „dependencies“ stehen die Pakete, die im Browser gebraucht werden: Angular selbst, „rxjs“ und „tslib“, eine kleine Hilfsbibliothek für übersetzten TypeScript-Code. Unter „devDependencies“ stehen die Werkzeuge: das Build-System, die CLI, TypeScript und Vitest für die Tests.\n\nVor den Versionsnummern stehen die Zeichen Dach und Tilde. Was sie bedeuten, erklären die nächsten Folien."
+        },
+        {
+          "type": "content",
+          "title": "dependencies oder devDependencies?",
+          "bullets": [
+            "dependencies: Code, der später im Browser läuft",
+            [
+              "@angular/core, @angular/router, rxjs, tslib",
+              1
+            ],
+            "devDependencies: nur zum Bauen, Testen, Prüfen",
+            [
+              "@angular/cli, @angular/build, typescript, vitest",
+              1
+            ],
+            "npm install installiert beide",
+            "npm install --omit=dev lässt devDependencies weg",
+            "Bei Angular entscheidet der Build, was ins Bundle kommt"
+          ],
+          "notes": "Folie: „dependencies oder devDependencies?“.\n\nUnter „dependencies“ stehen Pakete, deren Code später in der Anwendung im Browser läuft, zum Beispiel Angular selbst und „rxjs“. Unter „devDependencies“ stehen Werkzeuge, die man nur zum Bauen, Testen und Prüfen braucht, zum Beispiel die CLI, TypeScript und Vitest.\n\nEin normales „npm install“ installiert beide Gruppen. Mit der Option „--omit=dev“ lässt npm die Entwicklungs-Pakete weg. Das ist bei Server-Programmen wichtig, die direkt aus „node_modules“ laufen.\n\nBei Angular ist die Trennung vor allem eine Ordnungshilfe. Was am Ende im Browser landet, bestimmt der Build: Er nimmt nur den Code, der wirklich importiert wird. Das Diagramm zeigt die beiden Gruppen.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "dependencies",
+              "items": [
+                "@angular/core",
+                "@angular/router",
+                "rxjs, tslib"
+              ]
+            },
+            "right": {
+              "title": "devDependencies",
+              "items": [
+                "@angular/cli",
+                "@angular/build",
+                "typescript, vitest"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Versionsnummern: Semantic Versioning",
+          "bullets": [
+            "Aufbau: MAJOR.MINOR.PATCH, z. B. 21.0.6",
+            "MAJOR: inkompatible Änderungen (Breaking Changes)",
+            "MINOR: neue Funktionen, abwärtskompatibel",
+            "PATCH: nur Fehlerkorrekturen",
+            "Vorabversionen: 22.0.0-next.1, 22.0.0-rc.0",
+            "Angular: alle 6 Monate eine neue Hauptversion"
+          ],
+          "notes": "Folie: „Versionsnummern: Semantic Versioning“.\n\nFast alle npm-Pakete nutzen „Semantic Versioning“, abgekürzt „SemVer“. Das bedeutet „Versionsnummern mit Bedeutung“. Eine Version besteht aus drei Zahlen, getrennt durch Punkte.\n\nDie erste Zahl ist die Hauptversion, englisch „major“. Sie steigt, wenn sich etwas inkompatibel ändert und man eventuell seinen Code anpassen muss. Die zweite Zahl, „minor“, steigt bei neuen Funktionen, die alten Code nicht stören. Die dritte Zahl, „patch“, steigt bei reinen Fehlerkorrekturen.\n\nVorabversionen haben einen Zusatz wie „next“ oder „rc“, das steht für „Release Candidate“, also Kandidat für die fertige Version. Angular bringt etwa alle sechs Monate eine neue Hauptversion heraus.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "21 = MAJOR\nBreaking Changes",
+              "0 = MINOR\nneue Funktionen",
+              "6 = PATCH\nFehlerkorrekturen"
+            ],
+            "note": "21.0.6"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Versionsbereiche: ^ und ~",
+          "bullets": [
+            "^21.0.0 (Dach): gleiche Hauptversion",
+            [
+              ">= 21.0.0 und < 22.0.0 – erlaubt Minor- und Patch-Updates",
+              1
+            ],
+            "~5.9.0 (Tilde): gleiche Minor-Version",
+            [
+              ">= 5.9.0 und < 5.10.0 – nur Patch-Updates",
+              1
+            ],
+            "21.0.6 ohne Zeichen: genau diese Version",
+            "Sonderfall ^0.x: ^0.2.3 erlaubt nur < 0.3.0",
+            "TypeScript mit ~: Angular unterstützt nur bestimmte Minor-Versionen"
+          ],
+          "notes": "Folie: „Versionsbereiche: ^ und ~“.\n\nIn der Datei „package.json“ steht meist keine genaue Version, sondern ein Bereich. Das Dach-Zeichen „^“ erlaubt alle Versionen mit derselben Hauptversion. „^21.0.0“ erlaubt also 21.0.6 oder 21.1.0, aber nicht 22.0.0.\n\nDie Tilde „~“ ist strenger. Sie erlaubt nur neue Patch-Versionen. „~5.9.0“ erlaubt 5.9.3, aber nicht 5.10.0. Steht kein Zeichen davor, ist genau diese eine Version gemeint.\n\nBei Hauptversion 0 gilt eine Sonderregel: Dort gilt schon die zweite Zahl als inkompatibel. TypeScript wird in Angular-Projekten mit Tilde eingetragen, weil jede Angular-Version nur bestimmte TypeScript-Versionen unterstützt.",
+          "diagram": {
+            "kind": "code",
+            "title": "Was ist erlaubt?",
+            "text": "^21.0.0\n  21.0.6  ja\n  21.2.0  ja\n  22.0.0  nein\n\n~5.9.0\n  5.9.3   ja\n  5.10.0  nein"
+          }
+        },
+        {
+          "type": "content",
+          "title": "package-lock.json",
+          "bullets": [
+            "Hält den exakten Stand aller installierten Pakete fest",
+            [
+              "Version, Download-Adresse (resolved), Prüfsumme (integrity)",
+              1
+            ],
+            [
+              "Auch alle indirekten Abhängigkeiten",
+              1
+            ],
+            "Wird von npm geschrieben – nicht von Hand bearbeiten",
+            "Immer mit einchecken (Git)",
+            "Grund: alle bauen mit identischen Versionen, npm ci braucht sie",
+            "Merge-Konflikt: Datei aus Ziel-Branch nehmen, npm install"
+          ],
+          "notes": "Folie: „package-lock.json“.\n\nDie Datei „package.json“ enthält nur Versionsbereiche. Die Datei „package-lock.json“ enthält dagegen den genauen Stand: Für jedes installierte Paket die exakte Version, die Download-Adresse und eine Prüfsumme. Mit der Prüfsumme erkennt npm, ob ein Paket verändert wurde. Auch alle indirekten Abhängigkeiten stehen darin, also die Pakete, die von anderen Paketen gebraucht werden.\n\nDie Datei wird von npm geschrieben und nicht von Hand bearbeitet. Sie gehört unbedingt mit ins Versionsverwaltungssystem, zum Beispiel Git. Nur so bauen alle Entwickler und der Build-Server mit denselben Versionen. „npm ci“ funktioniert ohne sie gar nicht.\n\nGibt es beim Zusammenführen von Branches einen Konflikt in dieser Datei, übernimmt man die Fassung des Ziel-Branches und führt „npm install“ aus. npm ergänzt dann die fehlenden Einträge.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "package.json",
+              "items": [
+                "Bereiche: ^21.0.0",
+                "nur direkte Pakete",
+                "von Hand gepflegt"
+              ]
+            },
+            "right": {
+              "title": "package-lock.json",
+              "items": [
+                "exakt: 21.0.6",
+                "alle Pakete",
+                "von npm erzeugt"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ein eigenes Projekt anlegen: npm init",
+          "bullets": [
+            "Jedes npm-Projekt ist selbst ein Paket (Node-Module)",
+            "npm init fragt Name, Version, Beschreibung, … ab",
+            "npm init -y übernimmt alle Vorgaben ohne Fragen",
+            "Ergebnis: eine neue package.json",
+            "Bei Angular übernimmt ng new diesen Schritt",
+            [
+              "inklusive Abhängigkeiten, Scripts und npm install",
+              1
+            ]
+          ],
+          "notes": "Folie: „Ein eigenes Projekt anlegen: npm init“.\n\nJedes Projekt, das npm verwendet, ist selbst ein Paket. Man legt es mit „npm init“ an. Der Befehl fragt nacheinander den Namen, die Version, die Beschreibung und weitere Angaben ab und schreibt daraus eine neue Datei „package.json“. Mit „npm init -y“ werden alle Fragen mit den Vorgabewerten beantwortet.\n\nDanach installiert man die benötigten Pakete, zum Beispiel „express“. Der Kasten zeigt diese Schritte.\n\nBei Angular-Projekten macht man das nicht von Hand. „ng new“ erzeugt die Datei „package.json“ mit allen Abhängigkeiten und Scripts und führt „npm install“ automatisch aus.",
+          "diagram": {
+            "kind": "code",
+            "title": "Terminal",
+            "text": "mkdir npm-sample\ncd npm-sample\nnpm init -y\nnpm install express\n\n# Angular:\nng new shop"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: package.json nach npm init",
+          "code": "{\n  \"name\": \"npm-sample\",\n  \"version\": \"1.0.0\",\n  \"description\": \"a simple training project\",\n  \"main\": \"index.js\",\n  \"type\": \"commonjs\",\n  \"scripts\": {\n    \"start\": \"node index.js\",\n    \"test\": \"echo \\\"Error: no test specified\\\" && exit 1\"\n  },\n  \"keywords\": [\"training\"],\n  \"author\": \"theAuthor\",\n  \"license\": \"ISC\",\n  \"engines\": { \"node\": \">=22.12\" }\n}",
+          "notes": "Codefolie „Beispiel: package.json nach npm init“.\n\nDiese Datei entsteht ungefähr so durch „npm init“. Sie enthält Name, Version und Beschreibung des Projekts. „main“ nennt die Einstiegsdatei „index.js“. Diese Datei wird geladen, wenn jemand das Paket benutzt.\n\n„type“ gibt das Modulsystem an. Der Wert „commonjs“ bedeutet: Dateien mit der Endung „.js“ nutzen „require“. Ein „start“-Script wurde ergänzt. Das „test“-Script ist nur ein Platzhalter, der eine Fehlermeldung ausgibt.\n\n„engines“ wurde hier zusätzlich eingetragen. Es dokumentiert, welche node-Version das Projekt braucht."
+        },
+        {
+          "type": "content",
+          "title": "Der Ordner node_modules",
+          "bullets": [
+            "Enthält alle installierten Pakete, je mit eigener package.json",
+            "Flach: Abhängigkeiten von Abhängigkeiten liegen meist oben",
+            "Verschachtelt nur bei Versionskonflikten",
+            ".bin/ enthält die Befehle (ng, vitest, tsc)",
+            "Groß (oft Hunderte MB) – nie einchecken (.gitignore)",
+            "Kaputt? Ordner löschen und npm install bzw. npm ci"
+          ],
+          "notes": "Folie: „Der Ordner node_modules“.\n\nIm Ordner „node_modules“ liegen alle installierten Pakete. Jedes Paket hat dort einen eigenen Unterordner mit einer eigenen „package.json“. Pakete mit einem „@“ am Anfang, wie „@angular/core“, liegen in einem gemeinsamen Ordner, hier „@angular“.\n\nnpm legt die Pakete möglichst flach ab. Auch die Abhängigkeiten von Abhängigkeiten liegen meist direkt in „node_modules“. Nur wenn zwei Pakete verschiedene Versionen desselben Pakets brauchen, entsteht ein verschachtelter Ordner. Der Ordner „.bin“ enthält die Befehle der Pakete.\n\nDer Ordner ist sehr groß und wird nie eingecheckt, sondern in „.gitignore“ eingetragen. Man kann ihn jederzeit löschen und mit „npm install“ oder „npm ci“ neu erzeugen. Das hilft oft bei merkwürdigen Fehlern.",
+          "diagram": {
+            "kind": "tree",
+            "root": "node_modules/",
+            "children": [
+              ".bin/\nng, vitest",
+              "@angular/\ncore, router, …",
+              "rxjs/",
+              "tslib/",
+              ".package-lock.json"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Aufbau eines Pakets",
+          "bullets": [
+            "package.json: Name, Version, eigene Abhängigkeiten",
+            "Einstiegspunkt: main oder exports",
+            [
+              "Datei, die beim Import des Paketnamens geladen wird",
+              1
+            ],
+            "types: TypeScript-Typen (*.d.ts) für den Editor",
+            "Abhängigkeiten werden mit installiert",
+            "Beispiel: node_modules/rxjs/package.json"
+          ],
+          "notes": "Folie: „Aufbau eines Pakets“.\n\nJedes Paket in „node_modules“ ist selbst ein Node-Module mit eigener „package.json“. Darin stehen Name, Version und die Pakete, die es selbst braucht. npm installiert diese automatisch mit.\n\nWichtig ist der Einstiegspunkt. Das Feld „main“ oder das neuere Feld „exports“ legt fest, welche Datei geladen wird, wenn man das Paket über seinen Namen importiert. Mit „exports“ kann ein Paket außerdem steuern, welche Teile von außen sichtbar sind.\n\nDas Feld „types“ zeigt auf die TypeScript-Typbeschreibungen, die Dateien mit der Endung „.d.ts“. Daher kennt der Editor die Funktionen und Parameter eines Pakets.",
+          "diagram": {
+            "kind": "tree",
+            "root": "rxjs/",
+            "children": [
+              "package.json",
+              "dist/cjs/ (require)",
+              "dist/esm/ (import)",
+              "dist/types/ (*.d.ts)"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Zwei Modulsysteme: CommonJS und ES-Module",
+          "bullets": [
+            "CommonJS (CJS): das klassische Modulsystem von node.js",
+            [
+              "require() lädt, module.exports gibt frei – synchron",
+              1
+            ],
+            "ES-Module (ESM): Standard von JavaScript seit ES2015",
+            [
+              "import / export – Browser, TypeScript, Angular",
+              1
+            ],
+            "Neue node-Projekte nutzen zunehmend ESM",
+            "Im Angular-Code schreibt man immer import / export"
+          ],
+          "notes": "Folie: „Zwei Modulsysteme: CommonJS und ES-Module“.\n\nEin „Modul“ ist eine Datei, die bestimmte Dinge nach außen freigibt, und andere Dateien können diese Dinge laden. In JavaScript gibt es dafür zwei Systeme.\n\n„CommonJS“ ist das ältere, klassische System von node.js. Man lädt mit „require“ und gibt mit „module.exports“ frei. Das Laden passiert sofort beim Aufruf.\n\n„ES-Module“ sind der offizielle Standard der Sprache seit 2015. Man schreibt „import“ und „export“. Diese Schreibweise kennen wir aus TypeScript und aus jeder Angular-Datei. Browser verstehen ES-Module direkt, und auch neue node-Projekte verwenden sie immer häufiger. Das Diagramm stellt die beiden Schreibweisen gegenüber.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "CommonJS",
+              "items": [
+                "require('./x')",
+                "module.exports = …",
+                ".js / .cjs"
+              ]
+            },
+            "right": {
+              "title": "ES-Module",
+              "items": [
+                "import { a } from './x.js'",
+                "export function a()",
+                ".mjs oder \"type\": \"module\""
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Woran node.js das Modulsystem erkennt",
+          "bullets": [
+            "Endung .mjs: immer ES-Modul",
+            "Endung .cjs: immer CommonJS",
+            "Endung .js: entscheidet \"type\" in der nächsten package.json",
+            [
+              "\"type\": \"module\" → ESM, sonst CommonJS",
+              1
+            ],
+            "Bei ESM in node: Dateiendung im Pfad angeben (./x.js)",
+            "Neuere node-Versionen laden ESM auch per require()"
+          ],
+          "notes": "Folie: „Woran node.js das Modulsystem erkennt“.\n\nnode.js muss wissen, ob eine Datei CommonJS oder ein ES-Modul ist. Die Endung „.mjs“ bedeutet immer ES-Modul, die Endung „.cjs“ immer CommonJS.\n\nBei der normalen Endung „.js“ schaut node.js in die nächstgelegene Datei „package.json“. Steht dort „type“ mit dem Wert „module“, gilt die Datei als ES-Modul. Sonst gilt sie als CommonJS.\n\nBei ES-Modulen verlangt node.js beim Import eigener Dateien die vollständige Dateiendung, also zum Beispiel „./gruss.js“. In Angular-Projekten lässt man die Endung weg, weil dort das Build-Werkzeug die Dateien auflöst. Neuere node-Versionen, zum Beispiel ab 20.19 und 22.12, können ES-Module auch mit „require“ laden."
+        },
+        {
+          "type": "code",
+          "title": "Eigenes Modul mit CommonJS",
+          "code": "// gruss.js – das Modul\nconst anrede = 'Hallo';                        // privat: nicht exportiert\n\nfunction gruesse(name) {\n  return `${anrede}, ${name}!`;\n}\n\nmodule.exports = { gruesse, version: '1.0.0' };   // Freigabe nach außen\n\n// app.js – das Programm, starten mit: node app.js\nconst gruss = require('./gruss.js');           // Rückgabe = module.exports\nconsole.log(gruss.gruesse('Angular'));         // Hallo, Angular!\nconsole.log(gruss.version);                    // 1.0.0\n\n// Kurzform mit Destrukturierung:\nconst { gruesse } = require('./gruss.js');",
+          "notes": "Codefolie „Eigenes Modul mit CommonJS“.\n\nDie Datei „gruss.js“ ist ein Modul. Sie enthält eine Konstante „anrede“ und eine Funktion „gruesse“. Am Ende wird „module.exports“ ein Objekt zugewiesen. Nur was in diesem Objekt steht, ist von außen sichtbar. Die Konstante „anrede“ bleibt privat.\n\nDie Datei „app.js“ lädt das Modul mit „require“. Der Pfad beginnt mit „./“, das heißt: eine eigene Datei im selben Ordner. „require“ gibt genau das Objekt zurück, das das Modul in „module.exports“ geschrieben hat. Darüber ruft man dann die Funktion auf.\n\nIn der letzten Zeile wird mit geschweiften Klammern nur die Funktion herausgeholt. Das nennt man „Destrukturierung“."
+        },
+        {
+          "type": "code",
+          "title": "Dasselbe Modul als ES-Modul",
+          "code": "// gruss.mjs – das Modul\nconst anrede = 'Hallo';                        // privat\n\nexport function gruesse(name) {                // benannter Export\n  return `${anrede}, ${name}!`;\n}\nexport const version = '1.0.0';\n\n// app.mjs – das Programm, starten mit: node app.mjs\nimport { gruesse, version } from './gruss.mjs';   // Endung angeben!\nconsole.log(gruesse('Angular'));               // Hallo, Angular!\nconsole.log(version);\n\n// Eingebaute Module und Pakete:\nimport { readFile } from 'node:fs/promises';\nimport { map } from 'rxjs';",
+          "notes": "Codefolie „Dasselbe Modul als ES-Modul“.\n\nHier ist dasselbe Modul in der Schreibweise der ES-Module. Statt alles am Ende in „module.exports“ zu sammeln, steht „export“ direkt vor der Funktion und vor der Konstante „version“. Das nennt man „benannte Exporte“.\n\nDie Datei „app.mjs“ holt mit „import“ und geschweiften Klammern genau diese Namen. In node.js muss man dabei die Dateiendung angeben. Durch die Endung „.mjs“ weiß node.js, dass es ES-Module sind.\n\nUnten sieht man, dass man auch eingebaute Module mit „node:“ am Anfang und installierte Pakete wie „rxjs“ so importiert. Diese Schreibweise entspricht dem, was wir in jeder Angular-Datei verwenden."
+        },
+        {
+          "type": "content",
+          "title": "Was beim Laden eines Moduls passiert",
+          "bullets": [
+            "Der Code des Moduls läuft beim ersten Laden genau einmal",
+            "Das Ergebnis wird zwischengespeichert",
+            [
+              "Jedes weitere require/import bekommt dasselbe Objekt",
+              1
+            ],
+            "Jedes Modul hat einen eigenen Gültigkeitsbereich",
+            [
+              "Variablen sind privat, solange sie nicht exportiert werden",
+              1
+            ],
+            "Ähnlich in Angular: eine Datei = ein Modul mit Exporten"
+          ],
+          "notes": "Folie: „Was beim Laden eines Moduls passiert“.\n\nWird ein Modul zum ersten Mal geladen, führt node.js seinen Code genau einmal aus. Das Ergebnis, also die Exporte, wird zwischengespeichert. Lädt eine andere Datei dasselbe Modul noch einmal, bekommt sie dasselbe Objekt und der Code läuft nicht erneut.\n\nJedes Modul hat seinen eigenen Gültigkeitsbereich. Variablen, die man nicht exportiert, sind von außen nicht erreichbar. So kommen sich verschiedene Dateien nicht in die Quere.\n\nDas gilt genauso für TypeScript-Dateien in Angular: Jede Datei ist ein Modul, und nur was mit „export“ markiert ist, können andere Dateien importieren. Das Diagramm zeigt den Ablauf.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "require / import",
+              "Schon im Cache?",
+              "Nein: Code einmal ausführen",
+              "Exporte speichern",
+              "Exporte zurückgeben"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Wie node.js ein Modul findet",
+          "bullets": [
+            "Pfad mit ./ oder ../ : eigene Datei relativ zur aktuellen Datei",
+            "Präfix node: : eingebautes Modul (node:fs, node:http)",
+            "Nur ein Name (rxjs, express): Paket in node_modules",
+            [
+              "Sucht im eigenen Ordner, dann in übergeordneten Ordnern",
+              1
+            ],
+            [
+              "Im Paket bestimmen exports bzw. main die Datei",
+              1
+            ],
+            "Nicht gefunden: Fehler „Cannot find module“"
+          ],
+          "notes": "Folie: „Wie node.js ein Modul findet“.\n\nBeginnt der Pfad mit einem Punkt und Schrägstrich, also „./“ oder „../“, sucht node.js eine eigene Datei relativ zur aktuellen Datei.\n\nBeginnt der Name mit „node:“, ist ein eingebautes Modul gemeint, zum Beispiel „node:fs“. Steht nur ein Name wie „rxjs“ oder „express“ da, sucht node.js ein Paket im Ordner „node_modules“. Zuerst im Ordner der aktuellen Datei, dann Ordner für Ordner nach oben. Im gefundenen Paket legen die Felder „exports“ oder „main“ der „package.json“ fest, welche Datei geladen wird.\n\nFindet node.js nichts, kommt der Fehler „Cannot find module“. Meist fehlt dann ein „npm install“. Das Diagramm zeigt die Suche.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "require('rxjs')",
+              "./node_modules/rxjs?",
+              "../node_modules/rxjs?",
+              "package.json: exports / main",
+              "Einstiegsdatei laden"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Zusammenfassung Anhang",
+          "bullets": [
+            "node.js: JavaScript außerhalb des Browsers, V8 + Event Loop",
+            "Für Angular: CLI, Build (esbuild), Dev-Server (Vite), Tests (Vitest)",
+            "Im Browser läuft nur das gebaute Ergebnis",
+            "npm: Pakete aus der Registry, Befehle install, ci, run, update, audit, npx",
+            "package.json: Bereiche (^, ~), Scripts, dependencies / devDependencies",
+            "package-lock.json: exakter Stand, immer einchecken",
+            "node_modules: nie einchecken, jederzeit neu erzeugbar",
+            "Module: CommonJS (require) und ES-Module (import / export)"
+          ],
+          "notes": "Folie: „Zusammenfassung Anhang“.\n\nnode.js führt JavaScript außerhalb des Browsers aus. Es nutzt die V8-Engine und eine Event Loop für nicht blockierende Ein- und Ausgabe. Für Angular ist node.js das Fundament der Werkzeuge: CLI, Build, Entwicklungs-Server und Tests. Im Browser läuft am Ende nur das gebaute Ergebnis.\n\nnpm lädt Pakete aus einer Registry. Die wichtigsten Befehle sind „install“, „ci“, „run“, „update“, „audit“ und „npx“. Die Datei „package.json“ beschreibt das Projekt mit Versionsbereichen, Scripts und den beiden Gruppen von Abhängigkeiten. Die Datei „package-lock.json“ hält den genauen Stand fest und wird immer eingecheckt. Der Ordner „node_modules“ wird nie eingecheckt.\n\nSchließlich gibt es zwei Modulsysteme: das klassische CommonJS mit „require“ und die ES-Module mit „import“ und „export“, die wir aus Angular kennen."
+        }
+      ]
+    }
+  ],
+  "ops": [
+    {
+      "op": "delete",
+      "slides": [
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300,
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309
+      ]
+    }
+  ]
+}
