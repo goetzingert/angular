@@ -57,7 +57,7 @@ Selbsttest: `cp content_selftest.json.example /tmp/t/content_selftest.json` und 
 - Gelöschte Folien verschwinden samt Notizen aus der Datei; Querverweise/Hyperlinks auf Folien werden nicht angepasst.
 
 ## Wichtig: Eingabedatei ist das Original-Deck
-Alle Folienverweise (`after`, `move`, `edit`) beziehen sich auf die ursprüngliche Nummerierung mit **309 Folien**. Die Datei `presentation_angular21.pptx` im Repo enthält nach dem Einbau bereits die neuen Folien (444). Wird das Werkzeug erneut benötigt (z. B. nach Änderung einer `content_*.json`), das Original aus der Git-Historie holen und als Eingabe verwenden:
+Alle Folienverweise (`after`, `move`, `edit`) beziehen sich auf die ursprüngliche Nummerierung mit **309 Folien**. Die Datei `presentation_angular21.pptx` im Repo enthält nach dem Einbau bereits die neuen Folien (658). Wird das Werkzeug erneut benötigt (z. B. nach Änderung einer `content_*.json`), das Original aus der Git-Historie holen und als Eingabe verwenden:
 
 ```
 git show baf0614:presentation_angular21.pptx > /tmp/original.pptx
@@ -92,3 +92,18 @@ cd 01_typescript_primer && npm install && cd ..
 python3 -I folien_neu/deck/verify_ts_snippets.py
 ```
 Die Pipeline (`ts_korrekturen.py` → `build_deck.py`) bleibt wie oben beschrieben.
+
+## Kapitel ab Folie 247 (`content_kap07`–`content_kap13`)
+Die Folien ab dem Kapitel „Eigene Direktiven“ stehen je Kapitel in einer eigenen Datei:
+
+| Datei | Inhalt | Originalfolien |
+|---|---|---|
+| `content_kap07_angular_features.json` | Direktiven, Guards, Interceptors, Resource API, NgOptimizedImage, Signal Queries, Content Projection, SSR | ersetzt 250–268 |
+| `content_kap08_struktur_reaktivitaet.json` | Komponenten aufteilen, Reaktivität und Datenfluss | – |
+| `content_kap09_zustand.json` | Anwendungsstruktur und Zustandsverwaltung, Rückblick-Übung | – |
+| `content_kap10_test_performance.json` | Tests (Vitest, TestBed) und Performance | – |
+| `content_kap11_sicherheit_ki.json` | Sicherheit im Frontend, KI-gestützte Entwicklung, Abschlussprojekt | – |
+| `content_kap12_legacy_forms_anhang.json` | Legacy NgModule, Wahlthema Reactive Forms | ersetzt 217–219, 222–226, 269–291 |
+| `content_kap13_node_anhang.json` | Anhang node.js und npm | ersetzt 292–309 |
+
+Die alten Originalfolien dieser Bereiche enthielten Code als Aufzählung und doppelte Aufzählungspunkte; sie werden per `delete` entfernt und durch neu erzeugte Folien ersetzt.
