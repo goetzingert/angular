@@ -28,7 +28,7 @@ P = "http://schemas.openxmlformats.org/presentationml/2006/main"
 R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 
 # Vorlagenfolien (1-basiert, Originaldatei)
-TEMPLATE_SLIDE = {"content": 256, "code": 160, "exercise": 258, "divider": 269}
+TEMPLATE_SLIDE = {"content": 256, "code": 160, "exercise": 258, "divider": 269, "diagram": 256}
 TYPES = tuple(TEMPLATE_SLIDE)
 
 MAX_LINES = {"content": 9, "exercise": 9, "code": 18}
@@ -279,10 +279,21 @@ def validate_slide(s, where, fname):
         if "diagram" in s:
             if typ != "content":
                 raise BuildError("%s: 'diagram' ist nur bei type content erlaubt" % where)
-            err = diagrams.validate(s["diagram"], where)
+            err = diagrams.validate(s["diagram"], where, wide=False)
             if err:
                 raise BuildError(err)
             out["diagram"] = s["diagram"]
+    elif typ == "diagram":
+        if "diagram" not in s:
+            raise BuildError("%s: 'diagram' fehlt (type diagram)" % where)
+        err = diagrams.validate(s["diagram"], where, wide=True)
+        if err:
+            raise BuildError(err)
+        out["diagram"] = s["diagram"]
+        cap = s.get("caption", "")
+        if not isinstance(cap, str) or len(cap) > 130:
+            raise BuildError("%s: 'caption' muss ein String mit höchstens 130 Zeichen sein" % where)
+        out["caption"] = clean(cap).strip()
     elif typ == "code":
         if not isinstance(s.get("code"), str):
             raise BuildError("%s: 'code' (String) fehlt (type code)" % where)
@@ -419,6 +430,8 @@ def build_title(tree, title, sizes, width_pt, height_pt, char_factor, line_facto
 TITLE_BOX = (838080, 365040, 10514160, 1324080)
 BODY_BOX = (838080, 1825560, 10514160, 4349880)
 BODY_BOX_NARROW = (838080, 1825560, 5900000, 4349880)
+WIDE_DIAGRAM = (838080, 1650000, 10514160, 4800000)
+CAPTION_BOX = (838080, 6000000, 10514160, 420000)
 
 
 def set_xfrm(sp, box):
@@ -524,7 +537,17 @@ def build_slide(prs, tpl, spec, warns):
         set_xfrm(find_body_sp(tree), BODY_BOX_NARROW if narrow else BODY_BOX)
         build_lines_body(tree, spec["bullets"], typ, warns, ctx, narrow=narrow)
         if narrow:
-            diagrams.draw(slide, spec["diagram"])
+            diagrams.draw(slide, spec["diagram"], region=diagrams.NARROW)
+    elif typ == "diagram":
+        build_title(tree, spec["title"], [3600, 3200, 2800, 2400], 800, 100, 0.56, 1.2, warns, ctx)
+        set_xfrm(find_title_sp(tree), TITLE_BOX)
+        body = find_body_sp(tree)
+        body.getparent().remove(body)
+        region = WIDE_DIAGRAM
+        if spec["caption"]:
+            region = (WIDE_DIAGRAM[0], WIDE_DIAGRAM[1], WIDE_DIAGRAM[2], WIDE_DIAGRAM[3] - 520000)
+            diagrams.caption(slide, spec["caption"], CAPTION_BOX)
+        diagrams.draw(slide, spec["diagram"], region=region)
     elif typ == "code":
         build_title(tree, spec["title"], [4400, 3600, 3200, 2800, 2400], 800, 100, 0.48, 1.08, warns, ctx)
         build_code_body(tree, spec["code"], warns, ctx)
