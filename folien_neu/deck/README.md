@@ -57,7 +57,7 @@ Selbsttest: `cp content_selftest.json.example /tmp/t/content_selftest.json` und 
 - Gelöschte Folien verschwinden samt Notizen aus der Datei; Querverweise/Hyperlinks auf Folien werden nicht angepasst.
 
 ## Wichtig: Eingabedatei ist das Original-Deck
-Alle Folienverweise (`after`, `move`, `edit`) beziehen sich auf die ursprüngliche Nummerierung mit **309 Folien**. Die Datei `presentation_angular21.pptx` im Repo enthält nach dem Einbau bereits die neuen Folien (658). Wird das Werkzeug erneut benötigt (z. B. nach Änderung einer `content_*.json`), das Original aus der Git-Historie holen und als Eingabe verwenden:
+Alle Folienverweise (`after`, `move`, `edit`) beziehen sich auf die ursprüngliche Nummerierung mit **309 Folien**. Die Datei `presentation_angular21.pptx` im Repo enthält nach dem Einbau bereits die neuen Folien (733). Wird das Werkzeug erneut benötigt (z. B. nach Änderung einer `content_*.json`), das Original aus der Git-Historie holen und als Eingabe verwenden:
 
 ```
 git show baf0614:presentation_angular21.pptx > /tmp/original.pptx
