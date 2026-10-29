@@ -216,9 +216,13 @@ def _line(slide, x1, y1, x2, y2, color=GREEN, width=2, dashed=False, arrow=True)
     return c
 
 
-def _label(slide, x, y, w, h, text, size, color=DARK, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.BOTTOM, bold=False):
+def _label(slide, x, y, w, h, text, size, color=DARK, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.BOTTOM, bold=False,
+           bg=False):
     s = slide.shapes.add_textbox(Emu(x), Emu(y), Emu(w), Emu(h))
     _text(s, text, size, color=color, align=align, anchor=anchor, bold=bold)
+    if bg:
+        s.fill.solid()
+        s.fill.fore_color.rgb = WHITE
     s.text_frame.margin_top = s.text_frame.margin_bottom = Emu(0)
     return s
 
@@ -253,12 +257,19 @@ def sequence(slide, d):
         if a == b:
             loop_w, loop_h = min(380000, cw // 4), int(pitch * 0.38)
             x = xs[a]
-            _line(slide, x, y - loop_h, x + loop_w, y - loop_h, color=col, width=1.75, arrow=False)
-            _line(slide, x + loop_w, y - loop_h, x + loop_w, y, color=col, width=1.75, arrow=False)
-            _line(slide, x + loop_w, y, x + 20000, y, color=col, width=1.75)
-            lx = x + loop_w + 50000
-            _label(slide, lx, y - loop_h - lab_h // 2, max(cw - loop_w - 120000, 900000), lab_h, text, size,
-                   align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
+            lw = max(cw - loop_w - 120000, 900000)
+            left_side = a == n - 1 and n > 1   # letzter Teilnehmer: Schleife und Text nach links
+            sgn = -1 if left_side else 1
+            _line(slide, x, y - loop_h, x + sgn * loop_w, y - loop_h, color=col, width=1.75, arrow=False)
+            _line(slide, x + sgn * loop_w, y - loop_h, x + sgn * loop_w, y, color=col, width=1.75, arrow=False)
+            _line(slide, x + sgn * loop_w, y, x + sgn * 20000, y, color=col, width=1.75)
+            if left_side:
+                lx = x - loop_w - 50000 - lw
+                al = PP_ALIGN.RIGHT
+            else:
+                lx = x + loop_w + 50000
+                al = PP_ALIGN.LEFT
+            _label(slide, lx, y - loop_h - lab_h // 2, lw, lab_h, text, size, align=al, anchor=MSO_ANCHOR.MIDDLE)
         else:
             x1, x2 = xs[a], xs[b]
             _line(slide, x1, y, x2 + (-20000 if x2 > x1 else 20000), y, color=col, width=1.75, dashed=reply)
@@ -361,12 +372,15 @@ def composition(slide, d):
         if ln.get("text"):
             mx, my = (x1 + x2) // 2, (y1 + y2) // 2
             col = RGBColor(0xC0, 0x5A, 0x1E) if ln.get("accent") else GREEN
+            # Beschriftung mit weißem Hintergrund, damit sie auch über Kastenrändern lesbar bleibt
+            chars = max(len(t) for t in ln["text"].split("\n"))
+            lw = int(chars * (size - 1) * 0.62 * 12700) + 160000
             if x1 == x2:   # senkrecht: Beschriftung rechts daneben
-                _label(slide, mx + 60000, my - 140000, 1900000, 280000, ln["text"], size - 1, color=col, bold=True,
-                       align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE)
-            else:          # waagerecht: Beschriftung darüber
-                lw = max(abs(x2 - x1) + 400000, 1200000)
-                _label(slide, mx - lw // 2, my - 330000, lw, 300000, ln["text"], size - 1, color=col, bold=True)
+                _label(slide, mx + 60000, my - 140000, lw, 280000, ln["text"], size - 1, color=col, bold=True,
+                       align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE, bg=True)
+            else:          # waagerecht: Beschriftung mittig über dem Pfeil
+                _label(slide, mx - lw // 2, my - 330000, lw, 280000, ln["text"], size - 1, color=col, bold=True,
+                       anchor=MSO_ANCHOR.MIDDLE, bg=True)
     if d.get("note"):
         _note(slide, d["note"], Y0 + root_h + 60000)
 
