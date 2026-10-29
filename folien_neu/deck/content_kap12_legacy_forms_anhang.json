@@ -256,16 +256,16 @@
                   ]
                 },
                 {
-                  "label": "imports: AppRoutingModule",
+                  "label": "weitere imports",
                   "vertical": true,
                   "children": [
                     {
-                      "label": "RouterModule",
-                      "sub": "exports: router-outlet, routerLink"
+                      "label": "AppRoutingModule",
+                      "sub": "exports: [RouterModule]"
                     },
                     {
                       "label": "BrowserModule",
-                      "sub": "eigener Import von AppModule"
+                      "sub": "Grundlagen für den Browser"
                     }
                   ]
                 }
@@ -278,7 +278,7 @@
                 "text": "sichtbar"
               },
               {
-                "from": "RouterModule",
+                "from": "AppRoutingModule",
                 "to": "AppComponent",
                 "text": "sichtbar"
               },
@@ -291,7 +291,7 @@
               }
             ]
           },
-          "caption": "Das Template von AppComponent sieht nur eigene declarations und die exports der importierten Module",
+          "caption": "AppComponent sieht nur eigene declarations und die exports importierter Module",
           "notes": "Folie: „Wer sieht wen? AppModule und seine Importe“.\n\nDas Diagramm zeigt das „AppModule“ aus dem Projekt 30_modules_legacy als Kasten. Darin stehen links das importierte „TrainingsModule“, in der Mitte die eigene Deklaration „AppComponent“ und rechts das importierte „AppRoutingModule“ sowie das „BrowserModule“.\n\nDas „TrainingsModule“ deklariert drei Bausteine. Die beiden Komponenten stehen zusätzlich in „exports“, also gibt das Modul sie nach außen frei. Die Pipe „TakePlaceSoonPipe“ steht nur in „declarations“; sie bleibt privat. Das „AppRoutingModule“ exportiert das „RouterModule“ und damit „router-outlet“ und „routerLink“.\n\nDie grünen Pfeile zeigen: Diese Bausteine darf das Template von „AppComponent“ verwenden. Der gestrichelte orange Pfeil zeigt: Die Pipe ist im Template von AppComponent nicht bekannt. Wer sie dort benutzt, bekommt einen Fehler beim Bauen. Abhilfe wäre, die Pipe im TrainingsModule zusätzlich zu exportieren."
         },
         {
@@ -450,7 +450,7 @@
               {
                 "from": 0,
                 "to": 0,
-                "text": "index.html laden, <app-root> leer"
+                "text": "index.html laden"
               },
               {
                 "from": 0,
@@ -496,7 +496,7 @@
               }
             ]
           },
-          "caption": "Aufrufer ist immer Angular selbst: main.ts übergibt nur die Klasse AppModule, nicht ein Objekt",
+          "caption": "Aufrufer ist Angular selbst: main.ts übergibt nur die Klasse AppModule",
           "notes": "Folie: „Startvorgang mit Modul: wer ruft wen auf?“.\n\nDas Diagramm zeigt den Startvorgang einer Modul-Anwendung mit allen Beteiligten: Browser, die Datei „main.ts“, die Plattform, das „AppModule“ und die „AppComponent“.\n\nIn Schritt 1 lädt der Browser die index.html; das Element „app-root“ ist noch leer. In Schritt 2 führt er das gebaute Skript aus, das aus „main.ts“ entstanden ist. „main.ts“ erzeugt in Schritt 3 die Plattform für den Browser und ruft in Schritt 4 „bootstrapModule“ mit der Klasse „AppModule“ auf.\n\nIn Schritt 5 legt Angular das Modul an. Dabei wertet es die importierten Module und die Provider aus. Das Feld „bootstrap“ nennt in Schritt 6 die Startkomponente. In Schritt 7 erzeugt Angular die „AppComponent“ und sucht ihr Element „app-root“ in der Seite. In Schritt 8 erscheint das Template dort. Zum Schluss, in Schritt 9, wird das Promise aus „bootstrapModule“ erfüllt. Ging etwas schief, greift stattdessen das „catch“ in main.ts."
         },
         {
@@ -747,7 +747,7 @@
         },
         {
           "type": "diagram",
-          "title": "Routing mit RouterModule: von /trainings nach /trainings/3",
+          "title": "Routing: von /trainings nach /trainings/3",
           "diagram": {
             "kind": "composition",
             "root": {
@@ -774,25 +774,24 @@
                 },
                 {
                   "label": "AppComponent",
-                  "sub": "<h1>Invoice Manager App</h1>",
+                  "sub": "<h1> und <router-outlet>",
+                  "vertical": true,
                   "children": [
                     {
-                      "label": "vorher: <router-outlet>",
-                      "sub": "URL /trainings",
+                      "label": "vorher: Outlet bei /trainings",
                       "children": [
                         {
                           "label": "TrainingListComponent",
-                          "sub": "Link [routerLink]=\"[training.id]\""
+                          "sub": "[routerLink]=\"[training.id]\""
                         }
                       ]
                     },
                     {
-                      "label": "nachher: <router-outlet>",
-                      "sub": "URL /trainings/3",
+                      "label": "nachher: Outlet bei /trainings/3",
                       "children": [
                         {
                           "label": "TrainingDetailsComponent",
-                          "sub": "liest id aus ActivatedRoute",
+                          "sub": "id aus ActivatedRoute",
                           "highlight": true
                         }
                       ]
@@ -805,13 +804,13 @@
               {
                 "from": "TrainingListComponent",
                 "to": "TrainingDetailsComponent",
-                "text": "Klick",
+                "text": "Klick auf Training 3",
                 "accent": true
               }
             ]
           },
-          "caption": "Der Router ersetzt nur den Inhalt von <router-outlet> – AppComponent mit der Überschrift bleibt stehen",
-          "notes": "Folie: „Routing mit RouterModule: von /trainings nach /trainings/3“.\n\nDas Diagramm zeigt, wo die Routen hängen und was sich bei einem Klick ändert. Links steht das „AppRoutingModule“ mit den drei Routen aus dem Projekt. Rechts steht die „AppComponent“ mit ihrem Template: eine Überschrift und darunter „router-outlet“, der Platzhalter für die aktuelle Seite.\n\nDie AppComponent ist zweimal dargestellt: einmal vorher, einmal nachher. Vorher lautet die Adresse „/trainings“. Der Router hat dazu die Route „trainings“ gefunden und zeigt im Outlet die „TrainingListComponent“. Jeder Eintrag der Liste hat einen Link mit „routerLink“ und der Nummer des Trainings.\n\nKlickt der Nutzer auf das Training 3, ändert sich die Adresse zu „/trainings/3“. Der Router findet die Route „trainings/:id“, entfernt die Liste aus dem Outlet und erzeugt dort die „TrainingDetailsComponent“. Der Teil „:id“ ist ein Platzhalter; der Wert 3 steht der Komponente über „ActivatedRoute“ zur Verfügung. Die Überschrift außerhalb des Outlets bleibt unverändert."
+          "caption": "Der Router tauscht nur den Inhalt von <router-outlet> – die Überschrift bleibt",
+          "notes": "Folie: „Routing: von /trainings nach /trainings/3“.\n\nDas Diagramm zeigt, wo die Routen hängen und was sich bei einem Klick ändert. Links steht das „AppRoutingModule“ mit den drei Routen aus dem Projekt. Rechts steht die „AppComponent“ mit ihrem Template: eine Überschrift und darunter „router-outlet“, der Platzhalter für die aktuelle Seite.\n\nDer Platzhalter im Kasten „AppComponent“ ist zweimal dargestellt: einmal vorher, einmal nachher. Vorher lautet die Adresse „/trainings“. Der Router hat dazu die Route „trainings“ gefunden und zeigt im Outlet die „TrainingListComponent“. Jeder Eintrag der Liste hat einen Link mit „routerLink“ und der Nummer des Trainings.\n\nKlickt der Nutzer auf das Training 3, ändert sich die Adresse zu „/trainings/3“. Der Router findet die Route „trainings/:id“, entfernt die Liste aus dem Outlet und erzeugt dort die „TrainingDetailsComponent“. Der Teil „:id“ ist ein Platzhalter; der Wert 3 steht der Komponente über „ActivatedRoute“ zur Verfügung. Die Überschrift außerhalb des Outlets bleibt unverändert."
         },
         {
           "type": "content",
@@ -982,7 +981,7 @@
               }
             ]
           },
-          "caption": "Bei /trainings/7 → /trainings/8 bleibt die Komponente bestehen – nur der subscribe-Callback läuft erneut",
+          "caption": "Bei /trainings/7 → /trainings/8 bleibt die Komponente – nur der Callback läuft erneut",
           "notes": "Folie: „ActivatedRoute: Parameterwechsel im Ablauf“.\n\nDas Diagramm zeigt, warum man die Parameter mit „subscribe“ abonniert. Beteiligt sind die Liste, der Router, die Detailkomponente, „ActivatedRoute“ als Information über die aktuelle Route und der „TrainingService“.\n\nIn Schritt 1 klickt der Nutzer in der Liste auf Training 7. Der Router erzeugt in Schritt 2 die Detailkomponente und übergibt ihr über den Konstruktor die ActivatedRoute. In Schritt 3 abonniert die Komponente in „ngOnInit“ die Parameter und bekommt in Schritt 4 sofort das Objekt mit der id 7, als Text. In den Schritten 5 und 6 lädt sie das Training über den Service.\n\nWechselt die Adresse danach auf Training 8, zum Beispiel über einen Weiter-Link, erzeugt der Router keine neue Komponente. Er schickt in Schritt 7 nur neue Parameter an die ActivatedRoute. Der Callback läuft in Schritt 8 erneut und lädt in Schritt 9 das Training 8. Hätte man den Parameter nur einmal gelesen, bliebe Training 7 stehen. In Schritt 10 beendet die Komponente beim Entfernen das Abonnement."
         },
         {
@@ -1410,7 +1409,7 @@
         },
         {
           "type": "diagram",
-          "title": "Formular-Modell und Template: wer gehört zu wem?",
+          "title": "Formular-Modell und Template",
           "diagram": {
             "kind": "composition",
             "root": {
@@ -1459,22 +1458,22 @@
               {
                 "from": "firstname",
                 "to": "<input formControlName=\"firstname\">",
-                "text": "Wert ↔ Eingabe"
+                "text": "Name"
               },
               {
                 "from": "lastname",
                 "to": "<input formControlName=\"lastname\">",
-                "text": "per Name"
+                "text": "Name"
               },
               {
                 "from": "zip",
                 "to": "<input [formControl]=\"…controls.zip\">",
-                "text": "per Objekt"
+                "text": "Objekt"
               }
             ]
           },
-          "caption": "Das Modell lebt in der Klasse, das Template verbindet jedes Eingabefeld mit genau einem FormControl",
-          "notes": "Folie: „Formular-Modell und Template: wer gehört zu wem?“.\n\nDas Diagramm zeigt die „CustomerDetailsComponent“ als Kasten mit zwei Teilen. Links steht die Klasse mit dem Formular-Modell „customerForm“, einer „FormGroup“, also einer Gruppe von Feldern. Darin liegen die Felder „firstname“, „lastname“ und „zip“, jeweils ein „FormControl“.\n\nRechts steht das Template. Das Element „form“ ist mit „[formGroup]“ an die Gruppe gebunden. Jedes Eingabefeld ist mit genau einem FormControl verbunden: die ersten beiden über „formControlName“, also über den Namen in der Gruppe, das PLZ-Feld über „[formControl]“ direkt mit dem Objekt.\n\nDie Pfeile zeigen diese Verbindungen. Die Werte fließen in beide Richtungen: Tippt der Nutzer, ändert sich das FormControl. Setzt die Klasse einen Wert, zum Beispiel mit „patchValue“, erscheint er im Feld. Prüfregeln und Zustand hängen am FormControl in der Klasse, nicht am Eingabefeld."
+          "caption": "Das Modell lebt in der Klasse – jedes Eingabefeld hängt an genau einem FormControl",
+          "notes": "Folie: „Formular-Modell und Template“.\n\nDas Diagramm zeigt die „CustomerDetailsComponent“ als Kasten mit zwei Teilen. Links steht die Klasse mit dem Formular-Modell „customerForm“, einer „FormGroup“, also einer Gruppe von Feldern. Darin liegen die Felder „firstname“, „lastname“ und „zip“, jeweils ein „FormControl“.\n\nRechts steht das Template. Das Element „form“ ist mit „[formGroup]“ an die Gruppe gebunden. Jedes Eingabefeld ist mit genau einem FormControl verbunden: die ersten beiden über „formControlName“, also über den Namen in der Gruppe, das PLZ-Feld über „[formControl]“ direkt mit dem Objekt.\n\nDie Pfeile zeigen diese Verbindungen. Die Werte fließen in beide Richtungen: Tippt der Nutzer, ändert sich das FormControl. Setzt die Klasse einen Wert, zum Beispiel mit „patchValue“, erscheint er im Feld. Prüfregeln und Zustand hängen am FormControl in der Klasse, nicht am Eingabefeld."
         },
         {
           "type": "content",
@@ -1674,7 +1673,7 @@
               {
                 "from": 2,
                 "to": 2,
-                "text": "errors setzen, status INVALID"
+                "text": "errors, INVALID"
               },
               {
                 "from": 4,
@@ -1690,7 +1689,7 @@
               {
                 "from": 1,
                 "to": 1,
-                "text": "CSS-Klassen ng-dirty ng-invalid"
+                "text": "ng-dirty ng-invalid"
               }
             ]
           },
@@ -1800,7 +1799,7 @@
               {
                 "from": 3,
                 "to": 3,
-                "text": "/^[0-9]+$/.test('12a') → false"
+                "text": "Regex-Test → false"
               },
               {
                 "from": 3,
@@ -1811,7 +1810,7 @@
               {
                 "from": 2,
                 "to": 2,
-                "text": "errors setzen, INVALID"
+                "text": "errors, INVALID"
               },
               {
                 "from": 4,
@@ -1820,7 +1819,7 @@
               }
             ]
           },
-          "caption": "Wir übergeben nur die Funktion digitsOnly – aufgerufen wird sie von Angular, bei jeder Wertänderung",
+          "caption": "Wir übergeben nur die Funktion – Angular ruft sie bei jeder Wertänderung auf",
           "notes": "Folie: „Eigener Validator: wann ruft Angular ihn auf?“.\n\nDas Diagramm zeigt, wer die eigene Prüffunktion „digitsOnly“ aufruft. Beteiligt sind die Komponente, der „FormBuilder“, das FormControl für die Postleitzahl, die Funktion „digitsOnly“ und das Template.\n\nIn Schritt 1 legt die Komponente das Formular an und übergibt die Funktion ohne Klammern, also ohne sie aufzurufen. Der FormBuilder erzeugt in Schritt 2 das FormControl und hängt die Funktion als Prüfregel an. Schon beim Anlegen prüft das FormControl in Schritt 3 den Startwert. Der leere Wert ist für „digitsOnly“ in Ordnung, deshalb kommt in Schritt 4 „null“ zurück.\n\nIn Schritt 5 tippt der Nutzer „12a“. Das FormControl ruft die Funktion in Schritt 6 erneut auf und übergibt sich selbst als Parameter „control“. Die Funktion prüft in Schritt 7 mit einem regulären Ausdruck, ob nur Ziffern enthalten sind. Das stimmt nicht, also liefert sie in Schritt 8 ein Fehlerobjekt mit dem frei gewählten Schlüssel „digitsOnly“. In Schritt 9 wird das Feld ungültig, und das Template kann in Schritt 10 mit „hasError“ eine Meldung anzeigen."
         },
         {

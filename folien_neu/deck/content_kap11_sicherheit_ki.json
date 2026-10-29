@@ -157,12 +157,12 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "PUT api/customer/7: note mit <img onerror>"
+                "text": "PUT: note mit <img onerror>"
               },
               {
                 "from": 1,
                 "to": 2,
-                "text": "speichert den Text unverändert"
+                "text": "unverändert speichern"
               },
               {
                 "from": 3,
@@ -177,18 +177,18 @@
               {
                 "from": 1,
                 "to": 3,
-                "text": "{ note: '<img src=x onerror=…>' }",
+                "text": "{ note: '<img onerror=…>' }",
                 "reply": true
               },
               {
                 "from": 3,
                 "to": 4,
-                "text": "[innerHTML]=\"customer.note\""
+                "text": "[innerHTML]=\"note\""
               },
               {
                 "from": 4,
                 "to": 4,
-                "text": "onerror-Attribut entfernen"
+                "text": "onerror entfernen"
               },
               {
                 "from": 4,
@@ -197,7 +197,7 @@
               }
             ]
           },
-          "caption": "Der Schadcode wandert unverändert durch API und Datenbank – erst der Sanitizer vor dem DOM hält ihn auf",
+          "caption": "Der Schadcode läuft unverändert durch API und Datenbank – erst der Sanitizer hält ihn auf",
           "notes": "Folie: „XSS im Ablauf: wer gibt die Notiz weiter?“.\n\nDas Diagramm zeigt denselben Angriff wie die vorige Folie, aber mit allen Beteiligten. Oben stehen die Beteiligten nebeneinander: der Angreifer, die API im Backend, die Datenbank, die Angular-App im Browser des Opfers, der „Sanitizer“, also Angulars Reinigungsfunktion für HTML, und ganz rechts das „DOM“, die Seite im Browser.\n\nIn Schritt 1 schickt der Angreifer eine Kundennotiz mit einem Bild-Element, dessen Attribut „onerror“ Script-Code enthält. In Schritt 2 speichert das Backend den Text, ohne ihn zu prüfen. Später öffnet das Opfer die Kundenseite: Die App fragt in Schritt 3 die API, die API liest in Schritt 4 aus der Datenbank und liefert in Schritt 5 die Notiz mit dem gefährlichen HTML zurück.\n\nIn Schritt 6 bindet das Template die Notiz mit „[innerHTML]“. Bevor der Wert in die Seite kommt, entfernt der Sanitizer in Schritt 7 das „onerror“-Attribut. In Schritt 8 landet nur noch ein harmloses Bild im DOM. Wichtig: API und Datenbank haben den Angriff nicht bemerkt. Das Backend sollte Eingaben trotzdem selbst prüfen, denn andere Programme zeigen die Notiz vielleicht ohne Schutz an."
         },
         {
@@ -280,7 +280,7 @@
         },
         {
           "type": "diagram",
-          "title": "Bindung, Sanitizer und DOM im Zusammenspiel",
+          "title": "Bindung, Sanitizer und DOM",
           "diagram": {
             "kind": "sequence",
             "actors": [
@@ -293,22 +293,22 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "note() liefert '<b>Hallo</b><img onerror=…>'"
+                "text": "neuer Wert von note()"
               },
               {
                 "from": 1,
                 "to": 1,
-                "text": "[innerHTML] am div → Kontext HTML"
+                "text": "Kontext: HTML"
               },
               {
                 "from": 1,
                 "to": 2,
-                "text": "sanitize(SecurityContext.HTML, wert)"
+                "text": "sanitize(HTML, wert)"
               },
               {
                 "from": 2,
                 "to": 2,
-                "text": "Allowlist: <b> bleibt, onerror wird entfernt"
+                "text": "onerror entfernen"
               },
               {
                 "from": 2,
@@ -324,12 +324,12 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "unsafeNote(): SafeHtml (bypassSecurityTrustHtml)"
+                "text": "unsafeNote(): SafeHtml"
               },
               {
                 "from": 1,
                 "to": 2,
-                "text": "sanitize(SecurityContext.HTML, safeHtml)"
+                "text": "sanitize(HTML, safeHtml)"
               },
               {
                 "from": 2,
@@ -344,8 +344,8 @@
               }
             ]
           },
-          "caption": "Schritte 1–6: normaler Weg mit Prüfung. Schritte 7–10: ein SafeValue wird ohne Prüfung durchgereicht",
-          "notes": "Folie: „Bindung, Sanitizer und DOM im Zusammenspiel“.\n\nDas Diagramm zeigt, wer bei einer Bindung mit „[innerHTML]“ wen aufruft. Beteiligt sind die Komponente „NoteDemoComponent“ aus Übung 36, Angular mit der Template-Bindung, der Dienst „DomSanitizer“ und das DOM.\n\nIn Schritt 1 liefert das Signal „note“ einen neuen Text mit HTML. In Schritt 2 erkennt Angular am Element und am Attribut, dass es sich um HTML handelt; das ist der Sicherheitskontext. In Schritt 3 ruft Angular die Methode „sanitize“ auf. Der Sanitizer behält in Schritt 4 harmlose Elemente wie „b“ für fett und entfernt gefährliche Teile wie „onerror“. Den bereinigten Text gibt er in Schritt 5 zurück, und Angular schreibt ihn in Schritt 6 in die Seite.\n\nDie Schritte 7 bis 10 zeigen die unsichere Variante. Die Komponente hat den Text vorher mit „bypassSecurityTrustHtml“ als vertrauenswürdig markiert. Der Sanitizer erkennt diese Markierung und gibt den Wert ungeprüft zurück. Dann landet das Script im DOM und wird ausgeführt. Genau deshalb darf man „bypassSecurityTrust…“ nie für Nutzereingaben oder Backend-Daten verwenden."
+          "caption": "Schritte 1–6: normaler Weg mit Prüfung. Schritte 7–10: SafeValue ohne Prüfung",
+          "notes": "Folie: „Bindung, Sanitizer und DOM“.\n\nDas Diagramm zeigt, wer bei einer Bindung mit „[innerHTML]“ wen aufruft. Beteiligt sind die Komponente „NoteDemoComponent“ aus Übung 36, Angular mit der Template-Bindung, der Dienst „DomSanitizer“ und das DOM.\n\nIn Schritt 1 liefert das Signal „note“ einen neuen Text mit HTML. In Schritt 2 erkennt Angular am Element und am Attribut, dass es sich um HTML handelt; das ist der Sicherheitskontext. In Schritt 3 ruft Angular die Methode „sanitize“ auf. Der Sanitizer behält in Schritt 4 harmlose Elemente wie „b“ für fett und entfernt gefährliche Teile wie „onerror“. Den bereinigten Text gibt er in Schritt 5 zurück, und Angular schreibt ihn in Schritt 6 in die Seite.\n\nDie Schritte 7 bis 10 zeigen die unsichere Variante. Die Komponente hat den Text vorher mit „bypassSecurityTrustHtml“ als vertrauenswürdig markiert. Der Sanitizer erkennt diese Markierung und gibt den Wert ungeprüft zurück. Dann landet das Script im DOM und wird ausgeführt. Genau deshalb darf man „bypassSecurityTrust…“ nie für Nutzereingaben oder Backend-Daten verwenden."
         },
         {
           "type": "content",
@@ -558,29 +558,29 @@
               {
                 "from": 2,
                 "to": 3,
-                "text": "next(req): GET api/customer + Cookie"
+                "text": "GET api/customer + Cookie"
               },
               {
                 "from": 3,
                 "to": 2,
-                "text": "401 Unauthorized: Token abgelaufen",
+                "text": "401: Token abgelaufen",
                 "reply": true
               },
               {
                 "from": 2,
                 "to": 3,
-                "text": "POST api/auth/refresh (Refresh-Cookie)"
+                "text": "POST api/auth/refresh"
               },
               {
                 "from": 3,
                 "to": 2,
-                "text": "200 + Set-Cookie: neues Token (HttpOnly)",
+                "text": "200 + neues Cookie",
                 "reply": true
               },
               {
                 "from": 2,
                 "to": 3,
-                "text": "next(req): dieselbe Anfrage noch einmal"
+                "text": "Anfrage wiederholen"
               },
               {
                 "from": 3,
@@ -602,7 +602,7 @@
               }
             ]
           },
-          "caption": "Typisches Muster mit catchError und switchMap im Interceptor – das Token selbst sieht das Frontend nie",
+          "caption": "Typisches Muster mit catchError und switchMap – das Token selbst sieht das Frontend nie",
           "notes": "Folie: „Kurzlebiges Token: Erneuerung im Interceptor“.\n\nDie vorige Folie empfiehlt Tokens mit kurzer Laufzeit, die über das Backend erneuert werden. Das Diagramm zeigt, wie das im Frontend aussehen kann. Beteiligt sind der „CustomerService“, der „HttpClient“, ein „Interceptor“, also eine Funktion, die jede Anfrage abfangen kann, hier „authInterceptor“ genannt, und das Backend.\n\nIn Schritt 1 fordert der Service die Kundenliste an. Der HttpClient gibt die Anfrage in Schritt 2 an den Interceptor. Dieser reicht sie in Schritt 3 mit „next“ weiter; der Browser hängt das Sitzungs-Cookie automatisch an. In Schritt 4 antwortet das Backend mit dem Status 401: Das Token ist abgelaufen.\n\nDer Interceptor fängt diesen Fehler ab. In Schritt 5 bittet er das Backend um ein neues Token. Das Backend setzt es in Schritt 6 als neues HttpOnly-Cookie, also unlesbar für JavaScript. In Schritt 7 wiederholt der Interceptor die ursprüngliche Anfrage, und diesmal kommen in Schritt 8 die Daten. Der Service merkt von der Erneuerung nichts. Die Adresse „api/auth/refresh“ ist ein Beispiel; der Name hängt vom Backend ab. In echten Projekten übernimmt das oft eine erprobte Login-Bibliothek."
         },
         {
@@ -675,7 +675,7 @@
               }
             ]
           },
-          "caption": "Die fremde Seite kennt das Cookie nicht – der Browser hängt es selbst an. Ohne SameSite und CSRF-Token fällt das nicht auf",
+          "caption": "Die fremde Seite kennt das Cookie nicht – der Browser hängt es selbst an",
           "notes": "Folie: „CSRF im Ablauf: Browser, Cookie, fremde Seite“.\n\nDas Diagramm zeigt den CSRF-Angriff mit drei Beteiligten: dem Browser des Nutzers, dem Server unserer App und einer fremden Seite des Angreifers. „CSRF“ bedeutet: Eine fremde Seite schickt im Namen des Nutzers eine Anfrage.\n\nIn Schritt 1 meldet sich der Nutzer an. In Schritt 2 setzt der Server ein Sitzungs-Cookie. Später öffnet der Nutzer in Schritt 3 die Seite des Angreifers. Diese liefert in Schritt 4 ein verstecktes Formular, das sich sofort selbst absendet.\n\nIn Schritt 5 schickt der Browser die Anfrage an unseren Server und hängt das Cookie automatisch an, weil es zu dieser Adresse gehört. Der Server sieht in Schritt 6 ein gültiges Cookie und führt die Aktion aus. Die fremde Seite musste das Cookie nie lesen. Moderne Browser senden Cookies mit der Einstellung „SameSite“ bei solchen Anfragen nicht mit; der sichere Schutz ist das CSRF-Token auf den nächsten Folien."
         },
         {
@@ -747,7 +747,7 @@
               {
                 "from": 3,
                 "to": 2,
-                "text": "Set-Cookie: XSRF-TOKEN=k7f2 (frühere Antwort)"
+                "text": "Set-Cookie: XSRF-TOKEN=k7f2"
               },
               {
                 "from": 0,
@@ -773,17 +773,12 @@
               {
                 "from": 2,
                 "to": 3,
-                "text": "Browser sendet Cookie XSRF-TOKEN=k7f2 mit"
-              },
-              {
-                "from": 3,
-                "to": 3,
-                "text": "Header == Cookie? → echt"
+                "text": "Cookie XSRF-TOKEN=k7f2"
               },
               {
                 "from": 3,
                 "to": 1,
-                "text": "201 Created",
+                "text": "Header = Cookie → 201 Created",
                 "reply": true
               },
               {
@@ -794,8 +789,8 @@
               }
             ]
           },
-          "caption": "Eine fremde Seite kann Schritt 3 nicht ausführen: Sie darf das Cookie unserer Seite nicht lesen",
-          "notes": "Folie: „Double Submit: wer liest und vergleicht was?“.\n\nDas Diagramm zeigt den Schutz mit dem CSRF-Token im Zusammenspiel. Beteiligt sind der „CustomerService“, der „HttpClient“, der Cookie-Speicher des Browsers und das Backend.\n\nIn Schritt 1 hat das Backend bei einer früheren Antwort ein Cookie „XSRF-TOKEN“ mit einem Zufallswert gesetzt. Dieses Cookie ist absichtlich nicht HttpOnly, damit Angular es lesen kann. In Schritt 2 ruft der Service „post“ auf. Weil es eine verändernde Anfrage an eine relative Adresse ist, liest der HttpClient in den Schritten 3 und 4 den Wert aus dem Cookie.\n\nIn Schritt 5 schickt der HttpClient die Anfrage mit dem Wert im Header „X-XSRF-TOKEN“. Zusätzlich hängt der Browser in Schritt 6 das Cookie selbst an. Das Backend vergleicht in Schritt 7 beide Werte. Nur wenn sie gleich sind, gilt die Anfrage als echt. Eine fremde Seite kann zwar das Cookie mitschicken lassen, aber nicht den Header setzen, weil sie den Wert nicht kennt."
+          "caption": "Eine fremde Seite kann Schritt 3 nicht ausführen: Sie darf das Cookie nicht lesen",
+          "notes": "Folie: „Double Submit: wer liest und vergleicht was?“.\n\nDas Diagramm zeigt den Schutz mit dem CSRF-Token im Zusammenspiel. Beteiligt sind der „CustomerService“, der „HttpClient“, der Cookie-Speicher des Browsers und das Backend.\n\nIn Schritt 1 hat das Backend bei einer früheren Antwort ein Cookie „XSRF-TOKEN“ mit einem Zufallswert gesetzt. Dieses Cookie ist absichtlich nicht HttpOnly, damit Angular es lesen kann. In Schritt 2 ruft der Service „post“ auf. Weil es eine verändernde Anfrage an eine relative Adresse ist, liest der HttpClient in den Schritten 3 und 4 den Wert aus dem Cookie.\n\nIn Schritt 5 schickt der HttpClient die Anfrage mit dem Wert im Header „X-XSRF-TOKEN“. Zusätzlich hängt der Browser in Schritt 6 das Cookie selbst an. Das Backend vergleicht beide Werte. Nur wenn sie gleich sind, gilt die Anfrage als echt, und in Schritt 7 kommt die Antwort „201 Created“. Eine fremde Seite kann zwar das Cookie mitschicken lassen, aber nicht den Header setzen, weil sie den Wert nicht kennt."
         },
         {
           "type": "content",
@@ -879,7 +874,7 @@
         },
         {
           "type": "diagram",
-          "title": "CSP im Ablauf: Header, Nonce, blockiertes Skript",
+          "title": "CSP im Ablauf: Nonce und Blockade",
           "diagram": {
             "kind": "sequence",
             "actors": [
@@ -896,7 +891,7 @@
               {
                 "from": 0,
                 "to": 0,
-                "text": "Nonce erzeugen: r4nd0m (bei jedem Aufruf neu)"
+                "text": "neue Nonce: r4nd0m"
               },
               {
                 "from": 0,
@@ -922,17 +917,17 @@
               {
                 "from": 1,
                 "to": 1,
-                "text": "Nonce passt zum Header → Style wird angewendet"
+                "text": "Nonce passt → Style aktiv"
               },
               {
                 "from": 1,
                 "to": 1,
-                "text": "eingeschleustes <script> ohne Nonce → blockiert"
+                "text": "<script> ohne Nonce → blockiert"
               }
             ]
           },
           "caption": "Die CSP kommt als Header vom Server – der Browser setzt sie durch, nicht Angular",
-          "notes": "Folie: „CSP im Ablauf: Header, Nonce, blockiertes Skript“.\n\nDas Diagramm zeigt, wie Server, Browser und Angular bei der „Content Security Policy“ zusammenarbeiten. Die CSP ist eine Liste von Regeln, woher die Seite Skripte und Styles laden darf.\n\nIn Schritt 1 fordert der Browser die Seite an. In Schritt 2 erzeugt der Server einen Zufallswert, die „Nonce“. In Schritt 3 schickt er die index.html, in der dieser Wert im Attribut „ngCspNonce“ steht, und dazu den CSP-Header mit demselben Wert. In Schritt 4 lädt der Browser „main.js“; das ist erlaubt, weil die Datei von der eigenen Adresse kommt.\n\nIn Schritt 5 startet Angular. Angular fügt in Schritt 6 die Styles der Komponenten als „style“-Elemente ein und gibt ihnen die Nonce mit. In Schritt 7 prüft der Browser: Die Nonce passt, also wird der Style angewendet. Gelingt einem Angreifer trotzdem, ein Script-Element einzuschleusen, fehlt ihm die passende Nonce. Der Browser blockiert es in Schritt 8."
+          "notes": "Folie: „CSP im Ablauf: Nonce und Blockade“.\n\nDas Diagramm zeigt, wie Server, Browser und Angular bei der „Content Security Policy“ zusammenarbeiten. Die CSP ist eine Liste von Regeln, woher die Seite Skripte und Styles laden darf.\n\nIn Schritt 1 fordert der Browser die Seite an. In Schritt 2 erzeugt der Server einen Zufallswert, die „Nonce“. In Schritt 3 schickt er die index.html, in der dieser Wert im Attribut „ngCspNonce“ steht, und dazu den CSP-Header mit demselben Wert. In Schritt 4 lädt der Browser „main.js“; das ist erlaubt, weil die Datei von der eigenen Adresse kommt.\n\nIn Schritt 5 startet Angular. Angular fügt in Schritt 6 die Styles der Komponenten als „style“-Elemente ein und gibt ihnen die Nonce mit. In Schritt 7 prüft der Browser: Die Nonce passt, also wird der Style angewendet. Gelingt einem Angreifer trotzdem, ein Script-Element einzuschleusen, fehlt ihm die passende Nonce. Der Browser blockiert es in Schritt 8."
         },
         {
           "type": "content",
@@ -1054,7 +1049,7 @@
         },
         {
           "type": "diagram",
-          "title": "returnUrl im Ablauf: von /customer/7 über /login zurück",
+          "title": "returnUrl im Ablauf: über /login zurück",
           "diagram": {
             "kind": "sequence",
             "actors": [
@@ -1089,7 +1084,7 @@
               {
                 "from": 3,
                 "to": 3,
-                "text": "login() → authService.login()"
+                "text": "login()"
               },
               {
                 "from": 3,
@@ -1120,8 +1115,8 @@
               }
             ]
           },
-          "caption": "Mit returnUrl=//evil.example liefert Schritt 7 undefined – die App navigiert dann nach /customer",
-          "notes": "Folie: „returnUrl im Ablauf: von /customer/7 über /login zurück“.\n\nDas Diagramm zeigt den Weg aus Übung 36 von einer geschützten Seite über die Anmeldung zurück. Beteiligt sind die Adresse im Browser, der „Router“, der Guard „authGuard“, die „LoginComponent“ und die Prüffunktion „safeReturnUrl“.\n\nDer Nutzer öffnet in Schritt 1 die Kundenseite 7. Der Router fragt in Schritt 2 den Guard. Der Nutzer ist nicht angemeldet, deshalb leitet der Guard in Schritt 3 zur Login-Seite um und hängt die ursprüngliche Adresse als Parameter „returnUrl“ an. In Schritt 4 zeigt der Router die Login-Seite; die Komponente bekommt den Parameter als Input.\n\nNach dem Anmelden in Schritt 5 prüft die Komponente in Schritt 6 das Ziel mit „safeReturnUrl“. Das Ziel ist ein erlaubter interner Pfad, also kommt es in Schritt 7 zurück. In Schritt 8 navigiert die App dorthin, der Guard lässt den Nutzer jetzt durch. Stünde in der returnUrl eine fremde Adresse, käme in Schritt 7 „undefined“ zurück, und die App ginge sicher zur Kundenliste."
+          "caption": "Bei returnUrl=//evil.example liefert Schritt 7 undefined – Ziel ist dann /customer",
+          "notes": "Folie: „returnUrl im Ablauf: über /login zurück“.\n\nDas Diagramm zeigt den Weg aus Übung 36 von einer geschützten Seite über die Anmeldung zurück. Beteiligt sind die Adresse im Browser, der „Router“, der Guard „authGuard“, die „LoginComponent“ und die Prüffunktion „safeReturnUrl“.\n\nDer Nutzer öffnet in Schritt 1 die Kundenseite 7. Der Router fragt in Schritt 2 den Guard. Der Nutzer ist nicht angemeldet, deshalb leitet der Guard in Schritt 3 zur Login-Seite um und hängt die ursprüngliche Adresse als Parameter „returnUrl“ an. In Schritt 4 zeigt der Router die Login-Seite; die Komponente bekommt den Parameter als Input.\n\nNach dem Anmelden in Schritt 5, die Methode „login“ ruft den „AuthService“ auf, prüft die Komponente in Schritt 6 das Ziel mit „safeReturnUrl“. Das Ziel ist ein erlaubter interner Pfad, also kommt es in Schritt 7 zurück. In Schritt 8 navigiert die App dorthin, der Guard lässt den Nutzer jetzt durch. Stünde in der returnUrl eine fremde Adresse, käme in Schritt 7 „undefined“ zurück, und die App ginge sicher zur Kundenliste."
         },
         {
           "type": "content",
@@ -1404,26 +1399,16 @@
         },
         {
           "type": "diagram",
-          "title": "Wer ist beteiligt? Editor, Agent, Regeln, MCP-Server",
+          "title": "KI-Werkzeuge: wer ist beteiligt?",
           "diagram": {
             "kind": "composition",
             "root": {
               "label": "Arbeitsumgebung",
+              "vertical": true,
               "children": [
                 {
                   "label": "Rechner des Entwicklers",
                   "children": [
-                    {
-                      "label": "Editor mit KI-Werkzeug",
-                      "sub": "z. B. VS Code",
-                      "children": [
-                        {
-                          "label": "KI-Agent",
-                          "sub": "Chat, Agent-Modus",
-                          "highlight": true
-                        }
-                      ]
-                    },
                     {
                       "label": "Repository",
                       "vertical": true,
@@ -1439,13 +1424,23 @@
                       ]
                     },
                     {
+                      "label": "Editor (z. B. VS Code)",
+                      "children": [
+                        {
+                          "label": "KI-Agent",
+                          "sub": "Chat, Agent-Modus",
+                          "highlight": true
+                        }
+                      ]
+                    },
+                    {
                       "label": "ng mcp",
-                      "sub": "Angular CLI MCP-Server"
+                      "sub": "MCP-Server der CLI"
                     }
                   ]
                 },
                 {
-                  "label": "Anbieter (Internet)",
+                  "label": "Anbieter im Internet",
                   "children": [
                     {
                       "label": "Sprachmodell",
@@ -1455,10 +1450,27 @@
                 }
               ]
             },
-            "links": []
+            "links": [
+              {
+                "from": "AGENTS.md",
+                "to": "KI-Agent",
+                "text": "liest"
+              },
+              {
+                "from": "KI-Agent",
+                "to": "ng mcp",
+                "text": "MCP-Aufruf"
+              },
+              {
+                "from": "KI-Agent",
+                "to": "Sprachmodell",
+                "text": "Prompt + Kontext",
+                "accent": true
+              }
+            ]
           },
-          "caption": "Der Agent ist die Zentrale: Er liest Regeln und Code, fragt das Modell und ruft Werkzeuge wie ng mcp auf",
-          "notes": "Folie: „Wer ist beteiligt? Editor, Agent, Regeln, MCP-Server“.\n\nDas Diagramm zeigt, wo die Bausteine der KI-Unterstützung liegen. Verschachtelte Kästen bedeuten: Der innere Kasten gehört zum äußeren.\n\nAuf dem Rechner des Entwicklers läuft der Editor mit dem KI-Werkzeug. Darin arbeitet der „KI-Agent“; das ist der Teil, der Dateien liest, Befehle ausführt und Änderungen vorschlägt. Im Repository liegen die Regeldatei „AGENTS.md“ und der Code. Ebenfalls auf dem Rechner läuft der MCP-Server der Angular CLI, gestartet mit „ng mcp“. „MCP“ ist ein Standard, über den ein KI-Werkzeug fremde Funktionen aufrufen kann.\n\nDas Sprachmodell selbst läuft meist beim Anbieter im Internet. Es sieht nur das, was der Agent ihm schickt. Deshalb ist der Kontext so wichtig, und deshalb gehören keine Geheimnisse in Dateien, die der Agent mitschickt. Wie die Teile nacheinander zusammenarbeiten, zeigt die nächste Folie."
+          "caption": "Der Agent ist die Zentrale: Er liest Regeln, fragt das Modell und ruft Werkzeuge auf",
+          "notes": "Folie: „KI-Werkzeuge: wer ist beteiligt?“.\n\nDas Diagramm zeigt, wo die Bausteine der KI-Unterstützung liegen. Verschachtelte Kästen bedeuten: Der innere Kasten gehört zum äußeren.\n\nAuf dem Rechner des Entwicklers läuft der Editor mit dem KI-Werkzeug. Darin arbeitet der „KI-Agent“; das ist der Teil, der Dateien liest, Befehle ausführt und Änderungen vorschlägt. Im Repository liegen die Regeldatei „AGENTS.md“ und der Code. Ebenfalls auf dem Rechner läuft der MCP-Server der Angular CLI, gestartet mit „ng mcp“. „MCP“ ist ein Standard, über den ein KI-Werkzeug fremde Funktionen aufrufen kann.\n\nDie Pfeile zeigen die Wege: Der Agent liest die Regeldatei, ruft den MCP-Server auf und schickt den Auftrag mit dem Kontext an das Sprachmodell. Das Modell läuft meist beim Anbieter im Internet. Es sieht nur das, was der Agent ihm schickt. Deshalb ist der Kontext so wichtig, und deshalb gehören keine Geheimnisse in Dateien, die der Agent mitschickt. Wie die Teile nacheinander zusammenarbeiten, zeigt die nächste Folie."
         },
         {
           "type": "diagram",
@@ -1476,12 +1488,12 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "„Erstelle CustomerFilter mit input()“"
+                "text": "„Erstelle CustomerFilter …“"
               },
               {
                 "from": 1,
                 "to": 2,
-                "text": "AGENTS.md + betroffene Dateien lesen"
+                "text": "AGENTS.md + Dateien lesen"
               },
               {
                 "from": 1,
@@ -1529,7 +1541,7 @@
               }
             ]
           },
-          "caption": "Regeldatei und MCP-Server verbessern den Kontext – die Prüfung in Schritt 10 bleibt Aufgabe des Entwicklers",
+          "caption": "Regeldatei und MCP-Server verbessern den Kontext – prüfen muss am Ende der Entwickler",
           "notes": "Folie: „Eine Anfrage an den KI-Agenten im Ablauf“.\n\nDas Diagramm zeigt eine typische Anfrage an einen KI-Agenten Schritt für Schritt. Beteiligt sind der Entwickler, der Agent im Editor, das Repository, das Sprachmodell und der MCP-Server der Angular CLI.\n\nIn Schritt 1 gibt der Entwickler einen kleinen, klaren Auftrag. Der Agent liest in Schritt 2 die Regeldatei „AGENTS.md“ und die betroffenen Dateien. In Schritt 3 schickt er alles zusammen an das Sprachmodell. Das Modell antwortet in Schritt 4 noch nicht mit Code, sondern bittet darum, ein Werkzeug aufzurufen. Der Agent ruft in Schritt 5 beim MCP-Server die Funktion „get_best_practices“ auf und bekommt in Schritt 6 die aktuellen Regeln für Angular.\n\nIn Schritt 7 gibt der Agent dieses Ergebnis an das Modell weiter, und in Schritt 8 kommt der Codevorschlag. Der Agent ändert in Schritt 9 die Dateien und kann zum Beispiel die Tests starten. In Schritt 10 zeigt er dem Entwickler die Änderungen. Diese Änderungen prüft der Entwickler wie einen Code-Review eines Kollegen."
         },
         {
