@@ -315,15 +315,17 @@ def _comp_node(slide, node, x, y, w, h, depth, boxes, size, scale, gap_h, gap_v)
                anchor=MSO_ANCHOR.TOP)
         pad = PAD
         inner_y, inner_h = y + head, h - head - int(pad * scale)
+        pad_v = int(pad * scale)  # noqa: F841 (Abstand unten skaliert, damit nichts überläuft)
         n = len(kids)
         if node.get("vertical"):
+            g = int(gap_v * scale)
             hs = [int(_nat_h(k, gap_v) * scale) for k in kids]
-            extra = max(0, inner_h - sum(hs) - gap_v * (n - 1))
+            extra = max(0, inner_h - sum(hs) - g * (n - 1))
             yy = inner_y
             for k, kh in zip(kids, hs):
                 kh2 = kh + (extra // n if k.get("children") else 0)
                 _comp_node(slide, k, x + pad, yy, w - 2 * pad, kh2, depth + 1, boxes, size, scale, gap_h, gap_v)
-                yy += kh2 + gap_v
+                yy += kh2 + g
         else:
             cw = (w - 2 * pad - gap_h * (n - 1)) // n
             for i, k in enumerate(kids):
