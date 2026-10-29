@@ -410,12 +410,7 @@
        {
         "from": 1,
         "to": 2,
-        "text": "customerSelected.emit(customer)"
-       },
-       {
-        "from": 2,
-        "to": 2,
-        "text": "newCustomerSelected()"
+        "text": "emit() → newCustomerSelected()"
        },
        {
         "from": 2,
@@ -435,7 +430,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Ablauf: Klick in der Liste bis zur Detailansicht“.\n\nDas Sequenzdiagramm zeigt, was nach einem Klick auf einen Kunden in der Liste passiert. Die Zeit läuft von oben nach unten. Erstens: Der Browser meldet den Klick auf ein Listenelement. Das Event Binding „(click)“ ruft die Methode „listItemClicked“ in der Kundenliste auf. Zweitens merkt sich die Liste den Kunden in ihrem eigenen Signal, damit sie ihn hervorheben kann.\n\nDrittens löst die Liste mit „emit“ ihr Output „customerSelected“ aus. Ein Output ist ein Ausgang für Ereignisse an die Eltern-Komponente. Die „AppComponent“ hat sich im Template mit runden Klammern dafür angemeldet. Deshalb ruft Angular viertens ihre Methode „newCustomerSelected“ auf. Fünftens speichert die „AppComponent“ den Kunden in ihrem Signal „selectedCustomer“.\n\nSechstens: Das Template der „AppComponent“ gibt das Signal über den Input „[customer]“ an die Detailansicht weiter. Siebtens zeigt die Detailansicht den neuen Kunden an. Die Liste und die Detailansicht kennen sich dabei nicht. Die Verbindung läuft immer über die Eltern-Komponente."
+     "notes": "Diagrammfolie „Ablauf: Klick in der Liste bis zur Detailansicht“.\n\nDas Sequenzdiagramm zeigt, was nach einem Klick auf einen Kunden in der Liste passiert. Die Zeit läuft von oben nach unten. Erstens: Der Browser meldet den Klick auf ein Listenelement. Das Event Binding „(click)“ ruft die Methode „listItemClicked“ in der Kundenliste auf. Zweitens merkt sich die Liste den Kunden in ihrem eigenen Signal, damit sie ihn hervorheben kann.\n\nDrittens löst die Liste mit „emit“ ihr Output „customerSelected“ aus. Ein Output ist ein Ausgang für Ereignisse an die Eltern-Komponente. Die „AppComponent“ hat sich im Template mit runden Klammern dafür angemeldet. Deshalb ruft Angular ihre Methode „newCustomerSelected“ auf. Viertens speichert die „AppComponent“ den Kunden in ihrem Signal „selectedCustomer“.\n\nFünftens: Das Template der „AppComponent“ gibt das Signal über den Input „[customer]“ an die Detailansicht weiter. Sechstens zeigt die Detailansicht den neuen Kunden an. Die Liste und die Detailansicht kennen sich dabei nicht. Die Verbindung läuft immer über die Eltern-Komponente."
     }
    ]
   },
@@ -788,7 +783,7 @@
        {
         "from": 0,
         "to": 1,
-        "text": "[class.active] … currentActiveCustomers:5"
+        "text": "Pipe currentActiveCustomers:5"
        },
        {
         "from": 1,
