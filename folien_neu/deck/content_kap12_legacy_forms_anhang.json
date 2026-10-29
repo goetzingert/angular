@@ -285,14 +285,14 @@
               {
                 "from": "TakePlaceSoonPipe",
                 "to": "AppComponent",
-                "text": "nicht sichtbar",
+                "text": "privat",
                 "dashed": true,
                 "accent": true
               }
             ]
           },
           "caption": "AppComponent sieht nur eigene declarations und die exports importierter Module",
-          "notes": "Folie: „Wer sieht wen? AppModule und seine Importe“.\n\nDas Diagramm zeigt das „AppModule“ aus dem Projekt 30_modules_legacy als Kasten. Darin stehen links das importierte „TrainingsModule“, in der Mitte die eigene Deklaration „AppComponent“ und rechts das importierte „AppRoutingModule“ sowie das „BrowserModule“.\n\nDas „TrainingsModule“ deklariert drei Bausteine. Die beiden Komponenten stehen zusätzlich in „exports“, also gibt das Modul sie nach außen frei. Die Pipe „TakePlaceSoonPipe“ steht nur in „declarations“; sie bleibt privat. Das „AppRoutingModule“ exportiert das „RouterModule“ und damit „router-outlet“ und „routerLink“.\n\nDie grünen Pfeile zeigen: Diese Bausteine darf das Template von „AppComponent“ verwenden. Der gestrichelte orange Pfeil zeigt: Die Pipe ist im Template von AppComponent nicht bekannt. Wer sie dort benutzt, bekommt einen Fehler beim Bauen. Abhilfe wäre, die Pipe im TrainingsModule zusätzlich zu exportieren."
+          "notes": "Folie: „Wer sieht wen? AppModule und seine Importe“.\n\nDas Diagramm zeigt das „AppModule“ aus dem Projekt 30_modules_legacy als Kasten. Darin stehen links das importierte „TrainingsModule“, in der Mitte die eigene Deklaration „AppComponent“ und rechts das importierte „AppRoutingModule“ sowie das „BrowserModule“.\n\nDas „TrainingsModule“ deklariert drei Bausteine. Die beiden Komponenten stehen zusätzlich in „exports“, also gibt das Modul sie nach außen frei. Die Pipe „TakePlaceSoonPipe“ steht nur in „declarations“; sie bleibt privat. Das „AppRoutingModule“ exportiert das „RouterModule“ und damit „router-outlet“ und „routerLink“.\n\nDie grünen Pfeile zeigen: Diese Bausteine darf das Template von „AppComponent“ verwenden. Der gestrichelte orange Pfeil mit der Aufschrift „privat“ zeigt: Die Pipe ist im Template von AppComponent nicht bekannt. Wer sie dort benutzt, bekommt einen Fehler beim Bauen. Abhilfe wäre, die Pipe im TrainingsModule zusätzlich zu exportieren."
         },
         {
           "type": "code",
@@ -1689,7 +1689,7 @@
               {
                 "from": 1,
                 "to": 1,
-                "text": "ng-dirty ng-invalid"
+                "text": "CSS: ng-invalid"
               }
             ]
           },
