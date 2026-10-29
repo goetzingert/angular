@@ -363,6 +363,69 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Gleicher Store, anderer Injector",
+          "caption": "Der Code des CustomerStore bleibt gleich; nur der Injector entscheidet, was inject(CustomerService) liefert.",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "CustomerStore in zwei Umgebungen",
+              "children": [
+                {
+                  "label": "Anwendung: Root-Injector",
+                  "sub": "providedIn: 'root'",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "CustomerStore (App)"
+                    },
+                    {
+                      "label": "CustomerService",
+                      "sub": "echter Service"
+                    },
+                    {
+                      "label": "HttpClient -> Server"
+                    }
+                  ]
+                },
+                {
+                  "label": "Test: TestBed-Injector",
+                  "sub": "configureTestingModule({ providers })",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "CustomerStore (Test)",
+                      "sub": "TestBed.inject(CustomerStore)"
+                    },
+                    {
+                      "label": "{ getAll: vi.fn() }",
+                      "sub": "provide: CustomerService, useValue",
+                      "highlight": true
+                    },
+                    {
+                      "label": "kein HttpClient nötig"
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "CustomerStore (App)",
+                "to": "CustomerService",
+                "text": "inject(CustomerService)"
+              },
+              {
+                "from": "CustomerStore (Test)",
+                "to": "{ getAll: vi.fn() }",
+                "text": "inject(CustomerService)",
+                "accent": true
+              }
+            ]
+          },
+          "notes": "Folie: „Gleicher Store, anderer Injector“.\n\nDas Diagramm stellt zwei Umgebungen nebeneinander. Links läuft die Anwendung. Dort ist der „Root-Injector“ zuständig. Fragt der „CustomerStore“ mit „inject“ nach dem „CustomerService“, bekommt er den echten Service. Dieser spricht über den „HttpClient“ mit dem Server.\n\nRechts läuft ein Test. Hier ist der Injector des „TestBed“ zuständig. In „configureTestingModule“ steht unter „providers“: Wer „CustomerService“ anfordert, bekommt ein Objekt mit einer Mock-Funktion „getAll“. Der Store stellt dieselbe Frage mit „inject“, bekommt aber das Ersatzobjekt. Das zeigt der orange Pfeil.\n\nDer Code des Stores ist in beiden Fällen genau gleich. Nur die Umgebung ist anders. Deshalb braucht der Test keinen Server und keinen „HttpClient“."
+        },
+        {
           "type": "content",
           "title": "HTTP testen: der Ablauf",
           "bullets": [
@@ -414,6 +477,76 @@
           "notes": "Folie: „HttpTestingController im Detail“.\n\nHier sind die wichtigsten Regeln für den „HttpTestingController“. Zuerst muss man das Ergebnis abonnieren. Ein Observable vom „HttpClient“ sendet die Anfrage erst, wenn jemand es abonniert. Ohne „subscribe“ findet „expectOne“ deshalb nichts.\n\n„expectOne“ bekommt die erwartete Adresse. Gibt es keine oder mehrere passende Anfragen, schlägt der Test fehl. Sonst liefert es ein „TestRequest“, also die abgefangene Anfrage. Daran prüft man Methode, Inhalt und Kopfzeilen. „flush“ beantwortet die Anfrage. Mit einem zweiten Parameter kann man einen Fehlerstatus wie 500 vorgeben und so den Fehlerfall testen. „expectNone“ prüft, dass keine Anfrage gesendet wurde."
         },
         {
+          "type": "diagram",
+          "title": "Sequenz: HTTP-Test mit HttpTestingController",
+          "caption": "Die Anfrage verlässt den Test nie: Der Test fängt sie ab, prüft sie und beantwortet sie selbst mit flush().",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Test (it)",
+              "CustomerService",
+              "HttpClient",
+              "HttpTestingController"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "update(customer).subscribe()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "put('api/customer/1', customer)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Anfrage ablegen (kein Netzwerk)"
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "expectOne('api/customer/1')"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "TestRequest",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "method 'PUT' und body prüfen"
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "request.flush({ data: customer })"
+              },
+              {
+                "from": 3,
+                "to": 1,
+                "text": "Antwort über HttpClient",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Customer an subscribe (nach map)",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "afterEach: verify()"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: HTTP-Test mit HttpTestingController“.\n\nDas Diagramm zeigt den Test für „update“ im „CustomerService“ Schritt für Schritt. Erstens: Der Test ruft „update“ auf und abonniert das Ergebnis. Zweitens: Erst durch das Abonnieren sendet der Service über den „HttpClient“ eine Anfrage mit der Methode „PUT“. Drittens: Wegen „provideHttpClientTesting“ geht die Anfrage nicht ins Netzwerk. Sie wird beim „HttpTestingController“ abgelegt.\n\nViertens: Der Test fragt mit „expectOne“ nach genau einer Anfrage an diese Adresse. Fünftens: Er bekommt ein „TestRequest“ zurück, also die abgefangene Anfrage. Sechstens: Er prüft Methode und Inhalt. Siebtens: Mit „flush“ schickt er eine Antwort.\n\nAchtens: Die Antwort läuft über den „HttpClient“ zurück zum Service. Neuntens: Der Service wandelt sie mit „map“ um, und das Abonnement im Test bekommt den Kunden. Zehntens: Nach jedem Test prüft „verify“, dass keine Anfrage offen geblieben ist."
+        },
+        {
           "type": "content",
           "title": "Komponententest: die Fixture",
           "bullets": [
@@ -445,6 +578,78 @@
           "notes": "Codefolie „Komponententest: Vorbereitung“.\n\nDiese Vorbereitung stammt aus Übung 34. Die Komponente für einen Listeneintrag wird unter „imports“ eingetragen, weil sie eine Standalone-Komponente ist. Ihr Template enthält einen Link mit „routerLink“. Deshalb braucht der Test „provideRouter“ mit einer leeren Liste von Routen. „compileComponents“ bereitet die Templates vor und liefert ein Promise, deshalb steht davor „await“.\n\nDanach erzeugt „createComponent“ die Fixture. Die Hilfsfunktion „render“ setzt die beiden Eingaben „customer“ und „selected“ und wartet dann, bis die Anzeige fertig ist. Die kleine Funktion „el“ liefert das HTML-Element der Komponente, damit die Tests kürzer werden."
         },
         {
+          "type": "diagram",
+          "title": "Was steckt im Test der Kundenliste?",
+          "caption": "customer-list.component.spec.ts: echte Komponenten und echter Store, nur das Netzwerk ist durch das Test-Backend ersetzt.",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "TestBed",
+              "sub": "configureTestingModule({ imports, providers })",
+              "children": [
+                {
+                  "label": "ComponentFixture",
+                  "sub": "createComponent(CustomerListComponent)",
+                  "children": [
+                    {
+                      "label": "CustomerListComponent",
+                      "sub": "componentInstance",
+                      "vertical": true,
+                      "children": [
+                        {
+                          "label": "<customer-filter>"
+                        },
+                        {
+                          "label": "<li customer-list-item>",
+                          "sub": "je Kunde einmal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "TestBed-Injector",
+                  "sub": "providers",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "CustomerStore",
+                      "sub": "echt, providedIn: 'root'"
+                    },
+                    {
+                      "label": "CustomerService",
+                      "sub": "echt"
+                    },
+                    {
+                      "label": "HttpClient",
+                      "sub": "provideHttpClient()"
+                    },
+                    {
+                      "label": "HttpTestingController",
+                      "sub": "provideHttpClientTesting()",
+                      "highlight": true
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "CustomerListComponent",
+                "to": "CustomerStore",
+                "text": "inject()"
+              },
+              {
+                "from": "HttpClient",
+                "to": "HttpTestingController",
+                "text": "statt Netzwerk",
+                "accent": true
+              }
+            ]
+          },
+          "notes": "Folie: „Was steckt im Test der Kundenliste?“.\n\nDas Diagramm zeigt, was im Test der „CustomerListComponent“ aus Übung 34 zusammenarbeitet. Der äußere Kasten ist das „TestBed“, die kleine Angular-Umgebung des Tests. Links liegt die „ComponentFixture“. Sie entsteht mit „createComponent“ und enthält die echte Listen-Komponente mit ihren echten Kind-Komponenten: dem Filter und einem Listeneintrag je Kunde.\n\nRechts liegt der Injector des TestBed. Die Liste holt sich mit „inject“ den echten „CustomerStore“, der Store den echten „CustomerService“ und der Service den „HttpClient“. Nur das Netzwerk ist ersetzt: Wegen „provideHttpClientTesting“ landen alle Anfragen beim „HttpTestingController“.\n\nDer Test steuert von außen: Über die Fixture löst er Eingaben aus und prüft das HTML. Über den „HttpTestingController“ beantwortet er die Anfrage nach den Kunden. So testet man das Zusammenspiel aller Teile ohne echten Server."
+        },
+        {
           "type": "content",
           "title": "Change Detection im Test (zoneless)",
           "bullets": [
@@ -472,6 +677,70 @@
           "title": "Komponenten mit Signal-Inputs testen",
           "code": "it('should show the first name and the city', async () => {\n  await render(new Customer('Hans', 'Meyer', 'Hauptstraße 21', '11111', 'Teststadt'));\n\n  expect(el().textContent).toContain('Hans');\n  expect(el().textContent).toContain(': Teststadt');\n});\n\nit('should emit the customer when it is clicked', async () => {\n  const customer = new Customer('Hans', 'Meyer');\n  await render(customer);\n  const chosen: Customer[] = [];\n  fixture.componentInstance.chosen.subscribe(value => chosen.push(value));\n\n  el().click();\n\n  expect(chosen).toEqual([customer]);\n});",
           "notes": "Codefolie „Komponenten mit Signal-Inputs testen“.\n\nHier sind zwei Tests für die Komponente eines Listeneintrags. Der erste Test zeigt einen Kunden mit Stadt an. Er nutzt die Hilfsfunktion „render“ von der vorigen Folie und prüft dann, dass der Vorname und die Stadt im Text der Komponente stehen.\n\nDer zweite Test prüft den Ausgang „chosen“. Ein Ausgang, angelegt mit „output“, lässt sich im Test mit „subscribe“ abonnieren. Jeder gesendete Wert wird in eine Liste geschrieben. Dann löst der Test mit „click“ einen Klick auf das Element aus. Am Ende prüft er, dass genau dieser Kunde einmal gesendet wurde."
+        },
+        {
+          "type": "diagram",
+          "title": "Sequenz: ein Komponententest",
+          "caption": "CustomerListItemComponent: Input setzen, auf das Rendern warten, dann erst das DOM prüfen.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Test (it)",
+              "TestBed",
+              "ComponentFixture",
+              "CustomerListItem",
+              "DOM"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "createComponent(CustomerListItem…)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Komponente + Fixture erzeugen"
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "componentRef.setInput('customer', hans)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "customer() neu, Rendern geplant"
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "await whenStable()"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Change Detection: Template prüfen"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "<a> mit „Hans : Teststadt“"
+              },
+              {
+                "from": 2,
+                "to": 0,
+                "text": "Promise erfüllt",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 4,
+                "text": "el().textContent prüfen"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: ein Komponententest“.\n\nDas Diagramm zeigt den Ablauf eines Tests für die „CustomerListItemComponent“. Erstens: Der Test ruft „TestBed.createComponent“ auf. Zweitens: Das TestBed erzeugt die Komponente und die Fixture, also das Steuerobjekt für den Test. Drittens: Der Test setzt über „componentRef.setInput“ den Input „customer“ auf einen Kunden namens Hans.\n\nViertens: Die Komponente hat jetzt einen neuen Input-Wert, und Angular plant das Rendern ein. Es passiert aber noch nicht sofort. Fünftens: Der Test wartet mit „await whenStable“. Sechstens: Jetzt läuft die Änderungserkennung und prüft das Template. Siebtens: Das HTML enthält den Link mit dem Namen und der Stadt.\n\nAchtens: Das Promise von „whenStable“ ist erfüllt, der Test läuft weiter. Neuntens: Erst jetzt prüft der Test den Text im HTML. Würde der Test nicht warten, sähe er im neunten Schritt noch das alte, leere HTML."
         },
         {
           "type": "content",
@@ -989,6 +1258,70 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Sequenz: Change Detection ohne Zone.js",
+          "caption": "Zwei Änderungen, ein Durchlauf: Angular prüft nur die Komponente, deren Template die Signals liest.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "CustomerList\n(Event-Handler)",
+              "CustomerStore\n(Signals)",
+              "Angular\nScheduler",
+              "CustomerList\n(Template)",
+              "DOM"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "setFilter('li'): _filter.set()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Leser markieren, Durchlauf anfordern"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "select(id): _selectedId.set()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "schon geplant: kein 2. Durchlauf"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "Handler fertig: Durchlauf startet"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "nur markierte Komponente prüfen"
+              },
+              {
+                "from": 3,
+                "to": 1,
+                "text": "filtered(), selected() lesen"
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "neue Werte",
+                "reply": true
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "nur geänderte Stellen anpassen"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: Change Detection ohne Zone.js“.\n\nDas Diagramm zeigt, wie Angular ohne „Zone.js“ von einer Änderung erfährt. Erstens: Ein Ereignis-Handler der „CustomerListComponent“ ruft „setFilter“ auf, und der Store setzt sein Signal. Zweitens: Das Signal kennt seine Leser. Angular markiert deshalb das Template der Liste und bittet den „Scheduler“, also den Planer, um einen Durchlauf.\n\nDrittens: Im selben Handler wird auch die Auswahl geändert. Viertens: Ein Durchlauf ist schon geplant, deshalb kommt kein zweiter dazu. Fünftens: Wenn der Handler fertig ist, startet der Scheduler den Durchlauf.\n\nSechstens: Angular prüft nur die markierte Komponente. Siebtens: Ihr Template liest dabei „filtered“ und „selected“ aus dem Store. Achtens: Die neuen Werte kommen zurück. Neuntens: Angular passt im HTML nur die Stellen an, die sich wirklich geändert haben. Komponenten, die keines dieser Signals lesen, werden nicht neu geprüft."
+        },
+        {
           "type": "content",
           "title": "Was löst eine Neu-Prüfung aus?",
           "bullets": [
@@ -1259,6 +1592,71 @@
           "notes": "Codefolie „loadComponent und loadChildren“.\n\nDie erste Route lädt die Kundenliste ganz normal, sie gehört zum Start-Bundle. Die zweite Route ist die Detailseite aus Übung 35. Sie nutzt „loadComponent“. „import“ lädt die Datei der Komponente und liefert ein Promise mit dem Inhalt der Datei. Mit „then“ wählt man daraus die Komponentenklasse aus. Der Guard „authGuard“ funktioniert wie bei normalen Routen.\n\nDie dritte Route ist ein ausgedachtes Beispiel für einen ganzen Bereich. „loadChildren“ lädt die Datei „admin.routes.ts“ und nimmt daraus die Liste „ADMIN_ROUTES“. Alle Komponenten dieses Bereichs landen dann in eigenen Chunks und werden erst beim Aufruf von „admin“ geladen."
         },
         {
+          "type": "diagram",
+          "title": "Sequenz: Lazy Loading der Detailseite",
+          "caption": "Von /customer (CustomerListComponent im Outlet) nach /customer/5 (CustomerDetailsComponent, erst jetzt geladen).",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "CustomerListItem\n(routerLink)",
+              "Router",
+              "authGuard",
+              "Server\n(Chunk-Datei)",
+              "RouterOutlet"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Klick: navigieren zu /customer/5"
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "passt zu 'customer/:id'"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "canActivate prüfen"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "true",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "loadComponent: import(...)"
+              },
+              {
+                "from": 3,
+                "to": 1,
+                "text": "CustomerDetailsComponent",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 4,
+                "text": "CustomerListComponent entfernen"
+              },
+              {
+                "from": 1,
+                "to": 4,
+                "text": "CustomerDetails einsetzen, id = '5'"
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "nächstes Mal: Chunk schon da"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: Lazy Loading der Detailseite“.\n\nDas Diagramm zeigt, was beim ersten Öffnen der Detailseite in Übung 35 passiert. Vorher steht die Adresse auf „/customer“, und im „RouterOutlet“, dem Platzhalter für die Seite, steht die Kundenliste. Erstens: Der Benutzer klickt auf den Link eines Listeneintrags, und der Router soll zu „/customer/5“ wechseln. Zweitens: Der Router findet die Route mit dem Platzhalter „:id“.\n\nDrittens: Er fragt den „authGuard“, ob die Seite geöffnet werden darf. Viertens: Der Guard antwortet mit „true“. Fünftens: Jetzt ruft der Router die Funktion bei „loadComponent“ auf. Ihr „import“ lädt die eigene Datei mit der Detail-Komponente vom Server. Sechstens: Die Klasse „CustomerDetailsComponent“ ist geladen.\n\nSiebtens und achtens: Der Router entfernt die Liste aus dem Outlet und setzt die Detailseite ein. Die Kennung 5 aus der Adresse kommt als Input „id“ an. Neuntens: Beim nächsten Aufruf ist die Datei schon geladen, der fünfte und sechste Schritt entfallen."
+        },
+        {
           "type": "content",
           "title": "@defer: Teile einer Seite später laden",
           "bullets": [
@@ -1310,6 +1708,64 @@
             ],
             "highlight_last": true
           }
+        },
+        {
+          "type": "diagram",
+          "title": "Sequenz: @defer (on viewport; prefetch on idle)",
+          "caption": "Beispiel der Codefolie: Code im Leerlauf vorladen, anzeigen erst, wenn der Platzhalter sichtbar wird.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Angular\n(@defer-Block)",
+              "Browser",
+              "Server\n(Chunk-Datei)",
+              "DOM / Viewport"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 3,
+                "text": "@placeholder einsetzen"
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "Platzhalter beobachten (IntersectionObserver)"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Browser im Leerlauf (prefetch on idle)"
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "import(): Chunk mit OrderHistory laden"
+              },
+              {
+                "from": 2,
+                "to": 0,
+                "text": "Code geladen, noch nicht angezeigt",
+                "reply": true
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "Platzhalter sichtbar (on viewport)"
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "Platzhalter durch <order-history> ersetzen"
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "Block bleibt dauerhaft geladen"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: @defer (on viewport; prefetch on idle)“.\n\nDas Diagramm zeigt das Beispiel von der Codefolie mit der Bestellhistorie. Erstens: Beim Anzeigen der Seite setzt Angular zuerst den Platzhalter ein. Zweitens: Angular beobachtet diesen Platzhalter mit einem „IntersectionObserver“. Das ist eine Funktion des Browsers, die meldet, wenn ein Element in den sichtbaren Bereich kommt.\n\nDrittens: Sobald der Browser nichts anderes zu tun hat, meldet er Leerlauf. Das ist der Auslöser „prefetch on idle“. Viertens: Angular lädt jetzt die eigene Datei mit der Komponente vom Server. Fünftens: Der Code ist da, aber die Anzeige ändert sich noch nicht.\n\nSechstens: Der Benutzer scrollt, und der Platzhalter wird sichtbar. Das ist der Auslöser „on viewport“. Siebtens: Angular ersetzt den Platzhalter durch die Komponente. Weil der Code schon geladen ist, braucht es keinen Ladeblock. Achtens: Der Block bleibt danach geladen."
         },
         {
           "type": "content",

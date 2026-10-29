@@ -152,6 +152,64 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "readFile im Ablauf: Programm, node.js, Event Loop",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "lesen.js",
+              "node:fs",
+              "Betriebssystem",
+              "Event Loop"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 0,
+                "text": "console.log('1: Auftrag …')"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "readFile('daten.txt', 'utf8', cb)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Datei im Hintergrund lesen"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "kehrt sofort zurück",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "console.log('2: Programm läuft weiter')"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "fertig: Ereignis in die Warteschlange"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "cb(null, inhalt)"
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "console.log('3: Datei gelesen …')"
+              }
+            ]
+          },
+          "caption": "Zwischen Schritt 3 und 6 ist das Programm frei – der Callback kommt erst dran, wenn die Event Loop ihn holt",
+          "notes": "Folie: „readFile im Ablauf: Programm, node.js, Event Loop“.\n\nDas Diagramm zeigt das Beispiel „lesen.js“ mit allen Beteiligten: unser Programm, das eingebaute Modul „fs“ für das Dateisystem, das Betriebssystem und die „Event Loop“, also die Schleife, in der node.js wartende Aufgaben nacheinander abarbeitet.\n\nIn Schritt 1 gibt das Programm Text 1 aus. In Schritt 2 ruft es „readFile“ auf und übergibt den Callback. Das Modul gibt den Leseauftrag in Schritt 3 an das Betriebssystem weiter und kehrt in Schritt 4 sofort zurück, ohne Ergebnis. Deshalb kommt in Schritt 5 schon Text 2.\n\nWenn die Datei gelesen ist, meldet das Betriebssystem das in Schritt 6. Das Ereignis kommt in eine Warteschlange. Sobald das Programm nichts anderes mehr zu tun hat, ruft die Event Loop in Schritt 7 den Callback auf. Der erste Parameter ist „null“, also kein Fehler. In Schritt 8 erscheint Text 3."
+        },
+        {
           "type": "code",
           "title": "Dasselbe mit Promise und await",
           "code": "// lesen.mjs – ES-Modul, starten mit: node lesen.mjs\nimport { readFile } from 'node:fs/promises';\n\ntry {\n  const inhalt = await readFile('daten.txt', 'utf8');\n  console.log('Datei gelesen, Länge:', inhalt.length);\n} catch (err) {\n  console.error('Fehler beim Lesen:', err.message);\n}\n\n// readFile liefert hier ein Promise statt einen Callback zu erwarten.\n// await wartet auf das Ergebnis, ohne node.js zu blockieren.\n// Fehler kommen als Exception und landen im catch-Block.",
@@ -271,6 +329,77 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Eine API-Anfrage über den Proxy im Ablauf",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "CustomerService",
+              "Browser",
+              "ng serve :4200\n(Proxy)",
+              "server.js :3000\n(Express)"
+            ],
+            "steps": [
+              {
+                "from": 1,
+                "to": 2,
+                "text": "GET localhost:4200/"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "index.html, main.js: Angular-App",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "http.get('api/customer')"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "GET localhost:4200/api/customer"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "beginnt mit /api → dev.proxy.json"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "GET localhost:3000/api/customer"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "app.get('/api/customer', …)"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "200 { data: [ …Kunden ] }",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Antwort von Port 4200: gleiche Origin",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Observable liefert die Kunden",
+                "reply": true
+              }
+            ]
+          },
+          "caption": "Der Browser spricht nur mit Port 4200 – die Weiterleitung an Port 3000 macht der Dev-Server, deshalb kein CORS",
+          "notes": "Folie: „Eine API-Anfrage über den Proxy im Ablauf“.\n\nDas Diagramm zeigt eine Anfrage an das Kurs-Backend Schritt für Schritt. Beteiligt sind der „CustomerService“ in der Angular-App, der Browser, der Dev-Server von „ng serve“ auf Port 4200 und der Express-Server „server.js“ auf Port 3000.\n\nIn den Schritten 1 und 2 lädt der Browser die Angular-App vom Dev-Server. In Schritt 3 ruft der Service mit dem HttpClient die relative Adresse „api/customer“ auf. Der Browser schickt die Anfrage in Schritt 4 deshalb an dieselbe Adresse wie die Seite, also an Port 4200.\n\nDer Dev-Server erkennt in Schritt 5 am Anfang „/api“, dass die Proxy-Regel aus „dev.proxy.json“ gilt, und leitet die Anfrage in Schritt 6 an Port 3000 weiter. Dort ruft Express in Schritt 7 die passende Funktion auf, die in Schritt 8 die Kundendaten zurückgibt. Der Dev-Server reicht die Antwort in Schritt 9 an den Browser weiter. Für den Browser kommt alles von Port 4200; deshalb gibt es kein CORS-Problem, also keine Sperre für fremde Adressen."
+        },
+        {
           "type": "content",
           "title": "Installation von node.js",
           "bullets": [
@@ -364,6 +493,76 @@
             "highlight_last": true,
             "note": "Änderung → neu bauen → neu laden"
           }
+        },
+        {
+          "type": "diagram",
+          "title": "ng serve im Ablauf: bauen, ausliefern, neu laden",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Entwickler",
+              "Angular CLI\n(node)",
+              "esbuild",
+              "Vite-Dev-Server\n:4200",
+              "Browser"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "ng serve"
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "angular.json lesen (Builder, Proxy)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "main.ts, Komponenten übersetzen"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "JavaScript-Bundles im Speicher",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Dateien bereitstellen, Port öffnen"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "GET localhost:4200"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "index.html, main.js, styles.css",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Datei speichern (Watcher merkt es)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "nur Geändertes neu bauen"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "neu laden oder austauschen (HMR)"
+              }
+            ]
+          },
+          "caption": "Kein dist-Ordner: ng serve hält die gebauten Dateien im Speicher und baut bei jeder Änderung nach",
+          "notes": "Folie: „ng serve im Ablauf: bauen, ausliefern, neu laden“.\n\nDas Diagramm zeigt, was nach dem Befehl „ng serve“ passiert. Beteiligt sind der Entwickler, die Angular CLI als node-Prozess, das Bauwerkzeug „esbuild“, der Dev-Server „Vite“ und der Browser.\n\nIn Schritt 1 startet der Entwickler „ng serve“. Die CLI liest in Schritt 2 die Einstellungen aus „angular.json“, zum Beispiel die Proxy-Datei. In Schritt 3 übersetzt esbuild den TypeScript-Code und die Templates. Das Ergebnis liegt in Schritt 4 im Arbeitsspeicher, nicht auf der Festplatte. In Schritt 5 startet der Dev-Server auf Port 4200.\n\nIn den Schritten 6 und 7 lädt der Browser die Seite und die Skripte. Speichert der Entwickler danach eine Datei, bemerkt die CLI das in Schritt 8. In Schritt 9 baut esbuild nur die geänderten Teile neu. In Schritt 10 lädt der Browser die Seite neu oder tauscht nur die geänderten Teile aus; das heißt „HMR“, Hot Module Replacement."
         },
         {
           "type": "content",
@@ -469,6 +668,78 @@
               "Lock-Datei aktualisiert"
             ]
           }
+        },
+        {
+          "type": "diagram",
+          "title": "npm install im Ablauf: Lock-Datei, Cache, Registry",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "npm",
+              "package.json",
+              "package-lock.json",
+              "Cache\n(~/.npm)",
+              "Registry",
+              "node_modules/"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "lesen: \"rxjs\": \"~7.8.0\""
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "lesen: festgelegte Version?"
+              },
+              {
+                "from": 2,
+                "to": 0,
+                "text": "rxjs 7.8.2, resolved, integrity",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "rxjs-7.8.2.tgz vorhanden?"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "nein",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 4,
+                "text": "GET rxjs-7.8.2.tgz"
+              },
+              {
+                "from": 4,
+                "to": 0,
+                "text": "Paket; Prüfsumme stimmt",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "Kopie für später ablegen"
+              },
+              {
+                "from": 0,
+                "to": 5,
+                "text": "entpacken, auch Abhängigkeit tslib"
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "nur bei Änderungen schreiben"
+              }
+            ]
+          },
+          "caption": "package.json nennt Bereiche, package-lock.json die genaue Version – die Registry wird nur bei Bedarf gefragt",
+          "notes": "Folie: „npm install im Ablauf: Lock-Datei, Cache, Registry“.\n\nDas Diagramm zeigt „npm install“ am Beispiel des Pakets „rxjs“. Beteiligt sind npm, die beiden Dateien „package.json“ und „package-lock.json“, der Zwischenspeicher auf dem Rechner, die Registry im Internet und der Ordner „node_modules“.\n\nIn Schritt 1 liest npm in der package.json, dass rxjs in einem Versionsbereich gebraucht wird. In den Schritten 2 und 3 schaut npm in der Lock-Datei nach und findet dort die genaue Version, die Download-Adresse und eine Prüfsumme. In den Schritten 4 und 5 sucht npm das Paket im Zwischenspeicher, findet es aber nicht.\n\nDeshalb lädt npm das Paket in den Schritten 6 und 7 aus der Registry und vergleicht die Prüfsumme. In Schritt 8 legt es eine Kopie im Zwischenspeicher ab; beim nächsten Projekt geht es dann ohne Internet. In Schritt 9 entpackt npm das Paket in „node_modules“, zusammen mit den Paketen, die rxjs selbst braucht. In Schritt 10 schreibt npm die Lock-Datei nur, wenn sich etwas geändert hat."
         },
         {
           "type": "content",
@@ -947,6 +1218,78 @@
             ],
             "highlight_last": true
           }
+        },
+        {
+          "type": "diagram",
+          "title": "require im Ablauf: auflösen, ausführen, zwischenspeichern",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "app.js",
+              "require\n(node.js)",
+              "Modul-Cache",
+              "Dateisystem",
+              "gruss.js"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "require('./gruss.js')"
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Pfad relativ zu app.js auflösen"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "schon geladen?"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "nein",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 4,
+                "text": "Code einmal ausführen"
+              },
+              {
+                "from": 4,
+                "to": 1,
+                "text": "module.exports = { gruesse, version }",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Exporte speichern"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Exporte-Objekt",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "require('./gruss.js') noch einmal"
+              },
+              {
+                "from": 2,
+                "to": 0,
+                "text": "dasselbe Objekt – Code läuft nicht erneut",
+                "reply": true
+              }
+            ]
+          },
+          "caption": "Der Code eines Moduls läuft genau einmal – jedes weitere require bekommt das gespeicherte Objekt",
+          "notes": "Folie: „require im Ablauf: auflösen, ausführen, zwischenspeichern“.\n\nDas Diagramm zeigt, was bei „require“ im Beispiel mit „app.js“ und „gruss.js“ passiert. Beteiligt sind das Programm, die Funktion „require“ von node.js, der Zwischenspeicher für Module, das Dateisystem und das Modul „gruss.js“.\n\nIn Schritt 1 fordert das Programm das Modul an. Weil der Pfad mit „./“ beginnt, sucht node.js die Datei in Schritt 2 im Ordner von app.js. In den Schritten 3 und 4 prüft node.js, ob das Modul schon geladen wurde. Das ist nicht der Fall, also führt node.js in Schritt 5 den Code von gruss.js einmal aus. Das Modul gibt in Schritt 6 seine Exporte zurück, und node.js speichert sie in Schritt 7. In Schritt 8 bekommt das Programm das Objekt.\n\nRuft irgendein Teil des Programms in Schritt 9 erneut „require“ für dieselbe Datei auf, kommt in Schritt 10 direkt das gespeicherte Objekt zurück. Der Code des Moduls läuft nicht noch einmal. Bei ES-Modulen mit „import“ ist das genauso."
         },
         {
           "type": "content",

@@ -272,6 +272,75 @@
           "notes": "Codefolie „Store als Service (2/2): Aktionen“.\n\nDer zweite Teil enthält die abgeleiteten Werte. „filtered“ ist die gefilterte Liste, „selected“ ist der ausgewählte Kunde und „total“ ist die Anzahl der Treffer. Alle drei sind „computed“. Ein „computed“ rechnet sich automatisch neu, wenn sich ein Signal ändert, das es liest. Gespeichert wird nur die Kennung der Auswahl, der Kunde selbst wird daraus berechnet.\n\nDanach kommen die Aktionen. „load“ setzt zuerst den Merker für „lädt gerade“ und löscht alte Fehler. Dann wartet die Methode auf die Antwort des Servers. „firstValueFrom“ wandelt dafür das Observable in ein Promise um, also in ein Versprechen auf einen späteren Wert. Bei einem Fehler wird die Fehlermeldung gesetzt, und am Ende wird der Merker in jedem Fall wieder zurückgesetzt.\n\n„setFilter“ und „select“ setzen einfach das passende Signal. Sie bekommen den neuen Filtertext beziehungsweise die Kennung als Parameter."
         },
         {
+          "type": "diagram",
+          "title": "Wer stellt den CustomerStore bereit, wer nutzt ihn?",
+          "caption": "Eine Store-Instanz im Root-Injector; die Liste im <router-outlet> holt sie mit inject(), die Kinder bekommen nur Inputs.",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "Anwendung",
+              "sub": "bootstrapApplication(AppComponent)",
+              "children": [
+                {
+                  "label": "AppComponent",
+                  "sub": "app-root",
+                  "children": [
+                    {
+                      "label": "<router-outlet>",
+                      "sub": "URL /customer",
+                      "children": [
+                        {
+                          "label": "CustomerListComponent",
+                          "sub": "store = inject(CustomerStore)",
+                          "highlight": true
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "label": "Root-Injector",
+                  "sub": "providedIn: 'root'",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "CustomerStore",
+                      "sub": "eine Instanz für alle",
+                      "highlight": true
+                    },
+                    {
+                      "label": "CustomerService",
+                      "sub": "nur API-Aufrufe"
+                    },
+                    {
+                      "label": "HttpClient"
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "CustomerListComponent",
+                "to": "CustomerStore",
+                "text": "inject()",
+                "accent": true
+              },
+              {
+                "from": "CustomerStore",
+                "to": "CustomerService",
+                "text": "inject()"
+              },
+              {
+                "from": "CustomerService",
+                "to": "HttpClient",
+                "text": "get('api/customer')"
+              }
+            ]
+          },
+          "notes": "Folie: „Wer stellt den CustomerStore bereit, wer nutzt ihn?“.\n\nDas Diagramm zeigt links den Komponentenbaum und rechts den „Root-Injector“. Der Root-Injector ist der oberste Behälter für Services in der Anwendung. Weil der Store „providedIn: root“ hat, legt Angular dort genau eine Instanz an, sobald sie zum ersten Mal gebraucht wird.\n\nLinks steht die „AppComponent“ mit dem „router-outlet“, also dem Platzhalter für die aktuelle Seite. Bei der Adresse „/customer“ zeigt der Router dort die „CustomerListComponent“. Sie holt sich mit „inject“ den Store, das zeigt der orange Pfeil.\n\nDer Store holt sich wiederum den „CustomerService“, und der Service benutzt den „HttpClient“, um die Kunden vom Server zu laden. Die Abhängigkeiten zeigen also nur in eine Richtung: von der Komponente zum Store, vom Store zum Service. Die Kind-Komponenten der Liste, also Filter und Listeneinträge, kennen den Store nicht. Sie bekommen ihre Daten über Inputs."
+        },
+        {
           "type": "content",
           "title": "Privat schreibbar, öffentlich lesbar",
           "bullets": [
@@ -353,10 +422,150 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Sequenz: Filter tippen bis zur neuen Liste",
+          "caption": "Die Komponenten rufen nur Methoden auf; neu gerechnet wird erst, wenn das Template filtered() liest.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Eingabefeld",
+              "CustomerFilter",
+              "CustomerList",
+              "CustomerStore",
+              "Angular"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "input-Ereignis: onInput()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "changed.emit('li')"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "store.setFilter('li')"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "_filter.set('li')"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "Leser markiert, Durchlauf geplant"
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "Template der Liste prüfen"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "filtered(), total()"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "computed rechnet jetzt neu"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "gefilterte Liste, Treffer",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "@for zeigt neue <li>"
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: Filter tippen bis zur neuen Liste“.\n\nDas Diagramm ist ein Sequenzdiagramm. Oben stehen die Beteiligten, die Pfeile darunter zeigen von oben nach unten, wer wen aufruft. Erstens: Der Benutzer tippt „li“ in das Eingabefeld, und die „CustomerFilterComponent“ bekommt das Ereignis in „onInput“. Zweitens: Sie sendet den Text über ihr Output „changed“ an die Elternkomponente, die „CustomerListComponent“. Drittens: Die Liste ruft im Store „setFilter“ auf.\n\nViertens: Der Store setzt sein privates Signal „_filter“. Fünftens: Angular erfährt davon, markiert das Template der Liste, weil es dieses Signal liest, und plant einen Durchlauf der Änderungserkennung. Sechstens: Beim Durchlauf prüft Angular das Template der Liste. Siebtens: Das Template liest „filtered“ und „total“ aus dem Store.\n\nAchtens: Erst jetzt rechnen die „computed“-Werte neu. Neuntens: Die gefilterte Liste und die Zahl der Treffer kommen zurück. Zehntens: Die Schleife „@for“ zeigt die passenden Listeneinträge an. Keine Komponente hat dabei etwas abonniert oder von Hand neu gezeichnet."
+        },
+        {
           "type": "code",
           "title": "Komponente nutzt nur den Store",
           "code": "export class CustomerListComponent implements OnInit {\n  protected readonly store = inject(CustomerStore);\n  customerSelected = output<Customer>();\n\n  ngOnInit(): void { this.store.load(); }   // beim Öffnen neu laden\n  onFilterChanged(text: string) { this.store.setFilter(text); }\n  listItemClicked(c: Customer) {\n    this.store.select(c.id);\n    this.customerSelected.emit(c);\n  }\n}\n\n<!-- Template -->\n@if (store.loading()) { <p>Lade Kunden...</p> }\n@for (customer of store.filtered(); track customer.id) { ... }\n<p>Treffer: {{ store.total() }}</p>",
           "notes": "Codefolie „Komponente nutzt nur den Store“.\n\nDie Listen-Komponente hat jetzt keine eigene Zustandslogik mehr. Sie holt sich den Store mit „inject“ und speichert ihn in einem Feld „store“. Das Feld ist „protected“, damit das Template darauf zugreifen kann, andere Klassen aber nicht.\n\nIn „ngOnInit“, also beim Erzeugen der Komponente, ruft sie „load“ auf. So ist die Liste nach dem Zurückkehren von den Details immer aktuell. Eingaben im Filter gibt sie an „setFilter“ weiter. Bei einem Klick auf einen Kunden ruft sie „select“ auf und meldet den Kunden zusätzlich über ihr „output“ an die Eltern-Komponente.\n\nDas Template liest nur Signals aus dem Store: den Ladezustand, die gefilterte Liste und die Anzahl der Treffer."
+        },
+        {
+          "type": "diagram",
+          "title": "Sequenz: Kunden laden mit store.load()",
+          "caption": "Vorher: Liste leer, loading() ist true. Nachher: _customers enthält die Kunden, loading() ist false.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Router",
+              "CustomerList",
+              "CustomerStore",
+              "CustomerService",
+              "HttpClient"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "URL /customer: Komponente erzeugen"
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "ngOnInit()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "store.load()"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "_loading.set(true)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "getAll()"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "get('api/customer')"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "Antwort { data: [...] }",
+                "reply": true
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "Customer[] (firstValueFrom)",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "_customers.set(...), _loading.set(false)"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Template liest filtered(), loading()",
+                "reply": true
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: Kunden laden mit store.load()“.\n\nDieses Sequenzdiagramm zeigt das Laden der Kunden. Erstens: Der Router erkennt die Adresse „/customer“ und erzeugt die „CustomerListComponent“. Zweitens: Angular ruft ihre Methode „ngOnInit“ auf. Drittens: Darin ruft die Komponente „store.load“ auf.\n\nViertens: Der Store setzt den Merker „lädt gerade“ auf „true“. Die Liste zeigt jetzt „Lade Kunden“. Fünftens: Der Store ruft „getAll“ im „CustomerService“ auf. Sechstens: Der Service schickt mit dem „HttpClient“ eine Anfrage an die Adresse „api/customer“.\n\nSiebtens: Die Antwort des Servers kommt zurück. Achtens: Der Service wandelt sie in eine Liste von Kunden um, und der Store bekommt sie über „firstValueFrom“ als Ergebnis seines „await“. Neuntens: Der Store setzt die Kundenliste und schaltet den Merker wieder aus. Zehntens: Das Template der Liste liest die neuen Werte und zeigt die Kunden an. Die gestrichelten Pfeile sind Antworten."
         },
         {
           "type": "content",
@@ -713,6 +922,65 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Sequenz: setFilter im NgRx Signal Store",
+          "caption": "Gleicher Ablauf wie beim eigenen Store: Methode, patchState, Signal, computed, Template.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "CustomerList",
+              "withMethods\nsetFilter()",
+              "withState\nfilter-Signal",
+              "withComputed\nfiltered",
+              "Template"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "store.setFilter('li')"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "patchState(store, { filter })"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "filter() hat neuen Wert"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "filtered ist veraltet"
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "Leser markiert"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "store.filtered()"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "customers(), filter() lesen"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "gefilterte Liste",
+                "reply": true
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: setFilter im NgRx Signal Store“.\n\nDas Diagramm zeigt denselben Ablauf wie beim eigenen Store, diesmal mit dem „CustomerSignalStore“. Die Spalten sind die Bausteine des Stores. Erstens: Die „CustomerListComponent“ ruft „store.setFilter“ auf. Diese Methode stammt aus „withMethods“.\n\nZweitens: Die Methode ruft „patchState“ auf und ändert nur die Eigenschaft „filter“. Drittens: Das Signal „filter“, das aus „withState“ entstanden ist, hat jetzt den neuen Wert. Viertens: Der berechnete Wert „filtered“ aus „withComputed“ hängt davon ab und gilt als veraltet. Fünftens: Angular markiert das Template, weil es diese Werte liest.\n\nSechstens: Beim nächsten Durchlauf liest das Template „store.filtered()“. Siebtens: „filtered“ liest dafür die Signals „customers“ und „filter“. Achtens: Die neue, gefilterte Liste geht an das Template zurück. Die Komponente ruft also nie „patchState“ selbst auf, das macht nur die Methode im Store."
+        },
+        {
           "type": "content",
           "title": "Klassisches NgRx: Redux-Muster",
           "bullets": [
@@ -742,6 +1010,78 @@
           "title": "Klassisches NgRx im Code (Auszug)",
           "code": "// Actions: was ist passiert?\nexport const loadCustomers = createAction('[Customer List] Load');\nexport const loadSuccess = createAction('[Customer API] Load Success',\n  props<{ customers: Customer[] }>());\n\n// Reducer: (state, action) => neuer State\nexport const reducer = createReducer(initialState,\n  on(loadCustomers, state => ({ ...state, loading: true })),\n  on(loadSuccess, (state, { customers }) => ({ ...state, customers, loading: false })));\n\n// Selector: lesen und ableiten\nexport const selectCustomers = createSelector(selectCustomerState, s => s.customers);\n\n// Komponente\nprivate readonly store = inject(Store);\ncustomers = this.store.selectSignal(selectCustomers);\nngOnInit() { this.store.dispatch(loadCustomers()); }",
           "notes": "Codefolie „Klassisches NgRx im Code (Auszug)“.\n\nDie Folie zeigt einen Ausschnitt aus klassischem NgRx. „createAction“ erzeugt eine Action. Der Text in eckigen Klammern nennt die Quelle, danach folgt das Ereignis. „props“ legt fest, welche Daten die Action mitbringt, hier die geladenen Kunden.\n\n„createReducer“ bekommt den Anfangszustand und mehrere „on“-Einträge. Jeder Eintrag sagt: Bei dieser Action wird aus dem alten Zustand dieser neue Zustand. Der Zustand wird dabei immer neu erzeugt und nie verändert.\n\n„createSelector“ liest die Kunden aus dem Zustand. Die Komponente holt den „Store“ mit „inject“, liest mit „selectSignal“ ein Signal und sendet beim Start mit „dispatch“ die Action zum Laden. Ein Effect, der hier nicht gezeigt ist, ruft dann den Server auf und sendet bei Erfolg „loadSuccess“."
+        },
+        {
+          "type": "diagram",
+          "title": "Sequenz: klassisches NgRx mit Effect",
+          "caption": "Die Komponente sendet nur Actions und liest per Selector; den Server-Aufruf macht der Effect.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "CustomerList",
+              "Store",
+              "Reducer",
+              "Effect\nloadCustomers$",
+              "CustomerService"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "dispatch(loadCustomers())"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "reducer(state, action)"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "neuer State: loading true",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Action an Effects (ofType)"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "getAll()"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "Customer[]",
+                "reply": true
+              },
+              {
+                "from": 3,
+                "to": 1,
+                "text": "dispatch(loadSuccess({ customers }))"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "reducer(state, loadSuccess)"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "neuer State mit customers",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "selectSignal(selectCustomers)",
+                "reply": true
+              }
+            ]
+          },
+          "notes": "Folie: „Sequenz: klassisches NgRx mit Effect“.\n\nDas Diagramm zeigt den Weg einer Action durch klassisches NgRx. Erstens: Die „CustomerListComponent“ sendet mit „dispatch“ die Action „loadCustomers“ an den Store. Zweitens: Der Store gibt den alten Zustand und die Action an den Reducer. Drittens: Der Reducer liefert einen neuen Zustand zurück, in dem „loading“ auf „true“ steht.\n\nViertens: Der Store gibt dieselbe Action auch an die Effects weiter. Ein Effect wartet mit „ofType“ auf bestimmte Actions. Fünftens: Der Effect „loadCustomers$“ ruft „getAll“ im „CustomerService“ auf. Sechstens: Die Kunden kommen zurück. Siebtens: Der Effect sendet eine neue Action „loadSuccess“ mit den Kunden.\n\nAchtens: Wieder berechnet der Reducer den neuen Zustand. Neuntens: Jetzt stehen die Kunden im Zustand, und „loading“ ist wieder „false“. Zehntens: Die Komponente bekommt die Liste über den Selector, den sie mit „selectSignal“ als Signal liest. Der Effect ist in dieser Form nicht auf der Codefolie zu sehen, er gehört aber zu jedem Ladevorgang dazu."
         },
         {
           "type": "content",

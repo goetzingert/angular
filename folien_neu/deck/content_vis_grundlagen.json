@@ -1,1 +1,829 @@
-{"blocks": [], "ops": []}
+{
+ "blocks": [
+  {
+   "after": 71,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Architektur der Invoice-App im Überblick",
+     "caption": "Komponenten zeigen an, Services liefern Daten; nur der HttpClient spricht mit dem Server.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "Invoice-App im Browser",
+       "children": [
+        {
+         "label": "Komponenten (Oberfläche)",
+         "vertical": true,
+         "children": [
+          {
+           "label": "AppComponent",
+           "sub": "<app-root>"
+          },
+          {
+           "label": "CustomerListComponent",
+           "sub": "<customer-list>"
+          },
+          {
+           "label": "CustomerDetailsComponent",
+           "sub": "<customer-details>"
+          }
+         ]
+        },
+        {
+         "label": "Services (Logik und Daten)",
+         "vertical": true,
+         "children": [
+          {
+           "label": "CustomerService",
+           "sub": "getAll()"
+          },
+          {
+           "label": "HttpClient",
+           "sub": "von Angular"
+          },
+          {
+           "label": "Router",
+           "sub": "von Angular"
+          }
+         ]
+        },
+        {
+         "label": "Server",
+         "vertical": true,
+         "children": [
+          {
+           "label": "REST-API",
+           "sub": "/customers"
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "AppComponent",
+        "to": "CustomerService",
+        "text": "inject()"
+       },
+       {
+        "from": "CustomerService",
+        "to": "HttpClient",
+        "text": "nutzt"
+       },
+       {
+        "from": "HttpClient",
+        "to": "REST-API",
+        "text": "HTTP",
+        "accent": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Architektur der Invoice-App im Überblick“.\n\nDas Diagramm zeigt vorab, wie die Anwendung aufgebaut ist, die wir im Kurs Schritt für Schritt bauen. Sie heißt „Invoice-App“, also Rechnungs-Anwendung. Links stehen die Komponenten. Eine Komponente ist ein Baustein der Oberfläche, zum Beispiel die Kundenliste. Die „AppComponent“ ist die äußerste Komponente, darin liegen die Kundenliste und die Detailansicht eines Kunden.\n\nIn der Mitte stehen die Services. Ein Service ist eine Klasse ohne eigene Oberfläche, die Daten und Logik bereitstellt. Die „AppComponent“ holt sich den „CustomerService“ mit „inject()“, also lässt ihn sich von Angular geben. Der „CustomerService“ nutzt später den „HttpClient“, den Angular mitbringt. Nur der „HttpClient“ spricht über das Netz mit dem Server rechts. Der „Router“ wechselt später die angezeigte Seite.\n\nAlle diese Namen lernen wir in den nächsten Kapiteln genauer kennen."
+    }
+   ]
+  },
+  {
+   "after": 86,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Wie die Dateien zusammenhängen",
+     "caption": "main.ts startet AppComponent; der selector verbindet die Klasse mit <app-root> in index.html.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "invoice-app/src",
+       "children": [
+        {
+         "label": "index.html",
+         "sub": "<app-root></app-root>"
+        },
+        {
+         "label": "main.ts",
+         "sub": "bootstrapApplication(...)"
+        },
+        {
+         "label": "app/",
+         "vertical": true,
+         "children": [
+          {
+           "label": "app.component.ts",
+           "sub": "selector: 'app-root'"
+          },
+          {
+           "label": "app.component.html",
+           "sub": "Template"
+          },
+          {
+           "label": "app.component.css",
+           "sub": "Styles"
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "main.ts",
+        "to": "app.component.ts",
+        "text": "startet"
+       },
+       {
+        "from": "main.ts",
+        "to": "index.html",
+        "text": "füllt <app-root>",
+        "accent": true
+       },
+       {
+        "from": "app.component.ts",
+        "to": "app.component.html",
+        "text": "templateUrl"
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Wie die Dateien zusammenhängen“.\n\nDas Diagramm zeigt den Ordner „src“ eines neuen Projekts und die Verweise zwischen den Dateien. Die Pfeile zeigen, welche Datei welche andere benutzt. Die Datei „main.ts“ ist der Startpunkt. Sie ruft „bootstrapApplication“ mit der Klasse „AppComponent“ auf. Diese Klasse steht in „app.component.ts“.\n\nIn der Klasse steht im „selector“ der Name „app-root“. Angular sucht genau dieses Element in der Seite „index.html“ und setzt dort die Komponente ein. Das zeigt der orange Pfeil. Über „templateUrl“ verweist die Klasse auf ihr HTML-Template in „app.component.html“. Die CSS-Datei enthält das Aussehen nur für diese Komponente."
+    }
+   ]
+  },
+  {
+   "after": 93,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Ablauf beim Start der Anwendung",
+     "caption": "Vom Laden der Seite bis zur sichtbaren AppComponent – Schritt für Schritt.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Browser",
+       "main.ts",
+       "Angular",
+       "AppComponent",
+       "index.html (DOM)"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 4,
+        "text": "index.html laden"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "Skript main.js ausführen"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "bootstrapApplication(AppComponent)"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "providers registrieren"
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "Element <app-root> suchen"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "new AppComponent()"
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "Template in <app-root> rendern"
+       },
+       {
+        "from": 2,
+        "to": 1,
+        "text": "Promise erfüllt (ApplicationRef)",
+        "reply": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Ablauf beim Start der Anwendung“.\n\nDas ist ein Sequenzdiagramm. Oben stehen die Beteiligten. Die Pfeile darunter sind Aufrufe in zeitlicher Reihenfolge von oben nach unten. Zuerst lädt der Browser die Seite „index.html“. Darin steht noch nichts außer dem leeren Element „<app-root>“. Dann führt der Browser das Skript aus, das aus „main.ts“ gebaut wurde.\n\n„main.ts“ ruft „bootstrapApplication“ mit der „AppComponent“ auf. Angular registriert zuerst die „providers“, also die Dienste aus dem zweiten Parameter. Dann sucht Angular in der Seite das Element, das zum „selector“ „app-root“ passt. Angular erzeugt ein Objekt der Klasse „AppComponent“ und zeigt das Template der Komponente in diesem Element an.\n\nZum Schluss ist das Versprechen, englisch „Promise“, erfüllt. Die gestrichelte Linie ist eine Antwort und kein neuer Aufruf. Wenn beim Start ein Fehler passiert, landet er im „catch“ in „main.ts“."
+    }
+   ]
+  },
+  {
+   "after": 101,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Data Binding: Klasse und Template",
+     "caption": "Werte fließen per {{ }} und [ ] in das Template, Ereignisse per ( ) zurück in die Klasse.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "CustomerDetailsComponent",
+       "sub": "selector: 'customer-details'",
+       "children": [
+        {
+         "label": "Klasse (.ts)",
+         "vertical": true,
+         "children": [
+          {
+           "label": "customer().firstname"
+          },
+          {
+           "label": "customer().imageUrl"
+          },
+          {
+           "label": "save()"
+          },
+          {
+           "label": "name (Feld)"
+          }
+         ]
+        },
+        {
+         "label": "Template (.html)",
+         "vertical": true,
+         "children": [
+          {
+           "label": "<p>{{ ... }}</p>"
+          },
+          {
+           "label": "<img [src]=\"...\">"
+          },
+          {
+           "label": "<button (click)=\"save()\">"
+          },
+          {
+           "label": "<input [(ngModel)]=\"name\">"
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "customer().firstname",
+        "to": "<p>{{ ... }}</p>",
+        "text": "{{ }}"
+       },
+       {
+        "from": "customer().imageUrl",
+        "to": "<img [src]=\"...\">",
+        "text": "[src]"
+       },
+       {
+        "from": "<button (click)=\"save()\">",
+        "to": "save()",
+        "text": "(click)",
+        "accent": true
+       },
+       {
+        "from": "name (Feld)",
+        "to": "<input [(ngModel)]=\"name\">",
+        "text": "[(ngModel)]",
+        "dashed": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Data Binding: Klasse und Template“.\n\nEine Komponente besteht aus der Klasse links und dem Template rechts. „Data Binding“ heißt Datenbindung: Angular hält beide Seiten automatisch auf demselben Stand. Die grünen Pfeile zeigen die Richtung von der Klasse in das Template. Mit doppelten geschweiften Klammern wird ein Wert als Text angezeigt, hier der Vorname des Kunden. Mit eckigen Klammern wird eine Eigenschaft eines HTML-Elements gesetzt, hier die Bildadresse „src“.\n\nDer orange Pfeil zeigt die Gegenrichtung: Ein Klick im Template ruft mit runden Klammern eine Methode der Klasse auf. Der gestrichelte Pfeil steht für „ngModel“ mit eckigen und runden Klammern zusammen. Das wirkt in beide Richtungen: Der Wert aus der Klasse steht im Eingabefeld, und eine Eingabe ändert sofort das Feld in der Klasse. Dafür muss die Komponente das „FormsModule“ importieren.\n\nDie Methode „save“ ist ein Beispiel und nicht Teil der Übung."
+    }
+   ]
+  },
+  {
+   "after": 113,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Komponentenbaum der Invoice-App",
+     "caption": "Jedes Kind steht im Template seiner Eltern-Komponente; Daten sieht es nur, wenn sie übergeben werden.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "index.html",
+       "sub": "<body>",
+       "children": [
+        {
+         "label": "AppComponent",
+         "sub": "<app-root> – Template app.component.html",
+         "children": [
+          {
+           "label": "<h1>Invoice Manager App</h1>"
+          },
+          {
+           "label": "CustomerListComponent",
+           "sub": "<customer-list>",
+           "children": [
+            {
+             "label": "@for: ein <li> je Customer"
+            }
+           ]
+          },
+          {
+           "label": "CustomerDetailsComponent",
+           "sub": "<customer-details>",
+           "children": [
+            {
+             "label": "Bild, Vorname, Stadt"
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     },
+     "notes": "Diagrammfolie „Komponentenbaum der Invoice-App“.\n\nDas Diagramm zeigt, wie die Komponenten ineinander stecken. Ein Kasten in einem anderen Kasten bedeutet: Er steht im Template des äußeren Kastens. Ganz außen ist die Seite „index.html“. Darin steht das Element „<app-root>“, und dort zeigt Angular die „AppComponent“ an.\n\nIm Template der „AppComponent“ stehen eine Überschrift und zwei Kind-Komponenten: die Kundenliste mit dem Element „<customer-list>“ und die Kundendetails mit dem Element „<customer-details>“. Die Liste erzeugt mit „@for“ für jeden Kunden einen Listeneintrag. Wichtig: Die Kästen sind voneinander getrennt. Die Liste kann nicht einfach auf die Daten der „AppComponent“ zugreifen. Wie die Daten trotzdem hineinkommen, zeigen die nächsten Folien zu Inputs und Outputs."
+    }
+   ]
+  },
+  {
+   "after": 119,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Input: Daten von der Eltern- zur Kind-Komponente",
+     "caption": "[customers] im Template der AppComponent schreibt in das input() der CustomerListComponent.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "AppComponent",
+       "sub": "<customer-list [customers]=\"customerMockList\">",
+       "children": [
+        {
+         "label": "customerMockList",
+         "sub": "Feld: Customer[]"
+        },
+        {
+         "label": "CustomerListComponent",
+         "sub": "<customer-list>",
+         "vertical": true,
+         "children": [
+          {
+           "label": "customers = input<Customer[]>([])"
+          },
+          {
+           "label": "@for (customer of customers(); ...)"
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "customerMockList",
+        "to": "customers = input<Customer[]>([])",
+        "text": "[customers]"
+       },
+       {
+        "from": "customers = input<Customer[]>([])",
+        "to": "@for (customer of customers(); ...)",
+        "text": "customers()"
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Input: Daten von der Eltern- zur Kind-Komponente“.\n\nDie „AppComponent“ ist die Eltern-Komponente. Sie hat das Feld „customerMockList“ mit allen Kunden. Die Kundenliste ist die Kind-Komponente. Sie hat ein „input“, also einen Eingang, mit dem Namen „customers“.\n\nIm Template der Eltern-Komponente steht beim Element „<customer-list>“ der Name „customers“ in eckigen Klammern. Das ist ein „Property Binding“: Angular schreibt den Wert von „customerMockList“ in den Eingang der Kind-Komponente. Das zeigt der waagerechte Pfeil. Die Kind-Komponente liest den Eingang wie eine Funktion, also mit runden Klammern, und zeigt die Liste mit „@for“ an.\n\nDie Daten fließen nur in diese eine Richtung, von oben nach unten. Ändert sich das Feld in der Eltern-Komponente, bekommt die Kind-Komponente automatisch den neuen Wert."
+    }
+   ]
+  },
+  {
+   "after": 129,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Ablauf: Klick in der Liste bis zur Detailansicht",
+     "caption": "Output nach oben, Signal in der Eltern-Komponente, Input nach unten.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Browser (<li>)",
+       "CustomerListComponent",
+       "AppComponent",
+       "CustomerDetailsComponent"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "(click) → listItemClicked($event, customer)"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "selectedCustomer.set(customer)"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "customerSelected.emit(customer)"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "newCustomerSelected($event)"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "selectedCustomer.set(customer)"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "[customer]=\"selectedCustomer()\" – neuer Wert"
+       },
+       {
+        "from": 3,
+        "to": 0,
+        "text": "Template zeigt den neuen Kunden",
+        "reply": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Ablauf: Klick in der Liste bis zur Detailansicht“.\n\nDas Sequenzdiagramm zeigt, was nach einem Klick auf einen Kunden in der Liste passiert. Die Zeit läuft von oben nach unten. Erstens: Der Browser meldet den Klick auf ein Listenelement. Das Event Binding „(click)“ ruft die Methode „listItemClicked“ in der Kundenliste auf. Zweitens merkt sich die Liste den Kunden in ihrem eigenen Signal, damit sie ihn hervorheben kann.\n\nDrittens löst die Liste mit „emit“ ihr Output „customerSelected“ aus. Ein Output ist ein Ausgang für Ereignisse an die Eltern-Komponente. Die „AppComponent“ hat sich im Template mit runden Klammern dafür angemeldet. Deshalb ruft Angular viertens ihre Methode „newCustomerSelected“ auf. Fünftens speichert die „AppComponent“ den Kunden in ihrem Signal „selectedCustomer“.\n\nSechstens: Das Template der „AppComponent“ gibt das Signal über den Input „[customer]“ an die Detailansicht weiter. Siebtens zeigt die Detailansicht den neuen Kunden an. Die Liste und die Detailansicht kennen sich dabei nicht. Die Verbindung läuft immer über die Eltern-Komponente."
+    }
+   ]
+  },
+  {
+   "after": 131,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Theorie: Datenfluss zwischen Container und Darstellung",
+     "caption": "Nur der Container kennt den Service; Filter und Liste kennen nur input() und output().",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "CustomerPageComponent (Container)",
+       "sub": "inject(CustomerService)",
+       "children": [
+        {
+         "label": "CustomerFilterComponent",
+         "sub": "Darstellung"
+        },
+        {
+         "label": "Zustand im Container",
+         "sub": "filterText = signal('')\nfiltered = computed(...)"
+        },
+        {
+         "label": "CustomerListComponent",
+         "sub": "Darstellung"
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "CustomerFilterComponent",
+        "to": "Zustand im Container",
+        "text": "(changed)",
+        "accent": true
+       },
+       {
+        "from": "Zustand im Container",
+        "to": "CustomerListComponent",
+        "text": "[customers]"
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Theorie: Datenfluss zwischen Container und Darstellung“.\n\nDas Diagramm zeigt das Muster aus dem Theorieteil an einem Beispiel. Der große Kasten ist die Container-Komponente „CustomerPageComponent“. Nur sie holt sich den „CustomerService“ mit „inject“. Darin stehen zwei Darstellungskomponenten, der Filter und die Liste.\n\nWenn jemand im Filter tippt, meldet der Filter den neuen Text über sein Output „changed“ nach oben. Das zeigt der orange Pfeil. Der Container speichert den Text im Signal „filterText“. Ein „computed“, also ein berechneter Wert, bildet daraus die gefilterte Kundenliste. Diese gibt der Container über den Input „customers“ an die Liste weiter. Den aktuellen Text gibt der Container außerdem über den Input „value“ an den Filter zurück; dieser Pfeil ist der Übersicht halber nicht gezeichnet.\n\nFilter und Liste wissen nichts voneinander und nichts vom Service. Darum kann man sie leicht wiederverwenden und testen."
+    }
+   ]
+  },
+  {
+   "after": 151,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Service als stabile Schnittstelle",
+     "caption": "Die Komponente kennt nur getAll(); woher die Daten kommen, entscheidet allein der Service.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "Invoice-App",
+       "children": [
+        {
+         "label": "Komponenten",
+         "vertical": true,
+         "children": [
+          {
+           "label": "AppComponent",
+           "sub": "customers = getAll()"
+          },
+          {
+           "label": "weitere Komponenten",
+           "sub": "z. B. später eine Suche"
+          }
+         ]
+        },
+        {
+         "label": "CustomerService",
+         "sub": "@Injectable({ providedIn: 'root' })",
+         "vertical": true,
+         "children": [
+          {
+           "label": "getAll(): Customer[]"
+          }
+         ]
+        },
+        {
+         "label": "Datenquelle (austauschbar)",
+         "vertical": true,
+         "children": [
+          {
+           "label": "customer.mock.ts",
+           "sub": "heute: Testdaten"
+          },
+          {
+           "label": "HttpClient → Server",
+           "sub": "später: echte Daten"
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "AppComponent",
+        "to": "getAll(): Customer[]",
+        "text": "ruft auf"
+       },
+       {
+        "from": "getAll(): Customer[]",
+        "to": "customer.mock.ts",
+        "text": "liest"
+       },
+       {
+        "from": "getAll(): Customer[]",
+        "to": "HttpClient → Server",
+        "text": "später",
+        "dashed": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Service als stabile Schnittstelle“.\n\nLinks stehen die Komponenten, in der Mitte der „CustomerService“, rechts die Datenquellen. Die „AppComponent“ ruft nur die Methode „getAll“ des Services auf. Sie weiß nicht, woher die Kunden kommen.\n\nHeute liest der Service die Testdaten aus der Datei „customer.mock.ts“. Später holt er die Daten mit dem „HttpClient“ vom Server, das zeigt der gestrichelte Pfeil. Für die Komponenten ändert sich dabei nichts, weil die Schnittstelle, also die Methode „getAll“, gleich bleibt. Das meint „API-Stabilität“. Mehrere Komponenten können denselben Service nutzen und bekommen so dieselben Daten."
+    }
+   ]
+  },
+  {
+   "after": 160,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Ablauf: inject(CustomerService)",
+     "caption": "Angular sucht den Provider von unten nach oben und erzeugt die Instanz nur beim ersten Mal.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Angular",
+       "AppComponent",
+       "Element-Injector",
+       "Root-Injector",
+       "CustomerService"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "new AppComponent()"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "inject(CustomerService)"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "kein Provider hier"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "beim Eltern-Injector fragen"
+       },
+       {
+        "from": 3,
+        "to": 4,
+        "text": "erstes Mal: new CustomerService()"
+       },
+       {
+        "from": 3,
+        "to": 3,
+        "text": "Instanz merken (Singleton)"
+       },
+       {
+        "from": 3,
+        "to": 1,
+        "text": "Instanz zurück",
+        "reply": true
+       },
+       {
+        "from": 1,
+        "to": 4,
+        "text": "getAll()"
+       },
+       {
+        "from": 4,
+        "to": 1,
+        "text": "Customer[]",
+        "reply": true
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Ablauf: inject(CustomerService)“.\n\nDas Sequenzdiagramm zeigt, was bei „inject“ im Hintergrund passiert. Ein Injector ist der Teil von Angular, der Objekte erzeugt und verteilt. Erstens erzeugt Angular die „AppComponent“. Zweitens wird dabei das Feld mit „inject(CustomerService)“ belegt. Die Anfrage geht zuerst an den Injector der Komponente selbst, den „Element-Injector“.\n\nDie Komponente hat aber keine eigenen „providers“. Darum fragt der Injector beim nächsten Injector weiter oben, bis er beim „Root-Injector“ ankommt. Dort ist der Service durch „providedIn: 'root'“ bekannt. Beim ersten Mal erzeugt der Root-Injector das Objekt und merkt es sich. Jede weitere Komponente, die denselben Service anfordert, bekommt genau dieses eine Objekt. Das nennt man „Singleton“.\n\nZum Schluss ruft die Komponente „getAll“ auf und bekommt die Liste der Kunden zurück."
+    }
+   ]
+  },
+  {
+   "after": 161,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Injector-Hierarchie der Invoice-App",
+     "caption": "Ein Provider an einer Komponente gilt für sie und ihre Kinder; sonst kommt die Instanz aus root.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "Root-Injector",
+       "sub": "providedIn: 'root' und providers in main.ts – z. B. CustomerService (1 Instanz)",
+       "children": [
+        {
+         "label": "Injector der AppComponent",
+         "sub": "keine eigenen providers",
+         "children": [
+          {
+           "label": "Injector CustomerListComponent",
+           "sub": "inject(CustomerService)\n→ Instanz aus root"
+          },
+          {
+           "label": "Injector CustomerDetailsComponent",
+           "sub": "providers: [ConsoleLogger]",
+           "children": [
+            {
+             "label": "eigenes ConsoleLogger-Objekt",
+             "sub": "nur hier und in Kindern",
+             "highlight": true
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     },
+     "notes": "Diagrammfolie „Injector-Hierarchie der Invoice-App“.\n\nDie Injectoren bilden einen Baum, so wie die Komponenten. Ganz außen ist der „Root-Injector“, also der Wurzel-Injector. Er kennt alle Services mit „providedIn: 'root'“ und alle „providers“ aus „main.ts“. Davon gibt es in der ganzen Anwendung jeweils nur ein Objekt.\n\nJede Komponente hat einen eigenen Injector. Die „AppComponent“ und die Kundenliste haben keine eigenen „providers“. Wenn die Liste den „CustomerService“ anfordert, sucht Angular von innen nach außen und bekommt das Objekt aus dem Root-Injector.\n\nDie Detailansicht trägt in ihrer Annotation „providers“ mit einem Logger ein. Dann bekommt diese Komponente ein eigenes Logger-Objekt. Es gilt für sie und alle ihre Kinder. So kann man zum Beispiel einen Bereich mit einer anderen Konfiguration versorgen. Der Logger ist hier ein Beispiel und nicht Teil der Übung."
+    }
+   ]
+  },
+  {
+   "after": 164,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Ablauf: Lebenszyklus einer Kind-Komponente",
+     "caption": "Am Beispiel CustomerDetailsComponent: erst erzeugen, dann Inputs, dann ngOnInit – am Ende ngOnDestroy.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "AppComponent (Eltern)",
+       "Angular",
+       "CustomerDetailsComponent",
+       "DOM"
+      ],
+      "steps": [
+       {
+        "from": 1,
+        "to": 2,
+        "text": "constructor() – Felder und inject()"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "Wert für [customer] liefern"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "Input setzen, ngOnChanges()"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "ngOnInit() – einmalig, Inputs sind da"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "ngDoCheck(), ngAfterContentInit()"
+       },
+       {
+        "from": 1,
+        "to": 3,
+        "text": "Template rendern"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "ngAfterViewInit() – Ansicht steht"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "neuer Wert für [customer]"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "ngOnChanges(), Ansicht aktualisieren"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "ngOnDestroy() – Komponente entfernt"
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Ablauf: Lebenszyklus einer Kind-Komponente“.\n\nDas Sequenzdiagramm zeigt die Reihenfolge der Lebenszyklus-Methoden am Beispiel der Detailansicht. Erstens ruft Angular den Konstruktor auf. Dabei werden die Felder angelegt und Services mit „inject“ geholt. Die Inputs sind zu diesem Zeitpunkt noch nicht gesetzt.\n\nDanach liefert die Eltern-Komponente den Wert für „[customer]“. Angular setzt den Input und ruft „ngOnChanges“ auf. Erst danach kommt „ngOnInit“, genau einmal. Hier sind die Inputs sicher vorhanden, deshalb gehört die Initialisierung hierher. Dann folgen die Methoden für den Inhalt, Angular zeigt das Template an, und „ngAfterViewInit“ meldet: Die Ansicht ist fertig.\n\nÄndert die Eltern-Komponente später den Wert, ruft Angular wieder „ngOnChanges“ auf und aktualisiert die Ansicht, aber nicht noch einmal „ngOnInit“. Wird die Komponente entfernt, zum Beispiel weil ein „@if“ falsch wird, ruft Angular zum Schluss „ngOnDestroy“ auf. Dort räumt man auf."
+    }
+   ]
+  },
+  {
+   "after": 175,
+   "order": 50,
+   "slides": [
+    {
+     "type": "diagram",
+     "title": "Ablauf: Pipes im Template",
+     "caption": "Angular ruft transform() auf; eine reine Pipe rechnet nur neu, wenn sich ihr Eingabewert ändert.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Template (CustomerDetails)",
+       "Angular",
+       "DatePipe",
+       "CurrentActive-\nCustomersPipe"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "{{ lastOrderDate | date:'mediumDate' }}"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "transform(lastOrderDate, 'mediumDate')"
+       },
+       {
+        "from": 2,
+        "to": 1,
+        "text": "Text, z. B. \"Oct 12, 2026\"",
+        "reply": true
+       },
+       {
+        "from": 1,
+        "to": 0,
+        "text": "Text im DOM anzeigen"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "[class.active]=\"lastOrderDate | currentActiveCustomers:5\""
+       },
+       {
+        "from": 1,
+        "to": 3,
+        "text": "transform(lastOrderDate, 5)"
+       },
+       {
+        "from": 3,
+        "to": 1,
+        "text": "true oder false",
+        "reply": true
+       },
+       {
+        "from": 1,
+        "to": 0,
+        "text": "Klasse active setzen oder entfernen"
+       }
+      ]
+     },
+     "notes": "Diagrammfolie „Ablauf: Pipes im Template“.\n\nDas Sequenzdiagramm zeigt, was mit einer Pipe im Template der Detailansicht passiert. Im Template steht das Datum der letzten Bestellung, gefolgt von einem senkrechten Strich und dem Namen der Pipe. Angular erkennt das und ruft die Methode „transform“ der „DatePipe“ auf. Der Wert vor dem Strich ist der erste Parameter, das Format nach dem Doppelpunkt der zweite. Die Pipe gibt einen fertigen Text zurück, und Angular zeigt ihn an. Das ursprüngliche Datum bleibt unverändert.\n\nMit der eigenen Pipe „currentActiveCustomers“ läuft es genauso. Sie bekommt das Datum und die Zahl 5 und gibt „true“ oder „false“ zurück. Damit setzt das Class Binding die CSS-Klasse „active“ oder entfernt sie.\n\nPipes sind normalerweise „pure“, also rein: Angular ruft „transform“ nur dann erneut auf, wenn sich der Eingabewert ändert. Das ist schneller als ein Methodenaufruf im Template."
+    }
+   ]
+  }
+ ],
+ "ops": []
+}
