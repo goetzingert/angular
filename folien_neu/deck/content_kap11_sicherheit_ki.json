@@ -1,0 +1,1197 @@
+{
+  "blocks": [
+    {
+      "after": 268,
+      "order": 10,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Sicherheit im Frontend",
+          "notes": "Kapitelübergangsfolie „Sicherheit im Frontend“ – hier beginnt das Kapitel über Sicherheit in der Oberfläche einer Anwendung. Es geht darum, welchen Daten man nicht vertrauen darf, wie Angular vor eingeschleustem Schadcode schützt und wo dieser Schutz umgangen werden kann. Danach folgen Anmeldedaten, Angriffe über fremde Webseiten, Sicherheitsregeln des Servers für den Browser und Abhängigkeiten. Am Ende steht Übung 36."
+        },
+        {
+          "type": "content",
+          "title": "Grundsatz: Frontend ist nicht vertrauenswürdig",
+          "bullets": [
+            "Der Code läuft im Browser des Nutzers",
+            [
+              "Er kann ihn lesen, ändern, umgehen (Entwicklertools)",
+              1
+            ],
+            "Keine Geheimnisse im Frontend: Passwörter, Schlüssel",
+            "Berechtigungen setzt das Backend durch",
+            [
+              "Guards (Übung 25) verbessern nur die Bedienung",
+              1
+            ],
+            "Validierung im Client: Komfort",
+            "Validierung im Server: Sicherheit"
+          ],
+          "notes": "Folie: „Grundsatz: Frontend ist nicht vertrauenswürdig“.\n\nDas „Frontend“ ist der Teil der Anwendung, der im Browser des Nutzers läuft. Der Nutzer hat darüber volle Kontrolle. Mit den Entwicklertools des Browsers kann er den Code lesen, Werte verändern und Anfragen direkt an den Server schicken, ohne die Oberfläche zu benutzen.\n\nDaraus folgen drei Regeln. Erstens: Geheimnisse wie Passwörter oder Schlüssel mit weitreichenden Rechten gehören nicht in den Browser-Code. Zweitens: Wer etwas sehen oder tun darf, muss der Server prüfen. Ein „Guard“ aus Übung 25 versteckt nur eine Seite und schützt keine Daten. Drittens: Die Prüfung von Eingaben im Browser dient der Bedienung. Die Prüfung im Server dient der Sicherheit.\n\nDas Diagramm stellt beides gegenüber: links, was im Browser passiert und nur Komfort bringt, rechts, was im Server passieren muss.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Browser: Komfort",
+              "items": [
+                "Guard blendet Seite aus",
+                "Formular prüft Pflichtfeld",
+                "Button ist deaktiviert"
+              ]
+            },
+            "right": {
+              "title": "Server: Schutz",
+              "items": [
+                "Rechte bei jeder Anfrage",
+                "Eingaben erneut prüfen",
+                "Nur erlaubte Daten senden"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Vertrauensgrenzen",
+          "bullets": [
+            "Vertrauensgrenze: Stelle, an der Daten den Bereich wechseln",
+            "Benutzer und Browser: alles ist manipulierbar",
+            "Frontend: zeigt Daten an, muss sie richtig kodieren",
+            "API: prüft Anmeldung, Rechte und Eingaben",
+            "Datenbank: nur über die API erreichbar",
+            "An jeder Grenze gilt: Daten von außen sind Eingabe"
+          ],
+          "notes": "Folie: „Vertrauensgrenzen“.\n\nEine „Vertrauensgrenze“ ist eine Stelle, an der Daten von einem Bereich in einen anderen wechseln. Das Diagramm zeigt die vier Bereiche einer typischen Webanwendung: den Benutzer mit seinem Browser, das Angular-Frontend, die API auf dem Server und die Datenbank. „API“ ist die Schnittstelle des Servers, über die das Frontend Daten lädt und speichert.\n\nDer Benutzer und der Browser sind vollständig manipulierbar. Das Frontend muss Daten so ausgeben, dass sie nicht als Code ausgeführt werden. Die API ist die eigentliche Schutzschicht: Sie prüft, wer angemeldet ist, was er darf und ob die Eingaben gültig sind. Die Datenbank ist nie direkt aus dem Browser erreichbar.\n\nMerksatz: An jeder Grenze werden ankommende Daten als Eingabe behandelt und geprüft.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Benutzer und Browser",
+              "Angular-Frontend",
+              "API (Backend)",
+              "Datenbank"
+            ],
+            "highlight_last": false,
+            "note": "An jeder Grenze prüfen"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was alles „Eingabe“ ist",
+          "bullets": [
+            "Formularfelder und Dateiuploads",
+            "URL: Pfad, Query-Parameter, Fragment nach #",
+            "Antworten von APIs, auch vom eigenen Backend",
+            "localStorage, sessionStorage, Cookies",
+            "Nachrichten anderer Fenster (postMessage)",
+            "Vertrauenswürdig: nur eigener Quelltext und Konstanten",
+            "Angezeigte Daten je nach Kontext schützen: HTML, URL"
+          ],
+          "notes": "Folie: „Was alles ‚Eingabe‘ ist“.\n\nAls „Eingabe“ gilt alles, was nicht fest im eigenen Quelltext steht. Dazu gehören natürlich Formularfelder und hochgeladene Dateien. Dazu gehört aber auch die Adresse im Browser: der Pfad, die Query-Parameter nach dem Fragezeichen und das Fragment nach dem Rautezeichen. Ein Angreifer kann einen präparierten Link verschicken.\n\nAuch Antworten vom eigenen Backend sind Eingabe. Dort steht oft, was andere Nutzer eingegeben haben, zum Beispiel eine Notiz zu einem Kunden. Ebenso der Speicher im Browser, also „localStorage“, „sessionStorage“ und Cookies, und Nachrichten aus anderen Fenstern über „postMessage“.\n\nVertrauenswürdig ist nur der eigene Quelltext mit seinen festen Werten. Alles andere muss beim Anzeigen passend zum Kontext geschützt werden. Das Diagramm fasst die Quellen zusammen.",
+          "diagram": {
+            "kind": "tree",
+            "root": "Eingabe von außen",
+            "children": [
+              "Formular, Upload",
+              "URL, Query, #",
+              "API-Antworten",
+              "Storage, Cookies",
+              "postMessage"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "XSS: das Hauptrisiko",
+          "bullets": [
+            "Cross-Site Scripting (XSS): fremdes Script läuft in der Seite",
+            "Es hat die Rechte des angemeldeten Nutzers",
+            "Gespeichert: Script steht in der Datenbank (Notiz)",
+            "Reflektiert: Script steht im Link (Query-Parameter)",
+            "DOM-basiert: eigener Code setzt Eingabe als HTML ein",
+            "Ursache immer: Daten werden als Code behandelt"
+          ],
+          "notes": "Folie: „XSS: das Hauptrisiko“.\n\n„Cross-Site Scripting“, abgekürzt „XSS“, bedeutet: Ein Angreifer bringt eigenen Script-Code in eine fremde Webseite. Dieser Code läuft dann im Browser eines anderen Nutzers und hat dieselben Rechte wie dieser Nutzer.\n\nEs gibt drei Arten. Beim gespeicherten XSS steht der Schadcode in der Datenbank, zum Beispiel in einer Kunden-Notiz, und trifft jeden, der die Notiz ansieht. Beim reflektierten XSS steht der Code in einem Link, den das Opfer anklickt. Beim DOM-basierten XSS setzt der eigene JavaScript-Code im Browser eine Eingabe als HTML in die Seite ein.\n\nDie Ursache ist immer dieselbe: Daten werden so in die Seite eingesetzt, dass der Browser sie als Code ausführt. Rechts steht ein typisches Beispiel: ein Bild mit ungültiger Adresse und einem Fehler-Ereignis „onerror“. Weil das Bild nicht geladen werden kann, führt der Browser den Code im Ereignis aus.",
+          "diagram": {
+            "kind": "code",
+            "title": "Kunden-Notiz (Eingabe)",
+            "text": "<b>wichtig</b>\n<img src=x\n  onerror=\"alert('XSS')\">\n\n// src=x lädt nicht\n// -> Browser ruft\n//    onerror auf\n// -> Script läuft"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ein XSS-Angriff Schritt für Schritt",
+          "bullets": [
+            "1. Angreifer speichert Notiz mit <img onerror=…>",
+            "2. Server speichert den Text unverändert",
+            "3. Opfer öffnet die Kundenseite",
+            "4. Seite setzt die Notiz ungeschützt als HTML ein",
+            "5. Browser führt das Script des Angreifers aus",
+            "Folge: Token lesen, Anfragen senden, Seite fälschen"
+          ],
+          "notes": "Folie: „Ein XSS-Angriff Schritt für Schritt“.\n\nDas Diagramm zeigt den Ablauf eines gespeicherten XSS-Angriffs. Im ersten Schritt gibt der Angreifer als Notiz einen Text ein, der ein Bild-Element mit einem Fehler-Ereignis enthält. Im zweiten Schritt speichert der Server diesen Text so, wie er ist. Im dritten Schritt öffnet ein anderer Nutzer, zum Beispiel eine Sachbearbeiterin, die Kundenseite.\n\nIm vierten Schritt setzt die Seite die Notiz als HTML in die Seite ein, ohne sie zu prüfen. Im fünften Schritt führt der Browser den Code aus, und zwar mit den Rechten der Sachbearbeiterin.\n\nDer Schadcode kann dann zum Beispiel Anmeldedaten aus dem Speicher lesen, im Namen des Opfers Anfragen an den Server schicken oder ein gefälschtes Anmeldeformular einblenden. In der Übung zeigt der Code nur harmlos ein Meldungsfenster mit „alert“.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Angreifer speichert Notiz",
+              "Server speichert unverändert",
+              "Opfer öffnet Kundenseite",
+              "Notiz wird als HTML eingesetzt",
+              "Browser führt Script aus"
+            ],
+            "highlight_last": true,
+            "note": "Schritt 4 verhindert Angular"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was Angular standardmäßig tut",
+          "bullets": [
+            "Interpolation {{ }}: Wert wird als Text ausgegeben",
+            [
+              "Zeichen wie < und > erscheinen sichtbar (escaped)",
+              1
+            ],
+            "[innerHTML]: HTML wird bereinigt (Sanitizing)",
+            [
+              "script, onerror, onclick werden entfernt",
+              1
+            ],
+            "[href], [src]: javascript:-URLs erhalten „unsafe:“",
+            "Templates werden beim Build kompiliert",
+            [
+              "Nutzertext wird nie als Template ausgewertet",
+              1
+            ]
+          ],
+          "notes": "Folie: „Was Angular standardmäßig tut“.\n\nAngular schützt standardmäßig an drei Stellen. Bei der „Interpolation“ mit den doppelten geschweiften Klammern wird ein Wert immer als Text ausgegeben. Man sagt „escaped“: Zeichen wie spitze Klammern werden so umgewandelt, dass sie sichtbar auf der Seite stehen und nicht als HTML wirken.\n\nBei einer Bindung an „innerHTML“ wird der Wert als HTML eingesetzt. Vorher entfernt Angular gefährliche Teile, zum Beispiel „script“-Elemente und Ereignis-Attribute wie „onerror“. Das nennt man „Sanitizing“, also Bereinigen. Bei Adressen in „href“ oder „src“ setzt Angular vor gefährliche Adressen wie „javascript:“ das Wort „unsafe:“, damit sie wirkungslos sind.\n\nAußerdem übersetzt Angular die Templates schon beim Bauen der Anwendung. Ein Text, den ein Nutzer eingibt, wird deshalb nie als Template ausgewertet. Das Diagramm zeigt rechts, wo man selbst aufpassen muss.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Angular schützt",
+              "items": [
+                "{{ wert }} escaped",
+                "[innerHTML] bereinigt",
+                "[href] entschärft"
+              ]
+            },
+            "right": {
+              "title": "Selbst prüfen",
+              "items": [
+                "bypassSecurityTrust…",
+                "eigener DOM-Zugriff",
+                "HTML-Bibliotheken"
+              ]
+            }
+          }
+        },
+        {
+          "type": "code",
+          "title": "Interpolation und innerHTML im Vergleich",
+          "code": "// Komponente: note = '<b>wichtig</b> <img src=x onerror=\"alert(\\'XSS\\')\">'\n\n<!-- 1. Interpolation: Ausgabe als Text -->\n<p>{{ customer.note }}</p>\n<!-- Anzeige: alle Zeichen sichtbar, z. B. <b>wichtig</b> <img src=x onerror=… -->\n\n<!-- 2. innerHTML: Ausgabe als HTML, vorher bereinigt -->\n<div [innerHTML]=\"customer.note\"></div>\n<!-- Im DOM bleibt: <b>wichtig</b> <img src=\"x\">  (fett, onerror entfernt, kein alert) -->\n\n<!-- Konsole im Entwicklungsmodus:\n     WARNING: sanitizing HTML stripped some content, see https://g.co/ng/security#xss -->",
+          "notes": "Codefolie „Interpolation und innerHTML im Vergleich“.\n\nDie Komponente hat eine Notiz, die gewollte Formatierung und einen Angriff enthält: ein fettes Wort und ein Bild mit Fehler-Ereignis.\n\nIm ersten Fall wird die Notiz per Interpolation ausgegeben. Die Seite zeigt dann den gesamten Text mit allen spitzen Klammern an. Nichts wird ausgeführt, aber auch das fette Wort erscheint nicht fett.\n\nIm zweiten Fall wird die Notiz an „innerHTML“ gebunden. Angular bereinigt sie vorher. Im Ergebnis bleibt das fette Wort erhalten, das Bild-Element auch, aber das Attribut „onerror“ ist entfernt. Es erscheint kein Meldungsfenster. Im Entwicklungsmodus schreibt Angular eine Warnung in die Konsole, dass Inhalt entfernt wurde. Diese Warnung ist ein Hinweis, die Datenquelle zu prüfen."
+        },
+        {
+          "type": "content",
+          "title": "So arbeitet Angulars Sanitizer",
+          "bullets": [
+            "Angular kennt für jede Bindung den Sicherheitskontext",
+            [
+              "Er ergibt sich aus Element und Attribut",
+              1
+            ],
+            "Der Sanitizer prüft den Wert passend zum Kontext",
+            "Ungefährliches bleibt, Gefährliches wird entfernt",
+            [
+              "oder die Bindung wird mit Fehler abgelehnt",
+              1
+            ],
+            "Werte mit „SafeValue“-Markierung werden durchgelassen"
+          ],
+          "notes": "Folie: „So arbeitet Angulars Sanitizer“.\n\nEin „Sanitizer“ ist ein Baustein, der Werte bereinigt. Angular weiß bei jeder Bindung im Template, in welchem „Sicherheitskontext“ der Wert landet. Der Kontext ergibt sich aus dem Element und dem Attribut. Eine Bindung an „innerHTML“ ist zum Beispiel HTML-Kontext, eine Bindung an „href“ eines Links ist URL-Kontext.\n\nDas Diagramm zeigt den Ablauf. Zuerst kommt der Wert aus der Komponente. Dann bestimmt Angular den Kontext. Dann prüft der Sanitizer den Wert nach den Regeln dieses Kontexts. Ungefährliche Teile bleiben erhalten, gefährliche werden entfernt oder entschärft. In manchen Kontexten lehnt Angular den Wert auch ganz ab und meldet einen Fehler. Erst danach wird der Wert in die Seite geschrieben.\n\nAusnahme: Ein Wert, den der Entwickler ausdrücklich als vertrauenswürdig markiert hat, wird nicht geprüft. Das ist das Thema der nächsten Folien.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Wert aus Komponente",
+              "Kontext bestimmen",
+              "Sanitizer prüft",
+              "In den DOM schreiben"
+            ],
+            "highlight_last": true,
+            "note": "Markierte SafeValues: ohne Prüfung"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Die Sicherheitskontexte",
+          "bullets": [
+            "HTML: [innerHTML] – Allowlist harmloser Elemente",
+            "Style: [style] – wird nicht verändert",
+            [
+              "CSS führt in heutigen Browsern kein Script aus",
+              1
+            ],
+            "URL: [href], img [src] – javascript: wird entschärft",
+            "Resource-URL: iframe [src], script [src]",
+            [
+              "lädt fremden Code: Angular lehnt ab (Fehler)",
+              1
+            ],
+            "Script: Bindungen an Script-Inhalt sind nie erlaubt"
+          ],
+          "notes": "Folie: „Die Sicherheitskontexte“.\n\nAngular unterscheidet mehrere Sicherheitskontexte. Im HTML-Kontext, also bei „innerHTML“, lässt der Sanitizer nur eine Liste harmloser Elemente und Attribute durch. Diese Liste heißt „Allowlist“. Alles andere wird entfernt.\n\nIm Style-Kontext, also bei Bindungen an „style“, verändert Angular den Wert heute nicht mehr, weil aktuelle Browser aus CSS heraus keinen Script-Code ausführen. Im URL-Kontext, also bei Links und Bildadressen, wird eine Adresse mit „javascript:“ entschärft.\n\nDer Kontext „Resource-URL“ betrifft Adressen, von denen Code geladen wird, zum Beispiel die Adresse eines „iframe“, also eines eingebetteten Fensters, oder eines Script-Elements. Diese Adressen kann Angular nicht bereinigen. Angular lehnt einen solchen Wert ab und meldet einen Fehler, außer er wurde ausdrücklich als vertrauenswürdig markiert. Script-Inhalte lassen sich nie binden.",
+          "diagram": {
+            "kind": "tree",
+            "root": "SecurityContext",
+            "children": [
+              "HTML",
+              "STYLE",
+              "URL",
+              "RESOURCE_URL",
+              "SCRIPT"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "URL und Resource-URL im Template",
+          "code": "// Komponente\nwebsite = 'javascript:alert(1)';                  // z. B. aus Kundendaten\nvideoUrl = 'https://www.youtube.com/embed/abc';    // Adresse für ein eingebettetes Video\n\n<!-- URL-Kontext: Angular entschärft gefährliche Schemata -->\n<a [href]=\"website\">Webseite</a>\n<!-- Ergebnis: href=\"unsafe:javascript:alert(1)\"  Klick bewirkt nichts -->\n\n<!-- Resource-URL-Kontext: Angular lehnt einen normalen String ab -->\n<iframe [src]=\"videoUrl\"></iframe>\n<!-- Fehler: NG0904 unsafe value used in a resource URL context -->\n\n// Lösung nur nach Prüfung gegen eine Allowlist (nächste Folien):\n// sanitizer.bypassSecurityTrustResourceUrl(geprüfteUrl)",
+          "notes": "Codefolie „URL und Resource-URL im Template“.\n\nDie Komponente hat zwei Adressen. Die erste ist eine Webseiten-Adresse, die aus Kundendaten stammen könnte. Ein Angreifer hat dort eine „javascript:“-Adresse eingetragen. Die zweite ist die Adresse eines eingebetteten Videos.\n\nBindet man die erste Adresse an das „href“ eines Links, setzt Angular „unsafe:“ davor. Ein Klick auf den Link bewirkt dann nichts.\n\nBindet man die zweite Adresse an das „src“ eines „iframe“, lehnt Angular den Wert ab und meldet einen Fehler mit der Nummer NG0904. Denn über diese Adresse würde fremder Code in die Seite geladen. Will man das wirklich, muss man die Adresse vorher gegen eine Liste erlaubter Adressen prüfen und dann ausdrücklich als vertrauenswürdig markieren. Wie das geht, zeigen die nächsten Folien."
+        },
+        {
+          "type": "content",
+          "title": "DomSanitizer und bypassSecurityTrust…",
+          "bullets": [
+            "DomSanitizer: Dienst von Angular, per inject() holen",
+            "sanitize(kontext, wert): Wert selbst bereinigen",
+            "bypassSecurityTrustHtml/Style/Url/ResourceUrl/Script",
+            [
+              "Bekommt einen String, gibt einen SafeValue zurück",
+              1
+            ],
+            [
+              "Angular prüft diesen Wert danach nicht mehr",
+              1
+            ],
+            "Der Entwickler übernimmt die volle Verantwortung"
+          ],
+          "notes": "Folie: „DomSanitizer und bypassSecurityTrust…“.\n\n„DomSanitizer“ ist der Dienst, mit dem Angular Werte bereinigt. Man holt ihn wie jeden Dienst mit „inject“. Er hat zwei Arten von Methoden.\n\nDie Methode „sanitize“ bekommt einen Kontext und einen Wert. Sie bereinigt den Wert genauso, wie Angular es im Template tun würde, und gibt einen String zurück. Das ist sicher.\n\nDie Methoden, die mit „bypassSecurityTrust“ beginnen, bedeuten wörtlich „Sicherheitsprüfung umgehen, vertrauen“. Es gibt sie für HTML, Style, URL, Resource-URL und Script. Sie bekommen einen String und geben ein Objekt vom Typ „SafeValue“ zurück, zum Beispiel „SafeHtml“. Dieses Objekt ist nur eine Markierung. Bindet man es im Template, prüft Angular nichts mehr. Ab diesem Moment trägt der Entwickler die volle Verantwortung. Das Diagramm rechts zeigt die Signaturen.",
+          "diagram": {
+            "kind": "code",
+            "title": "DomSanitizer",
+            "text": "sanitize(ctx, value)\n  : string | null\n\nbypassSecurityTrustHtml(\n  value: string): SafeHtml\nbypassSecurityTrustUrl(\n  value: string): SafeUrl\nbypassSecurityTrustResourceUrl(\n  value: string)\n  : SafeResourceUrl"
+          }
+        },
+        {
+          "type": "code",
+          "title": "bypassSecurityTrust… im Code",
+          "code": "import { Component, computed, inject, input } from '@angular/core';\nimport { DomSanitizer, SafeHtml } from '@angular/platform-browser';\n\n@Component({ selector: 'note-demo', template: `<div [innerHTML]=\"unsafeNote()\"></div>` })\nexport class NoteDemoComponent {\n  note = input<string>();                          // kommt aus dem Backend = Eingabe!\n  private readonly sanitizer = inject(DomSanitizer);\n\n  // REVIEW-ALARM: Angular prüft diesen Wert NICHT mehr. Bewusst unsicheres Gegenbeispiel.\n  unsafeNote = computed<SafeHtml>(() =>\n    this.sanitizer.bypassSecurityTrustHtml(this.note() ?? ''));\n}\n\n// Ergebnis mit der Notiz aus Übung 36: Das alert erscheint.\n// Sichere Alternative: [innerHTML]=\"note()\" ohne bypass, Angular bereinigt selbst.",
+          "notes": "Codefolie „bypassSecurityTrust… im Code“.\n\nDas Beispiel entspricht der Demo-Komponente aus Übung 36. Die Komponente bekommt die Notiz über ein „input“. Die Notiz stammt aus dem Backend und ist damit Eingabe von außen. Mit „inject“ holt sich die Komponente den „DomSanitizer“.\n\nDas „computed“ ruft „bypassSecurityTrustHtml“ mit der Notiz auf. Der Rückgabewert ist ein „SafeHtml“, also ein als sicher markierter Wert. Das Template bindet diesen Wert an „innerHTML“. Weil der Wert markiert ist, bereinigt Angular ihn nicht. Das Fehler-Ereignis bleibt im HTML, und das Meldungsfenster erscheint.\n\nDer Kommentar „REVIEW-ALARM“ zeigt, wie man so eine Stelle kennzeichnet. Die sichere Alternative ist einfach: die Notiz direkt an „innerHTML“ binden und Angular die Bereinigung überlassen."
+        },
+        {
+          "type": "content",
+          "title": "bypassSecurityTrust…: Risiko einschätzen",
+          "bullets": [
+            "Vertretbar nur bei vollständig kontrollierten Inhalten",
+            [
+              "Konstante im Code, eigene Build-Dateien",
+              1
+            ],
+            [
+              "URL, die vorher gegen eine Allowlist geprüft wurde",
+              1
+            ],
+            "Niemals bei Nutzereingaben, API-Daten, URL-Parametern",
+            "Jeder Einsatz: Kommentar mit Begründung im Code",
+            "Im Review gezielt suchen: bypassSecurityTrust"
+          ],
+          "notes": "Folie: „bypassSecurityTrust…: Risiko einschätzen“.\n\nWann ist es vertretbar, Angulars Prüfung abzuschalten? Nur dann, wenn der Inhalt vollständig unter eigener Kontrolle steht. Das ist zum Beispiel eine Konstante im eigenen Code oder eine Datei, die beim Bauen der Anwendung entsteht. Ein weiterer Fall ist eine Adresse für ein eingebettetes Video, die vorher gegen eine feste Liste erlaubter Anbieter geprüft wurde.\n\nNiemals vertretbar ist es bei Nutzereingaben, bei Daten aus der API und bei Werten aus der Adresszeile. Dort kann ein Angreifer den Inhalt bestimmen.\n\nDeshalb bekommt jeder Einsatz einen Kommentar, der die Begründung nennt. Im Code-Review sucht man gezielt nach dem Wort „bypassSecurityTrust“. Das Diagramm stellt die beiden Fälle gegenüber.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Vertretbar",
+              "items": [
+                "Eigene Konstante",
+                "Eigenes SVG aus Build",
+                "URL nach Allowlist"
+              ]
+            },
+            "right": {
+              "title": "Niemals",
+              "items": [
+                "Nutzereingabe",
+                "Daten aus der API",
+                "Query-Parameter"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Weitere Wege am Schutz vorbei",
+          "bullets": [
+            "Direkter DOM-Zugriff ohne Sanitizer:",
+            [
+              "elementRef.nativeElement.innerHTML = …",
+              1
+            ],
+            [
+              "document.write, insertAdjacentHTML",
+              1
+            ],
+            "Code aus Strings: eval, new Function, setTimeout('…')",
+            "Templates zur Laufzeit aus Nutzertext erzeugen",
+            "Bibliotheken, die HTML erzeugen (Markdown, Editoren)",
+            [
+              "Ausgabe trotzdem über [innerHTML] oder sanitize()",
+              1
+            ]
+          ],
+          "notes": "Folie: „Weitere Wege am Schutz vorbei“.\n\nAngulars Schutz wirkt nur bei Bindungen im Template. Wer am Template vorbei direkt in die Seite schreibt, verliert ihn. Das passiert zum Beispiel, wenn man über „ElementRef“ und „nativeElement“ direkt die Eigenschaft „innerHTML“ eines Elements setzt, oder mit „document.write“ und „insertAdjacentHTML“.\n\nGefährlich ist auch alles, was Text als Code ausführt: „eval“, „new Function“ und „setTimeout“ mit einem String statt einer Funktion. Ebenso gefährlich ist es, Templates zur Laufzeit aus Text zu erzeugen, der Nutzereingaben enthält.\n\nBibliotheken, die HTML erzeugen, zum Beispiel für Markdown oder Texteditoren, bereinigen oft nicht selbst. Ihre Ausgabe sollte man trotzdem über „innerHTML“ oder über die Methode „sanitize“ des „DomSanitizer“ einsetzen, damit Angular sie prüft."
+        },
+        {
+          "type": "content",
+          "title": "Wo speichere ich das Token?",
+          "bullets": [
+            "Token: Nachweis der Anmeldung bei jeder Anfrage",
+            "localStorage: bleibt nach Reload, per Script lesbar",
+            [
+              "Bei XSS kann der Angreifer es stehlen",
+              1
+            ],
+            "HttpOnly-Cookie: setzt das Backend",
+            [
+              "Kein Script kommt heran, Browser sendet es mit",
+              1
+            ],
+            [
+              "Dafür CSRF beachten (nächste Folien)",
+              1
+            ]
+          ],
+          "notes": "Folie: „Wo speichere ich das Token?“.\n\nNach der Anmeldung braucht der Browser einen Nachweis, den er bei jeder Anfrage mitschickt. Dieser Nachweis heißt „Token“. Die Frage ist, wo er gespeichert wird.\n\nDie erste Möglichkeit ist „localStorage“, ein Speicher im Browser, der auch nach dem Neuladen der Seite erhalten bleibt. Der Nachteil: Jeder Script-Code auf der Seite kann ihn lesen. Gelingt ein XSS-Angriff, kann der Angreifer das Token stehlen und sich damit selbst anmelden.\n\nDie zweite Möglichkeit ist ein Cookie mit der Eigenschaft „HttpOnly“. Dieses Cookie setzt das Backend. Script-Code kann es nicht lesen, der Browser schickt es aber automatisch mit. Das schützt das Token vor Diebstahl, öffnet aber eine andere Angriffsmöglichkeit, die „CSRF“ heißt. Das Diagramm vergleicht beide Wege.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "localStorage",
+              "items": [
+                "Per Script lesbar",
+                "XSS stiehlt Token",
+                "Kein CSRF-Risiko"
+              ]
+            },
+            "right": {
+              "title": "HttpOnly-Cookie",
+              "items": [
+                "Nicht per Script lesbar",
+                "Automatisch mitgesendet",
+                "CSRF-Schutz nötig"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Token-Speicherung: Empfehlung",
+          "bullets": [
+            "Sitzung über Cookie mit HttpOnly, Secure, SameSite",
+            [
+              "Secure: nur über HTTPS; SameSite: nicht von fremden Seiten",
+              1
+            ],
+            "Cookie ohne HttpOnly: so unsicher wie localStorage",
+            "Variable im Speicher: weg beim Reload, schwerer zu stehlen",
+            "Tokens mit kurzer Laufzeit, Erneuerung über das Backend",
+            "Login über erprobte Bibliothek oder Identity Provider",
+            "AuthService aus Übung 25 (Signal isLoggedIn) ist nur Demo"
+          ],
+          "notes": "Folie: „Token-Speicherung: Empfehlung“.\n\nEmpfohlen ist eine Sitzung über ein Cookie, das das Backend mit drei Eigenschaften setzt. „HttpOnly“ heißt: Script-Code kann es nicht lesen. „Secure“ heißt: Der Browser schickt es nur über verschlüsselte Verbindungen. „SameSite“ heißt: Der Browser schickt es nicht mit, wenn eine fremde Seite die Anfrage auslöst.\n\nEin Cookie ohne „HttpOnly“ ist genauso angreifbar wie „localStorage“. Ein Token nur in einer Variablen im Arbeitsspeicher ist schwerer zu stehlen, geht aber beim Neuladen verloren.\n\nTokens sollten nur kurz gültig sein und über das Backend erneuert werden. Die Anmeldung baut man am besten nicht selbst, sondern nutzt eine erprobte Bibliothek oder einen „Identity Provider“, also einen spezialisierten Anmeldedienst. Der „AuthService“ aus Übung 25 mit dem Signal „isLoggedIn“ ist nur eine Demo und keine echte Anmeldung."
+        },
+        {
+          "type": "content",
+          "title": "CSRF: Angriff über eine fremde Seite",
+          "bullets": [
+            "Cross-Site Request Forgery: gefälschte Anfrage",
+            "Nutzer ist in der App angemeldet (Cookie)",
+            "Er besucht eine präparierte fremde Seite",
+            "Diese schickt ein Formular an die App-API",
+            "Browser hängt das Cookie automatisch an",
+            "Server hält die Anfrage für echt"
+          ],
+          "notes": "Folie: „CSRF: Angriff über eine fremde Seite“.\n\n„CSRF“ steht für „Cross-Site Request Forgery“, auf Deutsch etwa „seitenübergreifend gefälschte Anfrage“. Das Diagramm zeigt den Ablauf.\n\nZuerst ist der Nutzer in der Anwendung angemeldet, sein Browser hat also ein Sitzungs-Cookie. Dann besucht er in einem anderen Tab eine präparierte Seite des Angreifers. Diese Seite enthält ein verstecktes Formular, das sich selbst abschickt, zum Beispiel an die Adresse „Kunde löschen“ der Anwendung.\n\nDer Browser schickt das Cookie automatisch mit, weil die Anfrage an die Anwendung geht. Der Server sieht ein gültiges Cookie und führt die Aktion aus. Der Angreifer kann die Antwort zwar nicht lesen, aber die Aktion ist passiert.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Nutzer angemeldet (Cookie)",
+              "Besucht fremde Seite",
+              "Seite sendet POST an API",
+              "Browser hängt Cookie an",
+              "Server führt Aktion aus"
+            ],
+            "highlight_last": true,
+            "note": "Cookie allein beweist nichts"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Schutz: CSRF-Token (Double Submit)",
+          "bullets": [
+            "Backend setzt Cookie XSRF-TOKEN (zufälliger Wert)",
+            "HttpClient liest das Cookie per Script",
+            "und sendet den Wert als Header X-XSRF-TOKEN",
+            "Backend vergleicht Cookie und Header",
+            "Fremde Seite kann das Cookie nicht lesen",
+            [
+              "also kann sie den Header nicht setzen",
+              1
+            ],
+            "Zusätzlich: SameSite-Cookies"
+          ],
+          "notes": "Folie: „Schutz: CSRF-Token (Double Submit)“.\n\nGegen CSRF hilft ein zusätzlicher geheimer Wert, das „CSRF-Token“. Das Verfahren heißt „Double Submit“, also doppeltes Senden. Das Diagramm zeigt die vier Schritte.\n\nErstens setzt das Backend ein Cookie mit dem Namen „XSRF-TOKEN“ und einem zufälligen Wert. Dieses Cookie ist absichtlich nicht „HttpOnly“. Zweitens liest Angulars „HttpClient“ dieses Cookie. Drittens schickt er den Wert zusätzlich als Header mit dem Namen „X-XSRF-TOKEN“ mit. Viertens vergleicht das Backend den Wert im Cookie mit dem Wert im Header und lehnt die Anfrage ab, wenn sie nicht übereinstimmen.\n\nWarum hilft das? Eine fremde Seite darf wegen der „Same-Origin-Policy“ des Browsers keine Cookies einer anderen Seite lesen. Sie kennt den Wert also nicht und kann den Header nicht setzen. Zusätzlich schützen „SameSite“-Cookies.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Backend setzt Cookie XSRF-TOKEN",
+              "HttpClient liest Cookie",
+              "Header X-XSRF-TOKEN senden",
+              "Backend vergleicht beide"
+            ],
+            "highlight_last": true,
+            "note": "Fremde Seite kennt den Wert nicht"
+          }
+        },
+        {
+          "type": "code",
+          "title": "withXsrfConfiguration",
+          "code": "// app.config.ts\nimport { provideHttpClient, withInterceptors, withXsrfConfiguration }\n  from '@angular/common/http';\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    provideHttpClient(\n      withInterceptors([loggingInterceptor]),\n      // Ohne diese Zeile gilt: Cookie \"XSRF-TOKEN\", Header \"X-XSRF-TOKEN\"\n      withXsrfConfiguration({\n        cookieName: 'MY-XSRF-COOKIE',   // Name des Cookies, das das Backend setzt\n        headerName: 'X-MY-XSRF',        // Name des Headers, den das Backend erwartet\n      }),\n    ),\n  ],\n};\n\n// Abschalten (nur wenn das Backend anders schützt): withNoXsrfProtection()",
+          "notes": "Codefolie „withXsrfConfiguration“.\n\nDer CSRF-Schutz des „HttpClient“ ist standardmäßig eingeschaltet. Man muss nichts tun, wenn das Backend das Cookie „XSRF-TOKEN“ setzt und den Header „X-XSRF-TOKEN“ erwartet.\n\nVerwendet das Backend andere Namen, passt man sie mit „withXsrfConfiguration“ an. Diese Funktion gibt man an „provideHttpClient“ in der Datei „app.config.ts“, neben anderen Einstellungen wie den Interceptoren. Sie bekommt ein Objekt mit zwei Feldern: „cookieName“ ist der Name des Cookies, das gelesen wird. „headerName“ ist der Name des Headers, der gesendet wird.\n\nMit „withNoXsrfProtection“ schaltet man den Mechanismus ganz ab. Das macht man nur, wenn das Backend auf andere Weise geschützt ist."
+        },
+        {
+          "type": "content",
+          "title": "Was der HttpClient genau tut",
+          "bullets": [
+            "Header nur bei verändernden Anfragen",
+            [
+              "POST, PUT, PATCH, DELETE – nicht bei GET und HEAD",
+              1
+            ],
+            "Nur bei relativen URLs wie /api/customer",
+            [
+              "Kein Token an fremde Server (absolute URL)",
+              1
+            ],
+            "Kein Cookie vorhanden: kein Header",
+            "Prüfen muss immer das Backend",
+            "GET-Anfragen dürfen deshalb nie etwas verändern"
+          ],
+          "notes": "Folie: „Was der HttpClient genau tut“.\n\nDer „HttpClient“ hängt den Header nicht an jede Anfrage. Er tut es nur bei Anfragen, die etwas verändern: „POST“, „PUT“, „PATCH“ und „DELETE“. Bei „GET“ und „HEAD“, die nur lesen, sendet er ihn nicht.\n\nAußerdem sendet er ihn nur bei relativen Adressen, also bei Adressen ohne eigenen Servernamen, zum Beispiel „/api/customer“. So gelangt der geheime Wert nie an einen fremden Server. Findet der „HttpClient“ kein Cookie, schickt er keinen Header.\n\nAngular hilft also nur beim Senden. Prüfen muss immer das Backend. Und weil „GET“-Anfragen nicht geschützt werden, dürfen sie im Backend nie etwas verändern, zum Beispiel keinen Kunden löschen."
+        },
+        {
+          "type": "content",
+          "title": "CORS, HTTPS und URLs",
+          "bullets": [
+            "CORS schützt nicht den Server",
+            [
+              "Es regelt, welche Seiten Antworten lesen dürfen",
+              1
+            ],
+            [
+              "Anfragen kommen trotzdem beim Server an",
+              1
+            ],
+            "Immer HTTPS, auch in internen Netzen",
+            "Keine sensiblen Daten in URLs",
+            [
+              "Sie landen in Logs, Verlauf und Referrer-Header",
+              1
+            ],
+            "Werte in URLs kodieren: encodeURIComponent(id)"
+          ],
+          "notes": "Folie: „CORS, HTTPS und URLs“.\n\n„CORS“ steht für „Cross-Origin Resource Sharing“. Mit CORS legt der Server fest, welche fremden Webseiten die Antworten auf ihre Anfragen lesen dürfen. CORS ist aber kein Schutz für den Server: Die Anfrage kommt trotzdem an und wird ausgeführt. CORS verhindert nur das Lesen der Antwort im Browser.\n\nVerbindungen laufen immer über „HTTPS“, also verschlüsselt, auch in internen Netzen. Sensible Daten wie Tokens oder Kundennummern gehören nicht in die Adresse. Adressen landen in Server-Protokollen, im Browserverlauf und im „Referrer“-Header, mit dem der Browser der nächsten Seite mitteilt, woher man kam.\n\nSetzt man einen Wert aus der Adresszeile in eine Request-URL ein, kodiert man ihn mit „encodeURIComponent“. Dann können Zeichen wie Schrägstrich oder zwei Punkte den Pfad nicht verändern. Das ist Schritt 7 in Übung 36."
+        },
+        {
+          "type": "content",
+          "title": "Content Security Policy (CSP)",
+          "bullets": [
+            "HTTP-Header, den der Server mit der Seite sendet",
+            "Legt fest, woher Skripte, Styles, Bilder kommen dürfen",
+            "Browser blockiert alles andere, auch eingeschleuste Skripte",
+            "Begrenzt den Schaden, wenn XSS doch gelingt",
+            "Zusätzliche Schicht (Defense in Depth)",
+            [
+              "ersetzt kein sauberes Escaping",
+              1
+            ]
+          ],
+          "notes": "Folie: „Content Security Policy (CSP)“.\n\nDie „Content Security Policy“, abgekürzt „CSP“, ist eine Regel, die der Server als HTTP-Header zusammen mit der Seite schickt. Darin steht, von welchen Adressen der Browser Skripte, Styles, Bilder und andere Inhalte laden oder ausführen darf.\n\nDer Browser blockiert alles, was nicht erlaubt ist. Hat ein Angreifer trotzdem ein Script eingeschleust, wird es im besten Fall nicht ausgeführt, weil es nicht aus einer erlaubten Quelle stammt.\n\nCSP ist eine zusätzliche Verteidigungsschicht. Man nennt das „Defense in Depth“, also Verteidigung in mehreren Schichten. Das Diagramm zeigt die Schichten. Die Grundlage bleibt die saubere Prüfung im eigenen Code und das Escaping durch Angular.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "CSP und Trusted Types\nbegrenzen den Schaden",
+              "Angular: Escaping, Sanitizing\nverhindert XSS",
+              "Eigener Code\nprüft Eingaben"
+            ],
+            "note": "Mehrere Schutzschichten"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: ein CSP-Header",
+          "code": "Content-Security-Policy:\n  default-src 'self';                          # Standard: nur eigene Origin\n  script-src  'self' 'nonce-r4nd0m';           # Skripte: eigene Dateien + passende Nonce\n  style-src   'self' 'nonce-r4nd0m';           # Styles: Angular erzeugt <style>-Elemente\n  img-src     'self' data:;                    # Bilder: eigene und eingebettete (data:)\n  connect-src 'self' https://api.example.com;  # Ziele für HttpClient/fetch\n  object-src  'none';                          # keine Plugins (object, embed)\n  base-uri    'self';                          # <base> darf nicht umgebogen werden\n  frame-ancestors 'none';                      # Seite darf in keinem iframe laufen\n\n# Die Nonce ist ein Zufallswert, den der Server bei JEDER Auslieferung neu erzeugt.\n# Kommentare mit # dienen nur der Erklärung; ein echter Header steht in einer Zeile.",
+          "notes": "Codefolie „Beispiel: ein CSP-Header“.\n\nDie Folie zeigt einen beispielhaften CSP-Header, zur besseren Lesbarkeit auf mehrere Zeilen verteilt. Jede Zeile ist eine „Direktive“, also eine Regel für eine Art von Inhalt. „self“ bedeutet die eigene Herkunft der Seite, also gleicher Servername, gleiches Protokoll und gleicher Port.\n\n„default-src“ ist die Standardregel. „script-src“ erlaubt Skripte aus eigenen Dateien und solche mit dem passenden Zufallswert, der „Nonce“ heißt. „style-src“ gilt für Styles. Das ist für Angular wichtig, weil Angular die Styles der Komponenten als Style-Elemente in die Seite schreibt. „connect-src“ legt fest, welche Server der „HttpClient“ erreichen darf.\n\n„object-src none“ verbietet alte Plugins. „base-uri“ verhindert, dass ein Angreifer die Basisadresse der Seite verändert. „frame-ancestors none“ verbietet, die Seite in einem fremden „iframe“ einzubetten. Die Nonce muss der Server bei jeder Auslieferung neu und zufällig erzeugen."
+        },
+        {
+          "type": "content",
+          "title": "CSP mit Angular nutzen",
+          "bullets": [
+            "Angular schreibt Komponenten-Styles als <style> in die Seite",
+            [
+              "Diese brauchen die Nonce, sonst blockiert die CSP",
+              1
+            ],
+            "Nonce angeben: Attribut ngCspNonce am Root-Element",
+            [
+              "oder Provider für das Token CSP_NONCE",
+              1
+            ],
+            "Server ersetzt den Platzhalter bei jeder Auslieferung",
+            "angular.json: security.autoCsp erzeugt Hash-CSP",
+            "Erst im Report-Only-Modus testen, dann scharf schalten"
+          ],
+          "notes": "Folie: „CSP mit Angular nutzen“.\n\nAngular schreibt die Styles der Komponenten zur Laufzeit als Style-Elemente in die Seite. Eine strenge CSP würde diese Styles blockieren. Deshalb muss Angular den Zufallswert, die „Nonce“, kennen und an jedes Style-Element anhängen.\n\nDafür gibt es zwei Wege. Man setzt das Attribut „ngCspNonce“ an das Root-Element der Anwendung in der Datei „index.html“. Oder man stellt den Wert über das Injection-Token „CSP_NONCE“ bereit. In beiden Fällen setzt der Server bei jeder Auslieferung einen neuen Wert ein.\n\nIn der Datei „angular.json“ gibt es außerdem die Einstellung „autoCsp“. Dann erzeugt der Build eine CSP auf Basis von Prüfsummen, sogenannten „Hashes“, für die Skripte in der „index.html“. Eine neue CSP testet man zuerst mit dem Header „Content-Security-Policy-Report-Only“. Dann meldet der Browser Verstöße nur, statt etwas zu blockieren."
+        },
+        {
+          "type": "code",
+          "title": "Nonce in index.html und app.config.ts",
+          "code": "<!-- index.html: der Server ersetzt RANDOM_NONCE bei jeder Auslieferung -->\n<body>\n  <app-root ngCspNonce=\"RANDOM_NONCE\"></app-root>\n</body>\n\n// Alternative: app.config.ts (Wert z. B. aus einem Meta-Tag, das der Server setzt)\nimport { CSP_NONCE } from '@angular/core';\n\nconst nonce = document.querySelector('meta[name=\"csp-nonce\"]')?.getAttribute('content');\n\nexport const appConfig: ApplicationConfig = {\n  providers: [\n    { provide: CSP_NONCE, useValue: nonce },\n  ],\n};\n\n// Server-Header dazu: script-src 'self' 'nonce-<derselbe Wert>'; style-src ...",
+          "notes": "Codefolie „Nonce in index.html und app.config.ts“.\n\nDer erste Teil zeigt die Datei „index.html“. Das Root-Element „app-root“ bekommt das Attribut „ngCspNonce“ mit einem Platzhalter. Der Server ersetzt diesen Platzhalter bei jeder Auslieferung durch einen neuen Zufallswert und schreibt denselben Wert in den CSP-Header. Angular liest das Attribut und hängt den Wert an alle Style-Elemente, die es erzeugt.\n\nDer zweite Teil zeigt die Alternative in „app.config.ts“. Der Wert wird hier aus einem Meta-Tag gelesen, das der Server in die Seite schreibt. Dann wird er über einen Provider für das Token „CSP_NONCE“ bereitgestellt. Ein „Provider“ sagt Angular, welcher Wert für ein Token geliefert werden soll.\n\nWichtig ist nur: Im Header und in der Seite steht derselbe Wert, und er ist bei jedem Aufruf neu."
+        },
+        {
+          "type": "content",
+          "title": "Trusted Types",
+          "bullets": [
+            "Browser-Funktion, die die CSP aktiviert",
+            "Gefährliche DOM-Stellen nehmen keine Strings mehr an",
+            [
+              "z. B. innerHTML, script.src, eval",
+              1
+            ],
+            "Nur Werte aus einer erlaubten Policy werden akzeptiert",
+            "Angular bringt eigene Policies mit",
+            [
+              "angular, angular#unsafe-bypass (für bypass…)",
+              1
+            ],
+            "Fehlt angular#unsafe-bypass, scheitert jedes bypass"
+          ],
+          "notes": "Folie: „Trusted Types“.\n\n„Trusted Types“ heißt „vertrauenswürdige Typen“. Das ist eine Browser-Funktion, die man über die CSP einschaltet. Danach nehmen gefährliche Stellen im DOM keine normalen Strings mehr an. Gemeint sind zum Beispiel „innerHTML“, die Adresse eines Script-Elements oder „eval“. Ein Versuch, dort einen String einzusetzen, wird vom Browser blockiert.\n\nErlaubt sind nur Werte, die eine sogenannte „Policy“ erzeugt hat. Eine Policy ist eine benannte Funktion, die Werte prüft. Der Header legt fest, welche Policies erlaubt sind.\n\nAngular bringt eigene Policies mit. „angular“ ist die normale Policy für bereinigte Werte. „angular#unsafe-bypass“ ist die Policy für Werte aus den „bypassSecurityTrust“-Methoden. Lässt man sie im Header weg, funktioniert kein „bypassSecurityTrust“ mehr. Das ist eine strenge, aber wirksame Regel. Rechts steht der passende Header.",
+          "diagram": {
+            "kind": "code",
+            "title": "CSP-Header",
+            "text": "Content-Security-Policy:\n  trusted-types angular;\n  require-trusted-types-for\n    'script';\n\n# mit bypass-Ausnahme:\n  trusted-types angular\n    angular#unsafe-bypass;"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Abhängigkeiten: die Lieferkette",
+          "bullets": [
+            "Jedes npm-Paket läuft mit vollen Rechten in der App",
+            "npm audit: vergleicht Lockfile mit bekannten Lücken",
+            "npm audit fix: hebt auf sichere Versionen an",
+            "ng update: Angular und seine Pakete aktualisieren",
+            "package-lock.json committen, im CI mit npm ci bauen",
+            "Neue Pakete prüfen: Pflege, Verbreitung, echter Name"
+          ],
+          "notes": "Folie: „Abhängigkeiten: die Lieferkette“.\n\nEine Angular-Anwendung besteht zum größten Teil aus fremden Paketen aus „npm“, dem Paketverzeichnis für JavaScript. Jedes dieser Pakete läuft mit denselben Rechten wie der eigene Code. Eine Lücke in einem Paket ist also eine Lücke in der Anwendung. Man spricht von der „Lieferkette“.\n\nDer Befehl „npm audit“ vergleicht die installierten Versionen aus der Datei „package-lock.json“ mit einer Datenbank bekannter Sicherheitslücken. „npm audit fix“ hebt betroffene Pakete auf sichere Versionen an, soweit das ohne größere Versionssprünge geht. Angular selbst aktualisiert man mit „ng update“.\n\nDie Datei „package-lock.json“, das „Lockfile“, legt die genauen Versionen fest. Man legt sie im Repository ab und baut auf dem Build-Server mit „npm ci“, damit überall dieselben Versionen verwendet werden. Bei neuen Paketen prüft man, ob sie gepflegt sind und ob der Name wirklich stimmt. Das Diagramm zeigt den Ablauf.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "npm audit",
+              "Bericht lesen",
+              "audit fix / ng update",
+              "Tests und Build"
+            ],
+            "highlight_last": true,
+            "note": "Regelmäßig, z. B. im CI"
+          }
+        },
+        {
+          "type": "code",
+          "title": "npm audit in der Praxis",
+          "code": "npm audit                      # alle Pakete prüfen, Bericht nach Schweregrad\nnpm audit --omit=dev           # nur Pakete, die in die ausgelieferte App gelangen\nnpm audit --audit-level=high   # Exit-Code ungleich 0 erst ab \"high\" (für das CI)\nnpm audit fix                  # sichere Updates ohne neue Hauptversion\n\nng update                      # zeigt verfügbare Angular-Updates\nng update @angular/core @angular/cli   # aktualisiert und passt Code per Migration an\n\nnpm ci                         # installiert exakt nach package-lock.json (CI)\n\n# Beispiel-Ausgabe (gekürzt):\n# some-package  <2.4.1\n# Severity: high\n# Prototype Pollution - https://github.com/advisories/GHSA-...\n# fix available via `npm audit fix`",
+          "notes": "Codefolie „npm audit in der Praxis“.\n\nDie Folie zeigt die wichtigsten Befehle. „npm audit“ prüft alle Pakete und zeigt einen Bericht, sortiert nach Schweregrad. Mit der Option „omit dev“ werden nur Pakete geprüft, die wirklich in die ausgelieferte Anwendung gelangen, nicht die Werkzeuge für die Entwicklung. Mit „audit-level high“ meldet der Befehl erst ab dem Schweregrad „hoch“ einen Fehler. Das ist praktisch für den Build-Server.\n\n„npm audit fix“ installiert sichere Versionen, solange keine neue Hauptversion nötig ist. „ng update“ zeigt verfügbare Angular-Updates. Mit Paketnamen aktualisiert es diese Pakete und passt den eigenen Code mit sogenannten „Migrationen“ automatisch an.\n\n„npm ci“ installiert genau die Versionen aus dem Lockfile. Unten steht ein gekürztes Beispiel für einen Bericht: Paketname, betroffene Versionen, Schweregrad, Art der Lücke und der Hinweis, dass eine Korrektur verfügbar ist."
+        },
+        {
+          "type": "content",
+          "title": "Secrets im Frontend",
+          "bullets": [
+            "environment.ts wird in das JavaScript-Bundle kompiliert",
+            "Jeder kann das Bundle laden und lesen",
+            [
+              "Entwicklertools, Quelltext, Netzwerk-Tab",
+              1
+            ],
+            "Also: kein API-Key mit Rechten, kein Passwort im Client",
+            "Lösung: Backend ruft den fremden Dienst auf",
+            "Öffentliche Schlüssel (z. B. Karten): nur mit Domain-Sperre"
+          ],
+          "notes": "Folie: „Secrets im Frontend“.\n\nEin „Secret“ ist ein Geheimnis, zum Beispiel ein Passwort oder ein API-Schlüssel. Viele Projekte legen Einstellungen in der Datei „environment.ts“ ab. Diese Datei wird beim Bauen in das JavaScript-„Bundle“ übersetzt, also in die Dateien, die der Browser herunterlädt. Das Diagramm zeigt den Weg: von der Datei über den Build in das Bundle bis zu jedem Besucher.\n\nJeder Besucher kann das Bundle in den Entwicklertools lesen oder im Netzwerk-Tab die Anfragen mit dem Schlüssel sehen. Deshalb gehören Schlüssel mit Rechten und Passwörter nie in den Client.\n\nDie Lösung ist, dass das eigene Backend den fremden Dienst aufruft und den Schlüssel geheim hält. Manche Dienste geben bewusst öffentliche Schlüssel aus, zum Beispiel für Karten. Diese Schlüssel sollten beim Anbieter auf die eigene Domain beschränkt sein.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "environment.ts",
+              "ng build",
+              "main-XYZ.js",
+              "Jeder Besucher liest mit"
+            ],
+            "highlight_last": true,
+            "note": "Alles im Bundle ist öffentlich"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Offene Weiterleitung: returnUrl",
+          "bullets": [
+            "Guard hängt Ziel an: /login?returnUrl=/customer/7",
+            "Nach dem Login navigiert die App dorthin",
+            "Angreifer verschickt: /login?returnUrl=//evil.example",
+            [
+              "Opfer meldet sich echt an und landet beim Angreifer",
+              1
+            ],
+            "Gegenmaßnahme: Ziel gegen Allowlist prüfen",
+            [
+              "nur eigene Origin, nur erlaubte Pfade",
+              1
+            ]
+          ],
+          "notes": "Folie: „Offene Weiterleitung: returnUrl“.\n\nEine „offene Weiterleitung“ entsteht, wenn eine Anwendung auf ein Ziel weiterleitet, das in der Adresse steht. In unserer App hängt der Guard die angeforderte Seite als Query-Parameter „returnUrl“ an die Login-Seite an. Nach dem Login navigiert die App zu diesem Ziel. Das ist bequem.\n\nEin Angreifer kann aber einen Link verschicken, bei dem „returnUrl“ auf seine eigene Seite zeigt. Das Opfer sieht die echte Login-Seite, meldet sich an und wird dann auf die Seite des Angreifers geleitet. Dort sieht zum Beispiel eine gefälschte Seite „Sitzung abgelaufen, bitte Passwort erneut eingeben“. Das Diagramm zeigt den Ablauf.\n\nDie Gegenmaßnahme ist eine „Allowlist“, also eine Liste erlaubter Ziele. Nur Adressen auf der eigenen Origin und mit erlaubtem Pfad werden angenommen. Alles andere führt zum Standardziel.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Link mit returnUrl",
+              "Echter Login",
+              "Prüfung: Allowlist",
+              "Ziel oder /customer"
+            ],
+            "highlight_last": true,
+            "note": "Wird in Übung 36 gebaut"
+          }
+        },
+        {
+          "type": "code",
+          "title": "safeReturnUrl: Prüfung gegen eine Allowlist",
+          "code": "const ALLOWED_PREFIXES = ['/customer'];\n\nexport function safeReturnUrl(value: string | null | undefined,\n    origin: string = window.location.origin): string | undefined {\n  if (!value) return undefined;\n  let url: URL;\n  try {\n    url = new URL(value, origin);    // relativ: gegen eigene Origin aufgelöst\n  } catch {\n    return undefined;                // kein gültiger Wert\n  }\n  if (url.origin !== origin) return undefined;  // //evil.example, javascript:\n  const allowed = ALLOWED_PREFIXES.some(p =>\n    url.pathname === p || url.pathname.startsWith(p + '/'));   // Pfad ist normalisiert\n  return allowed ? url.pathname + url.search : undefined;\n}\n// Login: router.navigateByUrl(safeReturnUrl(this.returnUrl()) ?? '/customer')",
+          "notes": "Codefolie „safeReturnUrl: Prüfung gegen eine Allowlist“.\n\nDie Funktion stammt aus der Musterlösung von Übung 36. Sie bekommt den Wert aus der Adresse und die eigene „Origin“, also Protokoll, Servername und Port der App. Zurück gibt sie einen sicheren Pfad oder „undefined“, wenn der Wert nicht erlaubt ist.\n\nZuerst wird der Wert mit „new URL“ ausgewertet. Ein relativer Pfad wird dabei gegen die eigene Origin aufgelöst. Eine absolute Adresse wie „//evil.example“ behält ihren fremden Server. Ist der Wert ungültig, wirft „new URL“ einen Fehler, und die Funktion gibt „undefined“ zurück.\n\nDann wird verglichen: Stimmt die Origin nicht, wird abgelehnt. Das trifft fremde Server und auch „javascript:“-Adressen. Zuletzt muss der Pfad genau „/customer“ sein oder damit beginnen. Weil „new URL“ den Pfad normalisiert, wird auch ein Trick wie „/customer/../admin“ erkannt. Die Login-Seite navigiert zum Ergebnis oder zum Standardziel „/customer“."
+        },
+        {
+          "type": "content",
+          "title": "Weitere typische Risikoquellen",
+          "bullets": [
+            "Zu viele Daten im Client: Backend liefert nur erlaubte Felder",
+            "Sensible Daten in Logs: keine Header, Bodies, Tokens",
+            [
+              "loggingInterceptor (Übung 25): nur Methode, URL, Status",
+              1
+            ],
+            "Clickjacking: Seite in fremdem iframe, unsichtbar überlagert",
+            [
+              "Schutz: frame-ancestors oder X-Frame-Options",
+              1
+            ],
+            "Fremde Skripte (Tracking, Widgets): wirklich nötig?",
+            [
+              "Subresource Integrity (integrity-Attribut) und CSP",
+              1
+            ]
+          ],
+          "notes": "Folie: „Weitere typische Risikoquellen“.\n\nLiefert das Backend mehr Daten als nötig, sind sie im Netzwerk-Tab für jeden sichtbar, auch wenn die Oberfläche sie nicht anzeigt. Das Backend soll nur erlaubte Felder liefern.\n\nProtokolle sind eine häufige Quelle für Datenlecks. Der „loggingInterceptor“ aus Übung 25 gibt deshalb nur Methode, Adresse, Status und Dauer aus, aber nie Header wie „Authorization“ oder den Inhalt von Anfragen.\n\nBeim „Clickjacking“ bettet eine fremde Seite die Anwendung unsichtbar in einen „iframe“ ein und bringt den Nutzer dazu, darauf zu klicken. Dagegen hilft die CSP-Regel „frame-ancestors“ oder der Header „X-Frame-Options“. Fremde Skripte, zum Beispiel für Statistik, laufen mit vollen Rechten. Man prüft, ob sie nötig sind. Mit „Subresource Integrity“ prüft der Browser über eine Prüfsumme, ob die geladene Datei unverändert ist."
+        },
+        {
+          "type": "content",
+          "title": "Umgang mit Daten und Benutzerinteraktionen",
+          "bullets": [
+            "Datensparsamkeit: nur anzeigen und speichern, was nötig ist (DSGVO)",
+            "Kontextgerecht ausgeben: Text per {{ }}, HTML per Sanitizing, URL validieren",
+            "Client-Validierung im Backend wiederholen",
+            "Dateiuploads: Typ und Größe prüfen, Inhalte nie ausführen",
+            "Fehlermeldungen ohne technische Details, keine Stacktraces für Endnutzer",
+            "Nach dem Logout: Zustand im Speicher (Stores, Signals) zurücksetzen"
+          ],
+          "notes": "Folie: „Umgang mit Daten und Benutzerinteraktionen“.\n\n„Datensparsamkeit“ ist ein Grundsatz der Datenschutz-Grundverordnung, kurz „DSGVO“. Man zeigt und speichert nur die Daten, die man wirklich braucht.\n\nDaten werden passend zum Kontext ausgegeben: Text über die Interpolation, HTML nur bereinigt, Adressen nach einer Prüfung. Jede Prüfung im Browser wird im Backend wiederholt. Bei hochgeladenen Dateien prüft man Typ und Größe und führt den Inhalt nie aus.\n\nFehlermeldungen für Nutzer enthalten keine technischen Details wie einen „Stacktrace“, also die Liste der aufgerufenen Funktionen. Solche Details helfen Angreifern. Nach dem Abmelden setzt man den Zustand im Speicher zurück, zum Beispiel die Daten in Stores und Signals. Sonst sieht der nächste Nutzer am selben Gerät eventuell noch fremde Daten."
+        },
+        {
+          "type": "content",
+          "title": "Verantwortungsvoller Einsatz im Team",
+          "bullets": [
+            "Sicherheit ist Teamaufgabe: Review-Checkliste für jede Änderung",
+            "Automatische Prüfungen im CI: Lint, Tests, npm audit",
+            "Updates zeitnah mit ng update: Sicherheitsfixes in Minor- und Patch-Versionen",
+            "Dokumentierte Ausnahmen: Wo steht bypassSecurityTrust* oder innerHTML, und warum?",
+            "Vorfälle offen und lernorientiert besprechen, ohne Schuldzuweisung"
+          ],
+          "notes": "Folie: „Verantwortungsvoller Einsatz im Team“.\n\nSicherheit ist keine Aufgabe einer einzelnen Person. Jede Änderung wird mit einer Checkliste geprüft. Dazu laufen automatische Prüfungen im „CI“, also auf dem Build-Server, der bei jeder Änderung baut und testet: Lint, Tests und „npm audit“.\n\nUpdates spielt man zeitnah mit „ng update“ ein. Sicherheitskorrekturen erscheinen auch in kleinen Versionen, den sogenannten „Minor“- und „Patch“-Versionen.\n\nAusnahmen werden dokumentiert: Wo im Code wird „bypassSecurityTrust“ oder „innerHTML“ verwendet, und warum ist das in Ordnung? Wenn doch etwas passiert, bespricht das Team den Vorfall offen. Ziel ist, daraus zu lernen, nicht einen Schuldigen zu finden."
+        },
+        {
+          "type": "content",
+          "title": "Review-Checkliste Frontend-Sicherheit",
+          "bullets": [
+            "Wird bypassSecurityTrust* verwendet? Ist es begründet?",
+            "Gibt es innerHTML, nativeElement.innerHTML, document.write oder eval?",
+            "Werden URL-Parameter ungeprüft für Navigation oder Requests genutzt?",
+            "Werden Tokens oder personenbezogene Daten geloggt oder im localStorage abgelegt?",
+            "Stehen Geheimnisse in environment-Dateien oder im Bundle?",
+            "Verlässt sich eine Funktion nur auf einen Guard statt auf das Backend?",
+            "Wurden neue Abhängigkeiten geprüft (npm audit, Pflegezustand)?"
+          ],
+          "notes": "Folie: „Review-Checkliste Frontend-Sicherheit“.\n\nDiese Checkliste fasst das Kapitel zusammen. Sie ist für das Code-Review gedacht, also für die Prüfung einer Änderung durch eine andere Person. Sie liegt auch der Übung 36 bei, in der Datei „review-checkliste.md“ im Ordner „material“.\n\nDie Fragen lauten: Wird die Sicherheitsprüfung von Angular abgeschaltet, und gibt es dafür einen Grund? Wird HTML direkt in die Seite geschrieben oder Text als Code ausgeführt? Werden Werte aus der Adresszeile ungeprüft verwendet? Werden Tokens oder persönliche Daten protokolliert oder im Browser gespeichert? Stehen Geheimnisse im Code? Schützt nur ein Guard statt das Backend? Und wurden neue Pakete geprüft?"
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 36: XSS erleben und beheben (1/2)",
+          "bullets": [
+            "Öffne das Projekt 36_sicherheit; Lastgenerator aus Übung 35 abschalten (LOAD_TEST_SIZE = 0)",
+            "1. Customer erhält note?: string; der CustomerService setzt für Kunde 1 die Notiz",
+            [
+              "<b>wichtig</b> <img src=x onerror=\"alert('XSS')\">  (Konstante, nur für die Übung)",
+              1
+            ],
+            "2. In CustomerDetailsComponent per Interpolation {{ c.note }} ausgeben: Was siehst du?",
+            "3. Per [innerHTML] ausgeben und in den Entwicklertools (Elements) prüfen, was bleibt",
+            "4. Gegenbeispiel mit bypassSecurityTrustHtml: Das alert erscheint",
+            [
+              "Nur in einer getrennten Demo-Komponente hinter einem Schalter; wann wäre es akzeptabel?",
+              1
+            ],
+            "Musterlösung: 36_sicherheit (baut auf 35_performance auf)"
+          ],
+          "notes": "Folie: „Übung 36: XSS erleben und beheben (1/2)“.\n\nErklärung für die Dolmetscherin:\nDie Teilnehmer öffnen das Projekt „36_sicherheit“ und schalten zuerst den Lastgenerator aus Übung 35 ab. Dann bekommt jeder Kunde ein optionales Feld „note“ für eine Notiz. Der Service setzt für Kunde 1 eine Notiz, die ein fettes Wort und ein Bild mit Fehler-Ereignis enthält.\n\nDanach zeigen sie die Notiz auf drei Arten an: per Interpolation, dann ist alles sichtbarer Text; per „innerHTML“, dann bereinigt Angular sie; und als Gegenbeispiel mit „bypassSecurityTrustHtml“, dann erscheint das Meldungsfenster. Diese unsichere Variante gehört nur in eine getrennte Demo-Komponente mit Schalter. Zum Schluss diskutieren sie, wann so etwas überhaupt akzeptabel wäre."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 36: XSS erleben und beheben (2/2)",
+          "bullets": [
+            "5. Login: returnUrl gegen eine Allowlist prüfen",
+            [
+              "Nur Pfade /customer oder /customer/…; absolute URLs und fremde Hosts verwerfen",
+              1
+            ],
+            [
+              "Tipp: new URL(value, window.location.origin), dann origin und pathname prüfen",
+              1
+            ],
+            "6. loggingInterceptor darf Header wie Authorization nie ausgeben (Test oder Kommentar)",
+            "7. Wo fließt ein Wert aus der Adresszeile in eine Request-URL? encodeURIComponent nutzen",
+            "8. Review-Checkliste (material/review-checkliste.md) für die ganze App durchgehen",
+            [
+              "Funde in der Tabelle dokumentieren",
+              1
+            ],
+            "Musterlösung: 36_sicherheit (baut auf 35_performance auf)"
+          ],
+          "notes": "Folie: „Übung 36: XSS erleben und beheben (2/2)“.\n\nErklärung für die Dolmetscherin:\nIm zweiten Teil sichern die Teilnehmer die Weiterleitung nach dem Login ab. Der Parameter „returnUrl“ wird gegen eine Liste erlaubter Pfade geprüft. Nur Pfade, die mit „/customer“ beginnen, sind erlaubt. Adressen zu fremden Servern werden verworfen, dann geht es zum Standardziel.\n\nDanach prüfen sie, dass der Logging-Interceptor keine Header wie „Authorization“ ausgibt, am besten mit einem Test. Sie suchen Stellen, an denen ein Wert aus der Adresse in eine Request-Adresse eingesetzt wird, und kodieren ihn mit „encodeURIComponent“. Zum Schluss gehen sie die Checkliste aus dem Ordner „material“ für die ganze App durch und tragen ihre Funde in die Tabelle ein."
+        }
+      ]
+    },
+    {
+      "after": 268,
+      "order": 20,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "KI-gestützte Entwicklung",
+          "notes": "Kapitelübergangsfolie „KI-gestützte Entwicklung“ – hier beginnt das Kapitel über den Einsatz von künstlicher Intelligenz beim Programmieren. Es geht darum, wofür KI-Werkzeuge gut geeignet sind, wie man ihnen den richtigen Kontext gibt, wie man ihre Vorschläge prüft und welche typischen Fehler sie bei Angular machen. Am Ende stehen Übung 37 und das Abschlussprojekt in Übung 38."
+        },
+        {
+          "type": "content",
+          "title": "Wofür KI in der Entwicklung?",
+          "bullets": [
+            "Sehr gut geeignet: Gerüste, Standardcode, Umbenennungen",
+            "Gut geeignet: fremden Code und Fehlermeldungen erklären lassen",
+            "Gut, aber mit Review: Tests vorschlagen, Randfälle sammeln",
+            "Gut, mit Tests: Umbauten in kleinen Schritten",
+            "Nur als Diskussionspartner: Architektur, Fachlogik, Sicherheit",
+            "Riskant: große Änderungen blind übernehmen",
+            "KI ist ein schneller Assistent ohne Verantwortung: Die Verantwortung bleibt beim Entwickler"
+          ],
+          "notes": "Folie: „Wofür KI in der Entwicklung?“.\n\nDie Folie ordnet Aufgaben danach, wie gut KI-Werkzeuge sie erledigen. Sehr gut geeignet sind sich wiederholende Aufgaben: ein Grundgerüst erzeugen, Standardcode schreiben oder Namen im ganzen Projekt ändern. Gut geeignet ist es auch, sich fremden Code oder eine Fehlermeldung erklären zu lassen.\n\nTests und Randfälle kann die KI vorschlagen, aber man muss sie prüfen. Umbauten macht man in kleinen Schritten und sichert sie mit Tests ab. Bei Architektur, Fachlogik und Sicherheit ist die KI nur ein Gesprächspartner, die Entscheidung trifft der Mensch.\n\nRiskant ist es, große Änderungen ungeprüft zu übernehmen. Die KI ist ein schneller Assistent, aber sie trägt keine Verantwortung. Verantwortlich bleibt der Entwickler, der den Code übernimmt."
+        },
+        {
+          "type": "content",
+          "title": "Formen der Unterstützung",
+          "bullets": [
+            "Chat: Fragen stellen, Code erklären lassen",
+            "Vorschläge im Editor: Zeilen oder Blöcke ergänzen",
+            "Agenten: lesen das Projekt, ändern mehrere Dateien",
+            [
+              "führen Befehle aus, z. B. ng build, ng test",
+              1
+            ],
+            "Je selbstständiger das Werkzeug,",
+            [
+              "desto größer Prüfaufwand und möglicher Schaden",
+              1
+            ]
+          ],
+          "notes": "Folie: „Formen der Unterstützung“.\n\nEs gibt drei Formen. Im Chat stellt man Fragen und lässt sich Code erklären. Die Antwort kopiert man selbst. Im Editor macht das Werkzeug während des Tippens Vorschläge für die nächsten Zeilen.\n\nEin „Agent“ ist ein Werkzeug, das selbstständig arbeitet. Es liest Dateien im Projekt, ändert mehrere Dateien und führt Befehle aus, zum Beispiel den Build oder die Tests.\n\nDas Diagramm zeigt die Stufen von unten nach oben. Je selbstständiger das Werkzeug arbeitet, desto mehr muss man prüfen, und desto größer kann der Schaden sein, wenn etwas schiefgeht.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Agent: ändert Dateien, testet",
+              "Vorschläge im Editor",
+              "Chat: Fragen und Erklärungen"
+            ],
+            "note": "Mehr Selbstständigkeit = mehr Prüfaufwand"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Arbeitsablauf mit KI: ein Kreislauf",
+          "bullets": [
+            "Kontext geben: Ziel, Dateien, Regeln, Beispiele",
+            "Vorschlag: Plan oder Code der KI",
+            "Prüfen: lesen, mit Checkliste vergleichen",
+            "Testen: Build, Lint, Tests, im Browser ausprobieren",
+            "Befunde als neuen Kontext zurückgeben",
+            "Erst wenn alles passt: Commit"
+          ],
+          "notes": "Folie: „Arbeitsablauf mit KI: ein Kreislauf“.\n\nDie Arbeit mit einer KI ist ein Kreislauf aus vier Schritten. Das Diagramm zeigt ihn. Im ersten Schritt gibt man „Kontext“: das Ziel, die betroffenen Dateien, die Regeln des Projekts und Beispiele. Im zweiten Schritt macht die KI einen Vorschlag, entweder einen Plan oder Code.\n\nIm dritten Schritt prüft der Mensch den Vorschlag: Er liest ihn und vergleicht ihn mit der Checkliste. Im vierten Schritt wird getestet: Build, Lint, automatische Tests und Ausprobieren im Browser.\n\nWas dabei auffällt, gibt man der KI als neuen Kontext zurück, und der Kreislauf beginnt erneut. Erst wenn Prüfung und Tests in Ordnung sind, wird die Änderung mit einem „Commit“ gespeichert.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "Kontext geben",
+              "Vorschlag",
+              "Prüfen",
+              "Testen"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Kontext ist alles",
+          "bullets": [
+            "Aufgabe klar und klein:",
+            [
+              "„Erstelle CustomerFilter mit input()/output()“",
+              1
+            ],
+            [
+              "nicht: „Baue die App um“",
+              1
+            ],
+            "Betroffene Dateien nennen oder anhängen",
+            "Beispiele zeigen: „analog zu CustomerListComponent“",
+            "Projektregeln mitgeben (nächste Folie)",
+            "Version nennen: „Angular 21, zoneless, Vitest“"
+          ],
+          "notes": "Folie: „Kontext ist alles“.\n\nEine KI weiß nur das, was in ihrem „Kontext“ steht. Der Kontext ist alles, was sie bei einer Anfrage sieht: die Nachricht, angehängte Dateien und Regeldateien.\n\nDie Aufgabe sollte klar und klein sein, zum Beispiel: „Erstelle eine Komponente CustomerFilter mit input und output“. Eine Aufgabe wie „Baue die App um“ ist zu groß und zu ungenau. Man nennt die betroffenen Dateien und zeigt ein Beispiel aus dem Projekt, an dem sich die KI orientieren soll.\n\nDazu kommen die Regeln des Projekts und die genaue Version, also zum Beispiel „Angular 21, ohne zone.js, Tests mit Vitest“. Ohne diese Angabe schreibt die KI oft Code im Stil älterer Versionen, weil sie davon mehr Beispiele gelernt hat."
+        },
+        {
+          "type": "content",
+          "title": "Projektregeln als Datei: AGENTS.md, CLAUDE.md",
+          "bullets": [
+            "Textdatei im Repository, die das Werkzeug automatisch liest",
+            "Name je nach Werkzeug, z. B.:",
+            [
+              "AGENTS.md (werkzeugübergreifend), CLAUDE.md",
+              1
+            ],
+            [
+              ".github/copilot-instructions.md",
+              1
+            ],
+            "Inhalt: Version, Stil, Verbote, Befehle für Build und Test",
+            "Kurz und konkret, mit dem Code mitpflegen",
+            "Wirkt wie eine Einarbeitung für jede neue Sitzung"
+          ],
+          "notes": "Folie: „Projektregeln als Datei: AGENTS.md, CLAUDE.md“.\n\nDamit man die Regeln nicht jedes Mal neu schreiben muss, legt man sie als Textdatei im Repository ab. Das KI-Werkzeug liest diese Datei automatisch zu Beginn jeder Sitzung. Der Name hängt vom Werkzeug ab. „AGENTS.md“ ist ein Name, den mehrere Werkzeuge verstehen. „CLAUDE.md“ liest das Werkzeug „Claude Code“. Für „GitHub Copilot“ gibt es die Datei „copilot-instructions.md“ im Ordner „.github“.\n\nIn die Datei gehören die Angular-Version, die Stilregeln, Verbote und die Befehle für Build und Test. Sie sollte kurz und konkret sein und zusammen mit dem Code gepflegt werden.\n\nMan kann sie sich wie die Einarbeitung eines neuen Kollegen vorstellen, nur dass sie bei jeder neuen Sitzung wiederholt wird. Das Diagramm zeigt die typischen Abschnitte.",
+          "diagram": {
+            "kind": "tree",
+            "root": "AGENTS.md",
+            "children": [
+              "Version, Technik",
+              "Stilregeln",
+              "Verbote",
+              "Build und Test"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "Beispiel: Projektregeln für Angular",
+          "code": "# Projektregeln (AGENTS.md)\n\n## Technik\n- Angular 21, TypeScript strict, zoneless, ChangeDetectionStrategy.OnPush.\n- Standalone-Komponenten, kein NgModule. inject() statt Konstruktor-Injection.\n- Control Flow @if/@for (mit track auf ID), kein *ngIf/*ngFor, kein CommonModule.\n- input()/output()/model() statt @Input/@Output.\n- Zustand: signal/computed; effect nur für Nebenwirkungen außerhalb von Angular.\n\n## Verbote\n- Kein any. Kein innerHTML mit zusammengebautem HTML.\n- Kein bypassSecurityTrust* ohne Rückfrage.\n- Keine neuen npm-Pakete ohne Rückfrage.\n\n## Befehle\n- Build: ng build | Tests (Vitest): ng test | Lint: ng lint\n- Neue Logik immer mit Tests, die Verhalten prüfen (nicht nur toBeTruthy).",
+          "notes": "Codefolie „Beispiel: Projektregeln für Angular“.\n\nDie Folie zeigt eine mögliche Regeldatei für ein Angular-21-Projekt. Sie ist in Abschnitte gegliedert.\n\nUnter „Technik“ stehen die Version und die modernen Schreibweisen: eigenständige Komponenten ohne „NgModule“, „inject“ statt Übergabe im Konstruktor, die neue Ablaufsteuerung mit „@if“ und „@for“, Signal-Eingaben mit „input“ und „output“, und Signals für den Zustand.\n\nUnter „Verbote“ stehen Dinge, die die KI nicht ohne Rückfrage tun darf: den Typ „any“ verwenden, HTML zusammenbauen, die Sicherheitsprüfung abschalten oder neue Pakete installieren. Unter „Befehle“ steht, wie man baut, testet und prüft. So kann ein Agent seine eigenen Änderungen selbst überprüfen."
+        },
+        {
+          "type": "content",
+          "title": "Angular-Hilfen für KI-Werkzeuge",
+          "bullets": [
+            "angular.dev/ai: offizielle Seite zu KI und Angular",
+            [
+              "Best-Practices-Regeln zum Kopieren in die Regeldatei",
+              1
+            ],
+            "ng new fragt nach Regeldateien für KI-Werkzeuge",
+            [
+              "Option --ai-config, z. B. für Claude, Copilot, Cursor",
+              1
+            ],
+            "llms.txt: Übersicht der Doku für Sprachmodelle",
+            "Angular CLI MCP-Server: ng mcp (nächste Folie)"
+          ],
+          "notes": "Folie: „Angular-Hilfen für KI-Werkzeuge“.\n\nDas Angular-Team unterstützt die Arbeit mit KI-Werkzeugen. Auf der Seite „angular.dev/ai“ gibt es eine Sammlung von Best-Practice-Regeln, die man in die eigene Regeldatei übernehmen kann. Sie beschreiben die modernen Schreibweisen, die auch im Kurs verwendet werden.\n\nBeim Anlegen eines neuen Projekts mit „ng new“ fragt die Angular CLI, für welches KI-Werkzeug eine Regeldatei erzeugt werden soll. Mit der Option „ai-config“ kann man das auch direkt angeben.\n\nDie Datei „llms.txt“ auf angular.dev ist eine Übersicht der Dokumentation, die für Sprachmodelle aufbereitet ist. Ein Sprachmodell ist die Technik hinter den KI-Werkzeugen. Außerdem bringt die Angular CLI einen eigenen „MCP-Server“ mit. Das erklärt die nächste Folie. Die genauen Optionen ändern sich schnell, deshalb immer in der aktuellen Dokumentation nachsehen."
+        },
+        {
+          "type": "content",
+          "title": "Der Angular CLI MCP-Server",
+          "bullets": [
+            "MCP: Model Context Protocol, Standard für Werkzeuge",
+            "Das KI-Werkzeug ruft Funktionen eines Servers auf",
+            "ng mcp startet den Server der Angular CLI",
+            "Bietet z. B. aktuelle Best Practices, Doku-Suche,",
+            [
+              "Übersicht der Projekte im Workspace",
+              1
+            ],
+            "Konfiguration im KI-Werkzeug (Beispiel rechts)",
+            "Ergebnisse trotzdem prüfen"
+          ],
+          "notes": "Folie: „Der Angular CLI MCP-Server“.\n\n„MCP“ steht für „Model Context Protocol“. Das ist ein Standard, über den ein KI-Werkzeug zusätzliche Funktionen aufrufen kann, die ein sogenannter „MCP-Server“ anbietet. So bekommt die KI Informationen, die nicht in ihrem Training standen.\n\nDie Angular CLI enthält einen solchen Server. Man startet ihn mit dem Befehl „ng mcp“. Er bietet zum Beispiel die aktuellen Best Practices von Angular, eine Suche in der offiziellen Dokumentation und eine Übersicht der Projekte im eigenen Workspace. Damit greift die KI auf aktuelles Wissen zu, statt auf veraltete Beispiele.\n\nRechts steht ein Beispiel für die Einstellung im KI-Werkzeug. Das Werkzeug startet den Server dann selbst über „npx“. Die genaue Datei hängt vom Werkzeug ab. Auch mit MCP gilt: Die Ergebnisse werden geprüft.",
+          "diagram": {
+            "kind": "code",
+            "title": "MCP-Konfiguration",
+            "text": "{\n  \"mcpServers\": {\n    \"angular-cli\": {\n      \"command\": \"npx\",\n      \"args\": [\"-y\",\n        \"@angular/cli\",\n        \"mcp\"]\n    }\n  }\n}"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Gute Prompts: ein Muster",
+          "code": "Kontext:   Angular 21 App, Feature customer, siehe customer-list.component.ts\nAufgabe:   Extrahiere die Filter-UI in eine Darstellungskomponente\n           CustomerFilterComponent\nVorgaben:  input()/output(), OnPush, keine Services, kein neues Paket\nAbnahme:   Verhalten unverändert; Test für den Output vorhanden; ng build läuft durch\nFormat:    Zeige zuerst den Plan, dann die Änderungen als Diff\n\n// Merkregel: Kontext, Aufgabe, Vorgaben, Abnahmekriterien, Format",
+          "notes": "Codefolie „Gute Prompts: ein Muster“.\n\nEin „Prompt“ ist die Anweisung an die KI. Ein guter Prompt hat fünf Teile. Der „Kontext“ beschreibt das Projekt und nennt die betroffene Datei. Die „Aufgabe“ sagt genau, was gemacht werden soll, hier: die Filter-Oberfläche in eine eigene Darstellungskomponente auslagern.\n\nDie „Vorgaben“ legen fest, welche Technik verwendet wird und was verboten ist. Die „Abnahme“ beschreibt, woran man erkennt, dass die Aufgabe erfüllt ist: Das Verhalten ändert sich nicht, es gibt einen Test, und der Build läuft durch.\n\nDas „Format“ sagt, wie die Antwort aussehen soll. Hier soll die KI zuerst einen Plan zeigen und erst danach die Änderungen. So kann man den Plan prüfen, bevor Code entsteht."
+        },
+        {
+          "type": "code",
+          "title": "Weitere Prompt-Beispiele",
+          "code": "Erklären:\n  \"Erkläre die Fehlermeldung NG0904 und zeige, wo sie in\n   customer-video.component.ts entsteht. Ändere noch nichts.\"\n\nTests vorschlagen:\n  \"Schlage für safeReturnUrl() in auth/return-url.ts Testfälle vor: erlaubte Pfade,\n   fremde Hosts, //evil.example, javascript:, /customer/../admin. Nur Liste, kein Code.\"\n\nReview anfordern:\n  \"Prüfe den Diff mit unserer Checkliste in AGENTS.md. Nenne Befunde mit Datei, Zeile\n   und verletzter Regel. Schreibe keinen Code.\"\n\nBefunde zurückgeben (zweite Runde):\n  \"Behebe: 1. *ngIf in Zeile 8 durch @if ersetzen. 2. any bei customers durch\n   readonly Customer[] ersetzen. 3. effect in Zeile 20 durch computed ersetzen.\"",
+          "notes": "Codefolie „Weitere Prompt-Beispiele“.\n\nDie Folie zeigt vier typische Prompts. Der erste lässt eine Fehlermeldung erklären und sagt ausdrücklich: Noch nichts ändern. So bleibt die Kontrolle beim Entwickler.\n\nDer zweite bittet um Vorschläge für Testfälle zur Funktion „safeReturnUrl“ aus Übung 36. Er nennt selbst schon die wichtigen Randfälle und will nur eine Liste, keinen Code. Der dritte bittet die KI, eine Änderung mit der Checkliste aus der Regeldatei zu prüfen und die Befunde genau zu benennen.\n\nDer vierte zeigt die zweite Runde: Die Befunde aus dem Review werden konkret zurückgegeben, mit Stelle und gewünschter Korrektur. Je genauer die Rückmeldung, desto besser das Ergebnis. So wird es auch in Übung 37 gemacht."
+        },
+        {
+          "type": "content",
+          "title": "Mehrrunden-Zusammenarbeit",
+          "bullets": [
+            "Erst Plan, dann Code: Schritte besprechen",
+            "Kleine, überprüfbare Schritte, ein Commit pro Schritt",
+            "Ergebnisse zurückspiegeln: Fehlermeldung, Testausgabe",
+            "Bei langen Sitzungen Regeln wiederholen",
+            [
+              "oder neu starten mit kurzer Zusammenfassung",
+              1
+            ],
+            "Bei Abweichung vom Plan sofort stoppen"
+          ],
+          "notes": "Folie: „Mehrrunden-Zusammenarbeit“.\n\nGute Ergebnisse entstehen selten in einer einzigen Runde. Das Diagramm zeigt den Ablauf. Zuerst nennt man das Ziel. Dann lässt man einen Plan erstellen und prüft ihn, bevor Dateien geändert werden. Danach setzt die KI einen kleinen Schritt um. Dieser wird geprüft und getestet und mit einem eigenen „Commit“ gespeichert. Ein Commit ist ein gespeicherter Zwischenstand in der Versionsverwaltung.\n\nFehlermeldungen und Testausgaben gibt man genau so zurück, wie sie erscheinen. Bei langen Sitzungen vergisst die KI frühere Anweisungen leichter. Dann hilft es, die Regeln zu wiederholen oder neu zu beginnen und eine kurze Zusammenfassung mitzugeben.\n\nWeicht die KI vom Plan ab, stoppt man sofort und korrigiert, statt sie weiterlaufen zu lassen.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Ziel nennen",
+              "Plan prüfen",
+              "Kleiner Schritt",
+              "Review und Tests",
+              "Commit"
+            ],
+            "highlight_last": true,
+            "note": "Dann nächste Runde"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Typische KI-Fehler bei Angular",
+          "bullets": [
+            "Veraltete Muster: *ngFor, @Input(), Konstruktor-Injection, NgModule",
+            "Erfundene oder falsche APIs: Methoden oder Optionen, die es nicht gibt",
+            "effect für alles: Zustand synchronisieren, statt computed zu nutzen",
+            "any und Typ-Casts: Fehler verschwinden, statt gelöst zu werden",
+            "Unnötige Komplexität: zusätzliche Abstraktionen, Wrapper, Hilfsklassen",
+            "Sicherheitsblindheit: innerHTML, Tokens im localStorage, ungeprüfte Weiterleitungen",
+            "Tests, die nichts prüfen: toBeTruthy, Spiegelung der Mocks",
+            "Stilbruch: andere Namens- und Ordnerkonventionen"
+          ],
+          "notes": "Folie: „Typische KI-Fehler bei Angular“.\n\nKI-Werkzeuge machen bei Angular immer wieder dieselben Fehler. Am häufigsten sind veraltete Schreibweisen, weil die KI mit viel älterem Code trainiert wurde: „*ngFor“, der Dekorator „@Input“, Übergabe im Konstruktor und „NgModule“. Manchmal erfindet sie Methoden oder Optionen, die es gar nicht gibt.\n\nOft nutzt sie „effect“, um Werte abzugleichen, obwohl ein „computed“ richtig wäre. Sie setzt den Typ „any“ ein, damit Fehlermeldungen verschwinden, statt das Problem zu lösen. Sie baut unnötige Zwischenschichten ein.\n\nDazu kommen Sicherheitsfehler wie „innerHTML“ oder Tokens im „localStorage“, Tests, die nichts Echtes prüfen, und ein anderer Stil als im übrigen Projekt. Die nächsten Folien zeigen ein konkretes Beispiel."
+        },
+        {
+          "type": "code",
+          "title": "Fehlerbeispiel: veralteter KI-Vorschlag",
+          "code": "@NgModule({                                         // (1) NgModule\n  declarations: [CustomerBadgeComponent],\n  imports: [CommonModule],\n  exports: [CustomerBadgeComponent],\n})\nexport class CustomerBadgeModule {}\n\n@Component({\n  selector: 'customer-badge',\n  template: `<span *ngIf=\"customer\">{{ label }}</span>`,  // (2) *ngIf\n})\nexport class CustomerBadgeComponent implements OnInit {\n  @Input() customer: any;                          // (3) @Input und any\n  label = '';\n  constructor(private store: CustomerStore) {}     // (4) Konstruktor-Injection\n  ngOnInit() { this.label = this.customer.lastname + ' (' + this.store.total() + ')'; }\n}                                                  // (5) label wird nie aktualisiert",
+          "notes": "Codefolie „Fehlerbeispiel: veralteter KI-Vorschlag“.\n\nDie Folie zeigt einen erfundenen, aber typischen Vorschlag einer KI für eine kleine Komponente, die einen Kunden als Etikett anzeigt. Der Code würde funktionieren, entspricht aber nicht Angular 21. Die Fehler sind mit Nummern markiert.\n\nErstens wird ein „NgModule“ angelegt, das in Angular 21 nicht nötig ist. Zweitens steht im Template „*ngIf“ statt „@if“. Drittens wird die Eingabe mit dem Dekorator „@Input“ und dem Typ „any“ deklariert. Viertens wird der Store über den Konstruktor übergeben.\n\nFünftens wird der Text „label“ nur einmal in „ngOnInit“ berechnet. Ändert sich später der Kunde oder die Gesamtzahl im Store, bleibt die Anzeige veraltet. Das ist ein echter Fehler, kein reines Stilproblem."
+        },
+        {
+          "type": "code",
+          "title": "Korrektur: dasselbe in Angular 21",
+          "code": "import { ChangeDetectionStrategy, Component, computed, inject, input }\n  from '@angular/core';\nimport { Customer } from '../customer.model';\nimport { CustomerStore } from '../customer.store';\n@Component({                                       // (1) standalone, kein NgModule\n  selector: 'customer-badge',\n  changeDetection: ChangeDetectionStrategy.OnPush,\n  template: `\n    @if (customer(); as c) {                       <!-- (2) Control Flow -->\n      <span>{{ label() }}</span>\n    }`,\n})\nexport class CustomerBadgeComponent {\n  customer = input<Customer>();                    // (3) Signal-Input, echter Typ\n  private readonly store = inject(CustomerStore);  // (4) inject()\n  label = computed(() =>                           // (5) immer aktuell\n    `${this.customer()?.lastname} (${this.store.total()})`);\n}",
+          "notes": "Codefolie „Korrektur: dasselbe in Angular 21“.\n\nDie Folie zeigt dieselbe Komponente in der Schreibweise von Angular 21. Die Nummern entsprechen den Fehlern der vorigen Folie.\n\nErstens gibt es kein Modul mehr, die Komponente ist eigenständig, also „standalone“. Das ist seit Angular 19 der Standard und muss nicht mehr angegeben werden. Zweitens wird im Template „@if“ verwendet. Drittens ist die Eingabe ein Signal-Input mit dem echten Typ „Customer“. Viertens wird der Store mit „inject“ geholt.\n\nFünftens ist „label“ ein „computed“. Es liest das Signal „customer“ und die Anzahl aus dem Store. Ändert sich einer dieser Werte, berechnet Angular den Text automatisch neu. Dadurch ist auch „ngOnInit“ nicht mehr nötig. Dazu kommt die Strategie „OnPush“ wie in allen Komponenten des Projekts."
+        },
+        {
+          "type": "code",
+          "title": "Fehlerbeispiel: effect statt computed, any",
+          "code": "// KI-Vorschlag (aus Übung 37, gekürzt)\n@Input() customers: any;\ncount = signal(0);\nmessage = signal('');\nconstructor() {\n  effect(() => this.count.set(this.customers ? this.customers.length : 0)); // nie wieder\n  effect(() => this.message.set('<b>' + this.count() + '</b> Kunden exportiert'));\n}\n// Template: <div *ngIf=\"message()\" [innerHTML]=\"message()\"></div>\n\n// Korrektur\ncustomers = input.required<readonly Customer[]>();\ncount = computed(() => this.customers().length);\n// Template:\n// @if (count() > 0) { <p><b>{{ count() }}</b> Kunden exportiert</p> }",
+          "notes": "Codefolie „Fehlerbeispiel: effect statt computed, any“.\n\nDer obere Teil stammt aus dem vorbereiteten KI-Ergebnis von Übung 37. Die Eingabe hat den Typ „any“ und ist ein Dekorator-Input. Ein „effect“ schreibt die Anzahl in ein Signal. Weil „customers“ aber kein Signal ist, merkt Angular keine Änderung, und der „effect“ läuft nie wieder. Ein zweiter „effect“ baut daraus einen HTML-Text, und das Template setzt ihn mit „innerHTML“ ein. Das ist genau das Muster, aus dem XSS entsteht.\n\nDer untere Teil zeigt die Korrektur. Die Eingabe ist ein Pflicht-Signal-Input mit dem Typ „readonly Customer[]“, also einer unveränderlichen Liste von Kunden. Die Anzahl ist ein „computed“, das sich automatisch anpasst. Die Meldung braucht kein eigenes Signal. Sie steht direkt im Template, mit „@if“ und Interpolation statt „innerHTML“."
+        },
+        {
+          "type": "content",
+          "title": "Vorschläge bewerten: Review-Checkliste",
+          "bullets": [
+            "1. Läuft es? Build, Lint, Tests",
+            "2. Passt es zur Architektur? Abhängigkeitsrichtung, Feature-Struktur, keine Parallelwelt",
+            "3. Ist es modern? Keine veralteten APIs (*ngIf, @Input, NgModule), keine erfundenen Methoden",
+            "4. Ist es sicher? innerHTML, bypassSecurityTrust*, Tokens, Logging",
+            "5. Ist es reaktiv korrekt? Effects missbraucht? Werte verändert statt neu gesetzt?",
+            "6. Ist es getestet? Prüfen die Tests Verhalten oder nur toBeTruthy?",
+            "7. Verstehe ich es? Was ich nicht erklären kann, committe ich nicht"
+          ],
+          "notes": "Folie: „Vorschläge bewerten: Review-Checkliste“.\n\nDiese Checkliste verwendet man für jeden Vorschlag einer KI, genauso wie für eine Änderung eines Kollegen. Sie wird in Übung 37 gebraucht.\n\nDie sieben Fragen sind: Läuft der Code, also Build, Lint und Tests? Passt er zur Architektur des Projekts, oder entsteht eine zweite, parallele Lösung? Ist er modern, ohne veraltete Schreibweisen und ohne erfundene Methoden? Ist er sicher? Ist er reaktiv korrekt, also werden Signals richtig verwendet und Listen neu gesetzt statt verändert?\n\nIst er sinnvoll getestet? Und die wichtigste Frage zum Schluss: Verstehe ich den Code? Was man nicht erklären kann, übernimmt man nicht."
+        },
+        {
+          "type": "code",
+          "title": "KI-Tests prüfen: aussagelos oder aussagekräftig?",
+          "code": "// Aussagelos (KI-Vorschlag aus Übung 37)\nit('should export customers', () => {\n  const csv = exportCustomers([{ id: '1', firstname: 'Hans', lastname: 'Meyer' }]);\n  expect(csv).toBeTruthy();                 // jeder nicht leere Text besteht\n});\n\n// Aussagekräftig: prüft konkretes Verhalten und einen Randfall\nit('setzt Werte mit Komma in Anführungszeichen', () => {\n  const csv = toCsv([{ id: '1', firstname: 'Hans', lastname: 'Meyer, Jr.' } as Customer]);\n  expect(csv.split('\\r\\n')[1]).toContain('\"Meyer, Jr.\"');\n});\n\nit('schützt vor Formeln in Excel (CSV-Injection)', () => {\n  expect(escapeCsvField('=SUMME(A1)')).toBe(\"'=SUMME(A1)\");\n});",
+          "notes": "Codefolie „KI-Tests prüfen: aussagelos oder aussagekräftig?“.\n\nDer erste Test stammt aus dem KI-Vorschlag in Übung 37. Er prüft nur mit „toBeTruthy“, dass irgendein Text herauskommt. Dieser Test besteht auch dann, wenn die CSV-Datei völlig falsch ist. Er gibt also keine Sicherheit.\n\nDie beiden unteren Tests prüfen konkretes Verhalten. Der erste prüft einen Randfall: Ein Nachname enthält ein Komma. Dann muss der Wert in Anführungszeichen stehen, sonst verrutschen die Spalten. Der zweite prüft einen Sicherheitsfall: Ein Wert, der mit einem Gleichheitszeichen beginnt, könnte in Excel als Formel ausgeführt werden. Das nennt man „CSV-Injection“. Die Funktion setzt deshalb ein Hochkomma davor.\n\nDie Funktionen „toCsv“ und „escapeCsvField“ stammen aus der Musterlösung von Übung 37."
+        },
+        {
+          "type": "content",
+          "title": "Grenzen und Fehlannahmen (1/2)",
+          "bullets": [
+            "Annahme: „Die KI weiß, wie unser Projekt aussieht.“",
+            [
+              "Realität: Nur das, was im Kontext steht",
+              1
+            ],
+            "Annahme: „Wenn sie selbstsicher klingt, stimmt es.“",
+            [
+              "Realität: Sie klingt immer überzeugend, auch bei Unsinn (Halluzination)",
+              1
+            ],
+            "Annahme: „Es kompiliert, also ist es richtig.“",
+            [
+              "Realität: Falsches Verhalten, Sicherheitslücken und Performance-Probleme bleiben möglich",
+              1
+            ]
+          ],
+          "notes": "Folie: „Grenzen und Fehlannahmen (1/2)“.\n\nDie Folie stellt drei verbreitete Annahmen der Wirklichkeit gegenüber. Erste Annahme: Die KI kennt das Projekt. In Wirklichkeit kennt sie nur das, was in ihrem Kontext steht, also was man ihr gezeigt hat oder was sie selbst gelesen hat.\n\nZweite Annahme: Wenn die Antwort selbstsicher klingt, ist sie richtig. In Wirklichkeit klingt die KI immer überzeugend, auch wenn sie etwas Falsches erfindet. Das nennt man „Halluzination“.\n\nDritte Annahme: Wenn der Code ohne Fehler übersetzt wird, ist er richtig. In Wirklichkeit kann er trotzdem falsch rechnen, Sicherheitslücken enthalten oder langsam sein."
+        },
+        {
+          "type": "content",
+          "title": "Grenzen und Fehlannahmen (2/2)",
+          "bullets": [
+            "Annahme: „Tests von der KI sind ein Qualitätsnachweis.“",
+            [
+              "Realität: Nur wenn sie Verhalten wirklich prüfen",
+              1
+            ],
+            "Annahme: „Die KI kennt die aktuelle Angular-Version.“",
+            [
+              "Realität: Ihr Wissensstand kann veraltet sein, deshalb Doku oder MCP-Server nutzen",
+              1
+            ],
+            "Annahme: „Die KI erspart mir das Lernen.“",
+            [
+              "Realität: Ohne Wissen kann ich Ergebnisse nicht beurteilen",
+              1
+            ]
+          ],
+          "notes": "Folie: „Grenzen und Fehlannahmen (2/2)“.\n\nVierte Annahme: Tests, die die KI geschrieben hat, beweisen Qualität. In Wirklichkeit gilt das nur, wenn die Tests echtes Verhalten prüfen. Die vorige Codefolie hat ein Gegenbeispiel gezeigt.\n\nFünfte Annahme: Die KI kennt die aktuelle Angular-Version. In Wirklichkeit endet ihr Wissen zu einem bestimmten Zeitpunkt, und alte Beispiele überwiegen. Deshalb prüft man in der offiziellen Dokumentation nach oder gibt ihr über den MCP-Server Zugriff auf aktuelles Wissen.\n\nSechste Annahme: Mit KI muss man nicht mehr lernen. In Wirklichkeit braucht man das Wissen gerade, um die Ergebnisse beurteilen zu können."
+        },
+        {
+          "type": "content",
+          "title": "Datenschutz, Lizenzen, Verantwortung",
+          "bullets": [
+            "Keine Geheimnisse, Zugangsdaten oder Kundendaten in Prompts oder Regeldateien",
+            "Firmenrichtlinien beachten: erlaubte Werkzeuge, Datenablage, Nachweispflichten",
+            "Agenten: Rechte begrenzen, Befehle vor dem Ausführen bestätigen",
+            "Lizenzen: Herkunft generierten Codes kann unklar sein, bei längeren Übernahmen prüfen",
+            "Vorgeschlagene Pakete prüfen (Existenz, Pflege, Sicherheit): Namen werden manchmal erfunden",
+            "Verantwortlich ist der Entwickler, der den Code committet"
+          ],
+          "notes": "Folie: „Datenschutz, Lizenzen, Verantwortung“.\n\nWas man in einen Prompt schreibt, verlässt meist das eigene Netz. Deshalb gehören keine Passwörter, Zugangsdaten oder Kundendaten in Prompts oder Regeldateien. Man hält sich an die Regeln der Firma: welche Werkzeuge erlaubt sind, wo Daten verarbeitet werden und was dokumentiert werden muss.\n\nAgenten, die Befehle ausführen, bekommt man nur die nötigen Rechte. Wichtige Befehle bestätigt man vorher selbst. Bei der Lizenz ist nicht immer klar, woher generierter Code stammt. Bei längeren Übernahmen prüft man das.\n\nSchlägt die KI ein Paket vor, prüft man, ob es existiert, gepflegt wird und sicher ist. KI-Werkzeuge erfinden manchmal Paketnamen, und Angreifer veröffentlichen dann Schadpakete unter genau diesen Namen. Verantwortlich für den Code ist immer der Mensch, der ihn übernimmt."
+        },
+        {
+          "type": "content",
+          "title": "Was bleibt Entwicklerkompetenz?",
+          "bullets": [
+            "Anforderungen verstehen und präzisieren",
+            "Architektur und Abwägungen (Aufteilung, Reaktivität, Zustandsverwaltung)",
+            "Code lesen und beurteilen",
+            "Testen, Messen, Absichern (Tests, Performance, Sicherheit)",
+            "Verantwortung im Team und gegenüber den Nutzern"
+          ],
+          "notes": "Folie: „Was bleibt Entwicklerkompetenz?“.\n\nAuch mit KI bleiben wichtige Aufgaben beim Menschen. Er muss verstehen, was die Nutzer wirklich brauchen, und die Anforderungen genau formulieren. Er trifft Entscheidungen über die Architektur, zum Beispiel wie die Anwendung aufgeteilt wird und wie der Zustand verwaltet wird.\n\nEr muss Code lesen und beurteilen können, auch Code, den er nicht selbst geschrieben hat. Er sorgt durch Tests, Messungen und Sicherheitsprüfungen für Qualität. Und er trägt die Verantwortung im Team und gegenüber den Nutzern der Anwendung."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 37: KI-Ergebnis reviewen",
+          "bullets": [
+            "Öffne 37_ki_review; Auftrag: „Kunden als CSV exportieren“ + Komponente CustomerExportButton",
+            [
+              "Eigenes KI-Werkzeug (wenn erlaubt) oder Beispielergebnis material/ki-vorschlag.md",
+              1
+            ],
+            "1. Mit der Review-Checkliste prüfen: mindestens 5 Befunde (Stelle, Problem, Regel)",
+            [
+              "Enthalten u. a.: *ngIf, any, effect schreibt Signal, innerHTML, toBeTruthy; suche weitere",
+              1
+            ],
+            "2. Befunde in einem zweiten Prompt konkret zurückgeben („Behebe: …“), erneut prüfen",
+            "3. Korrigiertes Feature einbauen: CSV-Funktion, Button in der Kundenliste, Tests",
+            [
+              "Download im Browser ausprobieren",
+              1
+            ],
+            "4. Auswertung: Was hat die KI nicht erkannt? Was war in Runde 2 neu kaputt?",
+            "Musterlösung: 37_ki_review (baut auf 36_sicherheit auf)"
+          ],
+          "notes": "Folie: „Übung 37: KI-Ergebnis reviewen“.\n\nErklärung für die Dolmetscherin:\nDie Teilnehmer prüfen einen Vorschlag einer KI für einen CSV-Export der Kunden mit einer Button-Komponente. Wer kein KI-Werkzeug nutzen darf, verwendet das vorbereitete Ergebnis in der Datei „ki-vorschlag.md“. Darin sind absichtlich Fehler versteckt, zum Beispiel „*ngIf“, „any“, ein „effect“, der ein Signal schreibt, „innerHTML“ und ein Test mit „toBeTruthy“. Es gibt aber noch weitere Fehler, etwa in der CSV-Erzeugung selbst.\n\nDie Teilnehmer schreiben mindestens fünf Befunde auf, geben sie in einer zweiten Runde an die KI zurück und prüfen erneut. Dann bauen sie das korrigierte Feature mit Tests in die Kundenliste ein und testen den Download im Browser. Zum Schluss besprechen alle gemeinsam, welche Fehler die KI selbst nicht gefunden hat."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 38: Abschlussprojekt Dashboard (1/2)",
+          "bullets": [
+            "Öffne das Projekt 38_abschluss; Kleingruppen, KI-Unterstützung nach Wahl",
+            "Neues Feature: Seite /dashboard mit Kennzahlen",
+            [
+              "Anzahl Kunden; aktive Kunden (Bestellung in den letzten 7 Tagen); Kunden pro Stadt",
+              1
+            ],
+            "1. Plan mit 5 Schritten schreiben und im Team abstimmen, bevor Code entsteht",
+            "2. In kleinen Schritten umsetzen, je Schritt ein Commit",
+            "Bewertet werden: Architektur, Reaktivität, Tests, Sicherheit, Nachvollziehbarkeit",
+            "Musterlösung: 38_abschluss (baut auf 37_ki_review auf)"
+          ],
+          "notes": "Folie: „Übung 38: Abschlussprojekt Dashboard (1/2)“.\n\nErklärung für die Dolmetscherin:\nDas Abschlussprojekt wird in kleinen Gruppen bearbeitet, und jede Gruppe darf ein KI-Werkzeug nach Wahl verwenden. Ziel ist eine neue Seite unter der Adresse „/dashboard“, also eine Übersichtsseite mit Kennzahlen: die Anzahl der Kunden, die Anzahl der Kunden mit einer Bestellung in den letzten sieben Tagen und die Anzahl der Kunden pro Stadt.\n\nZuerst schreibt jede Gruppe einen Plan mit fünf Schritten und stimmt ihn ab. Erst dann entsteht Code, und zwar in kleinen Schritten mit je einem Commit. Bewertet werden Architektur, richtige Verwendung von Signals, Tests, Sicherheit und ob das Vorgehen nachvollziehbar ist."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 38: Abschlussprojekt Dashboard (2/2)",
+          "bullets": [
+            "3. Anforderungen:",
+            [
+              "Kennzahlen als computed; Daten über den CustomerStore, kein HTTP in der Komponente",
+              1
+            ],
+            [
+              "Lazy Route /dashboard, geschützt durch authGuard; /dashboard in die returnUrl-Allowlist",
+              1
+            ],
+            [
+              "Aktiv-Logik der CurrentActiveCustomersPipe wiederverwenden",
+              1
+            ],
+            [
+              "Kein innerHTML, keine ungeprüften Parameter; mindestens 3 sinnvolle Tests",
+              1
+            ],
+            "4. Selbst-Review mit den Checklisten (Sicherheit und KI-Review)",
+            "5. Kurzvorstellung (5 Min. je Gruppe): Was hat die KI gut gemacht, was wurde korrigiert?",
+            "Musterlösung: 38_abschluss (baut auf 37_ki_review auf)"
+          ],
+          "notes": "Folie: „Übung 38: Abschlussprojekt Dashboard (2/2)“.\n\nErklärung für die Dolmetscherin:\nDie Kennzahlen werden als „computed“ berechnet. Die Daten kommen aus dem vorhandenen „CustomerStore“, die Komponente ruft den Server nicht selbst auf. Die neue Route wird erst bei Bedarf geladen und durch den „authGuard“ geschützt. Damit man nach dem Login wieder auf dem Dashboard landet, muss „/dashboard“ in die Liste erlaubter Ziele aus Übung 36 aufgenommen werden. Für „aktiv“ wird die vorhandene Pipe wiederverwendet.\n\nEs gibt kein „innerHTML“ und keine ungeprüften Parameter, dafür mindestens drei sinnvolle Tests. Danach prüft jede Gruppe ihr Ergebnis mit den Checklisten. Zum Schluss stellt jede Gruppe in fünf Minuten vor, wo die KI geholfen hat und wo sie korrigiert werden musste."
+        }
+      ]
+    }
+  ]
+}

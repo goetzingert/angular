@@ -1,0 +1,1441 @@
+{
+  "blocks": [
+    {
+      "after": 267,
+      "order": 40,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Qualitätssicherung: Testbarkeit und Tests",
+          "notes": "Kapitelübergangsfolie „Qualitätssicherung: Testbarkeit und Tests“ – hier beginnt das Kapitel über automatische Tests. Es geht darum, warum man Tests schreibt, wie ein Test mit dem Werkzeug „Vitest“ aufgebaut ist und wie man Services, HTTP-Aufrufe, Komponenten und Signals in Angular testet. Zum Schluss geht es darum, wie man automatisch erzeugte Tests kritisch prüft. Am Ende des Kapitels steht Übung 34."
+        },
+        {
+          "type": "content",
+          "title": "Wofür Tests?",
+          "bullets": [
+            "Sicherheitsnetz für Änderungen: umbauen, ohne Angst vor versteckten Fehlern",
+            "Dokumentation: Ein Test beschreibt, wie sich der Code verhalten soll",
+            "Frühes Feedback: Fehler fallen beim Entwickeln und in der Pipeline auf",
+            "Mut zum Aufräumen: Refactoring wird erst mit Tests sicher",
+            "Tests sind Code und kosten Pflege",
+            [
+              "Schlechte Tests bremsen mehr, als sie helfen",
+              1
+            ],
+            [
+              "Gute Tests prüfen Verhalten, nicht Details der Umsetzung",
+              1
+            ]
+          ],
+          "notes": "Folie: „Wofür Tests?“.\n\nTests haben drei Aufgaben. Erstens sind sie ein Sicherheitsnetz. Wenn man Code umbaut, zeigen die Tests sofort, ob sich das Verhalten geändert hat. Zweitens beschreiben sie, wie sich der Code verhalten soll. Drittens geben sie früh Rückmeldung, auch in der „Pipeline“. Die „Pipeline“ ist der automatische Ablauf, der bei jeder Änderung den Code baut und prüft.\n\n„Refactoring“ bedeutet, den Code umzubauen, ohne sein Verhalten zu ändern. Das traut man sich nur mit Tests. Tests sind aber selbst Code, der gepflegt werden muss. Ein schlechter Test verursacht Arbeit und gibt falsche Sicherheit."
+        },
+        {
+          "type": "content",
+          "title": "Testpyramide mit Angular-Bezug",
+          "bullets": [
+            "Unten, viele: Unit-Tests für Services, Stores, Pipes, Funktionen",
+            [
+              "laufen in Millisekunden, ohne Browser und Server",
+              1
+            ],
+            "Mitte: Komponententests mit Template (TestBed)",
+            [
+              "prüfen Anzeige, Klicks, Inputs und Outputs",
+              1
+            ],
+            "Oben, wenige: End-to-End-Tests (Playwright, Cypress)",
+            [
+              "echter Browser, echte App, langsam",
+              1
+            ],
+            "Mehr Logik außerhalb von Komponenten: mehr schnelle Tests"
+          ],
+          "notes": "Folie: „Testpyramide mit Angular-Bezug“.\n\nDie Testpyramide zeigt, wie viele Tests es von welcher Art geben sollte. Unten stehen die „Unit-Tests“. Das sind kleine Tests für einzelne Bausteine wie einen Service, einen Store oder eine Pipe. Sie laufen sehr schnell, deshalb schreibt man viele davon.\n\nIn der Mitte stehen Komponententests. Sie prüfen eine Komponente zusammen mit ihrem Template, also was angezeigt wird und was bei einem Klick passiert. Dafür nutzt man das „TestBed“, das gleich erklärt wird. Oben stehen die „End-to-End-Tests“. Sie bedienen die ganze Anwendung in einem echten Browser wie ein Benutzer, zum Beispiel mit „Playwright“ oder „Cypress“. Sie sind langsam und aufwendig, deshalb gibt es nur wenige.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "End-to-End\nwenige, langsam",
+              "Komponententests\nTestBed, mittel viele",
+              "Unit-Tests\nviele, schnell"
+            ],
+            "note": "Je weiter oben, desto teurer"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Struktur bestimmt Testbarkeit",
+          "bullets": [
+            "Reine Funktion oder Pipe: trivial",
+            [
+              "Eingabe hinein, Ausgabe prüfen",
+              1
+            ],
+            "Store oder Service mit Signals: einfach",
+            [
+              "Methode aufrufen, Signal lesen",
+              1
+            ],
+            "Darstellungskomponente: einfach",
+            [
+              "Input setzen, Anzeige und Output prüfen",
+              1
+            ],
+            "Container mit Services: aufwendig (Mocks)",
+            "Mit window, DOM-Tricks, Singletons: schwer"
+          ],
+          "notes": "Folie: „Struktur bestimmt Testbarkeit“.\n\nWie leicht sich etwas testen lässt, hängt von der Struktur ab. Eine „reine Funktion“ hängt nur von ihren Parametern ab und hat keine Nebenwirkungen. Man gibt einen Wert hinein und prüft das Ergebnis. Das ist am einfachsten.\n\nEin Store mit Signals ist ebenfalls einfach: Man ruft eine Methode auf und liest danach das Signal. Eine Darstellungskomponente bekommt nur Eingaben und sendet Ausgaben, auch das ist gut testbar. Eine Container-Komponente, die viele Services nutzt, braucht viele Ersatzobjekte. Am schwersten sind Komponenten, die direkt auf „window“ oder globale Objekte zugreifen. Das Diagramm zeigt: Je weiter unten die Logik liegt, desto einfacher der Test.",
+          "diagram": {
+            "kind": "layers",
+            "layers": [
+              "Schwer: window, Singletons",
+              "Aufwendig: Container, Mocks",
+              "Einfach: Store, Darstellung",
+              "Trivial: Funktion, Pipe"
+            ],
+            "note": "Logik nach unten verlagern"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Vorher und nachher: Logik im Store",
+          "bullets": [
+            "Vorher: Komponente ruft HttpClient selbst auf und filtert",
+            [
+              "Test braucht HTTP-Ersatz, DOM und Change Detection",
+              1
+            ],
+            "Nachher: Filterlogik im CustomerStore als computed",
+            [
+              "Test: Store holen, setFilter aufrufen, filtered() lesen",
+              1
+            ],
+            [
+              "kein Template, kein DOM, wenige Zeilen",
+              1
+            ],
+            "Die Komponente zeigt nur noch an, ihr Test bleibt klein"
+          ],
+          "notes": "Folie: „Vorher und nachher: Logik im Store“.\n\nDiese Folie zeigt den Unterschied an der Übungsanwendung. Vorher hat die Kundenliste die Daten selbst über den „HttpClient“ geladen und selbst gefiltert. Um das Filtern zu testen, musste man den Server-Aufruf ersetzen, die Komponente erzeugen und das HTML prüfen.\n\nNach Übung 33 liegt die Filterlogik im „CustomerStore“, als „computed“. Ein „computed“ ist ein berechneter Wert, der sich automatisch neu berechnet, wenn sich ein gelesener Wert ändert. Der Test holt den Store, setzt den Filter und liest das Ergebnis. Es gibt kein Template und keine Oberfläche. Die Komponente zeigt nur noch an, ihr Test bleibt deshalb klein.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Vorher: Komponente",
+              "items": [
+                "HTTP, Filter, Anzeige",
+                "Test: HTTP + DOM"
+              ]
+            },
+            "right": {
+              "title": "Nachher: Store",
+              "items": [
+                "filtered = computed",
+                "Test: wenige Zeilen"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Vitest in Angular 21",
+          "bullets": [
+            "Vitest ist ab Angular 21 der Standard-Test-Runner",
+            "Start mit ng test (einmalig: ng test --watch=false)",
+            [
+              "Builder @angular/build:unit-test in angular.json",
+              1
+            ],
+            "Tests laufen in jsdom, einem nachgebauten Browser",
+            "Testdateien enden auf .spec.ts, liegen neben dem Code",
+            "describe, it, expect, vi sind global verfügbar",
+            [
+              "über vitest/globals in tsconfig.spec.json",
+              1
+            ]
+          ],
+          "notes": "Folie: „Vitest in Angular 21“.\n\nEin „Test-Runner“ ist ein Programm, das die Tests findet, ausführt und das Ergebnis anzeigt. Ab Angular 21 ist das „Vitest“. Früher waren es „Karma“ und „Jasmine“. Man startet die Tests mit dem Befehl „ng test“. Ohne weitere Angabe beobachtet Vitest die Dateien und startet die Tests bei jeder Änderung neu. Mit „--watch=false“ laufen sie genau einmal, das braucht man in der Pipeline.\n\nDie Tests laufen in „jsdom“. Das ist ein Programm, das einen Browser nachbildet, ohne ein Fenster zu öffnen. Testdateien enden auf „.spec.ts“. Die Funktionen „describe“, „it“, „expect“ und „vi“ muss man nicht importieren, weil sie über die Datei „tsconfig.spec.json“ global bekannt sind. Das Diagramm zeigt den Weg vom Befehl bis zum Ergebnis.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "ng test",
+              "@angular/build:unit-test",
+              "Vitest + jsdom",
+              "*.spec.ts ausführen",
+              "Ergebnis in der Konsole"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Aufbau eines Vitest-Tests",
+          "code": "describe('CustomerStore', () => {          // Suite: Gruppe von Tests\n  const getAll = vi.fn();                  // Ersatz für den Service\n\n  beforeEach(() => {                       // läuft vor JEDEM it\n    getAll.mockReset();\n    TestBed.configureTestingModule({\n      providers: [{ provide: CustomerService, useValue: { getAll } }]\n    });\n  });\n\n  it('should ignore upper and lower case', async () => {   // ein Test\n    getAll.mockReturnValue(of([hans, lisa]));              // Arrange\n    const store = TestBed.inject(CustomerStore);\n    await store.load();\n    store.setFilter('LISA');                                // Act\n    expect(store.filtered()).toEqual([lisa]);               // Assert\n  });\n});",
+          "notes": "Codefolie „Aufbau eines Vitest-Tests“.\n\nDiese Folie zeigt einen vollständigen Test aus der Übungsanwendung. Ganz außen steht „describe“. Damit bildet man eine „Suite“, also eine Gruppe zusammengehöriger Tests, hier für den „CustomerStore“. Darin wird ein Ersatz für die Methode „getAll“ des Services angelegt.\n\n„beforeEach“ läuft vor jedem einzelnen Test. Hier wird der Ersatz zurückgesetzt und die Testumgebung eingerichtet. Der eigentliche Test steht in „it“. Er liefert dem Ersatz zwei Kunden, holt den Store, lädt die Daten, setzt den Filter auf „LISA“ in Großbuchstaben und prüft, dass nur Lisa übrig bleibt. Die Kommentare rechts zeigen die drei Phasen: vorbereiten, ausführen, prüfen. Die nächsten Folien erklären jeden Baustein."
+        },
+        {
+          "type": "content",
+          "title": "describe, it, beforeEach: wer ruft was auf?",
+          "bullets": [
+            "describe(name, fn): Vitest ruft fn sofort auf, sammelt die Tests",
+            "it(name, fn): ein Test; Vitest ruft fn später einzeln auf",
+            [
+              "fn darf async sein: Vitest wartet auf das Promise",
+              1
+            ],
+            "beforeEach(fn) / afterEach(fn): vor bzw. nach jedem it",
+            "beforeAll / afterAll: einmal pro describe",
+            "Test ist rot, wenn fn einen Fehler wirft",
+            [
+              "expect wirft bei falschem Wert einen Fehler",
+              1
+            ]
+          ],
+          "notes": "Folie: „describe, it, beforeEach: wer ruft was auf?“.\n\nAlle diese Funktionen bekommen eine Funktion als Parameter, und Vitest ruft sie zu einem bestimmten Zeitpunkt auf. „describe“ bekommt einen Namen und eine Funktion. Vitest ruft diese Funktion sofort auf, um alle Tests darin einzusammeln. „it“ bekommt ebenfalls einen Namen und eine Funktion. Diese Funktion ist der eigentliche Test. Vitest ruft sie später auf, jeden Test für sich.\n\nDie Funktion darf „async“ sein. Dann wartet Vitest, bis sie fertig ist. „beforeEach“ und „afterEach“ laufen vor und nach jedem einzelnen Test, „beforeAll“ und „afterAll“ nur einmal für die ganze Gruppe. Ein Test gilt als fehlgeschlagen, wenn seine Funktion einen Fehler wirft. Genau das macht „expect“, wenn der Wert nicht stimmt. Das Diagramm zeigt den Ablauf für jeden Test.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "beforeEach",
+              "it: Test läuft",
+              "afterEach",
+              "nächster Test"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "expect und Matcher",
+          "bullets": [
+            "expect(wert) nimmt den tatsächlichen Wert entgegen",
+            "Der Matcher vergleicht mit dem erwarteten Wert",
+            "toBe: gleiche Referenz bzw. gleicher einfacher Wert",
+            "toEqual: gleicher Inhalt (tiefer Vergleich)",
+            "toHaveLength, toContain, toBeUndefined, toThrow",
+            ".not kehrt jeden Matcher um",
+            "toBeTruthy nur sparsam: prüft fast nichts"
+          ],
+          "notes": "Folie: „expect und Matcher“.\n\n„expect“ bekommt den tatsächlichen Wert, also das, was der Code wirklich geliefert hat. Daran hängt man einen „Matcher“. Ein Matcher ist eine Prüffunktion, die den Wert mit der Erwartung vergleicht.\n\n„toBe“ prüft, ob es genau derselbe Wert ist. Bei Objekten und Listen heißt das: dasselbe Objekt im Speicher. „toEqual“ vergleicht dagegen den Inhalt, auch verschachtelt. Für Listen nimmt man deshalb meist „toEqual“. Weitere Matcher prüfen die Länge, ob ein Element enthalten ist, ob ein Wert fehlt oder ob ein Fehler geworfen wird. Mit „not“ kehrt man die Prüfung um. „toBeTruthy“ prüft nur, ob überhaupt etwas da ist, und sagt deshalb wenig aus.",
+          "diagram": {
+            "kind": "code",
+            "title": "Matcher",
+            "text": "expect(store.total()).toBe(1);\nexpect(store.filtered())\n  .toEqual([lisa]);\nexpect(list).toHaveLength(2);\nexpect(text).toContain('Hans');\nexpect(store.selected())\n  .toBeUndefined();\nexpect(store.error())\n  .not.toBeUndefined();"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Arrange, Act, Assert",
+          "bullets": [
+            "Arrange: Ausgangslage herstellen (Daten, Ersatzobjekte)",
+            "Act: genau eine Aktion ausführen",
+            "Assert: Ergebnis prüfen",
+            "Ein Test prüft ein Verhalten",
+            "Testnamen beschreiben Verhalten",
+            [
+              "„should ignore upper and lower case“",
+              1
+            ],
+            "Kleine Hilfsfunktionen für wiederholtes Arrange"
+          ],
+          "notes": "Folie: „Arrange, Act, Assert“.\n\nEin guter Test hat drei Teile. Im ersten Teil, „Arrange“, stellt man die Ausgangslage her, zum Beispiel Testdaten und Ersatzobjekte. Im zweiten Teil, „Act“, führt man genau eine Aktion aus, hier das Setzen des Filters. Im dritten Teil, „Assert“, prüft man das Ergebnis.\n\nJeder Test prüft nur ein Verhalten. Der Name des Tests beschreibt dieses Verhalten in einem Satz und nicht den Namen einer Methode. Wenn die Vorbereitung in vielen Tests gleich ist, schreibt man eine kleine Hilfsfunktion. Im Beispiel rechts heißt sie „loadedStore“ und liefert einen Store mit geladenen Kunden.",
+          "diagram": {
+            "kind": "code",
+            "title": "Arrange, Act, Assert",
+            "text": "it('should return an empty list\n    when nothing matches',\n  async () => {\n  // Arrange\n  const store = await loadedStore();\n  // Act\n  store.setFilter('xyz');\n  // Assert\n  expect(store.filtered())\n    .toEqual([]);\n});"
+          }
+        },
+        {
+          "type": "content",
+          "title": "TestBed: Angular im Kleinen",
+          "bullets": [
+            "TestBed baut für jeden Test eine kleine Angular-Umgebung",
+            [
+              "mit eigenem Injector für Dependency Injection",
+              1
+            ],
+            "configureTestingModule({ imports, providers })",
+            [
+              "imports: Standalone-Komponenten, die getestet werden",
+              1
+            ],
+            [
+              "providers: Services oder deren Ersatz",
+              1
+            ],
+            "TestBed.inject(Typ): Instanz aus dem Injector holen",
+            "TestBed.createComponent(Typ): Komponente rendern",
+            "Nach jedem Test setzt Angular das TestBed zurück"
+          ],
+          "notes": "Folie: „TestBed: Angular im Kleinen“.\n\nDas „TestBed“ ist das Testwerkzeug von Angular. Es baut für jeden Test eine kleine Angular-Umgebung auf. Dazu gehört ein „Injector“. Der Injector ist der Teil von Angular, der bei „inject“ die passenden Objekte herausgibt, also die Dependency Injection.\n\nMit „configureTestingModule“ legt man fest, was in dieser Umgebung vorhanden ist. Unter „imports“ stehen die Standalone-Komponenten, die man testen will. Unter „providers“ stehen Services oder deren Ersatzobjekte. Danach holt „TestBed.inject“ einen Service aus dem Injector, und „TestBed.createComponent“ erzeugt eine Komponente mit ihrem Template. Nach jedem Test räumt Angular das TestBed automatisch auf, sodass sich Tests nicht gegenseitig beeinflussen.",
+          "diagram": {
+            "kind": "tree",
+            "root": "TestBed",
+            "children": [
+              "configureTesting-\nModule",
+              "inject(Service)",
+              "createComponent",
+              "runInInjection-\nContext",
+              "tick()"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Arten von Ersatzobjekten",
+          "bullets": [
+            "Stub oder Fake: Ersatz mit festen Daten",
+            [
+              "z. B. getAll liefert immer zwei Kunden",
+              1
+            ],
+            "Mock (vi.fn): zeichnet Aufrufe auf, Rückgabe steuerbar",
+            [
+              "„Wurde update mit diesem Kunden aufgerufen?“",
+              1
+            ],
+            "Spy (vi.spyOn): beobachtet eine echte Methode",
+            "Echte Abhängigkeit: bei reinen Funktionen kein Ersatz",
+            "Over-Mocking vermeiden: sonst testet man nur Ersatz"
+          ],
+          "notes": "Folie: „Arten von Ersatzobjekten“.\n\nWenn der getestete Baustein andere Bausteine braucht, ersetzt man diese im Test oft. Dafür gibt es verschiedene Arten von Ersatzobjekten, auf Englisch „Test Doubles“. Ein „Stub“ oder „Fake“ ist ein einfacher Ersatz, der feste Daten liefert.\n\nEin „Mock“ zeichnet zusätzlich auf, ob und womit er aufgerufen wurde. In Vitest erzeugt man ihn mit „vi.fn“. Ein „Spy“ beobachtet eine echte Methode, ohne das Objekt zu ersetzen. Reine Funktionen und einfache Hilfsklassen ersetzt man gar nicht. „Over-Mocking“ heißt, dass man zu viel ersetzt. Dann prüft der Test am Ende nur noch die Ersatzobjekte und nicht den echten Code.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Ersetzen",
+              "items": [
+                "Service mit HTTP",
+                "Zeit, Zufall, window"
+              ]
+            },
+            "right": {
+              "title": "Echt lassen",
+              "items": [
+                "reine Funktionen",
+                "computed, Pipes"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "vi.fn: eine aufzeichnende Funktion",
+          "bullets": [
+            "vi.fn() liefert eine Funktion ohne eigene Logik",
+            "Sie merkt sich jeden Aufruf mit Parametern",
+            "mockReturnValue(x): Rückgabewert festlegen",
+            "mockImplementation(fn): eigene Logik einsetzen",
+            "mockReset(): Aufrufe und Einstellungen löschen",
+            "Prüfen: toHaveBeenCalledTimes, toHaveBeenCalledWith",
+            "vi.spyOn(obj, 'name'): echte Methode beobachten"
+          ],
+          "notes": "Folie: „vi.fn: eine aufzeichnende Funktion“.\n\n„vi“ ist das Hilfsobjekt von Vitest. „vi.fn“ erzeugt eine neue Funktion. Diese Funktion tut zunächst nichts und gibt „undefined“ zurück. Sie merkt sich aber jeden Aufruf und die übergebenen Parameter.\n\nMit „mockReturnValue“ legt man fest, was sie zurückgibt, zum Beispiel ein Observable mit zwei Kunden. Mit „mockImplementation“ gibt man ihr eine eigene Logik. „mockReset“ löscht die gemerkten Aufrufe und die Einstellungen, das macht man in „beforeEach“. Mit den Matchern „toHaveBeenCalledTimes“ und „toHaveBeenCalledWith“ prüft man, wie oft und womit sie aufgerufen wurde. „vi.spyOn“ legt sich dagegen um eine vorhandene, echte Methode.",
+          "diagram": {
+            "kind": "code",
+            "title": "vi.fn im Einsatz",
+            "text": "const getAll = vi.fn();\ngetAll.mockReturnValue(\n  of([hans, lisa]));\n\ngetAll();  // liefert das Observable\n\nexpect(getAll)\n  .toHaveBeenCalledTimes(1);\n\ngetAll.mockReturnValue(\n  throwError(() => new Error()));"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Services per providers ersetzen",
+          "code": "const getAll = vi.fn();\n\nbeforeEach(() => {\n  getAll.mockReset();\n  TestBed.configureTestingModule({\n    providers: [{ provide: CustomerService, useValue: { getAll } }]\n  });\n});\n\nit('should set an error when loading fails', async () => {\n  getAll.mockReturnValue(throwError(() => new Error('Netzwerk')));\n  const store = TestBed.inject(CustomerStore);  // Store bekommt den Ersatz\n\n  await store.load();\n\n  expect(store.error()).toBe('Fehler beim Laden der Kunden.');\n  expect(store.loading()).toBe(false);\n});",
+          "notes": "Codefolie „Services per providers ersetzen“.\n\nDer „CustomerStore“ holt sich den „CustomerService“ mit „inject“. Im Test soll aber kein echter Server-Aufruf passieren. Deshalb wird der Service in „providers“ ersetzt.\n\n„provide“ sagt, welcher Typ angefordert wird, hier „CustomerService“. „useValue“ sagt, welches Objekt Angular stattdessen herausgibt, hier ein Objekt mit der Mock-Funktion „getAll“. Im Test liefert „getAll“ mit „throwError“ ein Observable, das sofort einen Fehler meldet. Danach holt der Test den Store, ruft „load“ auf und wartet mit „await“ auf das Ende. Am Schluss prüft er die Fehlermeldung und dass die Ladeanzeige wieder aus ist."
+        },
+        {
+          "type": "content",
+          "title": "Was passiert beim Ersetzen per DI?",
+          "bullets": [
+            "Store ruft inject(CustomerService) auf",
+            "Der Injector des TestBed sucht einen Provider dafür",
+            "Er findet { provide, useValue } und gibt das Objekt heraus",
+            "Der Store merkt keinen Unterschied, sein Code bleibt gleich",
+            "of(...) liefert Daten, throwError(...) einen Fehler",
+            "mockReset in beforeEach: jeder Test startet sauber"
+          ],
+          "notes": "Folie: „Was passiert beim Ersetzen per DI?“.\n\nDiese Folie erklärt, warum der Ersatz funktioniert. Der Store fordert mit „inject“ den „CustomerService“ an. Im Test beantwortet der Injector des TestBed diese Anfrage. Er sucht in den „providers“ einen Eintrag für diesen Typ und findet das Ersatzobjekt.\n\nDer Store bekommt also das Ersatzobjekt, ohne dass sein Code geändert werden muss. Das ist der große Vorteil von Dependency Injection beim Testen. „of“ erzeugt ein Observable, das sofort Daten liefert. „throwError“ erzeugt ein Observable, das sofort einen Fehler meldet. Weil die Mock-Funktion für alle Tests dieselbe ist, setzt man sie in „beforeEach“ mit „mockReset“ zurück.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "CustomerStore",
+              "inject(CustomerService)",
+              "TestBed-Injector",
+              "useValue: { getAll }"
+            ],
+            "highlight_last": true,
+            "note": "Ersatz statt echtem Service"
+          }
+        },
+        {
+          "type": "content",
+          "title": "HTTP testen: der Ablauf",
+          "bullets": [
+            "provideHttpClientTesting ersetzt das Netzwerk",
+            "Der Service sendet wie immer über HttpClient",
+            "Die Anfrage bleibt im Test-Backend hängen",
+            "Der Test holt sie mit expectOne(url)",
+            "flush(daten) schickt die Antwort zurück",
+            "verify(): keine Anfrage darf offen bleiben"
+          ],
+          "notes": "Folie: „HTTP testen: der Ablauf“.\n\nWenn man einen Service testet, der selbst den „HttpClient“ benutzt, braucht man keinen echten Server. Angular bringt dafür ein Test-Backend mit. Es wird mit „provideHttpClientTesting“ eingeschaltet.\n\nDer Ablauf ist so: Der Test ruft eine Methode des Services auf und abonniert das Ergebnis. Der Service sendet die Anfrage wie gewohnt über den „HttpClient“. Die Anfrage geht aber nicht ins Netzwerk, sondern bleibt im Test-Backend liegen. Der Test holt sie mit „expectOne“ ab und beantwortet sie mit „flush“. Erst dann kommt die Antwort beim Service und beim Test an. Am Ende prüft „verify“, dass keine Anfrage unbeantwortet geblieben ist.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Test: subscribe",
+              "CustomerService",
+              "HttpClient",
+              "Test-Backend",
+              "Test: expectOne + flush"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "HTTP-Aufrufe testen",
+          "code": "beforeEach(() => {\n  TestBed.configureTestingModule({\n    providers: [provideHttpClient(), provideHttpClientTesting()]\n  });\n  service = TestBed.inject(CustomerService);\n  httpMock = TestBed.inject(HttpTestingController);\n});\nafterEach(() => httpMock.verify());   // kein Request darf offen bleiben\n\nit('should send the customer with PUT when updating', () => {\n  const customer = { ...new Customer('Lisa', 'Simpson'), id: '1' };\n  service.update(customer).subscribe();\n\n  const request = httpMock.expectOne('api/customer/1');\n  expect(request.request.method).toBe('PUT');\n  expect(request.request.body).toEqual(customer);\n  request.flush({ data: customer });\n});",
+          "notes": "Codefolie „HTTP-Aufrufe testen“.\n\nDieser Code stammt aus dem Test für den „CustomerService“ in Übung 34. In „beforeEach“ werden zwei Provider eingetragen: „provideHttpClient“ stellt den normalen „HttpClient“ bereit, und „provideHttpClientTesting“ ersetzt das Netzwerk durch das Test-Backend. Die Reihenfolge ist wichtig: Der Testteil steht als zweiter. Danach holt der Test den Service und den „HttpTestingController“. Das ist das Steuerobjekt für das Test-Backend.\n\nDer Test ruft „update“ auf und abonniert das Ergebnis. Dann holt er mit „expectOne“ die Anfrage an die Adresse „api/customer/1“ ab. Er prüft, dass die Methode „PUT“ ist und dass der Kunde mitgeschickt wird. Mit „flush“ beantwortet er die Anfrage. „verify“ in „afterEach“ meldet einen Fehler, wenn noch eine Anfrage offen ist."
+        },
+        {
+          "type": "content",
+          "title": "HttpTestingController im Detail",
+          "bullets": [
+            "Erst subscribe, dann expectOne",
+            [
+              "Observables vom HttpClient senden erst beim Abonnieren",
+              1
+            ],
+            "expectOne(url) wirft, wenn es 0 oder mehr als 1 Anfrage gibt",
+            "Rückgabe: ein TestRequest",
+            [
+              "request.method, request.body, request.headers prüfen",
+              1
+            ],
+            "flush(body): Antwort mit Status 200 senden",
+            "flush('Fehler', { status: 500, statusText: '...' }): Fehlerfall",
+            "expectNone(url): prüfen, dass nichts gesendet wurde"
+          ],
+          "notes": "Folie: „HttpTestingController im Detail“.\n\nHier sind die wichtigsten Regeln für den „HttpTestingController“. Zuerst muss man das Ergebnis abonnieren. Ein Observable vom „HttpClient“ sendet die Anfrage erst, wenn jemand es abonniert. Ohne „subscribe“ findet „expectOne“ deshalb nichts.\n\n„expectOne“ bekommt die erwartete Adresse. Gibt es keine oder mehrere passende Anfragen, schlägt der Test fehl. Sonst liefert es ein „TestRequest“, also die abgefangene Anfrage. Daran prüft man Methode, Inhalt und Kopfzeilen. „flush“ beantwortet die Anfrage. Mit einem zweiten Parameter kann man einen Fehlerstatus wie 500 vorgeben und so den Fehlerfall testen. „expectNone“ prüft, dass keine Anfrage gesendet wurde."
+        },
+        {
+          "type": "content",
+          "title": "Komponententest: die Fixture",
+          "bullets": [
+            "TestBed.createComponent(Typ) liefert eine ComponentFixture",
+            "fixture.componentInstance: das Objekt der Klasse",
+            "fixture.nativeElement: das Host-Element im DOM",
+            "fixture.componentRef: zum Setzen von Inputs (setInput)",
+            "fixture.debugElement: Suche mit By.css, triggerEventHandler",
+            "fixture.detectChanges(): Change Detection sofort ausführen",
+            "await fixture.whenStable(): warten, bis alles gerendert ist"
+          ],
+          "notes": "Folie: „Komponententest: die Fixture“.\n\nFür Komponententests ruft man „TestBed.createComponent“ auf. Das Ergebnis heißt „Fixture“. Eine Fixture ist ein Steuerobjekt, mit dem der Test die Komponente bedient und beobachtet.\n\n„componentInstance“ ist das Objekt der Komponentenklasse. „nativeElement“ ist das HTML-Element der Komponente, darin sucht man mit „querySelector“. „componentRef“ braucht man, um Eingaben zu setzen. „debugElement“ ist eine Angular-Hülle um das Element, mit der man ebenfalls suchen und Ereignisse auslösen kann. „detectChanges“ führt die Aktualisierung der Anzeige sofort aus. „whenStable“ liefert ein Promise, das erfüllt ist, wenn Angular alle anstehenden Aktualisierungen erledigt hat.",
+          "diagram": {
+            "kind": "tree",
+            "root": "ComponentFixture",
+            "children": [
+              "componentInstance",
+              "nativeElement",
+              "componentRef",
+              "debugElement",
+              "whenStable()"
+            ]
+          }
+        },
+        {
+          "type": "code",
+          "title": "Komponententest: Vorbereitung",
+          "code": "describe('CustomerListItemComponent', () => {\n  let fixture: ComponentFixture<CustomerListItemComponent>;\n  const el = () => fixture.nativeElement as HTMLElement;\n\n  beforeEach(async () => {\n    await TestBed.configureTestingModule({\n      imports: [CustomerListItemComponent],   // Standalone-Komponente\n      providers: [provideRouter([])]           // für routerLink im Template\n    }).compileComponents();\n    fixture = TestBed.createComponent(CustomerListItemComponent);\n  });\n\n  async function render(customer: Customer, selected = false) {\n    fixture.componentRef.setInput('customer', customer);\n    fixture.componentRef.setInput('selected', selected);\n    await fixture.whenStable();\n  }\n});",
+          "notes": "Codefolie „Komponententest: Vorbereitung“.\n\nDiese Vorbereitung stammt aus Übung 34. Die Komponente für einen Listeneintrag wird unter „imports“ eingetragen, weil sie eine Standalone-Komponente ist. Ihr Template enthält einen Link mit „routerLink“. Deshalb braucht der Test „provideRouter“ mit einer leeren Liste von Routen. „compileComponents“ bereitet die Templates vor und liefert ein Promise, deshalb steht davor „await“.\n\nDanach erzeugt „createComponent“ die Fixture. Die Hilfsfunktion „render“ setzt die beiden Eingaben „customer“ und „selected“ und wartet dann, bis die Anzeige fertig ist. Die kleine Funktion „el“ liefert das HTML-Element der Komponente, damit die Tests kürzer werden."
+        },
+        {
+          "type": "content",
+          "title": "Change Detection im Test (zoneless)",
+          "bullets": [
+            "Angular 21 läuft ohne Zone.js (zoneless)",
+            "Nach einer Änderung plant Angular das Rendern ein",
+            "await fixture.whenStable() wartet darauf",
+            "fixture.detectChanges() rendert sofort, synchron",
+            "Empfehlung: Zustand ändern, whenStable, DOM prüfen",
+            "Ohne await prüft der Test das alte DOM"
+          ],
+          "notes": "Folie: „Change Detection im Test (zoneless)“.\n\n„Change Detection“ ist der Vorgang, bei dem Angular prüft, ob sich Daten geändert haben, und die Anzeige aktualisiert. In Angular 21 läuft das ohne die Bibliothek „Zone.js“, man sagt „zoneless“. Wenn sich ein Signal oder eine Eingabe ändert, merkt Angular sich das und plant eine Aktualisierung für kurz danach ein.\n\nIm Test muss man auf diese Aktualisierung warten. Dafür ruft man „await fixture.whenStable()“ auf. Alternativ führt „fixture.detectChanges()“ die Aktualisierung sofort aus. Empfohlen ist der Weg im Diagramm: erst den Zustand ändern, dann warten, dann das HTML prüfen. Fehlt das „await“, prüft der Test noch die alte Anzeige und schlägt fehl oder ist zufällig grün.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "setInput / Signal setzen",
+              "Angular plant Rendern",
+              "await whenStable()",
+              "DOM prüfen"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "code",
+          "title": "Komponenten mit Signal-Inputs testen",
+          "code": "it('should show the first name and the city', async () => {\n  await render(new Customer('Hans', 'Meyer', 'Hauptstraße 21', '11111', 'Teststadt'));\n\n  expect(el().textContent).toContain('Hans');\n  expect(el().textContent).toContain(': Teststadt');\n});\n\nit('should emit the customer when it is clicked', async () => {\n  const customer = new Customer('Hans', 'Meyer');\n  await render(customer);\n  const chosen: Customer[] = [];\n  fixture.componentInstance.chosen.subscribe(value => chosen.push(value));\n\n  el().click();\n\n  expect(chosen).toEqual([customer]);\n});",
+          "notes": "Codefolie „Komponenten mit Signal-Inputs testen“.\n\nHier sind zwei Tests für die Komponente eines Listeneintrags. Der erste Test zeigt einen Kunden mit Stadt an. Er nutzt die Hilfsfunktion „render“ von der vorigen Folie und prüft dann, dass der Vorname und die Stadt im Text der Komponente stehen.\n\nDer zweite Test prüft den Ausgang „chosen“. Ein Ausgang, angelegt mit „output“, lässt sich im Test mit „subscribe“ abonnieren. Jeder gesendete Wert wird in eine Liste geschrieben. Dann löst der Test mit „click“ einen Klick auf das Element aus. Am Ende prüft er, dass genau dieser Kunde einmal gesendet wurde."
+        },
+        {
+          "type": "content",
+          "title": "Komponententests: wichtige Regeln",
+          "bullets": [
+            "Signal-Inputs nicht direkt zuweisen (component.customer = …)",
+            [
+              "Inputs sind lesbare Signals ohne set",
+              1
+            ],
+            "Stattdessen fixture.componentRef.setInput('name', wert)",
+            "input.required: vor dem ersten Rendern setzen, sonst Fehler",
+            "Nach Änderungen await fixture.whenStable(), dann prüfen",
+            "Outputs mit subscribe beobachten, Klicks mit click()",
+            "Im DOM nach Inhalt oder Rolle suchen, nicht nach CSS-Details",
+            "Kinder-Komponenten nur einbinden, wenn sie wichtig sind"
+          ],
+          "notes": "Folie: „Komponententests: wichtige Regeln“.\n\nEin Signal-Input, angelegt mit „input“, ist ein Signal, das man nur lesen kann. Man kann ihm im Test deshalb keinen Wert zuweisen. Stattdessen benutzt man „fixture.componentRef.setInput“ mit dem Namen des Eingangs und dem Wert. So setzt Angular den Wert, als käme er von einer Eltern-Komponente.\n\nEin Pflicht-Eingang, angelegt mit „input.required“, muss gesetzt sein, bevor die Komponente zum ersten Mal gezeichnet wird. Sonst meldet Angular einen Fehler. Nach jeder Änderung wartet man mit „whenStable“. Ausgänge prüft man mit „subscribe“. Im HTML sucht man nach sichtbarem Inhalt und nicht nach Details wie bestimmten CSS-Klassen, die sich oft ändern."
+        },
+        {
+          "type": "content",
+          "title": "Signals und computed testen",
+          "bullets": [
+            "signal und computed funktionieren überall, auch ohne TestBed",
+            "computed rechnet beim Lesen neu, wenn sich Quellen geändert haben",
+            "Test: Quelle setzen, computed lesen, Ergebnis prüfen",
+            "Kein Warten nötig: Signals sind synchron",
+            "Stores mit inject() holt man über TestBed.inject",
+            "Readonly-Signals von außen nur über Methoden ändern"
+          ],
+          "notes": "Folie: „Signals und computed testen“.\n\n„signal“ und „computed“ sind gewöhnliche Funktionen. Man kann sie in jedem Test benutzen, auch ohne TestBed. Ein „computed“ berechnet seinen Wert neu, sobald man ihn liest und sich vorher eine seiner Quellen geändert hat. Das passiert sofort, man muss also nicht warten.\n\nDer Test setzt deshalb die Quelle, liest den berechneten Wert und prüft ihn. Das Beispiel rechts zeigt das ganz ohne Angular-Komponente. Ein Store, der mit „inject“ andere Services holt, braucht dagegen einen Injector. Ihn holt man über „TestBed.inject“. Seine Signals ändert man im Test genauso wie in der Anwendung, also über seine Methoden.",
+          "diagram": {
+            "kind": "code",
+            "title": "ohne TestBed",
+            "text": "const filter = signal('');\nconst names = signal(['Hans',\n                      'Lisa']);\nconst visible = computed(() =>\n  names().filter(n =>\n    n.toLowerCase()\n     .includes(filter())));\n\nfilter.set('li');\nexpect(visible())\n  .toEqual(['Lisa']);"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Effects testen mit TestBed.tick()",
+          "code": "// Im Store: effect(() => saveFilter(this._filter()));\n\nit('should write the filter to localStorage', () => {\n  const store = TestBed.inject(CustomerStore);   // effect braucht Injection Context\n\n  store.setFilter('lisa');\n  TestBed.tick();             // führt anstehende Effects jetzt aus\n\n  expect(localStorage.getItem('customerFilter')).toBe('lisa');\n});\n\nit('should restore the filter on creation', () => {\n  localStorage.setItem('customerFilter', 'burns');\n  const store = TestBed.inject(CustomerStore);\n  expect(store.filter()).toBe('burns');\n});",
+          "notes": "Codefolie „Effects testen mit TestBed.tick()“.\n\nEin „effect“ ist eine Funktion, die automatisch läuft, wenn sich ein gelesenes Signal ändert. Im „CustomerStore“ speichert ein Effect den Filter im Browser-Speicher „localStorage“. Ein Effect braucht einen „Injection Context“, also eine Umgebung, in der „inject“ erlaubt ist. Deshalb wird der Store mit „TestBed.inject“ erzeugt.\n\nEin Effect läuft nicht sofort, wenn sich das Signal ändert, sondern Angular plant ihn für etwas später ein. Im Test sorgt „TestBed.tick“ dafür, dass alle anstehenden Effects jetzt ausgeführt werden. Erst danach prüft der Test den gespeicherten Wert. Der zweite Test prüft die andere Richtung: Steht schon ein Filter im Speicher, übernimmt der neue Store ihn."
+        },
+        {
+          "type": "content",
+          "title": "Component Harnesses (CDK)",
+          "bullets": [
+            "Harness: Test-API für eine Komponente statt DOM-Selektoren",
+            "Fertige Harnesses für Angular Material (MatButtonHarness …)",
+            "Paket @angular/cdk/testing",
+            "loader = TestbedHarnessEnvironment.loader(fixture)",
+            "Methoden sind async und warten selbst auf Stabilität",
+            "Vorteil: Tests überleben Änderungen am inneren HTML"
+          ],
+          "notes": "Folie: „Component Harnesses (CDK)“.\n\nEin „Component Harness“ ist eine kleine Test-Schnittstelle für eine Komponente. Statt im HTML nach bestimmten Elementen zu suchen, ruft der Test Methoden wie „click“ oder „getText“ auf. Angular Material bringt für seine Komponenten fertige Harnesses mit, zum Beispiel für Buttons und Eingabefelder.\n\nDie Grundlage liegt im Paket „@angular/cdk/testing“. Man erzeugt aus der Fixture einen „Loader“ und holt sich damit den passenden Harness. Alle Methoden sind asynchron, man schreibt also „await“ davor. Sie warten selbst, bis die Anzeige aktuell ist. Der Vorteil: Wenn sich das innere HTML einer Komponente ändert, bleiben die Tests trotzdem gültig. In den Übungsprojekten wird kein Material verwendet, deshalb ist das hier nur ein Ausblick.",
+          "diagram": {
+            "kind": "code",
+            "title": "Harness (Beispiel Material)",
+            "text": "const loader =\n  TestbedHarnessEnvironment\n    .loader(fixture);\n\nconst button = await loader\n  .getHarness(MatButtonHarness\n    .with({ text: 'Speichern' }));\n\nawait button.click();\nexpect(await button.isDisabled())\n  .toBe(true);"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was macht einen guten Test aus?",
+          "bullets": [
+            "Er schlägt fehl, wenn das Verhalten kaputt ist, und nur dann",
+            "Er ist unabhängig von Reihenfolge und anderen Tests",
+            "Er ist schnell und deterministisch: keine echten Timer, kein Netz",
+            [
+              "vi.useFakeTimers() ersetzt echte Zeit durch steuerbare Zeit",
+              1
+            ],
+            "Er ist lesbar: Arrange, Act, Assert, sprechende Namen, kleine Testdaten",
+            "Er prüft Verhalten, nicht Implementierungsdetails (private Felder, CSS-Klassen)",
+            "Er deckt Randfälle ab: leere Liste, kein Treffer, Fehler, unbekannte ID",
+            "Coverage ist ein Hinweis, kein Ziel: 100 % ohne Prüfungen beweisen nichts"
+          ],
+          "notes": "Folie: „Was macht einen guten Test aus?“.\n\nEin guter Test schlägt nur dann fehl, wenn das Verhalten wirklich kaputt ist. Er hängt nicht von anderen Tests ab und liefert immer dasselbe Ergebnis. Das nennt man „deterministisch“. Dafür vermeidet man echte Zeit und echtes Netzwerk. Mit „vi.useFakeTimers“ ersetzt Vitest die echte Uhr durch eine Uhr, die der Test selbst vorstellt.\n\nEin guter Test ist lesbar, prüft das sichtbare Verhalten und nicht die interne Umsetzung, und er deckt Randfälle ab. „Coverage“ ist die Testabdeckung, also der Anteil des Codes, der beim Testen ausgeführt wird. Sie ist nur ein Hinweis. Ein Test ohne echte Prüfung erhöht die Abdeckung, beweist aber nichts."
+        },
+        {
+          "type": "content",
+          "title": "Automatisch erzeugte Tests richtig einordnen",
+          "bullets": [
+            "Quellen: ng generate (Gerüste), Assistenten in der Entwicklungsumgebung, KI-Werkzeuge",
+            "should create mit toBeTruthy: prüft nur, dass die Instanz entsteht",
+            "Test wiederholt die Implementierung: Tautologie, Fehler fallen nicht auf",
+            "Alles gemockt, nur Aufrufe geprüft: testet nicht das echte Verhalten",
+            "Nur der Normalfall: leere Listen, null, Fehler und Grenzwerte fehlen",
+            "Snapshots großer Templates: brechen oft und werden blind aktualisiert",
+            "Test passt sich dem Fehler an: bestätigt falsches Verhalten"
+          ],
+          "notes": "Folie: „Automatisch erzeugte Tests richtig einordnen“.\n\nTests können automatisch entstehen, zum Beispiel durch „ng generate“, durch Assistenten in der Entwicklungsumgebung oder durch KI-Werkzeuge. „KI“ steht für künstliche Intelligenz. Solche Tests haben oft typische Schwächen.\n\nEin Test mit „toBeTruthy“ prüft nur, dass die Komponente erzeugt wird. Eine „Tautologie“ ist ein Test, der nur wiederholt, was der Code ohnehin tut. Ändert man beides gleichzeitig, fällt nichts auf. Oft fehlen auch Randfälle wie eine leere Liste oder ein Fehler. Ein „Snapshot“ speichert eine ganze Ausgabe und vergleicht sie später. Bei großen Templates bricht er oft und wird dann ungeprüft erneuert. Schlimm ist ein Test, der einen vorhandenen Fehler als richtig bestätigt."
+        },
+        {
+          "type": "content",
+          "title": "Prüfverfahren für generierte Tests",
+          "bullets": [
+            "1. Lesen: Was behauptet der Test?",
+            [
+              "Passt das zur Anforderung?",
+              1
+            ],
+            "2. Kaputtmachen: Produktivcode absichtlich ändern",
+            [
+              "Wird kein Test rot, sind die Tests wertlos",
+              1
+            ],
+            "3. Randfälle ergänzen: leer, Fehler, Sonderzeichen",
+            "4. Vereinfachen: Mocks reduzieren, Namen verbessern",
+            "5. Verantwortung: Wer committet, haftet dafür"
+          ],
+          "notes": "Folie: „Prüfverfahren für generierte Tests“.\n\nEs gibt fünf Schritte, um erzeugte Tests zu prüfen. Zuerst liest man den Test und fragt, ob er zur Anforderung passt. Dann kommt der wichtigste Schritt: Man ändert den Produktivcode absichtlich falsch. Wird kein Test rot, sind die Tests wertlos. Das ist ein „Mutationstest von Hand“.\n\nDanach ergänzt man Randfälle und vereinfacht den Test. Zum Schluss gilt: Wer einen Test in das gemeinsame Projekt übernimmt, ist dafür verantwortlich. „Committen“ heißt, die Änderung in der Versionsverwaltung festzuhalten. Das Diagramm zeigt die Schritte als Kreislauf.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "Lesen",
+              "Kaputtmachen",
+              "Randfälle ergänzen",
+              "Vereinfachen"
+            ]
+          }
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 34: Tests schreiben und bewerten (1/2)",
+          "bullets": [
+            "Öffne das Projekt 34_tests (Test-Runner: Vitest, Start mit ng test)",
+            "Teil A: Schreibe customer.store.spec.ts für CustomerStore, ohne Oberfläche",
+            [
+              "Laden, Filter (Groß-/Kleinschreibung, Teiltreffer), Filter ohne Treffer, leere Liste",
+              1
+            ],
+            [
+              "Auswahl (auch unbekannte ID), Fehlerfall beim Laden, Filter in localStorage",
+              1
+            ],
+            "Ersetze CustomerService per providers durch ein Test-Double",
+            [
+              "const getAll = vi.fn();  { provide: CustomerService, useValue: { getAll } }",
+              1
+            ],
+            [
+              "Rückgabe steuern: getAll.mockReturnValue(of([...])) bzw. throwError(() => ...)",
+              1
+            ],
+            "Effect prüfen: nach store.setFilter('x') mit TestBed.tick() die Effects ausführen",
+            "Musterlösung: 34_tests (baut auf 33_state_store auf)"
+          ],
+          "notes": "Folie: „Übung 34: Tests schreiben und bewerten (1/2)“.\n\nErklärung für die Dolmetscherin:\nDies ist der erste Teil der Aufgabenstellung für Übung 34 im Ordner 34_tests. Sie baut auf dem Ergebnis von Übung 33 auf. Das Projekt nutzt „Vitest“, die Tests startet man mit „ng test“.\n\nIn Teil A schreiben die Teilnehmer Tests für den „CustomerStore“, ohne Oberfläche. Sie testen das Laden, den Filter mit verschiedenen Fällen, die Auswahl, den Fehlerfall und das Speichern des Filters. Den „CustomerService“ ersetzen sie über „providers“ durch ein Objekt mit einer Mock-Funktion. Für den Effect, der den Filter speichert, rufen sie „TestBed.tick“ auf."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 34: Tests schreiben und bewerten (2/2)",
+          "bullets": [
+            "Teil B: Teste CustomerListItemComponent",
+            [
+              "Name wird angezeigt, ohne Stadt kein Doppelpunkt, Klick löst chosen aus",
+              1
+            ],
+            [
+              "Klassen discontinued und selected; Inputs per fixture.componentRef.setInput",
+              1
+            ],
+            [
+              "Optional: CustomerFilterComponent und CustomerService (HttpTestingController)",
+              1
+            ],
+            "Teil C: Speichere material/generierter-store-test.spec.ts.txt als Spec und führe sie aus",
+            [
+              "Finde die fünf versteckten Schwächen",
+              1
+            ],
+            [
+              "Ändere in filtered includes zu startsWith: Welche Tests werden nicht rot?",
+              1
+            ],
+            [
+              "Verbessere die Spec, danach die generierte Datei wieder löschen",
+              1
+            ],
+            "Musterlösung: 34_tests (baut auf 33_state_store auf)"
+          ],
+          "notes": "Folie: „Übung 34: Tests schreiben und bewerten (2/2)“.\n\nErklärung für die Dolmetscherin:\nDies ist der zweite Teil der Aufgabenstellung für Übung 34. In Teil B testen die Teilnehmer die Komponente für einen Listeneintrag. Sie prüfen den angezeigten Namen, den fehlenden Doppelpunkt ohne Stadt, das Ereignis „chosen“ beim Klick und zwei CSS-Klassen. Die Eingaben setzen sie mit „setInput“. Optional testen sie auch die Filter-Komponente und den Service mit dem Test-Backend für HTTP.\n\nIn Teil C bekommen sie eine automatisch erzeugte Testdatei mit fünf versteckten Schwächen. Sie machen den Programmcode gezielt kaputt, indem sie im Filter „includes“ durch „startsWith“ ersetzen, und sehen, welche Tests das nicht bemerken. Danach verbessern sie die Testdatei."
+        }
+      ]
+    },
+    {
+      "after": 267,
+      "order": 50,
+      "slides": [
+        {
+          "type": "divider",
+          "title": "Performance und Laufzeitverhalten",
+          "notes": "Kapitelübergangsfolie „Performance und Laufzeitverhalten“ – hier beginnt das Kapitel über Geschwindigkeit. Es geht darum, wie man Performance misst, welche Kennzahlen wichtig sind, wie die Change Detection von Angular arbeitet und mit welchen Mitteln man Laufzeit und Ladezeit verbessert. Am Ende steht Übung 35 mit einer absichtlich langsamen Liste."
+        },
+        {
+          "type": "content",
+          "title": "Performance im Anwendungskontext",
+          "bullets": [
+            "Performance ist Nutzererlebnis: Fühlt sich die App schnell an?",
+            "Ladezeit: Wie schnell ist etwas sichtbar und bedienbar?",
+            [
+              "Einflüsse: Bundle-Größe, Netzwerk, Bilder, Rendering",
+              1
+            ],
+            "Laufzeit: Wie flüssig reagiert die App auf Eingaben?",
+            [
+              "Einflüsse: Change Detection, große Listen, Berechnungen",
+              1
+            ],
+            "Regel Nr. 1: Erst messen, dann optimieren",
+            "Vorzeitige Optimierung macht Code komplizierter, ohne zu wirken"
+          ],
+          "notes": "Folie: „Performance im Anwendungskontext“.\n\nPerformance bedeutet hier nicht, dass eine Zahl möglichst klein wird, sondern dass sich die Anwendung für den Benutzer schnell anfühlt. Man unterscheidet zwei Bereiche. Die „Ladezeit“ ist die Zeit, bis die Seite sichtbar und bedienbar ist. Sie hängt vor allem von der Menge an Code ab, dem sogenannten „Bundle“, und vom Netzwerk.\n\nDie „Laufzeit“ beschreibt, wie flüssig die Anwendung danach auf Eingaben reagiert. Hier spielen die Aktualisierung der Anzeige, große Listen und teure Berechnungen eine Rolle. Die wichtigste Regel lautet: Erst messen, dann optimieren. Wer ohne Messung optimiert, macht den Code oft nur komplizierter."
+        },
+        {
+          "type": "content",
+          "title": "Vorgehen: Messen, ändern, erneut messen",
+          "bullets": [
+            "Ausgangslage messen und notieren",
+            "Ursache suchen: Wo geht die Zeit verloren?",
+            "Genau eine Maßnahme umsetzen",
+            "Unter gleichen Bedingungen erneut messen",
+            [
+              "gleicher Build, gleiche Daten, gleiches Gerät",
+              1
+            ],
+            "Bringt sie nichts: zurücknehmen"
+          ],
+          "notes": "Folie: „Vorgehen: Messen, ändern, erneut messen“.\n\nPerformance-Arbeit ist ein Kreislauf. Zuerst misst man die Ausgangslage und schreibt die Werte auf. Dann sucht man die Ursache, also die Stelle, an der die Zeit verloren geht. Danach setzt man genau eine Maßnahme um.\n\nAnschließend misst man erneut, und zwar unter denselben Bedingungen wie vorher: gleicher Build, gleiche Datenmenge, gleicher Rechner. Nur so kann man die Werte vergleichen. Hat die Maßnahme nichts gebracht, nimmt man sie wieder zurück, denn jede Maßnahme macht den Code etwas komplizierter. Genau so ist auch Übung 35 aufgebaut.",
+          "diagram": {
+            "kind": "cycle",
+            "steps": [
+              "Messen",
+              "Ursache finden",
+              "Eine Maßnahme",
+              "Erneut messen"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Core Web Vitals: drei Kennzahlen",
+          "bullets": [
+            "LCP (Largest Contentful Paint)",
+            [
+              "Wann ist das größte Element sichtbar? Gut: bis 2,5 s",
+              1
+            ],
+            "INP (Interaction to Next Paint)",
+            [
+              "Wie schnell reagiert die Seite auf Eingaben? Gut: bis 200 ms",
+              1
+            ],
+            "CLS (Cumulative Layout Shift)",
+            [
+              "Wie stark springt das Layout? Gut: bis 0,1",
+              1
+            ],
+            "Gemessen bei echten Nutzern und im Labor"
+          ],
+          "notes": "Folie: „Core Web Vitals: drei Kennzahlen“.\n\n„Core Web Vitals“ sind drei Kennzahlen von Google, die das Nutzererlebnis einer Webseite beschreiben. „LCP“ steht für „Largest Contentful Paint“. Das ist der Zeitpunkt, an dem das größte sichtbare Element, etwa ein großes Bild oder ein Textblock, gezeichnet ist. Gut sind höchstens 2,5 Sekunden.\n\n„INP“ steht für „Interaction to Next Paint“. Es misst, wie lange es nach einem Klick oder einer Eingabe dauert, bis die Anzeige reagiert. Gut sind höchstens 200 Millisekunden. „CLS“ steht für „Cumulative Layout Shift“ und misst, wie stark sich Inhalte beim Laden unerwartet verschieben. Gut ist ein Wert bis 0,1. Das Diagramm ordnet die drei Werte dem Ablauf zu: laden, bedienen, ruhig bleiben.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "LCP: Hauptinhalt sichtbar",
+              "INP: Reaktion auf Eingaben",
+              "CLS: Layout bleibt ruhig"
+            ],
+            "note": "Core Web Vitals"
+          }
+        },
+        {
+          "type": "content",
+          "title": "Core Web Vitals: Ursachen und Hebel in Angular",
+          "bullets": [
+            "LCP schlecht: großes Start-Bundle, großes Hauptbild",
+            [
+              "Hebel: Lazy Loading, @defer, NgOptimizedImage mit priority, SSR",
+              1
+            ],
+            "INP schlecht: lange Aufgaben im Haupt-Thread nach einer Eingabe",
+            [
+              "Hebel: weniger Change Detection (Signals, OnPush), Debounce, Virtual Scrolling",
+              1
+            ],
+            "CLS schlecht: Bilder ohne Größe, nachgeladene Inhalte schieben das Layout",
+            [
+              "Hebel: width und height am Bild, @placeholder mit fester Höhe",
+              1
+            ],
+            "Lighthouse misst im Labor; INP am besten mit DevTools oder echten Nutzerdaten"
+          ],
+          "notes": "Folie: „Core Web Vitals: Ursachen und Hebel in Angular“.\n\nDiese Folie verbindet die drei Kennzahlen mit Maßnahmen in Angular. Ist der LCP-Wert schlecht, ist oft das Start-Bundle zu groß oder das Hauptbild lädt zu spät. Dagegen helfen Lazy Loading, „@defer“ und die Bild-Direktive „NgOptimizedImage“ mit „priority“ aus Übung 27, bei öffentlichen Seiten auch Server-Side Rendering.\n\nEin schlechter INP-Wert entsteht durch lange Aufgaben nach einer Eingabe, zum Beispiel wenn sehr viele Komponenten neu geprüft werden. Ein schlechter CLS-Wert entsteht, wenn Bilder ohne feste Größe oder nachgeladene Inhalte das Layout verschieben. „Lighthouse“ misst im Labor. Den INP-Wert kann es dort nur annähern, deshalb misst man ihn besser mit den Chrome DevTools oder bei echten Nutzern."
+        },
+        {
+          "type": "content",
+          "title": "Messen: Werkzeuge im Überblick",
+          "bullets": [
+            "Chrome DevTools, Bereich Performance: was passiert wann?",
+            "Angular DevTools, Profiler: welche Komponente kostet Zeit?",
+            "Lighthouse: Ladeverhalten und Core Web Vitals",
+            "ng build: Größe der Bundles, Budgets",
+            [
+              "--stats-json für die genaue Analyse",
+              1
+            ],
+            "Immer mit Production-Build messen"
+          ],
+          "notes": "Folie: „Messen: Werkzeuge im Überblick“.\n\nFür jede Frage gibt es ein passendes Werkzeug. Der Bereich „Performance“ der Chrome DevTools zeigt auf einer Zeitachse, womit der Browser beschäftigt ist. Die „Angular DevTools“ sind eine Browser-Erweiterung. Ihr „Profiler“ zeigt, welche Komponenten bei der Aktualisierung wie viel Zeit brauchen.\n\n„Lighthouse“ prüft das Ladeverhalten und berechnet Kennzahlen. Der Befehl „ng build“ zeigt die Größe der erzeugten Dateien an, mit „--stats-json“ auch im Detail. Für Messungen der Ladezeit nimmt man immer den Production-Build, weil der Entwicklungsmodus mit „ng serve“ nicht optimiert ist. Das Diagramm ordnet die Werkzeuge den Fragen zu.",
+          "diagram": {
+            "kind": "tree",
+            "root": "Was messen?",
+            "children": [
+              "Laufzeit:\nDevTools Performance",
+              "Komponenten:\nAngular Profiler",
+              "Laden:\nLighthouse",
+              "Größe:\nng build --stats-json"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Chrome DevTools: Performance-Aufnahme",
+          "bullets": [
+            "F12, Bereich Performance, Aufnahme starten",
+            "Aktion ausführen, z. B. im Filter tippen",
+            "Aufnahme stoppen und Zeitachse lesen",
+            [
+              "Long Tasks über 50 ms sind rot markiert",
+              1
+            ],
+            [
+              "Flamegraph: welche Funktion ruft welche auf",
+              1
+            ],
+            "CPU drosseln: langsame Geräte simulieren"
+          ],
+          "notes": "Folie: „Chrome DevTools: Performance-Aufnahme“.\n\nMit den Chrome DevTools nimmt man auf, was der Browser während einer Aktion tut. Man öffnet sie mit der Taste F12, wählt den Bereich „Performance“ und startet die Aufnahme. Dann führt man die Aktion aus, zum Beispiel ein paar Buchstaben im Filterfeld, und stoppt die Aufnahme.\n\nDie Zeitachse zeigt danach, womit der Browser beschäftigt war. Aufgaben, die länger als 50 Millisekunden dauern, heißen „Long Tasks“ und sind rot markiert. Sie blockieren die Bedienung. Der „Flamegraph“ zeigt übereinander, welche Funktion welche andere aufgerufen hat und wie lange das gedauert hat. Mit der CPU-Drosselung kann man einen langsameren Rechner nachstellen.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Aufnahme starten",
+              "Aktion ausführen",
+              "Aufnahme stoppen",
+              "Long Tasks finden"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Angular DevTools: der Profiler",
+          "bullets": [
+            "Browser-Erweiterung für Chrome und Firefox",
+            "Funktioniert mit dem Entwicklungs-Build (ng serve)",
+            "Reiter Profiler: Aufnahme starten, Aktion, stoppen",
+            "Jeder Balken: ein Durchlauf der Change Detection",
+            "Klick auf Balken: geprüfte Komponenten und Dauer",
+            "Frage: Werden mehr Komponenten geprüft als nötig?"
+          ],
+          "notes": "Folie: „Angular DevTools: der Profiler“.\n\nDie „Angular DevTools“ sind eine Erweiterung für Chrome und Firefox. Sie funktionieren mit dem Entwicklungs-Build, also mit „ng serve“. Im Reiter „Profiler“ startet man eine Aufnahme, führt die Aktion aus und stoppt die Aufnahme wieder.\n\nDas Ergebnis ist eine Reihe von Balken. Jeder Balken steht für einen Durchlauf der Change Detection, also eine Prüfung und Aktualisierung der Anzeige. Ein hoher Balken bedeutet, dass der Durchlauf lange gedauert hat. Klickt man auf einen Balken, sieht man, welche Komponenten geprüft wurden und wie lange jede gebraucht hat. Die wichtigste Frage lautet: Werden Komponenten geprüft, die sich gar nicht geändert haben?",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Profiler: Start",
+              "Filter tippen",
+              "Stopp",
+              "Balken = CD-Durchlauf",
+              "Komponenten und Zeit"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Lighthouse richtig einsetzen",
+          "bullets": [
+            "In Chrome DevTools: Bereich Lighthouse, Analyse starten",
+            "Ergebnis: Punkte und Kennzahlen (LCP, CLS, TBT …)",
+            [
+              "TBT: blockierte Zeit, Laborersatz für INP",
+              1
+            ],
+            "Mit Production-Build messen, nicht mit ng serve",
+            [
+              "ng build, dann dist/…/browser mit einem Webserver ausliefern",
+              1
+            ],
+            "Inkognito-Fenster: keine Erweiterungen stören",
+            "Mehrmals messen, Schwankungen beachten",
+            "Lighthouse CI: Messung automatisch in der Pipeline"
+          ],
+          "notes": "Folie: „Lighthouse richtig einsetzen“.\n\n„Lighthouse“ ist ein Prüfwerkzeug, das in die Chrome DevTools eingebaut ist. Es lädt die Seite unter festen Bedingungen und vergibt Punkte für Leistung und andere Bereiche. Dazu zeigt es Kennzahlen wie LCP und CLS. „TBT“ steht für „Total Blocking Time“, also die Zeit, in der der Browser blockiert war. Im Labor dient sie als Ersatz für INP.\n\nMan misst immer den Production-Build, also das Ergebnis von „ng build“, ausgeliefert über einen einfachen Webserver. Ein Inkognito-Fenster verhindert, dass Browser-Erweiterungen das Ergebnis verfälschen. Die Werte schwanken, deshalb misst man mehrmals. „Lighthouse CI“ führt die Messung automatisch bei jeder Änderung in der Pipeline aus."
+        },
+        {
+          "type": "content",
+          "title": "Bundle-Analyse: was steckt im Build?",
+          "bullets": [
+            "ng build zeigt Initial chunks und Lazy chunks mit Größe",
+            "Initial: wird beim Start geladen, soll klein bleiben",
+            "ng build --stats-json erzeugt stats.json",
+            [
+              "Analyse z. B. im esbuild Bundle Analyzer",
+              1
+            ],
+            "Fragen: Welche Bibliothek ist groß? Was ist unnötig?",
+            "Budgets in angular.json: Warnung oder Fehler"
+          ],
+          "notes": "Folie: „Bundle-Analyse: was steckt im Build?“.\n\nNach „ng build“ gibt die Konsole eine Tabelle aus. Unter „Initial chunk files“ stehen die Dateien, die beim Start geladen werden. Unter „Lazy chunk files“ stehen Dateien, die erst bei Bedarf geladen werden. Der Startteil soll möglichst klein bleiben.\n\nMit der Option „--stats-json“ entsteht zusätzlich die Datei „stats.json“. Sie beschreibt genau, welche Module in welchem Teil stecken. Man kann sie zum Beispiel im „esbuild Bundle Analyzer“ öffnen, einer Webseite, die die Anteile grafisch zeigt. So sieht man schnell, welche Bibliothek viel Platz braucht. Mit „Budgets“ legt man Grenzen fest, die nächste Folie zeigt das.",
+          "diagram": {
+            "kind": "code",
+            "title": "Ausgabe von ng build (Beispiel)",
+            "text": "Initial chunk files | Raw size\nmain-XYZ.js         | 312 kB\nstyles-XYZ.css      |   4 kB\n\nLazy chunk files    | Raw size\nchunk-ABC.js        |  48 kB\n  (customer-details-\n   component)"
+          }
+        },
+        {
+          "type": "code",
+          "title": "Budgets in angular.json",
+          "code": "\"configurations\": {\n  \"production\": {\n    \"budgets\": [\n      {\n        \"type\": \"initial\",            // alles, was beim Start geladen wird\n        \"maximumWarning\": \"500kB\",    // ab hier: Warnung\n        \"maximumError\": \"1MB\"         // ab hier: Build schlägt fehl\n      },\n      {\n        \"type\": \"anyComponentStyle\",  // CSS einer einzelnen Komponente\n        \"maximumWarning\": \"4kB\",\n        \"maximumError\": \"8kB\"\n      }\n    ]\n  }\n}",
+          "notes": "Codefolie „Budgets in angular.json“.\n\nBudgets sind Grenzwerte für die Größe der erzeugten Dateien. Sie stehen in der Datei „angular.json“ bei der Konfiguration „production“. Ein neues Projekt bringt diese Werte schon mit.\n\nDer erste Eintrag vom Typ „initial“ betrifft alles, was beim Start geladen wird. Ab 500 Kilobyte gibt der Build eine Warnung aus, ab einem Megabyte bricht er mit einem Fehler ab. Der zweite Eintrag begrenzt die Größe des CSS einer einzelnen Komponente. Weil der Build in der Pipeline fehlschlägt, fällt ein zu großes Bundle sofort auf und nicht erst beim Benutzer."
+        },
+        {
+          "type": "content",
+          "title": "Change Detection: die Grundidee",
+          "bullets": [
+            "Komponenten bilden einen Baum, beginnend bei AppComponent",
+            "Change Detection: Template-Bindungen prüfen, DOM anpassen",
+            "Läuft von oben nach unten durch den Baum",
+            "Kosten wachsen mit Zahl der geprüften Komponenten",
+            "Ziel: nur prüfen, was sich wirklich geändert hat",
+            "Frage: Wer sagt Angular, dass sich etwas geändert hat?"
+          ],
+          "notes": "Folie: „Change Detection: die Grundidee“.\n\nEine Angular-Anwendung besteht aus einem Baum von Komponenten. Oben steht die „AppComponent“, darunter zum Beispiel die Kundenliste mit vielen Listeneinträgen. „Change Detection“ heißt auf Deutsch Änderungserkennung. Dabei prüft Angular die Bindungen in den Templates, also die Stellen mit geschweiften oder eckigen Klammern, und passt das HTML an, wenn sich ein Wert geändert hat.\n\nDiese Prüfung läuft von oben nach unten durch den Baum. Je mehr Komponenten geprüft werden, desto länger dauert sie. Bei 5000 Listeneinträgen ist das spürbar. Ziel ist deshalb, nur das zu prüfen, was sich wirklich geändert hat. Die zentrale Frage ist: Woher weiß Angular, dass sich etwas geändert hat? Die nächsten Folien beantworten sie.",
+          "diagram": {
+            "kind": "tree",
+            "root": "AppComponent",
+            "children": [
+              "Header",
+              "CustomerList",
+              "Item 1",
+              "Item 2",
+              "… Item 5000"
+            ]
+          }
+        },
+        {
+          "type": "content",
+          "title": "Zone.js und zoneless im Vergleich",
+          "bullets": [
+            "Zone.js (früher Standard)",
+            [
+              "fängt jedes Ereignis, jeden Timer, jede HTTP-Antwort ab",
+              1
+            ],
+            [
+              "danach: ganzer Baum wird geprüft",
+              1
+            ],
+            "Zoneless (Standard in Angular 21)",
+            [
+              "Angular wird gezielt benachrichtigt, z. B. vom Signal",
+              1
+            ],
+            [
+              "nur markierte Komponenten werden geprüft",
+              1
+            ],
+            "Startprojekt: provideZonelessChangeDetection()"
+          ],
+          "notes": "Folie: „Zone.js und zoneless im Vergleich“.\n\nFrüher nutzte Angular die Bibliothek „Zone.js“. Sie verändert Browser-Funktionen wie Timer, Ereignisse und Netzwerk-Antworten so, dass Angular nach jedem dieser Vorgänge benachrichtigt wird. Angular wusste dann aber nicht, was sich geändert hat, und prüfte sicherheitshalber den ganzen Baum.\n\nIn Angular 21 ist „zoneless“ der Standard, also ohne Zone.js. Angular wird jetzt gezielt benachrichtigt, zum Beispiel wenn sich ein Signal ändert, das ein Template liest. Dann werden nur die betroffenen Komponenten markiert und geprüft. Die Übungsanwendung ist mit „provideZonelessChangeDetection“ in der Datei „main.ts“ eingerichtet.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Zone.js",
+              "items": [
+                "Ereignis, Timer, HTTP",
+                "ganzer Baum wird geprüft"
+              ]
+            },
+            "right": {
+              "title": "Zoneless + Signals",
+              "items": [
+                "Signal ändert sich",
+                "nur betroffene Komponenten"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ablauf: Signal ändert sich (zoneless)",
+          "bullets": [
+            "Code ruft set oder update auf einem Signal auf",
+            "Angular kennt alle Templates, die das Signal lesen",
+            "Diese Komponenten werden als „zu prüfen“ markiert",
+            "Der Scheduler plant einen Durchlauf ein",
+            [
+              "mehrere Änderungen ergeben einen Durchlauf",
+              1
+            ],
+            "Nur markierte Teile werden geprüft, DOM angepasst"
+          ],
+          "notes": "Folie: „Ablauf: Signal ändert sich (zoneless)“.\n\nDiese Folie zeigt Schritt für Schritt, was bei einer Änderung passiert. Der Code ruft „set“ oder „update“ auf einem Signal auf, zum Beispiel beim Setzen des Filters. Angular weiß, welche Templates dieses Signal lesen, denn beim letzten Zeichnen wurde das automatisch festgehalten.\n\nDiese Komponenten werden als „zu prüfen“ markiert. Der „Scheduler“, also der Planer von Angular, plant einen Durchlauf der Change Detection für kurz danach ein. Mehrere Änderungen direkt hintereinander führen deshalb nur zu einem einzigen Durchlauf. Dabei werden nur die markierten Teile geprüft, und das HTML wird angepasst.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "filter.set('li')",
+              "Leser-Templates markiert",
+              "Scheduler plant Durchlauf",
+              "markierte Komponenten prüfen",
+              "DOM aktualisiert"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Was löst eine Neu-Prüfung aus?",
+          "bullets": [
+            "Ein Signal, das im Template gelesen wird, ändert sich",
+            "Ein Event-Handler aus dem Template läuft, z. B. (click)",
+            "Ein Input bekommt einen neuen Wert (neue Referenz)",
+            [
+              "auch per componentRef.setInput im Test",
+              1
+            ],
+            "Die async-Pipe erhält einen neuen Wert",
+            "ChangeDetectorRef.markForCheck() wird aufgerufen",
+            "Keine Neu-Prüfung: normales Feld in setTimeout oder subscribe ändern",
+            [
+              "Abhilfe: den Wert in ein Signal legen",
+              1
+            ]
+          ],
+          "notes": "Folie: „Was löst eine Neu-Prüfung aus?“.\n\nOhne Zone.js muss Angular von einer Änderung erfahren. Diese Folie zählt auf, was eine Neu-Prüfung auslöst. Am wichtigsten ist ein Signal, das im Template gelesen wird. Auch ein Ereignis-Handler im Template, zum Beispiel für einen Klick, und ein neuer Wert für einen Eingang lösen eine Prüfung aus.\n\nDie „async“-Pipe meldet neue Werte eines Observables ebenfalls. Mit „markForCheck“ kann man eine Komponente von Hand markieren. Wichtig ist der letzte Punkt: Ändert man ein normales Feld der Klasse, zum Beispiel in einem Timer oder in einem Abonnement, bemerkt Angular das nicht. Die Anzeige bleibt dann alt. Die Lösung ist, den Wert in ein Signal zu legen."
+        },
+        {
+          "type": "content",
+          "title": "OnPush: Komponenten gezielt überspringen",
+          "bullets": [
+            "Ohne Angabe: Komponente wird bei jedem Durchlauf geprüft",
+            "OnPush: nur prüfen, wenn sie markiert ist",
+            [
+              "neuer Input, Template-Event, gelesenes Signal, async-Pipe",
+              1
+            ],
+            "Sonst wird sie samt Kindern übersprungen",
+            "Empfehlung: OnPush für alle neuen Komponenten",
+            "Passt ideal zu Signals und input()"
+          ],
+          "notes": "Folie: „OnPush: Komponenten gezielt überspringen“.\n\n„OnPush“ ist eine Einstellung für die Change Detection einer Komponente. Ohne diese Einstellung prüft Angular eine Komponente bei jedem Durchlauf, der ihren Teil des Baums erreicht, auch wenn sich für sie nichts geändert hat.\n\nMit „OnPush“ prüft Angular die Komponente nur, wenn sie markiert wurde: durch einen neuen Eingangswert, ein Ereignis in ihrem Template, ein gelesenes Signal oder die „async“-Pipe. Sonst wird sie mit ihren Kindern übersprungen. Das spart bei langen Listen viel Zeit. Man setzt „OnPush“ am besten für alle neuen Komponenten. Es passt gut zu Signals, denn sie markieren die Komponente automatisch.",
+          "diagram": {
+            "kind": "code",
+            "title": "customer-list-item.component.ts",
+            "text": "@Component({\n  selector: '[customer-list-item]',\n  changeDetection:\n    ChangeDetectionStrategy.OnPush,\n  templateUrl: '…',\n})\nexport class\n  CustomerListItemComponent {\n  customer =\n    input.required<Customer>();\n  selected = input(false);\n}"
+          }
+        },
+        {
+          "type": "content",
+          "title": "OnPush und Referenzen",
+          "bullets": [
+            "Inputs werden per Referenz verglichen (===)",
+            "Objekt verändern (mutieren): gleiche Referenz, keine Prüfung",
+            "Neues Objekt oder neue Liste: neue Referenz, Prüfung",
+            "Bei Signals gilt dasselbe: set mit gleicher Referenz meldet nichts",
+            "Darum: update(list => [...list, neu]) statt list.push(neu)",
+            "Beispiel: addDemo() im CustomerStore"
+          ],
+          "notes": "Folie: „OnPush und Referenzen“.\n\nOb sich ein Eingang geändert hat, prüft Angular über die Referenz. Eine „Referenz“ ist sozusagen die Adresse eines Objekts im Speicher. Ändert man ein Feld in einem vorhandenen Objekt, nennt man das „mutieren“. Die Referenz bleibt gleich, und Angular sieht keine Änderung. Eine OnPush-Komponente zeigt dann den alten Stand.\n\nBei Signals ist es genauso: Setzt man dieselbe Liste noch einmal, melden sie keine Änderung. Deshalb erzeugt man eine neue Liste, zum Beispiel mit „update“ und der Schreibweise mit drei Punkten, die die alte Liste in eine neue kopiert. Genau so arbeitet die Methode „addDemo“ im „CustomerStore“.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Mutieren (falsch)",
+              "items": [
+                "list().push(neu)",
+                "gleiche Referenz",
+                "keine Anzeige"
+              ]
+            },
+            "right": {
+              "title": "Neue Referenz",
+              "items": [
+                "update(l => [...l, neu])",
+                "neue Liste",
+                "Anzeige aktuell"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Struktur beeinflusst die Laufzeit",
+          "bullets": [
+            "Kleine Komponenten mit eigenen Signals ergeben kleine Aktualisierungsbereiche",
+            "Eine große Komponente, die alles liest, wird bei jeder Änderung komplett neu bewertet",
+            "Beispiel Invoice-App: Der Filtertext darf nur die Liste neu rendern, nicht den Kopfbereich",
+            "Ein weiterer Grund für die Aufteilung in kleine Komponenten (Übung 31)"
+          ],
+          "notes": "Folie: „Struktur beeinflusst die Laufzeit“.\n\nDie Struktur der Komponenten wirkt sich direkt auf die Geschwindigkeit aus. Wenn kleine Komponenten nur die Signals lesen, die sie wirklich brauchen, wird bei einer Änderung nur ein kleiner Bereich neu geprüft.\n\nEine große Komponente, die alle Daten liest, muss dagegen bei jeder Änderung vollständig neu bewertet werden. In der Invoice-App soll eine Eingabe im Filter nur die Liste betreffen und nicht den Kopfbereich. Das ist ein weiterer Grund für die Aufteilung in kleine Komponenten aus Übung 31."
+        },
+        {
+          "type": "code",
+          "title": "Zustandsstruktur und Rendering",
+          "code": "// Schlecht: ein grobes Objekt-Signal, jede Änderung betrifft alle Leser\nstate = signal({ customers: [], filter: '', selectedId: null });\n\n// Besser: feine Signals und computed, nur betroffene Leser werden aktualisiert\ncustomers  = signal<Customer[]>([]);\nfilter     = signal('');\nselectedId = signal<string | null>(null);\nselected   = computed(() => this.customers().find(c => c.id === this.selectedId()));\n\n// computed meldet nur dann eine Änderung, wenn sich sein Ergebnis wirklich ändert.\n// Leser von selected werden also nicht geprüft, wenn sich nur der Filter ändert.",
+          "notes": "Codefolie „Zustandsstruktur und Rendering“.\n\nDiese Folie zeigt zwei Arten, Zustand zu speichern. Oben steht ein einziges großes Signal mit einem Objekt, das alles enthält. Jede Änderung, auch nur am Filter, erzeugt ein neues Objekt. Damit gelten alle Stellen, die dieses Signal lesen, als geändert.\n\nUnten stehen feine, einzelne Signals und ein „computed“ für den ausgewählten Kunden. Ändert sich nur der Filter, sind die Liste und die Auswahl nicht betroffen. Ein „computed“ meldet außerdem nur dann eine Änderung, wenn sich sein Ergebnis tatsächlich unterscheidet. So werden möglichst wenige Komponenten neu geprüft."
+        },
+        {
+          "type": "code",
+          "title": "@for und track",
+          "code": "<!-- Schlecht: Objektidentität (so im Startprojekt) -->\n@for (customer of store.filtered(); track customer) {\n  <li customer-list-item [customer]=\"customer\"></li>\n}\n\n<!-- Besser: stabile, eindeutige ID -->\n@for (customer of store.filtered(); track customer.id) {\n  <li customer-list-item [customer]=\"customer\"></li>\n} @empty {\n  <p>Keine Kunden gefunden.</p>\n}\n\n<!-- Weitere Variablen im Block: $index, $first, $last, $even, $odd, $count -->",
+          "notes": "Codefolie „@for und track“.\n\n„@for“ ist die Schleife im Template. Hinter „track“ steht ein Ausdruck, der jeden Eintrag eindeutig kennzeichnet. Im ersten Beispiel ist das das Objekt selbst, so stand es im Startprojekt. Im zweiten Beispiel ist es die Kennung „id“ des Kunden.\n\nDer Block „@empty“ wird angezeigt, wenn die Liste leer ist. Innerhalb der Schleife gibt es außerdem eingebaute Variablen, zum Beispiel „$index“ für die Position oder „$count“ für die Anzahl. Warum die Kennung besser ist als das Objekt, erklärt die nächste Folie."
+        },
+        {
+          "type": "content",
+          "title": "Was macht track genau?",
+          "bullets": [
+            "Angular berechnet für jeden Eintrag einen Schlüssel",
+            "Neue Liste: Schlüssel mit der alten Liste vergleichen",
+            [
+              "gleicher Schlüssel: DOM wiederverwenden, ggf. verschieben",
+              1
+            ],
+            [
+              "neuer Schlüssel: DOM neu anlegen",
+              1
+            ],
+            [
+              "fehlender Schlüssel: DOM entfernen",
+              1
+            ],
+            "track customer: neu geladene Objekte gelten als neu"
+          ],
+          "notes": "Folie: „Was macht track genau?“.\n\nWenn sich die Liste ändert, muss Angular entscheiden, welche HTML-Elemente bleiben, welche neu entstehen und welche verschwinden. Dafür berechnet es für jeden Eintrag einen Schlüssel, nämlich den Ausdruck hinter „track“.\n\nDann vergleicht Angular die Schlüssel der neuen Liste mit denen der alten. Bei gleichem Schlüssel wird das vorhandene Element weiterverwendet und höchstens verschoben. Bei einem neuen Schlüssel entsteht ein neues Element, bei einem fehlenden wird es entfernt. Mit „track customer“ ist der Schlüssel das Objekt selbst. Lädt man die Daten neu, sind alle Objekte neu, und Angular baut die ganze Liste neu auf.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "neue Liste",
+              "Schlüssel je Eintrag",
+              "Vergleich mit alter Liste",
+              "behalten, verschieben, neu, entfernen"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "track: Regeln",
+          "bullets": [
+            "track customer: bei neu geladenen Daten entsteht alles neu",
+            "Zustand der Zeilen (Fokus, Eingaben) geht verloren",
+            "track $index nur bei statischen Listen",
+            "Faustregel: stabile, eindeutige ID verwenden",
+            "Bei Virtual Scrolling: trackBy-Funktion an cdkVirtualFor"
+          ],
+          "notes": "Folie: „track: Regeln“.\n\nDiese Folie fasst die Regeln für „track“ zusammen. Nimmt man das Objekt selbst als Schlüssel, entstehen nach dem Neuladen alle Elemente neu. Dabei geht auch der Zustand der Zeilen verloren, zum Beispiel der Fokus oder eine halb ausgefüllte Eingabe.\n\nDie Position „$index“ als Schlüssel passt nur, wenn sich die Liste nie ändert. Sonst werden Einträge falsch zugeordnet. Die Faustregel lautet: eine stabile, eindeutige Kennung verwenden. Beim Virtual Scrolling, das gleich folgt, übernimmt eine Funktion namens „trackBy“ diese Aufgabe.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "track customer",
+              "items": [
+                "neues Objekt = neues DOM",
+                "Fokus geht verloren"
+              ]
+            },
+            "right": {
+              "title": "track customer.id",
+              "items": [
+                "Zeile bleibt erhalten",
+                "nur Änderungen im DOM"
+              ]
+            }
+          }
+        },
+        {
+          "type": "code",
+          "title": "Berechnungen im Template",
+          "code": "{{ expensiveSum() }}      <!-- Methode: läuft bei jeder Prüfung der Komponente -->\n\n{{ total() }}             <!-- computed: gecacht, rechnet nur bei geänderten Quellen -->\n\n{{ customer.lastOrderDate | daysAgo }}   <!-- reine Pipe: gecacht je Eingabe -->\n\n<!-- Vorsicht bei unreinen Pipes (pure: false) und vielen async-Pipes in Schleifen -->",
+          "notes": "Codefolie „Berechnungen im Template“.\n\nDiese Folie zeigt drei Arten, im Template etwas zu berechnen. Eine normale Methode im Template wird bei jeder Prüfung der Komponente erneut aufgerufen. Ist die Berechnung teuer, kostet das jedes Mal Zeit.\n\nEin „computed“ merkt sich sein Ergebnis und rechnet nur neu, wenn sich die gelesenen Signals geändert haben. Eine „reine Pipe“ wird nur neu ausgeführt, wenn sich ihr Eingabewert ändert. Vorsicht gilt bei „unreinen Pipes“, die bei jeder Prüfung laufen, und bei vielen „async“-Pipes in Schleifen. Teure Berechnungen gehören deshalb in ein „computed“ oder in eine reine Pipe."
+        },
+        {
+          "type": "content",
+          "title": "Große Listen",
+          "bullets": [
+            "track mit ID: weniger Neuaufbau der DOM-Elemente",
+            "OnPush und leichte Zeilenkomponenten: günstigeres Prüfen",
+            "Debounce für Filtereingaben: weniger Neuberechnungen",
+            "Virtual Scrolling (@angular/cdk/scrolling)",
+            [
+              "nur sichtbare Zeilen plus Puffer sind im DOM",
+              1
+            ],
+            "Paginierung oder serverseitiges Filtern: weniger Daten",
+            "Erst messen, welche Maßnahme bei euch zählt"
+          ],
+          "notes": "Folie: „Große Listen“.\n\nBei sehr langen Listen helfen mehrere Maßnahmen. „track“ mit Kennung sorgt dafür, dass Elemente wiederverwendet werden. „OnPush“ und schlanke Zeilenkomponenten machen jede Prüfung billiger. Ein „Debounce“ wartet, bis der Benutzer kurz nicht mehr tippt, und filtert erst dann.\n\n„Virtual Scrolling“ legt nur die Zeilen im HTML an, die gerade sichtbar sind, plus einen kleinen Puffer. Aus 5000 Zeilen werden so etwa 20 bis 30. Bei „Paginierung“ lädt man die Daten seitenweise vom Server, oder der Server filtert gleich selbst. Welche Maßnahme am meisten bringt, zeigt nur die Messung. Genau das untersucht Übung 35."
+        },
+        {
+          "type": "code",
+          "title": "Virtual Scrolling mit dem CDK",
+          "code": "<!-- imports: [ScrollingModule]  aus '@angular/cdk/scrolling' -->\n<cdk-virtual-scroll-viewport class=\"viewport\" itemSize=\"32\" role=\"list\">\n  <div *cdkVirtualFor=\"let customer of store.filtered(); trackBy: trackById\"\n       customer-list-item\n       [customer]=\"customer\"\n       [selected]=\"isSelectedCustomer(customer)\"\n       (chosen)=\"listItemClicked($event)\"></div>\n</cdk-virtual-scroll-viewport>\n\n/* CSS: der Viewport braucht eine feste Höhe */\n.viewport { height: 400px; }\n\n// In der Klasse:\ntrackById = (index: number, customer: Customer) => customer.id;",
+          "notes": "Codefolie „Virtual Scrolling mit dem CDK“.\n\nDiese Lösung stammt aus Übung 35. „cdk-virtual-scroll-viewport“ ist ein Bereich mit Bildlaufleiste, der nur die sichtbaren Zeilen erzeugt. Er kommt aus dem Paket „@angular/cdk“, das man mit npm installiert, und dem „ScrollingModule“. „itemSize“ gibt die Höhe einer Zeile in Pixeln an. Sie muss zur tatsächlichen Zeilenhöhe passen, hier 32 Pixel. Der Bereich selbst braucht eine feste Höhe im CSS.\n\nStatt „@for“ verwendet man hier „*cdkVirtualFor“. Die Funktion „trackById“ übernimmt die Rolle von „track“: Sie bekommt die Position und den Kunden und gibt die Kennung zurück. Die Zeilenkomponente hat einen Attribut-Selektor und wird deshalb als „div“ mit dem Attribut „customer-list-item“ eingesetzt."
+        },
+        {
+          "type": "code",
+          "title": "Debounce für den Filter",
+          "code": "// Eingabefeld zeigt typedFilter sofort, der Store bekommt den Text verzögert\nprotected readonly typedFilter = signal(this.store.filter());\n\nconstructor() {\n  toObservable(this.typedFilter).pipe(\n    debounceTime(250),        // erst nach 250 ms Ruhe weitergeben\n    takeUntilDestroyed()      // beim Zerstören der Komponente abmelden\n  ).subscribe(text => this.store.setFilter(text));\n}\n\nonFilterChanged(text: string) {\n  this.typedFilter.set(text);\n}\nonFilterCleared() {            // Leeren wirkt sofort, ohne Wartezeit\n  this.typedFilter.set('');\n  this.store.setFilter('');\n}",
+          "notes": "Codefolie „Debounce für den Filter“.\n\nDieser Code stammt aus der Kundenliste in Übung 35. Das Eingabefeld ist an das Signal „typedFilter“ gebunden und zeigt den getippten Text sofort an. Der Store, der die große Liste filtert, bekommt den Text aber erst verzögert.\n\nDafür wandelt „toObservable“ das Signal in ein Observable um. „debounceTime(250)“ gibt einen Wert erst weiter, wenn 250 Millisekunden lang kein neuer Wert kam. „takeUntilDestroyed“ beendet das Abonnement automatisch, wenn die Komponente zerstört wird. Dann ruft „subscribe“ die Methode „setFilter“ des Stores auf. Beim Leeren des Filters wird der Store sofort aktualisiert, ohne Wartezeit."
+        },
+        {
+          "type": "content",
+          "title": "Debounce: der Ablauf",
+          "bullets": [
+            "Jeder Tastendruck setzt typedFilter",
+            "toObservable meldet jeden neuen Wert",
+            "debounceTime(250) startet bei jedem Wert neu",
+            "Erst nach 250 ms ohne Eingabe geht der Wert weiter",
+            "Ergebnis: „Hans“ tippen filtert einmal statt viermal",
+            "takeUntilDestroyed verhindert ein Speicherleck"
+          ],
+          "notes": "Folie: „Debounce: der Ablauf“.\n\nDiese Folie zeigt, was beim Tippen passiert. Jeder Tastendruck setzt das Signal „typedFilter“, und „toObservable“ meldet jeden neuen Wert weiter. „debounceTime“ startet dabei jedes Mal eine Wartezeit von 250 Millisekunden neu.\n\nErst wenn der Benutzer 250 Millisekunden lang nicht tippt, wird der letzte Wert an den Store gegeben. Tippt man „Hans“ zügig, wird die große Liste also nur einmal gefiltert und nicht viermal. „takeUntilDestroyed“ sorgt dafür, dass das Abonnement endet, wenn die Komponente verschwindet. Sonst würde es weiterlaufen und Speicher belegen, ein sogenanntes „Speicherleck“.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Tastendruck",
+              "typedFilter.set",
+              "toObservable",
+              "debounceTime(250)",
+              "store.setFilter"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Ladezeit: nur laden, was gebraucht wird",
+          "bullets": [
+            "Lazy Routes: Seiten erst beim Aufruf laden",
+            "@defer: Teile einer Seite erst bei Bedarf laden",
+            "NgOptimizedImage (Übung 27): priority für das Hauptbild",
+            [
+              "width und height verhindern Layout-Sprünge",
+              1
+            ],
+            "Bundle-Hygiene: nur importieren, was man nutzt",
+            [
+              "Tree-Shaking entfernt ungenutzten Code beim Build",
+              1
+            ],
+            "Budgets halten das Start-Bundle klein"
+          ],
+          "notes": "Folie: „Ladezeit: nur laden, was gebraucht wird“.\n\nFür eine kurze Ladezeit lädt man beim Start nur das, was wirklich sofort gebraucht wird. Mit „Lazy Routes“ wird eine Seite erst geladen, wenn der Benutzer sie aufruft. Mit „@defer“ lädt man Teile einer Seite erst später. Beides wird auf den nächsten Folien genauer erklärt.\n\nDie Bild-Direktive „NgOptimizedImage“ aus Übung 27 lädt das wichtigste Bild bevorzugt, wenn man „priority“ setzt. Feste Breite und Höhe verhindern, dass das Layout springt. „Tree-Shaking“ bedeutet, dass der Build ungenutzten Code automatisch weglässt. Das klappt nur, wenn man auch nur das importiert, was man wirklich nutzt."
+        },
+        {
+          "type": "content",
+          "title": "Lazy Loading von Routen",
+          "bullets": [
+            "loadComponent: eine Komponente bei Bedarf laden",
+            "loadChildren: eine ganze Gruppe von Routen laden",
+            "() => import('…') wird erst bei der Navigation aufgerufen",
+            "Der Build legt dafür einen eigenen Lazy Chunk an",
+            "Kein statischer Import der Komponente mehr",
+            [
+              "sonst landet sie trotzdem im Start-Bundle",
+              1
+            ]
+          ],
+          "notes": "Folie: „Lazy Loading von Routen“.\n\n„Lazy Loading“ heißt, etwas erst dann zu laden, wenn es gebraucht wird. Bei Routen gibt es dafür zwei Eigenschaften. „loadComponent“ lädt eine einzelne Komponente, „loadChildren“ eine ganze Liste von Unterrouten, zum Beispiel für einen Verwaltungsbereich.\n\nBeide bekommen eine Funktion, die „import“ aufruft. Angular ruft diese Funktion erst auf, wenn der Benutzer zu dieser Route navigiert. Der Build legt für den importierten Code eine eigene Datei an, einen „Lazy Chunk“. Wichtig: Die Komponente darf nirgends sonst statisch importiert werden, zum Beispiel oben in der Routendatei. Sonst landet sie trotzdem im Start-Bundle.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "Klick auf Link",
+              "Router: loadComponent",
+              "import() lädt Chunk",
+              "Komponente anzeigen"
+            ],
+            "highlight_last": true,
+            "note": "nur beim ersten Aufruf geladen"
+          }
+        },
+        {
+          "type": "code",
+          "title": "loadComponent und loadChildren",
+          "code": "// app.routes.ts (Übung 35)\nexport const routes: Routes = [\n  { path: 'customer', component: CustomerListComponent, canActivate: [authGuard] },\n  {\n    path: 'customer/:id',\n    loadComponent: () => import('./customer/customer-details/customer-details.component')\n      .then(m => m.CustomerDetailsComponent),\n    canActivate: [authGuard]\n  },\n  {\n    path: 'admin',                         // Beispiel: ganzer Bereich\n    loadChildren: () => import('./admin/admin.routes').then(m => m.ADMIN_ROUTES)\n  },\n];\n\n// admin.routes.ts\nexport const ADMIN_ROUTES: Routes = [{ path: '', component: AdminHomeComponent }];",
+          "notes": "Codefolie „loadComponent und loadChildren“.\n\nDie erste Route lädt die Kundenliste ganz normal, sie gehört zum Start-Bundle. Die zweite Route ist die Detailseite aus Übung 35. Sie nutzt „loadComponent“. „import“ lädt die Datei der Komponente und liefert ein Promise mit dem Inhalt der Datei. Mit „then“ wählt man daraus die Komponentenklasse aus. Der Guard „authGuard“ funktioniert wie bei normalen Routen.\n\nDie dritte Route ist ein ausgedachtes Beispiel für einen ganzen Bereich. „loadChildren“ lädt die Datei „admin.routes.ts“ und nimmt daraus die Liste „ADMIN_ROUTES“. Alle Komponenten dieses Bereichs landen dann in eigenen Chunks und werden erst beim Aufruf von „admin“ geladen."
+        },
+        {
+          "type": "content",
+          "title": "@defer: Teile einer Seite später laden",
+          "bullets": [
+            "Inhalt des @defer-Blocks kommt in einen eigenen Chunk",
+            "Voraussetzung: Standalone, nicht anderswo in der Datei benutzt",
+            "Trigger (on …) bestimmen, wann geladen und angezeigt wird",
+            [
+              "on idle (Standard), on viewport, on interaction",
+              1
+            ],
+            [
+              "on hover, on immediate, on timer(2s), when Bedingung",
+              1
+            ],
+            "prefetch: Code vorher laden, aber noch nicht anzeigen",
+            "Blöcke: @placeholder, @loading, @error"
+          ],
+          "notes": "Folie: „@defer: Teile einer Seite später laden“.\n\nMit „@defer“ lädt man einen Teil einer Seite später, zum Beispiel ein großes Diagramm weiter unten. Die Komponenten im Block kommen in eine eigene Datei. Das klappt nur, wenn sie Standalone sind und in derselben Datei nicht an anderer Stelle verwendet werden.\n\nEin „Trigger“ legt fest, wann geladen wird. „on idle“ ist der Standard und bedeutet: wenn der Browser nichts anderes zu tun hat. „on viewport“ heißt: wenn der Bereich in den sichtbaren Teil der Seite kommt. „on interaction“ heißt: beim Klick oder bei einer Eingabe. Es gibt auch Trigger für das Darüberfahren mit der Maus, für sofort, für einen Zeitraum und für eine Bedingung mit „when“. Mit „prefetch“ lädt man den Code schon vorher, zeigt ihn aber erst beim eigentlichen Trigger an."
+        },
+        {
+          "type": "code",
+          "title": "@defer mit Triggern",
+          "code": "@defer (on viewport; prefetch on idle) {\n  <order-history [customerId]=\"customer().id\" />\n} @placeholder (minimum 300ms) {\n  <div class=\"box\">Bestellhistorie</div>      <!-- ein Wurzelelement -->\n} @loading (after 100ms; minimum 500ms) {\n  <p>Lädt …</p>\n} @error {\n  <p>Die Bestellhistorie konnte nicht geladen werden.</p>\n}\n\n<!-- Weitere Beispiele -->\n@defer (on interaction) { <customer-chart /> } @placeholder { <button>Diagramm</button> }\n@defer (when showDetails()) { <customer-details /> }",
+          "notes": "Codefolie „@defer mit Triggern“.\n\nIn diesem Beispiel wird eine ausgedachte Komponente „order-history“ später geladen. Der Code wird schon geladen, wenn der Browser Zeit hat, das ist „prefetch on idle“. Angezeigt wird die Komponente aber erst, wenn der Platzhalter in den sichtbaren Bereich kommt, das ist „on viewport“.\n\n„@placeholder“ ist der Inhalt vor dem Laden. Für „on viewport“ und „on interaction“ muss er genau ein Wurzelelement haben, denn Angular beobachtet dieses Element. „minimum“ verhindert ein kurzes Flackern. „@loading“ erscheint während des Ladens, hier erst nach 100 Millisekunden und dann mindestens 500 Millisekunden lang. „@error“ erscheint, wenn das Laden fehlschlägt. Unten stehen zwei weitere Beispiele: Laden beim Klick auf den Platzhalter und Laden, sobald eine Bedingung wahr ist."
+        },
+        {
+          "type": "content",
+          "title": "@defer: der Ablauf",
+          "bullets": [
+            "Seite lädt: @placeholder wird angezeigt",
+            "prefetch-Trigger: Chunk wird im Hintergrund geladen",
+            "Haupt-Trigger: Anzeige wird umgeschaltet",
+            [
+              "noch nicht geladen: @loading, sonst sofort Inhalt",
+              1
+            ],
+            "Fehler beim Laden: @error",
+            "Danach bleibt der Inhalt dauerhaft geladen"
+          ],
+          "notes": "Folie: „@defer: der Ablauf“.\n\nDiese Folie zeigt die Reihenfolge bei „@defer“. Beim Laden der Seite sieht der Benutzer zuerst den Platzhalter. Kommt der „prefetch“-Trigger, lädt der Browser den Code im Hintergrund, aber die Anzeige ändert sich noch nicht.\n\nKommt dann der eigentliche Trigger, schaltet Angular um. Ist der Code schon da, erscheint der Inhalt sofort. Sonst wird währenddessen der „@loading“-Block gezeigt. Schlägt das Laden fehl, erscheint der „@error“-Block. Ein einmal geladener Block bleibt geladen, auch wenn der Trigger später nicht mehr zutrifft.",
+          "diagram": {
+            "kind": "flow",
+            "steps": [
+              "@placeholder sichtbar",
+              "prefetch on idle: Chunk laden",
+              "on viewport: Trigger",
+              "@loading (falls nötig)",
+              "Inhalt sichtbar"
+            ],
+            "highlight_last": true
+          }
+        },
+        {
+          "type": "content",
+          "title": "Rendering-Strategien im Überblick",
+          "bullets": [
+            "CSR (Client-Side Rendering): Browser baut alles",
+            [
+              "einfach, aber erster Inhalt kommt später",
+              1
+            ],
+            "SSR mit Hydration: Server liefert fertiges HTML",
+            [
+              "Browser macht es danach bedienbar",
+              1
+            ],
+            "Prerendering (SSG): HTML entsteht beim Build",
+            "Interne Fachanwendungen: oft reicht CSR",
+            "Öffentliche Seiten: SSR prüfen (Folie „SSR & Hydration“)"
+          ],
+          "notes": "Folie: „Rendering-Strategien im Überblick“.\n\nEs gibt drei Wege, wie eine Seite ihren Inhalt bekommt. Beim „Client-Side Rendering“ baut der Browser alles selbst auf. Das ist einfach, aber der erste Inhalt erscheint später. Beim „Server-Side Rendering“ liefert der Server schon fertiges HTML. „Hydration“ heißt, dass der Browser dieses HTML danach bedienbar macht. Beim „Prerendering“ wird das HTML schon beim Bauen der Anwendung erzeugt.\n\nFür interne Fachanwendungen reicht oft das Rendern im Browser. Für öffentliche Seiten lohnt es sich, Server-Side Rendering zu prüfen, weil es den LCP-Wert verbessert. Dazu folgt nach diesem Kapitel die Folie „Server-Side Rendering (SSR) & Hydration“.",
+          "diagram": {
+            "kind": "compare",
+            "left": {
+              "title": "Client (CSR)",
+              "items": [
+                "Browser baut alles",
+                "erster Inhalt später"
+              ]
+            },
+            "right": {
+              "title": "Server (SSR, SSG)",
+              "items": [
+                "HTML kommt fertig",
+                "schneller erster Inhalt"
+              ]
+            }
+          }
+        },
+        {
+          "type": "content",
+          "title": "Typische Ursachen für Laufzeitprobleme",
+          "bullets": [
+            "1. Methodenaufrufe im Template mit teurer Berechnung",
+            "2. @for ohne geeigneten track-Ausdruck",
+            "3. Sehr große Listen ohne Virtualisierung oder Paginierung",
+            "4. Grobes Objekt-Signal, das alles ungültig macht",
+            "5. Zu viele Effects oder Effects, die Signals schreiben",
+            "6. Nicht abgemeldete Subscriptions, Timer und Event-Listener (Speicherlecks)",
+            "7. Zu große Bundles oder zu viele Bibliotheken beim Start",
+            "8. Ungeeignete Bildgrößen und -formate",
+            "9. Zu häufige HTTP-Aufrufe ohne Debounce oder Cache"
+          ],
+          "notes": "Folie: „Typische Ursachen für Laufzeitprobleme“.\n\nDiese Liste fasst die häufigsten Ursachen für Probleme zusammen. Man kann sie als Checkliste benutzen, wenn eine Anwendung langsam ist.\n\nEin „Speicherleck“ entsteht, wenn Programmteile nicht aufgeräumt werden, zum Beispiel ein Timer oder ein Abonnement, das weiterläuft. Der Speicherbedarf wächst dann ständig. Wichtig bleibt: Man prüft zuerst mit einer Messung, welche Ursache wirklich zutrifft, und beginnt dann mit der Maßnahme."
+        },
+        {
+          "type": "content",
+          "title": "Vorbereitung auf Skalierung",
+          "bullets": [
+            "Messbare Budgets (Bundle, LCP) in der Pipeline festlegen",
+            "Performance-Tests bei Releases, z. B. mit Lighthouse CI",
+            "Frühere Entscheidungen zahlen ein: kleine Komponenten, feine Signals, Lazy Loading",
+            "OnPush und track mit ID von Anfang an als Standard",
+            "Wiederholbar messen und Ergebnisse dokumentieren"
+          ],
+          "notes": "Folie: „Vorbereitung auf Skalierung“.\n\nWächst eine Anwendung, sollte man Performance dauerhaft im Blick behalten. Dazu legt man Grenzwerte fest, etwa für die Bundle-Größe, und prüft sie in der Pipeline automatisch. Auch bei neuen Versionen kann man Messungen durchführen.\n\nDie Entscheidungen aus den früheren Kapiteln helfen dabei: kleine Komponenten, ein feines Signal-Modell und Lazy Loading. „OnPush“ und „track“ mit Kennung setzt man am besten von Anfang an. Wichtig ist, immer gleich zu messen und die Ergebnisse aufzuschreiben, damit man Veränderungen vergleichen kann."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 35: Langsame Liste (1/2)",
+          "bullets": [
+            "Öffne das Projekt 35_performance (baut auf 34_tests auf, npm install @angular/cdk)",
+            "1. Last erzeugen: Lastgenerator im CustomerStore ergänzen (Code in Aufgabe.md)",
+            [
+              "InjectionToken LOAD_TEST_SIZE mit factory: () => 5000 (0 = aus)",
+              1
+            ],
+            [
+              "in load(): geladene Kunden plus createLoadTestCustomers() setzen",
+              1
+            ],
+            [
+              "Tests mit genauen Listen: { provide: LOAD_TEST_SIZE, useValue: 0 }",
+              1
+            ],
+            "2. Messen: Chrome DevTools (Performance) bei Eingabe im Filter",
+            [
+              "und Angular DevTools Profiler: Dauer, DOM-Knoten, neu gerenderte Komponenten",
+              1
+            ],
+            "Werte als Ausgangslage in die Ergebnis-Tabelle eintragen",
+            "Musterlösung: 35_performance (baut auf 34_tests auf)"
+          ],
+          "notes": "Folie: „Übung 35: Langsame Liste (1/2)“.\n\nErklärung für die Dolmetscherin:\nDies ist der erste Teil der Aufgabenstellung für Übung 35 im Ordner 35_performance. Sie baut auf Übung 34 auf. Zusätzlich wird das Paket „@angular/cdk“ gebraucht.\n\nZuerst erzeugen die Teilnehmer künstlich Last. Sie fügen in den Store einen Generator ein, der 5000 Testkunden anlegt. Die Anzahl kommt aus einem „InjectionToken“, also einem Wert, den man über Dependency Injection einstellen kann. Mit dem Wert 0 ist der Generator aus, das brauchen die Tests. Danach messen sie mit den Chrome DevTools und dem Profiler der Angular DevTools, wie lange eine Eingabe im Filter dauert, und tragen die Werte als Ausgangslage ein."
+        },
+        {
+          "type": "exercise",
+          "title": "Übung 35: Langsame Liste (2/2)",
+          "bullets": [
+            "3. Optimieren, immer ein Schritt, danach neu messen:",
+            [
+              "a) track customer zu track customer.id",
+              1
+            ],
+            [
+              "b) OnPush für CustomerListItemComponent und CustomerListComponent",
+              1
+            ],
+            [
+              "c) Debounce für den Filter (250 ms): typedFilter + toObservable + debounceTime",
+              1
+            ],
+            [
+              "d) Virtual Scrolling mit cdk-virtual-scroll-viewport (itemSize 32)",
+              1
+            ],
+            [
+              "e) optional: CustomerDetailsComponent als Lazy Route (loadComponent)",
+              1
+            ],
+            "4. Tabelle füllen: Maßnahme, Messwert vorher, Messwert nachher, Fazit",
+            "5. Diskussion: Was brachte am meisten? Was war unnötig?",
+            "Musterlösung: 35_performance (baut auf 34_tests auf)"
+          ],
+          "notes": "Folie: „Übung 35: Langsame Liste (2/2)“.\n\nErklärung für die Dolmetscherin:\nDies ist der zweite Teil der Aufgabenstellung für Übung 35. Die Teilnehmer verbessern die Anwendung in kleinen Schritten und messen nach jedem Schritt erneut. Die Schritte sind: eine eindeutige Kennung bei „track“, „OnPush“ für die Liste und die Listeneinträge, ein Debounce von 250 Millisekunden für den Filter, Virtual Scrolling und optional eine Lazy Route für die Detailseite.\n\nDie Ergebnisse tragen sie in eine Tabelle ein. Zum Schluss besprechen sie, welche Maßnahme am meisten gebracht hat und welche sich nur im Zusammenspiel gelohnt hat. Nach dieser Übung folgt die Folie zum Server-Side Rendering."
+        }
+      ]
+    }
+  ]
+}
