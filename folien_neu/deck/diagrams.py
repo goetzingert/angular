@@ -221,6 +221,8 @@ def _label(slide, x, y, w, h, text, size, color=DARK, align=PP_ALIGN.CENTER, anc
     s = slide.shapes.add_textbox(Emu(x), Emu(y), Emu(w), Emu(h))
     _text(s, text, size, color=color, align=align, anchor=anchor, bold=bold)
     if bg:
+        s.text_frame.word_wrap = False
+    if bg:
         s.fill.solid()
         s.fill.fore_color.rgb = WHITE
     s.text_frame.margin_top = s.text_frame.margin_bottom = Emu(0)
@@ -376,7 +378,7 @@ def composition(slide, d):
             col = RGBColor(0xC0, 0x5A, 0x1E) if ln.get("accent") else GREEN
             # Beschriftung mit weißem Hintergrund, damit sie auch über Kastenrändern lesbar bleibt
             chars = max(len(t) for t in ln["text"].split("\n"))
-            lw = int(chars * (size - 1) * 0.62 * 12700) + 160000
+            lw = int(chars * (size - 1) * 0.78 * 12700) + 240000   # fett, plus Innenabstand: kein Umbruch
             if x1 == x2:   # senkrecht: Beschriftung rechts daneben
                 _label(slide, mx + 60000, my - 140000, lw, 280000, ln["text"], size - 1, color=col, bold=True,
                        align=PP_ALIGN.LEFT, anchor=MSO_ANCHOR.MIDDLE, bg=True)
