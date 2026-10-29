@@ -38,6 +38,7 @@ Jede Folie hat `type`, `title`, `notes` (Sprechtext, **Pflicht**) und je nach Ty
 | `code` | Folie 160 (Titel + Code) | `code`: String, Zeilenumbrüche mit `\n` |
 | `exercise` | Folie 258 (Übungsfolie) | `bullets`: Aufgabenzeilen; letzte Zeile „Musterlösung: <Ordner> (baut auf <Vorgänger> auf)“ |
 | `divider` | Folie 269 (Kapitel-Trenner, grün) | nur `title` |
+| `diagram` | Folie 256 (Titel, ohne Aufzählung) | `diagram` über die ganze Folienbreite, optional `caption` (eine Zeile, höchstens 130 Zeichen) |
 
 ### Grenzen pro Folie (damit nichts überläuft)
 - `content`/`exercise`: höchstens 9 Zeilen, höchstens ca. 95 Zeichen pro Zeile. Lieber auf zwei Folien aufteilen (Titel „… (1/2)“, „… (2/2)“).
@@ -73,3 +74,16 @@ Eine Inhaltsfolie kann ein Feld `"diagram"` haben. Die Aufzählung steht dann li
 - `code`: `{"title": "Datei", "text": "Zeile 1\nZeile 2"}` (höchstens 16 Zeilen, etwa 34 Zeichen pro Zeile)
 
 Kurze Texte verwenden (höchstens etwa 30 Zeichen pro Kasten). Ein Diagramm ersetzt nicht den Sprechtext: Der Sprechtext sollte es kurz beschreiben.
+
+### Sequenz- und Kompositionsdiagramme
+Zusätzlich gibt es zwei Arten, die das Zusammenspiel mehrerer Klassen zeigen. Neben Text (`type: content`) sind sie schmal;
+mit `type: diagram` stehen sie über die ganze Breite (mehr Teilnehmer, längere Beschriftungen).
+
+- `sequence`: `{"actors": ["Template", "Router", "RouterOutlet"], "steps": [{"from": 0, "to": 1, "text": "navigate(['/customer', 5])"}, {"from": 1, "to": 1, "text": "Guards prüfen"}, {"from": 1, "to": 0, "text": "true", "reply": true}], "note": "…"}`
+  - `from`/`to` sind Indizes in `actors`; gleicher Index = Selbstaufruf (Schleife); `reply: true` = gestrichelte Antwort.
+  - Schritte werden automatisch nummeriert. Grenzen: neben Text 2–3 Teilnehmer und bis 8 Schritte, `type: diagram` 2–6 Teilnehmer und bis 10 Schritte.
+  - Beschriftung kurz halten: neben Text ~22 Zeichen, breit bei 5–6 Teilnehmern ~30 Zeichen, bei 3–4 ~45 Zeichen.
+- `composition`: `{"root": {"label": "AppComponent", "sub": "app-root", "children": [ {"label": "<router-outlet>", "children": [ {"label": "CustomerList", "highlight": true} ]} ]}, "links": [{"from": "A", "to": "B", "text": "[customer]"}], "note": "…"}`
+  - Verschachtelte Kästen: ein Kasten innerhalb eines anderen steht in dessen Template bzw. gehört zu ihm (Komponentenbaum, Injector-Hierarchie, Schichten).
+  - `children` nebeneinander (höchstens 4) oder mit `"vertical": true` untereinander (höchstens 5); höchstens 4 Ebenen und 16 Kästen; `label` muss eindeutig sein.
+  - `links`: Pfeile zwischen Kästen (am besten Geschwister), Beschriftung z. B. `[customer]` (Input) oder `(selected)` (Output); `"accent": true` färbt orange, `"dashed": true` gestrichelt.

@@ -130,6 +130,64 @@
      }
     },
     {
+     "type": "diagram",
+     "title": "Zusammenspiel: Template, Direktive, Element",
+     "caption": "Inputs kommen aus dem Template, Ereignisse vom Element, Host-Bindungen gehen ans Element.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Eltern-Template",
+       "Angular",
+       "HighlightDirective",
+       "<p> im DOM"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "<p appHighlight>"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "Selector [appHighlight] passt"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "neue Instanz für dieses <p>"
+       },
+       {
+        "from": 0,
+        "to": 2,
+        "text": "Input: highlightColor = 'lightblue'"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "(mouseenter) → active.set(true)"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "[style.backgroundColor] = 'lightblue'"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "(mouseleave) → active.set(false)"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "[style.backgroundColor] = null"
+       }
+      ],
+      "note": "host-Objekt: Angular verbindet Ereignisse und Bindungen, kein direkter DOM-Zugriff"
+     },
+     "notes": "Folie: „Zusammenspiel: Template, Direktive, Element“.\n\nDas Sequenzdiagramm zeigt, wer bei der Direktive „HighlightDirective“ mit wem spricht. Es gibt vier Beteiligte: das Template der Elternkomponente, Angular selbst, die Direktive und das Absatz-Element im DOM, also in der Seite des Browsers. Im Template steht ein Absatz mit dem Attribut „appHighlight“. Angular erkennt, dass der Selector der Direktive passt, und erzeugt für genau diesen Absatz eine eigene Instanz.\n\nDann setzt Angular den Input „highlightColor“ auf den Wert aus dem Template, hier „lightblue“. Fährt der Benutzer mit der Maus über den Absatz, meldet das Element das Ereignis „mouseenter“. Die Direktive setzt daraufhin ihr Signal „active“ auf wahr. Durch die Host-Bindung schreibt Angular die Hintergrundfarbe an das Element. Verlässt die Maus den Absatz, läuft dasselbe rückwärts, und die Farbe wird entfernt.\n\nWichtig ist: Die Direktive fasst das Element nie selbst an. Sie beschreibt im „host“-Objekt nur, was verbunden werden soll, und Angular erledigt den Rest."
+    },
+    {
      "type": "content",
      "title": "Route Guards: Wozu?",
      "bullets": [
@@ -180,6 +238,139 @@
      "title": "Funktionaler Guard: authGuard",
      "code": "import { inject } from '@angular/core';\nimport { CanActivateFn, Router } from '@angular/router';\nimport { AuthService } from './auth.service';\n\nexport const authGuard: CanActivateFn = (route, state) => {\n  const authService = inject(AuthService);\n  const router = inject(Router);\n\n  if (authService.isLoggedIn()) {\n    return true;\n  }\n  // Umleitung zur Login-Seite, Ziel-URL für später merken\n  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });\n};\n\n// app.routes.ts – Guard ohne Klammern eintragen:\n{ path: 'customer', component: CustomerListComponent, canActivate: [authGuard] }",
      "notes": "Codefolie „Funktionaler Guard: authGuard“.\n\nDer Guard ist eine einfache Funktion, die in einer Konstante gespeichert wird. Der Typ „CanActivateFn“ legt fest, welche Parameter sie bekommt und was sie zurückgeben darf. Früher brauchte man dafür eine ganze Klasse mit einem Interface, heute reicht diese Funktion.\n\nMit „inject()“ holt sich der Guard den „AuthService“ und den „Router“. Ist der Nutzer angemeldet, gibt er „true“ zurück. Sonst erzeugt er mit „createUrlTree“ eine Umleitung zur Login-Seite. Die ursprünglich gewünschte Adresse hängt er als Parameter „returnUrl“ an, damit die Login-Seite danach dorthin zurückspringen kann.\n\nIn den Routen trägt man den Guard im Array „canActivate“ ein, und zwar ohne runde Klammern. Man übergibt also die Funktion selbst, der Router ruft sie später auf."
+    },
+    {
+     "type": "diagram",
+     "title": "Ablauf: Guard leitet zum Login um",
+     "caption": "Vorher: nicht angemeldet, Aufruf /customer. Nachher: URL /login, LoginComponent im Outlet.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Browser",
+       "Router",
+       "authGuard",
+       "AuthService",
+       "RouterOutlet"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "Adresse /customer aufgerufen"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "Route 'customer' passt"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "authGuard(route, state)"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "isLoggedIn()"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "false",
+        "reply": true
+       },
+       {
+        "from": 2,
+        "to": 1,
+        "text": "UrlTree '/login'",
+        "reply": true
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "Abbruch, neue Navigation /login"
+       },
+       {
+        "from": 1,
+        "to": 4,
+        "text": "LoginComponent anzeigen"
+       },
+       {
+        "from": 1,
+        "to": 0,
+        "text": "Adressleiste: /login",
+        "reply": true
+       }
+      ],
+      "note": "Die CustomerListComponent wird gar nicht erst erzeugt"
+     },
+     "notes": "Folie: „Ablauf: Guard leitet zum Login um“.\n\nDas Diagramm zeigt den Weg einer Navigation, wenn der Benutzer noch nicht angemeldet ist. Ausgangspunkt: Der Benutzer ruft im Browser die Adresse „/customer“ auf. Der Router sucht die passende Route und findet „customer“. Diese Route hat in „canActivate“ den „authGuard“ eingetragen. Deshalb ruft der Router zuerst diese Funktion auf und übergibt ihr das Ziel.\n\nDer Guard fragt den „AuthService“ mit „isLoggedIn()“, ob jemand angemeldet ist. Die Antwort ist „false“. Der Guard gibt deshalb einen „UrlTree“ zurück, also eine fertige Zieladresse, hier „/login“. Der Router bricht die erste Navigation ab und startet eine neue zur Login-Seite. Im „RouterOutlet“, dem Platzhalter für die aktuelle Seite, erscheint jetzt die „LoginComponent“, und die Adressleiste zeigt „/login“.\n\nDie Kundenliste wird in diesem Fall gar nicht erst erzeugt. Die Musterlösung ruft statt des „UrlTree“ „router.navigate“ auf und gibt „false“ zurück; das Ergebnis für den Benutzer ist dasselbe."
+    },
+    {
+     "type": "diagram",
+     "title": "Ablauf: Nach dem Login zur Kundenliste",
+     "caption": "Vorher: URL /login, LoginComponent im Outlet. Nachher: URL /customer, CustomerList im Outlet.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "LoginComponent",
+       "AuthService",
+       "Router",
+       "authGuard",
+       "RouterOutlet"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "login()"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "loggedIn.set(true)"
+       },
+       {
+        "from": 0,
+        "to": 2,
+        "text": "navigate(['/customer'])"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "authGuard(route, state)"
+       },
+       {
+        "from": 3,
+        "to": 1,
+        "text": "isLoggedIn()"
+       },
+       {
+        "from": 1,
+        "to": 3,
+        "text": "true",
+        "reply": true
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "true",
+        "reply": true
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "LoginComponent entfernen"
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "CustomerListComponent zeigen"
+       }
+      ],
+      "note": "Guard und LoginComponent nutzen dieselbe AuthService-Instanz (providedIn: 'root')"
+     },
+     "notes": "Folie: „Ablauf: Nach dem Login zur Kundenliste“.\n\nDieses Diagramm setzt das vorige fort. Ausgangspunkt ist jetzt die Login-Seite: Die Adresse lautet „/login“, und im „RouterOutlet“ steht die „LoginComponent“. Der Benutzer klickt auf „Anmelden“. Die Komponente ruft „login()“ im „AuthService“ auf, und der Dienst setzt sein Signal „loggedIn“ auf wahr.\n\nDanach ruft die Komponente „router.navigate“ mit dem Ziel „/customer“ auf. Der Router ruft wieder den „authGuard“ auf, und der Guard fragt erneut „isLoggedIn()“. Diesmal ist die Antwort „true“, und der Guard gibt ebenfalls „true“ zurück. Die Navigation darf weiterlaufen.\n\nDer Router entfernt die „LoginComponent“ aus dem Outlet und zeigt dort die „CustomerListComponent“. Das funktioniert nur, weil Guard und Login-Komponente denselben „AuthService“ verwenden: Er ist mit „providedIn: 'root'“ einmal für die ganze Anwendung vorhanden."
     },
     {
      "type": "content",
@@ -352,6 +543,78 @@
      "title": "Header ergänzen mit req.clone",
      "code": "import { inject } from '@angular/core';\nimport { HttpInterceptorFn } from '@angular/common/http';\n\nexport const authInterceptor: HttpInterceptorFn = (req, next) => {\n  const token = inject(AuthService).token();   // angenommen: Token als Signal\n\n  // Nur eigene API-Aufrufe erhalten das Token\n  if (!token || !req.url.startsWith('api/')) {\n    return next(req);\n  }\n\n  // req ist unveränderlich: veränderte Kopie erzeugen\n  const authReq = req.clone({\n    setHeaders: { Authorization: `Bearer ${token}` }\n  });\n  return next(authReq);\n};",
      "notes": "Codefolie „Header ergänzen mit req.clone“.\n\nDieses Beispiel schreibt ein Anmelde-Token in jede Anfrage an die eigene Schnittstelle. Wir nehmen an, dass der „AuthService“ das Token als Signal bereitstellt. Der „AuthService“ aus der Übung hat kein Token, er merkt sich nur, ob jemand angemeldet ist. Das Beispiel zeigt also eine typische Erweiterung.\n\nGibt es kein Token oder geht die Anfrage an einen fremden Server, wird sie unverändert weitergereicht. Sonst erzeugt „req.clone“ eine Kopie der Anfrage. Die Option „setHeaders“ ergänzt dabei einen Kopfeintrag „Authorization“ mit dem Token. Diese Kopie wird mit „next“ weitergereicht.\n\nWichtig ist die Prüfung der Adresse. Sonst würde das Token auch an fremde Server geschickt."
+    },
+    {
+     "type": "diagram",
+     "title": "Ablauf: Anfrage durch die Interceptors",
+     "caption": "withInterceptors([loggingInterceptor, authInterceptor]): hin vorwärts, zurück rückwärts.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "CustomerService",
+       "HttpClient",
+       "loggingInterceptor",
+       "authInterceptor",
+       "Backend"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "get('api/customer') + subscribe"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "loggingInterceptor(req, next)"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "console.log: gestartet"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "next(req)"
+       },
+       {
+        "from": 3,
+        "to": 3,
+        "text": "req.clone(): Authorization"
+       },
+       {
+        "from": 3,
+        "to": 4,
+        "text": "next(authReq): GET api/customer"
+       },
+       {
+        "from": 4,
+        "to": 3,
+        "text": "200 OK + JSON",
+        "reply": true
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "Antwort unverändert",
+        "reply": true
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "tap: console.log ok (… ms)"
+       },
+       {
+        "from": 2,
+        "to": 0,
+        "text": "Antwort über HttpClient",
+        "reply": true
+       }
+      ],
+      "note": "Die Anfrage startet erst mit subscribe(); jeder Interceptor gibt das Observable von next() zurück"
+     },
+     "notes": "Folie: „Ablauf: Anfrage durch die Interceptors“.\n\nDas Sequenzdiagramm zeigt eine einzelne Anfrage mit zwei Interceptors. Der „CustomerService“ ruft „get“ beim „HttpClient“ auf und abonniert das Ergebnis. Erst durch das Abonnieren startet die Anfrage. Der „HttpClient“ ruft zuerst den „loggingInterceptor“ auf, weil er im Array von „withInterceptors“ an erster Stelle steht. Dieser schreibt „gestartet“ in die Konsole und reicht die Anfrage mit „next(req)“ an das nächste Glied weiter.\n\nDer „authInterceptor“ erzeugt mit „req.clone“ eine Kopie der Anfrage mit dem Kopfeintrag „Authorization“, also dem Token. Diese Kopie gibt er mit „next“ weiter, und erst jetzt geht die Anfrage an den Server.\n\nDie Antwort läuft in umgekehrter Reihenfolge zurück: zuerst durch den „authInterceptor“, dann durch den „loggingInterceptor“. Der Logging-Interceptor sieht die Antwort im Operator „tap“ und schreibt die Dauer in die Konsole. Zum Schluss kommt die Antwort beim „CustomerService“ an."
     },
     {
      "type": "content",
@@ -597,6 +860,77 @@
      "notes": "Codefolie „Resources im Kursprojekt“.\n\nOben steht die Kundenliste. „httpResource“ bekommt eine Funktion, die die Adresse „api/customer“ liefert. Der Server antwortet mit einem Objekt, in dem die Liste im Feld „data“ steckt. Deshalb holt „customers“ die Liste aus dem Wert heraus und liefert eine leere Liste, solange nichts geladen ist. Ladezustand und Fehler werden direkt aus der Resource übernommen.\n\nUnten steht die Detailansicht. Hier wird „rxResource“ verwendet, weil der „CustomerService“ schon eine Methode „getById“ hat, die ein Observable liefert. „params“ liest den Input „id“. Die Funktion „stream“ bekommt die Nummer und ruft den Service auf. Fehlt die Nummer, wirft sie einen Fehler. Ändert sich die Nummer, lädt Angular automatisch den neuen Kunden. Den früheren „effect“ mit „subscribe“ braucht man nicht mehr."
     },
     {
+     "type": "diagram",
+     "title": "Ablauf: rxResource und neue Kunden-ID",
+     "caption": "CustomerDetailsComponent: id kommt per withComponentInputBinding aus der URL.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Router",
+       "id = input()",
+       "rxResource",
+       "CustomerService",
+       "Template"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "URL /customer/5: id = '5'"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "params() liefert '5'"
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "isLoading() = true"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "stream: getById('5')"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "Kunde 5 (über HttpClient)",
+        "reply": true
+       },
+       {
+        "from": 2,
+        "to": 4,
+        "text": "value() = Kunde 5"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "URL /customer/7: id = '7'"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "Abbruch alt, reloading"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "stream: getById('7')"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "Kunde 7: value() neu",
+        "reply": true
+       }
+      ],
+      "note": "Gleiche Route: Angular behält die Komponente und setzt nur den Input neu"
+     },
+     "notes": "Folie: „Ablauf: rxResource und neue Kunden-ID“.\n\nDas Diagramm zeigt, wie die Detailseite einen Kunden lädt. Der Benutzer öffnet die Adresse „/customer/5“. Weil im Projekt „withComponentInputBinding“ eingeschaltet ist, schreibt der Router den Wert aus der Adresse direkt in den Input „id“ der „CustomerDetailsComponent“. Die Funktion „params“ der Resource liest dieses Signal und liefert „5“. Die Resource meldet sofort „isLoading“, und das Template zeigt den Ladehinweis.\n\nDann ruft die Resource ihre Funktion „stream“ auf. Diese fragt den „CustomerService“ mit „getById“. Der Service lädt über den „HttpClient“ und liefert Kunde 5 zurück. Die Resource legt ihn in „value()“ ab, und das Template zeigt die Daten.\n\nWechselt der Benutzer auf „/customer/7“, bleibt dieselbe Komponente bestehen, nur der Input „id“ bekommt einen neuen Wert. Die Resource beendet die alte Anfrage, wechselt in den Zustand „reloading“ und ruft „getById“ mit 7 auf. Danach steht Kunde 7 in „value()“. Niemand muss dafür selbst abonnieren."
+    },
+    {
      "type": "content",
      "title": "httpResource im Detail",
      "bullets": [
@@ -762,6 +1096,59 @@
      }
     },
     {
+     "type": "diagram",
+     "title": "Ablauf: NgOptimizedImage im Browser",
+     "caption": "Logo in customer-details.component.html: ngSrc und priority werden zu Browser-Attributen.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Template",
+       "NgOptimizedImage",
+       "Browser"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 1,
+        "text": "[ngSrc]=\"c.imageUrl\" width=200 height=200 priority"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "prüft: Größe oder fill vorhanden?"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "width / height setzen: Platz reserviert"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "priority: loading=eager, fetchpriority=high"
+       },
+       {
+        "from": 1,
+        "to": 2,
+        "text": "src setzen (mit Loader auch srcset)"
+       },
+       {
+        "from": 2,
+        "to": 1,
+        "text": "Bild geladen: load-Ereignis",
+        "reply": true
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "nur Entwicklung: Seitenverhältnis prüfen"
+       }
+      ],
+      "note": "Ohne priority setzt die Direktive loading=lazy: Laden erst nahe am Sichtbereich"
+     },
+     "notes": "Folie: „Ablauf: NgOptimizedImage im Browser“.\n\nDas Diagramm zeigt, was mit dem Kundenlogo auf der Detailseite passiert. Im Template steht ein Bild mit „ngSrc“, einer Breite und Höhe von 200 Pixeln und dem Attribut „priority“. Die Direktive „NgOptimizedImage“ prüft zuerst, ob eine Größe oder „fill“ angegeben ist. Fehlt beides, meldet sie einen Fehler.\n\nDann schreibt die Direktive die Attribute für den Browser: Breite und Höhe, damit der Platz schon vor dem Laden reserviert ist. Wegen „priority“ setzt sie außerdem „loading=eager“ und „fetchpriority=high“. Das bedeutet: sofort und mit hoher Wichtigkeit laden. Zum Schluss setzt sie die eigentliche Bildadresse; mit einem Bild-Loader für ein CDN, also einen Bildserver, entsteht auch ein „srcset“ mit mehreren Größen.\n\nDer Browser lädt das Bild, und weil der Platz reserviert war, springt der Text nicht. Im Entwicklungsmodus prüft die Direktive nach dem Laden noch, ob das Seitenverhältnis stimmt, und warnt sonst in der Konsole. Ohne „priority“ würde sie „loading=lazy“ setzen, das Bild lädt dann erst kurz bevor es sichtbar wird."
+    },
+    {
      "type": "exercise",
      "title": "Übung 27: NgOptimizedImage",
      "bullets": [
@@ -845,6 +1232,57 @@
       "title": "Aus Sicht von CardComponent",
       "text": "<!-- card.component.html: View -->\n<div class=\"card\" #frame>\n  <ng-content />\n</div>\n\n<!-- Elterntemplate: Content -->\n<app-card>\n  <h3 #title>Kunde</h3>\n</app-card>\n\nframe = viewChild('frame');\ntitle = contentChild('title');"
      }
+    },
+    {
+     "type": "diagram",
+     "title": "Komposition: Was ist View, was ist Content?",
+     "caption": "viewChild sucht im eigenen Template der Card, contentChild im Inhalt vom Eltern-Template.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "<app-card> im Template von CustomerDetailsComponent",
+       "sub": "CardComponent",
+       "children": [
+        {
+         "label": "View: card.component.html",
+         "sub": "frame = viewChild('frame')",
+         "children": [
+          {
+           "label": "<div class=\"card\" #frame>",
+           "children": [
+            {
+             "label": "<ng-content />",
+             "sub": "Platzhalter",
+             "highlight": true
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "label": "Content: aus dem Eltern-Template",
+         "sub": "title = contentChild('title')",
+         "children": [
+          {
+           "label": "<h3 #title>Kunde</h3>",
+           "highlight": true
+          }
+         ]
+        }
+       ]
+      },
+      "note": "Der Content gehört zum Eltern-Template, angezeigt wird er an der Stelle von <ng-content />",
+      "links": [
+       {
+        "from": "<h3 #title>Kunde</h3>",
+        "to": "<ng-content />",
+        "text": "erscheint",
+        "accent": true,
+        "dashed": true
+       }
+      ]
+     },
+     "notes": "Folie: „Komposition: Was ist View, was ist Content?“.\n\nDas Diagramm zeigt verschachtelte Kästen. Der äußere Kasten ist die Karte „app-card“, also die „CardComponent“, so wie sie im Template der Elternkomponente „CustomerDetailsComponent“ steht.\n\nIm linken Kasten steht die View der Karte. Das ist das eigene Template der Karte aus „card.component.html“: das umschließende „div“ mit der Template-Variable „frame“ und darin der Platzhalter „ng-content“. Diese Elemente findet die Karte mit „viewChild“.\n\nIm rechten Kasten steht der Content. Die Überschrift „h3“ mit der Variable „title“ wurde nicht von der Karte geschrieben, sondern von der Elternkomponente zwischen die Tags von „app-card“. Diese Elemente findet die Karte mit „contentChild“. Der orange Pfeil zeigt: Angezeigt wird die Überschrift an der Stelle von „ng-content“, sie gehört aber weiterhin zum Eltern-Template."
     },
     {
      "type": "content",
@@ -972,6 +1410,82 @@
      "title": "Card verwenden: Inhalt in die Slots",
      "code": "<!-- customer-details.component.html -->\n<app-card>\n  <span card-header>\n    Kundendetails: {{ customer()?.firstname }}\n  </span>\n\n  <form id=\"customer-form\" #customerForm=\"ngForm\"\n        (ngSubmit)=\"onSubmit(customerForm)\">\n    <!-- Eingabefelder … landen im Default-Slot -->\n  </form>\n  <div card-footer>\n    <button type=\"submit\" form=\"customer-form\"\n            [disabled]=\"customerForm.invalid\">Speichern</button>\n    <button type=\"button\" (click)=\"goBack()\">Zurück zur Liste</button>\n  </div>\n</app-card>",
      "notes": "Codefolie „Card verwenden: Inhalt in die Slots“.\n\nDie Detailansicht verwendet die Karte. Zwischen dem öffnenden und dem schließenden Tag von „app-card“ steht der Inhalt. Das Element mit dem Attribut „card-header“ landet im Kopf der Karte. Das Formular hat kein solches Attribut und landet deshalb im Standard-Slot. Das Element mit „card-footer“ landet im Fuß.\n\nEine Besonderheit: Der Speichern-Knopf steht im Fuß und damit außerhalb des Formulars. Damit er das Formular trotzdem abschickt, bekommt das Formular eine „id“ und der Knopf das Attribut „form“ mit dieser „id“. Die Template-Variable „customerForm“ ist auch im Fuß sichtbar, weil alles im selben Template der Elternkomponente steht. Damit wird der Knopf gesperrt, solange das Formular ungültig ist."
+    },
+    {
+     "type": "diagram",
+     "title": "Komposition: Inhalt und Slots der Card",
+     "caption": "Links der Inhalt aus CustomerDetails, rechts das Template der CardComponent.",
+     "diagram": {
+      "kind": "composition",
+      "root": {
+       "label": "customer-details.component.html",
+       "sub": "Route /customer/:id im <router-outlet>",
+       "children": [
+        {
+         "label": "Inhalt zwischen <app-card> … </app-card>",
+         "sub": "gehört zu CustomerDetails",
+         "vertical": true,
+         "children": [
+          {
+           "label": "<span card-header>",
+           "sub": "Kundendetails: Name"
+          },
+          {
+           "label": "<form #customerForm>",
+           "sub": "ohne Slot-Attribut"
+          },
+          {
+           "label": "<div card-footer>",
+           "sub": "Speichern, Zurück"
+          }
+         ]
+        },
+        {
+         "label": "CardComponent: card.component.html",
+         "sub": "Rahmen mit drei Slots",
+         "vertical": true,
+         "children": [
+          {
+           "label": "div.card-header",
+           "sub": "ng-content select=\"[card-header]\"",
+           "highlight": true
+          },
+          {
+           "label": "div.card-body",
+           "sub": "<ng-content /> (Default-Slot)",
+           "highlight": true
+          },
+          {
+           "label": "div.card-footer",
+           "sub": "ng-content select=\"[card-footer]\"",
+           "highlight": true
+          }
+         ]
+        }
+       ]
+      },
+      "links": [
+       {
+        "from": "<span card-header>",
+        "to": "div.card-header",
+        "text": "header",
+        "accent": true
+       },
+       {
+        "from": "<form #customerForm>",
+        "to": "div.card-body",
+        "text": "Rest",
+        "accent": true
+       },
+       {
+        "from": "<div card-footer>",
+        "to": "div.card-footer",
+        "text": "footer",
+        "accent": true
+       }
+      ]
+     },
+     "notes": "Folie: „Komposition: Inhalt und Slots der Card“.\n\nDas Diagramm zeigt die Detailseite, die über die Route „/customer/:id“ im „router-outlet“ angezeigt wird. Links steht der Inhalt, den die Detailseite zwischen das öffnende und das schließende Tag von „app-card“ schreibt. Rechts steht das Template der „CardComponent“ mit ihren drei Slots, also Steckplätzen.\n\nDie orangen Pfeile zeigen die Zuordnung. Das „span“ mit dem Attribut „card-header“ passt zum Selector des ersten Slots und erscheint im Kopfbereich der Karte. Das „div“ mit „card-footer“ passt zum dritten Slot und erscheint unten. Das Formular hat kein passendes Attribut. Es landet deshalb im Default-Slot, dem „ng-content“ ohne „select“, also im Hauptbereich der Karte.\n\nDie Karte bestimmt also nur den Rahmen und das Aussehen. Der Inhalt mit seinen Bindungen, zum Beispiel das Formular mit „customerForm“, gehört weiterhin zur Detailseite."
     },
     {
      "type": "content",
@@ -1132,6 +1646,76 @@
       ],
       "highlight_last": true
      }
+    },
+    {
+     "type": "diagram",
+     "title": "Ablauf: SSR und Hydration im Detail",
+     "caption": "Der Server liefert fertiges HTML, Angular im Browser übernimmt es, statt es neu zu bauen.",
+     "diagram": {
+      "kind": "sequence",
+      "actors": [
+       "Browser",
+       "Angular im Browser",
+       "Server (Node.js)",
+       "Backend-API"
+      ],
+      "steps": [
+       {
+        "from": 0,
+        "to": 2,
+        "text": "GET /customer"
+       },
+       {
+        "from": 2,
+        "to": 2,
+        "text": "rendert die Liste"
+       },
+       {
+        "from": 2,
+        "to": 3,
+        "text": "HttpClient: GET api/customer"
+       },
+       {
+        "from": 3,
+        "to": 2,
+        "text": "Kundendaten (JSON)",
+        "reply": true
+       },
+       {
+        "from": 2,
+        "to": 0,
+        "text": "fertiges HTML + Daten",
+        "reply": true
+       },
+       {
+        "from": 0,
+        "to": 0,
+        "text": "zeigt HTML sofort"
+       },
+       {
+        "from": 0,
+        "to": 1,
+        "text": "JavaScript geladen: App startet"
+       },
+       {
+        "from": 1,
+        "to": 1,
+        "text": "liest Transfer Cache"
+       },
+       {
+        "from": 1,
+        "to": 0,
+        "text": "Hydration: DOM übernehmen"
+       },
+       {
+        "from": 1,
+        "to": 0,
+        "text": "Event Replay: Klicks nachspielen"
+       }
+      ],
+      "note": "provideClientHydration(withEventReplay()) in app.config.ts"
+     },
+     "notes": "Folie: „Ablauf: SSR und Hydration im Detail“.\n\nDas Sequenzdiagramm zeigt vier Beteiligte: den Browser, die Angular-Anwendung, sobald sie im Browser gestartet ist, den Node-Server, auf dem Angular ebenfalls läuft, und den Backend-Server mit den Daten. Der Browser fragt die Adresse „/customer“ an. Der Server führt Angular aus und rendert die Kundenliste. Dabei lädt der „HttpClient“ auf dem Server die Kundendaten vom Backend.\n\nDer Server schickt fertiges HTML an den Browser und legt die geladenen Daten mit hinein; das nennt man „Transfer Cache“. Der Browser zeigt die Seite sofort an. Sie ist sichtbar, aber noch nicht bedienbar. Klicks in dieser Zeit werden gemerkt.\n\nDann ist das JavaScript geladen, und Angular startet im Browser. Die Daten nimmt der „HttpClient“ aus dem Transfer Cache, er fragt das Backend also nicht ein zweites Mal. Bei der Hydration übernimmt Angular das vorhandene HTML, statt es neu aufzubauen, und hängt die Ereignisse an. Zum Schluss spielt „Event Replay“ die gemerkten Klicks nach."
     },
     {
      "type": "content",

@@ -218,6 +218,83 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Wer sieht wen? AppModule und seine Importe",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "AppModule",
+              "sub": "bootstrap: [AppComponent]",
+              "children": [
+                {
+                  "label": "imports: TrainingsModule",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "TrainingListComponent",
+                      "sub": "declarations + exports"
+                    },
+                    {
+                      "label": "TrainingDetailsComponent",
+                      "sub": "declarations + exports"
+                    },
+                    {
+                      "label": "TakePlaceSoonPipe",
+                      "sub": "nur declarations: privat"
+                    }
+                  ]
+                },
+                {
+                  "label": "declarations",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "AppComponent",
+                      "sub": "Template von app-root",
+                      "highlight": true
+                    }
+                  ]
+                },
+                {
+                  "label": "weitere imports",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "AppRoutingModule",
+                      "sub": "exports: [RouterModule]"
+                    },
+                    {
+                      "label": "BrowserModule",
+                      "sub": "Grundlagen für den Browser"
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "TrainingListComponent",
+                "to": "AppComponent",
+                "text": "sichtbar"
+              },
+              {
+                "from": "AppRoutingModule",
+                "to": "AppComponent",
+                "text": "sichtbar"
+              },
+              {
+                "from": "TakePlaceSoonPipe",
+                "to": "AppComponent",
+                "text": "privat",
+                "dashed": true,
+                "accent": true
+              }
+            ]
+          },
+          "caption": "AppComponent sieht nur eigene declarations und die exports importierter Module",
+          "notes": "Folie: „Wer sieht wen? AppModule und seine Importe“.\n\nDas Diagramm zeigt das „AppModule“ aus dem Projekt 30_modules_legacy als Kasten. Darin stehen links das importierte „TrainingsModule“, in der Mitte die eigene Deklaration „AppComponent“ und rechts das importierte „AppRoutingModule“ sowie das „BrowserModule“.\n\nDas „TrainingsModule“ deklariert drei Bausteine. Die beiden Komponenten stehen zusätzlich in „exports“, also gibt das Modul sie nach außen frei. Die Pipe „TakePlaceSoonPipe“ steht nur in „declarations“; sie bleibt privat. Das „AppRoutingModule“ exportiert das „RouterModule“ und damit „router-outlet“ und „routerLink“.\n\nDie grünen Pfeile zeigen: Diese Bausteine darf das Template von „AppComponent“ verwenden. Der gestrichelte orange Pfeil mit der Aufschrift „privat“ zeigt: Die Pipe ist im Template von AppComponent nicht bekannt. Wer sie dort benutzt, bekommt einen Fehler beim Bauen. Abhilfe wäre, die Pipe im TrainingsModule zusätzlich zu exportieren."
+        },
+        {
           "type": "code",
           "title": "Feature-Modul: TrainingsModule",
           "code": "// src/app/trainings/trainings.module.ts\n@NgModule({\n  declarations: [\n    TrainingListComponent,\n    TrainingDetailsComponent,\n    TakePlaceSoonPipe\n  ],\n  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],\n  providers: [TrainingService],\n  exports: [TrainingListComponent, TrainingDetailsComponent]\n})\nexport class TrainingsModule { }",
@@ -356,6 +433,71 @@
             ],
             "highlight_last": true
           }
+        },
+        {
+          "type": "diagram",
+          "title": "Startvorgang mit Modul: wer ruft wen auf?",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Browser",
+              "main.ts",
+              "platformBrowser-\nDynamic",
+              "AppModule",
+              "AppComponent"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 0,
+                "text": "index.html laden"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "main.js ausführen"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "platformBrowserDynamic()"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "bootstrapModule(AppModule)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Modul anlegen: imports, providers"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "bootstrap: [AppComponent]",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "erzeugen, selector app-root"
+              },
+              {
+                "from": 4,
+                "to": 0,
+                "text": "Template in <app-root> rendern"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Promise erfüllt (NgModuleRef)",
+                "reply": true
+              }
+            ]
+          },
+          "caption": "Aufrufer ist Angular selbst: main.ts übergibt nur die Klasse AppModule",
+          "notes": "Folie: „Startvorgang mit Modul: wer ruft wen auf?“.\n\nDas Diagramm zeigt den Startvorgang einer Modul-Anwendung mit allen Beteiligten: Browser, die Datei „main.ts“, die Plattform, das „AppModule“ und die „AppComponent“.\n\nIn Schritt 1 lädt der Browser die index.html; das Element „app-root“ ist noch leer. In Schritt 2 führt er das gebaute Skript aus, das aus „main.ts“ entstanden ist. „main.ts“ erzeugt in Schritt 3 die Plattform für den Browser und ruft in Schritt 4 „bootstrapModule“ mit der Klasse „AppModule“ auf.\n\nIn Schritt 5 legt Angular das Modul an. Dabei wertet es die importierten Module und die Provider aus. Das Feld „bootstrap“ nennt in Schritt 6 die Startkomponente. In Schritt 7 erzeugt Angular die „AppComponent“ und sucht ihr Element „app-root“ in der Seite. In Schritt 8 erscheint das Template dort. Zum Schluss, in Schritt 9, wird das Promise aus „bootstrapModule“ erfüllt. Ging etwas schief, greift stattdessen das „catch“ in main.ts."
         },
         {
           "type": "content",
@@ -604,6 +746,73 @@
           "notes": "Codefolie „AppRoutingModule im Projekt“.\n\nDas ist das Routing-Modul aus dem Übungsprojekt. Die Liste „routes“ ist genauso aufgebaut wie heute. Die erste Route zeigt unter der Adresse „trainings“ die Liste an. Die zweite Route hat den Parameter „id“, erkennbar am Doppelpunkt, und zeigt die Details eines Trainings. Die dritte Route mit zwei Sternchen fängt alle anderen Adressen ab und leitet auf die Liste um.\n\nNeu gegenüber heute ist nur die Verpackung: Die Routen werden mit „RouterModule.forRoot“ im „imports“-Array registriert, und das „RouterModule“ wird exportiert. Heute ersetzt der Aufruf „provideRouter“ in „app.config.ts“ dieses ganze Modul."
         },
         {
+          "type": "diagram",
+          "title": "Routing: von /trainings nach /trainings/3",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "AppModule",
+              "children": [
+                {
+                  "label": "AppRoutingModule",
+                  "sub": "RouterModule.forRoot(routes)",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "'trainings'",
+                      "sub": "→ TrainingListComponent"
+                    },
+                    {
+                      "label": "'trainings/:id'",
+                      "sub": "→ TrainingDetailsComponent"
+                    },
+                    {
+                      "label": "'**'",
+                      "sub": "→ redirectTo '/trainings'"
+                    }
+                  ]
+                },
+                {
+                  "label": "AppComponent",
+                  "sub": "<h1> und <router-outlet>",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "vorher: Outlet bei /trainings",
+                      "children": [
+                        {
+                          "label": "TrainingListComponent",
+                          "sub": "[routerLink]=\"[training.id]\""
+                        }
+                      ]
+                    },
+                    {
+                      "label": "nachher: Outlet bei /trainings/3",
+                      "children": [
+                        {
+                          "label": "TrainingDetailsComponent",
+                          "sub": "id aus ActivatedRoute",
+                          "highlight": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "TrainingListComponent",
+                "to": "TrainingDetailsComponent",
+                "text": "Klick auf Training 3",
+                "accent": true
+              }
+            ]
+          },
+          "caption": "Der Router tauscht nur den Inhalt von <router-outlet> – die Überschrift bleibt",
+          "notes": "Folie: „Routing: von /trainings nach /trainings/3“.\n\nDas Diagramm zeigt, wo die Routen hängen und was sich bei einem Klick ändert. Links steht das „AppRoutingModule“ mit den drei Routen aus dem Projekt. Rechts steht die „AppComponent“ mit ihrem Template: eine Überschrift und darunter „router-outlet“, der Platzhalter für die aktuelle Seite.\n\nDer Platzhalter im Kasten „AppComponent“ ist zweimal dargestellt: einmal vorher, einmal nachher. Vorher lautet die Adresse „/trainings“. Der Router hat dazu die Route „trainings“ gefunden und zeigt im Outlet die „TrainingListComponent“. Jeder Eintrag der Liste hat einen Link mit „routerLink“ und der Nummer des Trainings.\n\nKlickt der Nutzer auf das Training 3, ändert sich die Adresse zu „/trainings/3“. Der Router findet die Route „trainings/:id“, entfernt die Liste aus dem Outlet und erzeugt dort die „TrainingDetailsComponent“. Der Teil „:id“ ist ein Platzhalter; der Wert 3 steht der Komponente über „ActivatedRoute“ zur Verfügung. Die Überschrift außerhalb des Outlets bleibt unverändert."
+        },
+        {
           "type": "content",
           "title": "forRoot und forChild",
           "bullets": [
@@ -703,6 +912,77 @@
             ],
             "highlight_last": true
           }
+        },
+        {
+          "type": "diagram",
+          "title": "ActivatedRoute: Parameterwechsel im Ablauf",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Training-\nListComponent",
+              "Router",
+              "Training-\nDetailsComponent",
+              "ActivatedRoute",
+              "TrainingService"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Klick: routerLink → /trainings/7"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "erzeugen (Konstruktor-Injektion)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "ngOnInit: params.subscribe(…)"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "{ id: '7' }",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "getById(7)"
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "Observable: Training 7",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "URL /trainings/8: neue params"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "{ id: '8' } – gleiche Instanz!",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "getById(8)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "ngOnDestroy: unsubscribe()"
+              }
+            ]
+          },
+          "caption": "Bei /trainings/7 → /trainings/8 bleibt die Komponente – nur der Callback läuft erneut",
+          "notes": "Folie: „ActivatedRoute: Parameterwechsel im Ablauf“.\n\nDas Diagramm zeigt, warum man die Parameter mit „subscribe“ abonniert. Beteiligt sind die Liste, der Router, die Detailkomponente, „ActivatedRoute“ als Information über die aktuelle Route und der „TrainingService“.\n\nIn Schritt 1 klickt der Nutzer in der Liste auf Training 7. Der Router erzeugt in Schritt 2 die Detailkomponente und übergibt ihr über den Konstruktor die ActivatedRoute. In Schritt 3 abonniert die Komponente in „ngOnInit“ die Parameter und bekommt in Schritt 4 sofort das Objekt mit der id 7, als Text. In den Schritten 5 und 6 lädt sie das Training über den Service.\n\nWechselt die Adresse danach auf Training 8, zum Beispiel über einen Weiter-Link, erzeugt der Router keine neue Komponente. Er schickt in Schritt 7 nur neue Parameter an die ActivatedRoute. Der Callback läuft in Schritt 8 erneut und lädt in Schritt 9 das Training 8. Hätte man den Parameter nur einmal gelesen, bliebe Training 7 stehen. In Schritt 10 beendet die Komponente beim Entfernen das Abonnement."
         },
         {
           "type": "content",
@@ -1128,6 +1408,74 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Formular-Modell und Template",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "CustomerDetailsComponent",
+              "children": [
+                {
+                  "label": "Klasse: customerForm",
+                  "sub": "FormGroup",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "firstname",
+                      "sub": "FormControl"
+                    },
+                    {
+                      "label": "lastname",
+                      "sub": "FormControl"
+                    },
+                    {
+                      "label": "zip",
+                      "sub": "FormControl"
+                    }
+                  ]
+                },
+                {
+                  "label": "Template: <form [formGroup]=\"customerForm\">",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "<input formControlName=\"firstname\">",
+                      "sub": "Vorname"
+                    },
+                    {
+                      "label": "<input formControlName=\"lastname\">",
+                      "sub": "Nachname"
+                    },
+                    {
+                      "label": "<input [formControl]=\"…controls.zip\">",
+                      "sub": "PLZ"
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "firstname",
+                "to": "<input formControlName=\"firstname\">",
+                "text": "Name"
+              },
+              {
+                "from": "lastname",
+                "to": "<input formControlName=\"lastname\">",
+                "text": "Name"
+              },
+              {
+                "from": "zip",
+                "to": "<input [formControl]=\"…controls.zip\">",
+                "text": "Objekt"
+              }
+            ]
+          },
+          "caption": "Das Modell lebt in der Klasse – jedes Eingabefeld hängt an genau einem FormControl",
+          "notes": "Folie: „Formular-Modell und Template“.\n\nDas Diagramm zeigt die „CustomerDetailsComponent“ als Kasten mit zwei Teilen. Links steht die Klasse mit dem Formular-Modell „customerForm“, einer „FormGroup“, also einer Gruppe von Feldern. Darin liegen die Felder „firstname“, „lastname“ und „zip“, jeweils ein „FormControl“.\n\nRechts steht das Template. Das Element „form“ ist mit „[formGroup]“ an die Gruppe gebunden. Jedes Eingabefeld ist mit genau einem FormControl verbunden: die ersten beiden über „formControlName“, also über den Namen in der Gruppe, das PLZ-Feld über „[formControl]“ direkt mit dem Objekt.\n\nDie Pfeile zeigen diese Verbindungen. Die Werte fließen in beide Richtungen: Tippt der Nutzer, ändert sich das FormControl. Setzt die Klasse einen Wert, zum Beispiel mit „patchValue“, erscheint er im Feld. Prüfregeln und Zustand hängen am FormControl in der Klasse, nicht am Eingabefeld."
+        },
+        {
           "type": "content",
           "title": "Werte setzen: setValue und patchValue",
           "bullets": [
@@ -1278,6 +1626,77 @@
           "notes": "Folie: „Fehlerzustand im Template erklärt“.\n\nEin leeres Pflichtfeld ist schon beim ersten Anzeigen ungültig. Würde man die Meldung sofort zeigen, wäre das Formular voller Fehler, bevor der Benutzer etwas getan hat. Deshalb kombiniert man die Fehlerprüfung mit „touched“ oder „dirty“.\n\n„hasError“ bekommt den Namen einer Regel und liefert „true“, wenn genau diese Regel verletzt ist. „getError“ liefert die Zusatzdaten dieser Regel.\n\nUm das Absenden zu verhindern, gibt es zwei Wege: Den Button deaktivieren, solange das Formular ungültig ist, oder beim Absenden alle Felder als berührt markieren und abbrechen. In älterem Code findet man statt „@if“ noch das Attribut „hidden“ oder die Direktive „ngIf“."
         },
         {
+          "type": "diagram",
+          "title": "Von der Eingabe zur Fehlermeldung",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Nutzer",
+              "<input\nformControlName>",
+              "FormControl\nlastname",
+              "Validators",
+              "Template\n(@if)"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "tippt „M“"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "setValue('M'), dirty"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Validators.required(control)"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "null",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Validators.minLength(2)(control)"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "{ minlength: { requiredLength: 2 } }",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "errors, INVALID"
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "hasError('minlength')?"
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "true → Meldung anzeigen",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "CSS: ng-invalid"
+              }
+            ]
+          },
+          "caption": "Die Prüfung läuft im FormControl der Klasse – das Template fragt das Ergebnis nur ab",
+          "notes": "Folie: „Von der Eingabe zur Fehlermeldung“.\n\nDas Diagramm zeigt, was bei einer Eingabe im Feld „Nachname“ passiert. Beteiligt sind der Nutzer, das Eingabefeld, das „FormControl“ „lastname“ in der Klasse, die eingebauten Prüfregeln „Validators“ und das Template mit dem „@if“-Block für die Meldung.\n\nIn Schritt 1 tippt der Nutzer den Buchstaben M. Das Eingabefeld gibt den Wert in Schritt 2 an das FormControl weiter; das Feld gilt jetzt als „dirty“, also verändert. Das FormControl ruft in Schritt 3 die Regel „required“ auf. Sie ist erfüllt und liefert in Schritt 4 „null“. In Schritt 5 ruft es die Regel „minLength“ auf. Sie meldet in Schritt 6 einen Fehler, weil nur ein Zeichen da ist.\n\nIn Schritt 7 sammelt das FormControl die Fehler im Objekt „errors“ und wird ungültig. Beim nächsten Darstellen fragt das Template in Schritt 8 mit „hasError“ nach diesem Fehler, bekommt in Schritt 9 „true“ und zeigt die Meldung an. Gleichzeitig setzt Angular in Schritt 10 passende CSS-Klassen am Eingabefeld."
+        },
+        {
           "type": "content",
           "title": "Eigene Validatorfunktion: Konzept",
           "bullets": [
@@ -1332,6 +1751,76 @@
             "Felder vergleichen: Validator an der FormGroup"
           ],
           "notes": "Folie: „Eigener Validator erklärt“.\n\nDer Parameter „control“ hat den Typ „AbstractControl“. Bei einer Regel für ein einzelnes Feld ist es das FormControl dieses Feldes. Hängt man eine Regel an eine ganze FormGroup, bekommt sie die Gruppe und kann mehrere Felder vergleichen, zum Beispiel Passwort und Passwort-Wiederholung.\n\nWichtig ist der Unterschied zwischen Übergeben und Aufrufen. „digitsOnly“ wird ohne Klammern übergeben, denn Angular soll die Funktion später selbst aufrufen. „exactLength(5)“ wird sofort aufgerufen, denn erst das Ergebnis dieses Aufrufs ist die Prüffunktion.\n\nDen Schlüssel im Fehlerobjekt wählt man selbst. Unter genau diesem Namen fragt man den Fehler im Template mit „hasError“ ab. Es gibt außerdem asynchrone Prüffunktionen, die zum Beispiel beim Server nachfragen. Solange sie laufen, ist der Status „PENDING“, also wartend."
+        },
+        {
+          "type": "diagram",
+          "title": "Eigener Validator: wann ruft Angular ihn auf?",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Customer-\nDetailsComponent",
+              "FormBuilder",
+              "FormControl zip",
+              "digitsOnly",
+              "Template"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "group({ zip: ['', [digitsOnly]] })"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "new FormControl('', [digitsOnly])"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "digitsOnly(control): Startwert ''"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "null (leer: required prüft)",
+                "reply": true
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "Nutzer tippt „12a“"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "digitsOnly(control)"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "Regex-Test → false"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "{ digitsOnly: { actual: '12a' } }",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "errors, INVALID"
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "hasError('digitsOnly') → true"
+              }
+            ]
+          },
+          "caption": "Wir übergeben nur die Funktion – Angular ruft sie bei jeder Wertänderung auf",
+          "notes": "Folie: „Eigener Validator: wann ruft Angular ihn auf?“.\n\nDas Diagramm zeigt, wer die eigene Prüffunktion „digitsOnly“ aufruft. Beteiligt sind die Komponente, der „FormBuilder“, das FormControl für die Postleitzahl, die Funktion „digitsOnly“ und das Template.\n\nIn Schritt 1 legt die Komponente das Formular an und übergibt die Funktion ohne Klammern, also ohne sie aufzurufen. Der FormBuilder erzeugt in Schritt 2 das FormControl und hängt die Funktion als Prüfregel an. Schon beim Anlegen prüft das FormControl in Schritt 3 den Startwert. Der leere Wert ist für „digitsOnly“ in Ordnung, deshalb kommt in Schritt 4 „null“ zurück.\n\nIn Schritt 5 tippt der Nutzer „12a“. Das FormControl ruft die Funktion in Schritt 6 erneut auf und übergibt sich selbst als Parameter „control“. Die Funktion prüft in Schritt 7 mit einem regulären Ausdruck, ob nur Ziffern enthalten sind. Das stimmt nicht, also liefert sie in Schritt 8 ein Fehlerobjekt mit dem frei gewählten Schlüssel „digitsOnly“. In Schritt 9 wird das Feld ungültig, und das Template kann in Schritt 10 mit „hasError“ eine Meldung anzeigen."
         },
         {
           "type": "content",

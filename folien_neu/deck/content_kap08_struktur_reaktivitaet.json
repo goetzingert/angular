@@ -146,6 +146,89 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Komposition: Container und Darstellung",
+          "caption": "Kundenliste im <router-outlet>: Daten per [input] nach unten, Ereignisse per (output) nach oben.",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "CustomerListComponent (Container)",
+              "sub": "Template customer-list.component.html, URL /customer",
+              "children": [
+                {
+                  "label": "<customer-filter>",
+                  "sub": "CustomerFilterComponent",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "value = input('')"
+                    },
+                    {
+                      "label": "changed = output<string>()"
+                    }
+                  ]
+                },
+                {
+                  "label": "Klasse CustomerListComponent",
+                  "sub": "besitzt den Zustand",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "filterText, selectedCustomer",
+                      "sub": "signal(...)",
+                      "highlight": true
+                    },
+                    {
+                      "label": "onFilterChanged($event)",
+                      "sub": "listItemClicked($event)",
+                      "highlight": true
+                    }
+                  ]
+                },
+                {
+                  "label": "<li customer-list-item>",
+                  "sub": "CustomerListItem, je Kunde",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "customer, selected",
+                      "sub": "beide input()"
+                    },
+                    {
+                      "label": "chosen = output<Customer>()"
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "filterText, selectedCustomer",
+                "to": "value = input('')",
+                "text": "[value]"
+              },
+              {
+                "from": "changed = output<string>()",
+                "to": "onFilterChanged($event)",
+                "text": "(changed)",
+                "accent": true
+              },
+              {
+                "from": "filterText, selectedCustomer",
+                "to": "customer, selected",
+                "text": "Inputs"
+              },
+              {
+                "from": "chosen = output<Customer>()",
+                "to": "onFilterChanged($event)",
+                "text": "(chosen)",
+                "accent": true
+              }
+            ]
+          },
+          "notes": "Folie: „Komposition: Container und Darstellung“.\n\nDas Diagramm zeigt die aufgeteilte Kundenliste. Der äußere Kasten ist die „CustomerListComponent“. Sie steht im „router-outlet“ der App, wenn die Adresse „/customer“ lautet. In ihrem Template verwendet sie zwei Kind-Komponenten: links den Filter „customer-filter“ und rechts die Zeilenkomponente „customer-list-item“, die es für jeden Kunden einmal gibt. In der Mitte steht die Klasse der Liste. Sie ist der Container und besitzt den Zustand: den Filtertext und den ausgewählten Kunden.\n\nDie grünen Pfeile zeigen den Datenfluss nach unten, also von der Elternkomponente zu den Kindern. Mit „[value]“ bekommt der Filter den aktuellen Text, mit „[customer]“ und „[selected]“ bekommt jede Zeile ihren Kunden und die Information, ob sie ausgewählt ist. Die orangen Pfeile zeigen Ereignisse nach oben, also vom Kind zurück zur Elternkomponente. Der Filter meldet mit „changed“ einen neuen Text, die Zeile meldet mit „chosen“ einen Klick.\n\nDie Methoden der Liste, „onFilterChanged“ und „listItemClicked“, ändern daraufhin den Zustand. Nur der Container ändert also Daten, die Kinder zeigen sie an und melden Ereignisse."
+        },
+        {
           "type": "code",
           "title": "Zeilenkomponente: Attribut-Selektor und host",
           "code": "@Component({\n  selector: 'li[customer-list-item]',     // Attribut-Selektor auf <li>\n  imports: [RouterLink],\n  templateUrl: './customer-list-item.component.html',\n  host: {\n    '[class.discontinued]': 'customer().discontinued',  // Klasse am Host-Element\n    '[class.selected]': 'selected()',\n    '(click)': 'chosen.emit(customer())'                 // Klick am Host-Element\n  }\n})\nexport class CustomerListItemComponent {\n  customer = input.required<Customer>();\n  selected = input(false);\n  chosen = output<Customer>();\n}\n\n// Container: <li customer-list-item [customer]=\"customer\"\n//   [selected]=\"isSelectedCustomer(customer)\" (chosen)=\"listItemClicked($event)\">",
@@ -236,6 +319,61 @@
           "title": "hostDirectives im Code",
           "code": "@Directive({\n  selector: '[appHighlight]',\n  host: {\n    '[style.background]': 'active() ? color() : null',\n    '(mouseenter)': 'active.set(true)',\n    '(mouseleave)': 'active.set(false)'\n  }\n})\nexport class Highlight { color = input('lightyellow'); active = signal(false); }\n\n@Component({\n  selector: 'li[customer-list-item]',\n  hostDirectives: [{ directive: Highlight, inputs: ['color: highlightColor'] }]\n})\nexport class CustomerListItemComponent { /* wie bisher */ }\n// Nutzung: <li customer-list-item highlightColor=\"lightblue\" [customer]=\"c\">",
           "notes": "Codefolie „hostDirectives im Code“.\n\nOben steht eine kleine Direktive „Highlight“. Sie färbt das Element ein, solange die Maus darüber ist. Die Farbe kommt aus der Eingabe „color“. Ob die Maus gerade darüber ist, merkt sie sich im Signal „active“. Über „host“ reagiert sie auf das Hineinfahren und Hinausfahren der Maus.\n\nDie Zeilenkomponente trägt die Direktive unter „hostDirectives“ ein. Jede Zeile wird dadurch automatisch hervorgehoben. Mit „inputs“ wird die Eingabe „color“ freigegeben und gleichzeitig umbenannt: Von außen heißt sie „highlightColor“. Ohne diesen Eintrag könnte man die Farbe von außen nicht setzen.\n\nUnten sieht man die Nutzung im Container: Die Farbe wird als Attribut an der Zeile angegeben, ohne dass „appHighlight“ dort stehen muss."
+        },
+        {
+          "type": "diagram",
+          "title": "Komposition: Host-Direktive am <li>",
+          "caption": "Ein Host-Element, zwei Klassen: Highlight und CustomerListItemComponent am selben <li>.",
+          "diagram": {
+            "kind": "composition",
+            "root": {
+              "label": "<li customer-list-item highlightColor=\"lightblue\" [customer]=\"c\">",
+              "sub": "Host-Element im Template von CustomerListComponent",
+              "children": [
+                {
+                  "label": "Highlight (Host-Direktive)",
+                  "sub": "1. wird zuerst erzeugt",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "color = input('lightyellow')",
+                      "sub": "außen als highlightColor"
+                    },
+                    {
+                      "label": "host: [style.background]",
+                      "sub": "(mouseenter), (mouseleave)"
+                    }
+                  ]
+                },
+                {
+                  "label": "CustomerListItemComponent",
+                  "sub": "2. danach erzeugt",
+                  "vertical": true,
+                  "children": [
+                    {
+                      "label": "customer = input.required()",
+                      "sub": "aus [customer]=\"c\"",
+                      "highlight": true
+                    },
+                    {
+                      "label": "host: [class.selected]",
+                      "sub": "(click) → chosen.emit()",
+                      "highlight": true
+                    }
+                  ]
+                }
+              ]
+            },
+            "links": [
+              {
+                "from": "CustomerListItemComponent",
+                "to": "Highlight (Host-Direktive)",
+                "text": "inject()",
+                "dashed": true
+              }
+            ]
+          },
+          "notes": "Folie: „Komposition: Host-Direktive am <li>“.\n\nDas Diagramm zeigt ein einzelnes Listenelement „li“ aus dem Template der Kundenliste. Auf diesem einen Element sitzen zwei Klassen: links die Direktive „Highlight“ und rechts die Komponente „CustomerListItemComponent“. Die Direktive steht nicht im Template, die Komponente bringt sie über „hostDirectives“ selbst mit.\n\nAngular erzeugt zuerst die Host-Direktive und danach die Komponente. Das Attribut „highlightColor“ im Template landet im Input „color“ der Direktive, weil die Komponente diesen Input unter dem Alias „highlightColor“ freigegeben hat. Die Bindung „[customer]“ landet im Input der Komponente.\n\nBeide Klassen haben eigene Host-Bindungen am selben Element: Die Direktive färbt den Hintergrund, wenn die Maus darüber ist. Die Komponente setzt die Klasse „selected“ und meldet Klicks mit „chosen“. Der gestrichelte Pfeil zeigt: Die Komponente kann sich die Direktive bei Bedarf mit „inject(Highlight)“ holen."
         },
         {
           "type": "content",
@@ -440,6 +578,77 @@
             ],
             "highlight_last": false
           }
+        },
+        {
+          "type": "diagram",
+          "title": "Ablauf: Push und Pull im Signal-Graphen",
+          "caption": "Beispiel aus „Grundmodell im Code“: filter (signal) → visible (computed) → Template und effect.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Event-Handler",
+              "filter",
+              "visible",
+              "Template",
+              "effect"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "filter.set('M')"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Push: du bist veraltet"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Push: veraltet, eingeplant"
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "Push: veraltet, eingeplant"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "Pull: visible() lesen"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "filter() lesen"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "'M'",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "neu filtern, Ergebnis merken"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "neue Liste",
+                "reply": true
+              },
+              {
+                "from": 4,
+                "to": 2,
+                "text": "visible(): gemerktes Ergebnis"
+              }
+            ],
+            "note": "Push rechnet nichts, Pull rechnet nur einmal – auch bei mehreren Lesern"
+          },
+          "notes": "Folie: „Ablauf: Push und Pull im Signal-Graphen“.\n\nDas Diagramm nutzt das Beispiel aus dem Grundmodell: Das Signal „filter“ ist die Quelle, „visible“ ist ein „computed“, das die gefilterte Liste berechnet, und sowohl das Template als auch ein „effect“ lesen „visible“. Ein Event-Handler, zum Beispiel eine Eingabe des Benutzers, ruft „filter.set“ mit dem Text „M“ auf.\n\nZuerst kommt die Push-Phase: Das Signal benachrichtigt „visible“, dass es veraltet ist. „visible“ gibt diese Nachricht an das Template und an den „effect“ weiter. Beide werden zur Ausführung eingeplant. In dieser Phase wird noch nichts berechnet.\n\nDann kommt die Pull-Phase: Das Template wird aktualisiert und liest „visible“. Erst jetzt rechnet „visible“ neu. Es liest dazu „filter“, filtert die Liste und merkt sich das Ergebnis. Wenn danach der „effect“ läuft und „visible“ liest, bekommt er das gemerkte Ergebnis, ohne dass noch einmal gerechnet wird."
         },
         {
           "type": "content",
@@ -806,6 +1015,74 @@
           }
         },
         {
+          "type": "diagram",
+          "title": "Ablauf: Wer ruft effect und onCleanup auf?",
+          "caption": "DashboardComponent mit Polling: Angular ruft Effekt-Funktion und Aufräumfunktion auf.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "pollMs (signal)",
+              "Angular",
+              "Effekt-Funktion",
+              "Browser-Timer"
+            ],
+            "steps": [
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Lauf 1: effectFn(onCleanup)"
+              },
+              {
+                "from": 2,
+                "to": 0,
+                "text": "pollMs() lesen: 5000"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "setInterval(refresh, 5000): Timer A"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "onCleanup(Aufräumen A) anmelden"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "set(1000): effect ist veraltet"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Aufräumen A aufrufen"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "clearInterval(Timer A)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Lauf 2: effectFn(onCleanup)"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "setInterval(refresh, 1000): Timer B"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Komponente zerstört: Aufräumen B"
+              }
+            ],
+            "note": "Aufräumen B stoppt Timer B – es läuft nie mehr als ein Timer"
+          },
+          "notes": "Folie: „Ablauf: Wer ruft effect und onCleanup auf?“.\n\nDas Diagramm zeigt das Polling-Beispiel mit vier Beteiligten: das Signal „pollMs“ mit dem Intervall, Angular, die Effekt-Funktion, die wir geschrieben haben, und den Timer des Browsers. Angular ruft die Effekt-Funktion zum ersten Mal auf und übergibt ihr „onCleanup“. Die Funktion liest „pollMs“ und bekommt 5000. Damit ist „pollMs“ eine Abhängigkeit. Sie startet Timer A und meldet mit „onCleanup“ eine Aufräumfunktion bei Angular an.\n\nSpäter wird „pollMs“ auf 1000 gesetzt. Der „effect“ ist damit veraltet. Bevor Angular ihn erneut ausführt, ruft Angular die angemeldete Aufräumfunktion A auf, und diese stoppt Timer A. Dann folgt Lauf 2 mit Timer B und einer neuen Aufräumfunktion B.\n\nWird die Komponente zerstört, ruft Angular Aufräumfunktion B auf, und auch Timer B stoppt. Wichtig: Wir rufen die Aufräumfunktionen nie selbst auf, das macht immer Angular."
+        },
+        {
           "type": "content",
           "title": "Wie ein effect ausgeführt wird",
           "bullets": [
@@ -1003,6 +1280,76 @@
           "title": "Brücke zu RxJS: Filter mit Verzögerung",
           "code": "filterText = signal('');\n\n// Signal in einen Datenstrom umwandeln, verzögern, wieder als Signal bereitstellen\nprivate filter$ = toObservable(this.filterText).pipe(\n  debounceTime(300),            // erst weiterreichen, wenn 300 ms keine Eingabe kam\n  distinctUntilChanged()        // gleiche Werte hintereinander ignorieren\n);\ndebounced = toSignal(this.filter$, { initialValue: '' });\n\n// Treffer: rechnet erst nach der Tipp-Pause neu\nvisible = computed(() =>\n  this.customers().filter(c => c.lastname.includes(this.debounced()))\n);",
           "notes": "Codefolie „Brücke zu RxJS: Filter mit Verzögerung“.\n\nDieses Beispiel nutzt beide Richtungen. Der Filtertext ist ein Signal. Mit „toObservable“ wird daraus ein Datenstrom. Darauf wirken zwei Werkzeuge aus RxJS. „debounceTime“ mit 300 reicht einen Wert erst weiter, wenn 300 Millisekunden lang keine neue Eingabe kam. „distinctUntilChanged“ ignoriert einen Wert, wenn er gleich dem vorherigen ist.\n\nMit „toSignal“ wird der Strom wieder zu einem Signal. Der Startwert ist ein leerer Text. Das „computed“ für die Trefferliste liest dieses verzögerte Signal. Es rechnet also erst neu, wenn der Benutzer eine kurze Pause beim Tippen macht. So wird nicht bei jedem einzelnen Buchstaben gefiltert."
+        },
+        {
+          "type": "diagram",
+          "title": "Ablauf: Signal → Observable → Signal",
+          "caption": "Der Code der vorigen Folie: toObservable → debounceTime(300) → toSignal → computed visible.",
+          "diagram": {
+            "kind": "sequence",
+            "actors": [
+              "Eingabe",
+              "filterText",
+              "toObservable",
+              "debounceTime",
+              "debounced",
+              "visible"
+            ],
+            "steps": [
+              {
+                "from": 0,
+                "to": 1,
+                "text": "set('M'), set('Mü'), …"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "interner effect liest Wert"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "next('M'), next('Mü'), …"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "300 ms warten"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "set('Müller'), dann Pause"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "next('Müller')"
+              },
+              {
+                "from": 4,
+                "to": 4,
+                "text": "set('Müller')"
+              },
+              {
+                "from": 4,
+                "to": 5,
+                "text": "Push: veraltet"
+              },
+              {
+                "from": 5,
+                "to": 4,
+                "text": "Pull: debounced() lesen"
+              },
+              {
+                "from": 5,
+                "to": 5,
+                "text": "neu filtern"
+              }
+            ],
+            "note": "Signal → Observable: toObservable, Observable → Signal: toSignal (beide im Injection Context)"
+          },
+          "notes": "Folie: „Ablauf: Signal → Observable → Signal“.\n\nDas Diagramm zeigt den Weg eines Filtertextes durch die Brücke zwischen Signals und RxJS. Der Benutzer tippt. Jeder Tastendruck setzt das Signal „filterText“ neu. „toObservable“ enthält intern einen „effect“: Er liest das Signal und gibt jeden neuen Wert mit „next“ in einen Datenstrom, also ein Observable.\n\nDer Operator „debounceTime“ hält die Werte zurück und wartet, bis 300 Millisekunden lang nichts Neues kommt. Erst wenn der Benutzer nach „Müller“ eine Pause macht, reicht er genau diesen letzten Wert weiter. „toSignal“ hat den Strom abonniert und legt den Wert in das Signal „debounced“.\n\nAb hier gilt wieder das bekannte Signal-Verhalten: „visible“ wird als veraltet markiert, liest beim nächsten Zugriff „debounced“ und filtert die Liste ein einziges Mal. Die Zwischenwerte „M“ und „Mü“ lösen also keine Filterung aus."
         },
         {
           "type": "content",
