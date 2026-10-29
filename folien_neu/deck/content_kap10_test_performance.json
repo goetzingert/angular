@@ -413,12 +413,12 @@
               {
                 "from": "CustomerStore (App)",
                 "to": "CustomerService",
-                "text": "inject(CustomerService)"
+                "text": "inject()"
               },
               {
                 "from": "CustomerStore (Test)",
                 "to": "{ getAll: vi.fn() }",
-                "text": "inject(CustomerService)",
+                "text": "inject()",
                 "accent": true
               }
             ]
@@ -518,7 +518,7 @@
               {
                 "from": 0,
                 "to": 0,
-                "text": "method 'PUT' und body prüfen"
+                "text": "PUT und body prüfen"
               },
               {
                 "from": 0,
@@ -580,28 +580,24 @@
         {
           "type": "diagram",
           "title": "Was steckt im Test der Kundenliste?",
-          "caption": "customer-list.component.spec.ts: echte Komponenten und echter Store, nur das Netzwerk ist durch das Test-Backend ersetzt.",
+          "caption": "customer-list.component.spec.ts: echte Komponenten, echter Store, nur das Netzwerk ist ersetzt.",
           "diagram": {
             "kind": "composition",
             "root": {
               "label": "TestBed",
-              "sub": "configureTestingModule({ imports, providers })",
               "children": [
                 {
                   "label": "ComponentFixture",
-                  "sub": "createComponent(CustomerListComponent)",
                   "children": [
                     {
                       "label": "CustomerListComponent",
-                      "sub": "componentInstance",
                       "vertical": true,
                       "children": [
                         {
                           "label": "<customer-filter>"
                         },
                         {
-                          "label": "<li customer-list-item>",
-                          "sub": "je Kunde einmal"
+                          "label": "<li customer-list-item>"
                         }
                       ]
                     }
@@ -609,24 +605,19 @@
                 },
                 {
                   "label": "TestBed-Injector",
-                  "sub": "providers",
                   "vertical": true,
                   "children": [
                     {
-                      "label": "CustomerStore",
-                      "sub": "echt, providedIn: 'root'"
+                      "label": "CustomerStore"
                     },
                     {
-                      "label": "CustomerService",
-                      "sub": "echt"
+                      "label": "CustomerService"
                     },
                     {
-                      "label": "HttpClient",
-                      "sub": "provideHttpClient()"
+                      "label": "HttpClient"
                     },
                     {
                       "label": "HttpTestingController",
-                      "sub": "provideHttpClientTesting()",
                       "highlight": true
                     }
                   ]
@@ -695,7 +686,7 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "createComponent(CustomerListItem…)"
+                "text": "createComponent(...)"
               },
               {
                 "from": 1,
@@ -1279,7 +1270,7 @@
               {
                 "from": 1,
                 "to": 2,
-                "text": "Leser markieren, Durchlauf anfordern"
+                "text": "Leser markiert, Lauf geplant"
               },
               {
                 "from": 0,
@@ -1289,12 +1280,12 @@
               {
                 "from": 1,
                 "to": 2,
-                "text": "schon geplant: kein 2. Durchlauf"
+                "text": "schon geplant: kein 2. Lauf"
               },
               {
                 "from": 2,
                 "to": 2,
-                "text": "Handler fertig: Durchlauf startet"
+                "text": "Lauf startet"
               },
               {
                 "from": 2,
@@ -1594,7 +1585,7 @@
         {
           "type": "diagram",
           "title": "Sequenz: Lazy Loading der Detailseite",
-          "caption": "Von /customer (CustomerListComponent im Outlet) nach /customer/5 (CustomerDetailsComponent, erst jetzt geladen).",
+          "caption": "Vorher /customer mit CustomerListComponent im Outlet, nachher /customer/5 mit CustomerDetailsComponent.",
           "diagram": {
             "kind": "sequence",
             "actors": [
@@ -1613,7 +1604,7 @@
               {
                 "from": 1,
                 "to": 1,
-                "text": "passt zu 'customer/:id'"
+                "text": "Route finden"
               },
               {
                 "from": 1,
@@ -1650,7 +1641,7 @@
               {
                 "from": 1,
                 "to": 1,
-                "text": "nächstes Mal: Chunk schon da"
+                "text": "danach: aus Cache"
               }
             ]
           },
@@ -1711,7 +1702,7 @@
         },
         {
           "type": "diagram",
-          "title": "Sequenz: @defer (on viewport; prefetch on idle)",
+          "title": "Sequenz: @defer mit prefetch",
           "caption": "Beispiel der Codefolie: Code im Leerlauf vorladen, anzeigen erst, wenn der Platzhalter sichtbar wird.",
           "diagram": {
             "kind": "sequence",
@@ -1761,11 +1752,11 @@
               {
                 "from": 0,
                 "to": 0,
-                "text": "Block bleibt dauerhaft geladen"
+                "text": "bleibt geladen"
               }
             ]
           },
-          "notes": "Folie: „Sequenz: @defer (on viewport; prefetch on idle)“.\n\nDas Diagramm zeigt das Beispiel von der Codefolie mit der Bestellhistorie. Erstens: Beim Anzeigen der Seite setzt Angular zuerst den Platzhalter ein. Zweitens: Angular beobachtet diesen Platzhalter mit einem „IntersectionObserver“. Das ist eine Funktion des Browsers, die meldet, wenn ein Element in den sichtbaren Bereich kommt.\n\nDrittens: Sobald der Browser nichts anderes zu tun hat, meldet er Leerlauf. Das ist der Auslöser „prefetch on idle“. Viertens: Angular lädt jetzt die eigene Datei mit der Komponente vom Server. Fünftens: Der Code ist da, aber die Anzeige ändert sich noch nicht.\n\nSechstens: Der Benutzer scrollt, und der Platzhalter wird sichtbar. Das ist der Auslöser „on viewport“. Siebtens: Angular ersetzt den Platzhalter durch die Komponente. Weil der Code schon geladen ist, braucht es keinen Ladeblock. Achtens: Der Block bleibt danach geladen."
+          "notes": "Folie: „Sequenz: @defer mit prefetch“.\n\nDas Diagramm zeigt das Beispiel von der Codefolie mit der Bestellhistorie. Erstens: Beim Anzeigen der Seite setzt Angular zuerst den Platzhalter ein. Zweitens: Angular beobachtet diesen Platzhalter mit einem „IntersectionObserver“. Das ist eine Funktion des Browsers, die meldet, wenn ein Element in den sichtbaren Bereich kommt.\n\nDrittens: Sobald der Browser nichts anderes zu tun hat, meldet er Leerlauf. Das ist der Auslöser „prefetch on idle“. Viertens: Angular lädt jetzt die eigene Datei mit der Komponente vom Server. Fünftens: Der Code ist da, aber die Anzeige ändert sich noch nicht.\n\nSechstens: Der Benutzer scrollt, und der Platzhalter wird sichtbar. Das ist der Auslöser „on viewport“. Siebtens: Angular ersetzt den Platzhalter durch die Komponente. Weil der Code schon geladen ist, braucht es keinen Ladeblock. Achtens: Der Block bleibt danach geladen."
         },
         {
           "type": "content",

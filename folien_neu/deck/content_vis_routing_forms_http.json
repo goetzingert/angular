@@ -17,30 +17,55 @@
                   "label": "Callback",
                   "vertical": true,
                   "children": [
-                    {"label": "Funktion als zusätzlicher Parameter"},
-                    {"label": "Fehlerbehandlung: keine feste Regel"},
-                    {"label": "mehrere Schritte: tief verschachtelt"},
-                    {"label": "Abbrechen: nur, wenn die API es anbietet"}
+                    {
+                      "label": "Funktion als zusätzlicher Parameter"
+                    },
+                    {
+                      "label": "Fehlerbehandlung: keine feste Regel"
+                    },
+                    {
+                      "label": "mehrere Schritte: tief verschachtelt"
+                    },
+                    {
+                      "label": "Abbrechen: nur, wenn die API es anbietet"
+                    }
                   ]
                 },
                 {
                   "label": "Promise",
                   "vertical": true,
                   "children": [
-                    {"label": "genau ein Wert oder ein Fehler"},
-                    {"label": "then(...) und catch(...)"},
-                    {"label": "startet sofort beim Aufruf"},
-                    {"label": "kann nicht abgebrochen werden"}
+                    {
+                      "label": "genau ein Wert oder ein Fehler"
+                    },
+                    {
+                      "label": "then(...) und catch(...)"
+                    },
+                    {
+                      "label": "startet sofort beim Aufruf"
+                    },
+                    {
+                      "label": "kann nicht abgebrochen werden"
+                    }
                   ]
                 },
                 {
                   "label": "Observable (RxJS)",
                   "vertical": true,
                   "children": [
-                    {"label": "0 bis n Werte, dann complete oder error", "highlight": true},
-                    {"label": "pipe(map, filter, ...) und subscribe(...)"},
-                    {"label": "startet erst bei subscribe (lazy)"},
-                    {"label": "beenden mit unsubscribe()"}
+                    {
+                      "label": "0 bis n Werte, dann complete oder error",
+                      "highlight": true
+                    },
+                    {
+                      "label": "pipe(map, filter, ...) und subscribe(...)"
+                    },
+                    {
+                      "label": "startet erst bei subscribe (lazy)"
+                    },
+                    {
+                      "label": "beenden mit unsubscribe()"
+                    }
                   ]
                 }
               ]
@@ -60,17 +85,63 @@
           "caption": "Erst subscribe startet die Quelle. Jeder Wert läuft durch pipe(map) und kommt als next beim Abnehmer an, am Ende complete.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerListComponent", "Observable mit pipe(map)", "Quelle (z. B. HTTP-Anfrage)"],
+            "actors": [
+              "Komponente (CustomerList)",
+              "Observable mit pipe(map)",
+              "Quelle (z. B. HTTP-Anfrage)"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "subscribe({ next, error, complete })"},
-              {"from": 1, "to": 2, "text": "Quelle wird erst jetzt gestartet (lazy)"},
-              {"from": 2, "to": 1, "text": "Wert a", "reply": true},
-              {"from": 1, "to": 1, "text": "map(a) ergibt 1"},
-              {"from": 1, "to": 0, "text": "next(1): Handler läuft", "reply": true},
-              {"from": 2, "to": 1, "text": "Wert b", "reply": true},
-              {"from": 1, "to": 0, "text": "next(2): Handler läuft", "reply": true},
-              {"from": 2, "to": 1, "text": "Quelle ist fertig", "reply": true},
-              {"from": 1, "to": 0, "text": "complete(): Handler werden entfernt", "reply": true}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "subscribe({ next, error, complete })"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Quelle wird erst jetzt gestartet (lazy)"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Wert a",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "map(a) ergibt 1"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "next(1): Handler läuft",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Wert b",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "next(2): Handler läuft",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Quelle ist fertig",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "complete(): Handler werden entfernt",
+                "reply": true
+              }
             ]
           },
           "notes": "Folie: „Ablauf: subscribe, next, complete“.\n\nDas Sequenzdiagramm zeigt drei Beteiligte: links die Komponente „CustomerListComponent“, in der Mitte ein Observable mit dem Operator „map“, rechts die eigentliche Datenquelle, zum Beispiel eine HTTP-Anfrage. Die Pfeile sind von oben nach unten nummeriert. Gestrichelte Pfeile sind Antworten.\n\nIn Schritt 1 meldet sich die Komponente mit „subscribe“ an und übergibt drei Funktionen: „next“ für jeden Wert, „error“ für einen Fehler und „complete“ für das Ende. Erst in Schritt 2 startet die Quelle. Vorher passiert nichts, deshalb nennt man Observables „lazy“, also faul.\n\nDann liefert die Quelle den Wert „a“. Der Operator „map“ wandelt ihn in die Zahl 1 um, und die Komponente bekommt ihn über „next“. Mit dem Wert „b“ passiert dasselbe. Zum Schluss meldet die Quelle, dass sie fertig ist. Die Komponente bekommt „complete“, und alle Handler werden automatisch entfernt. Bei einem Fehler käme statt „complete“ der Aufruf „error“."
@@ -87,17 +158,60 @@
           "caption": "toSignal() abonniert beim Erzeugen der Komponente und meldet sich ab, sobald Angular die Komponente zerstört.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["Angular", "CustomerListComponent", "toSignal()", "Observable getAll()"],
+            "actors": [
+              "Angular",
+              "CustomerList",
+              "toSignal()",
+              "Observable getAll()"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "Komponente erzeugen (Route aktiv)"},
-              {"from": 1, "to": 2, "text": "toSignal(service.getAll(), { initialValue: [] })"},
-              {"from": 2, "to": 3, "text": "subscribe()"},
-              {"from": 3, "to": 2, "text": "next(customers)", "reply": true},
-              {"from": 2, "to": 1, "text": "Signal customers() hat neuen Wert", "reply": true},
-              {"from": 1, "to": 1, "text": "Template liest customers() und zeigt die Liste"},
-              {"from": 0, "to": 1, "text": "Komponente zerstören (andere Route)"},
-              {"from": 0, "to": 2, "text": "DestroyRef meldet: Komponente ist weg"},
-              {"from": 2, "to": 3, "text": "unsubscribe()"}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Komponente erzeugen (Route aktiv)"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "toSignal(service.getAll())"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "subscribe()"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "next(customers)",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Signal customers() hat neuen Wert",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "Liste anzeigen"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Komponente zerstören (andere Route)"
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "DestroyRef meldet: Komponente ist weg"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "unsubscribe()"
+              }
             ]
           },
           "notes": "Folie: „Automatisch abmelden mit toSignal()“.\n\nDas Diagramm zeigt die ganze Lebenszeit eines Abonnements. Beteiligt sind Angular selbst, die Komponente „CustomerListComponent“, die Funktion „toSignal“ und das Observable aus „getAll()“ des „CustomerService“.\n\nAngular erzeugt die Komponente, zum Beispiel weil der Router sie anzeigt. Dabei ruft die Komponente „toSignal“ auf und übergibt das Observable. „toSignal“ meldet sich mit „subscribe“ an. Jeder neue Wert kommt mit „next“ an und wird in das Signal „customers“ geschrieben. Das Template liest dieses Signal und zeigt die Liste an.\n\nWechselt der Benutzer zu einer anderen Seite, zerstört Angular die Komponente. Das „DestroyRef“ ist ein kleines Objekt, das das Ende der Komponente meldet. „toSignal“ hat sich dort beim Start eingetragen und ruft jetzt selbst „unsubscribe“ auf. Man braucht also kein „ngOnDestroy“. „takeUntilDestroyed“ arbeitet nach demselben Prinzip, wenn man doch selbst „subscribe“ aufruft."
@@ -122,8 +236,14 @@
                   "sub": "Kind-Komponenten fest im Template",
                   "vertical": true,
                   "children": [
-                    {"label": "<customer-list>", "sub": "[customers] von AppComponent"},
-                    {"label": "<customer-details>", "sub": "[customer] = ausgewählter Kunde"}
+                    {
+                      "label": "<customer-list>",
+                      "sub": "[customers] von AppComponent"
+                    },
+                    {
+                      "label": "<customer-details>",
+                      "sub": "[customer] = ausgewählter Kunde"
+                    }
                   ]
                 },
                 {
@@ -134,7 +254,11 @@
                       "label": "<router-outlet>",
                       "sub": "Platzhalter, URL /customer",
                       "children": [
-                        {"label": "CustomerListComponent", "sub": "lädt Daten selbst (toSignal)", "highlight": true}
+                        {
+                          "label": "CustomerListComponent",
+                          "sub": "lädt Daten selbst (toSignal)",
+                          "highlight": true
+                        }
                       ]
                     }
                   ]
@@ -142,7 +266,12 @@
               ]
             },
             "links": [
-              {"from": "Vorher: AppComponent", "to": "Nachher: AppComponent", "text": "Übung 20", "accent": true}
+              {
+                "from": "Vorher: AppComponent",
+                "to": "Nachher: AppComponent",
+                "text": "Übung 20",
+                "accent": true
+              }
             ]
           },
           "notes": "Folie: „Vom festen Template zum router-outlet“.\n\nDas Diagramm zeigt die Anwendung vor und nach Übung 20. Ein Kasten in einem anderen Kasten bedeutet: Er steht in dessen Template. Links ist der alte Zustand. Im Template von „AppComponent“ stehen die Liste „customer-list“ und die Detailansicht „customer-details“ fest nebeneinander. „AppComponent“ gibt ihnen die Daten über Inputs, also über Eingabe-Eigenschaften, mit.\n\nRechts ist der neue Zustand. Im Template von „AppComponent“ steht nur noch der Platzhalter „router-outlet“. Welche Komponente darin erscheint, entscheidet der Router anhand der URL. Bei der URL „/customer“ ist es die „CustomerListComponent“.\n\nWeil „AppComponent“ die Liste jetzt nicht mehr selbst in ihr Template schreibt, kann sie ihr auch keine Daten per Input mehr geben. Deshalb holt sich die Liste die Kunden selbst vom „CustomerService“, zum Beispiel mit „toSignal“."
@@ -159,16 +288,56 @@
           "caption": "Routen aus app.routes.ts: 'customer/:id', 'customer', '**' mit redirectTo '/customer'. Der erste Treffer gewinnt.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["Browser (Adresszeile)", "Router", "Routes (app.routes.ts)", "RouterOutlet", "CustomerListComponent"],
+            "actors": [
+              "Browser (Adresszeile)",
+              "Router",
+              "Routes (app.routes.ts)",
+              "RouterOutlet",
+              "CustomerList"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "Start mit URL localhost:4200/"},
-              {"from": 1, "to": 2, "text": "Route für Pfad '' suchen"},
-              {"from": 2, "to": 1, "text": "nur '**' passt: redirectTo '/customer'", "reply": true},
-              {"from": 1, "to": 0, "text": "URL wird zu /customer"},
-              {"from": 1, "to": 2, "text": "Route für 'customer' suchen"},
-              {"from": 2, "to": 1, "text": "Treffer: CustomerListComponent", "reply": true},
-              {"from": 1, "to": 3, "text": "Route aktivieren"},
-              {"from": 3, "to": 4, "text": "Komponente erzeugen, einfügen"}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Start mit URL localhost:4200/"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Route für Pfad '' suchen"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "'**': redirectTo",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "URL wird zu /customer"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Route für 'customer' suchen"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Treffer: CustomerListComponent",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Route aktivieren"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "erzeugen, einfügen"
+              }
             ]
           },
           "notes": "Folie: „Start mit leerem Pfad: Fallback-Route greift“.\n\nDas Sequenzdiagramm zeigt, was beim Start der Anwendung passiert, wenn in der Adresszeile nur „localhost:4200/“ steht. Beteiligt sind der Browser, der „Router“, die Routen-Liste aus „app.routes.ts“, der Platzhalter „RouterOutlet“ und die Komponente „CustomerListComponent“.\n\nDer Router sucht eine Route für den leeren Pfad. Er prüft die Routen der Reihe nach: „customer/:id“ passt nicht, „customer“ passt auch nicht. Nur die Fallback-Route mit zwei Sternchen passt immer. Sie hat „redirectTo“, also eine Weiterleitung, auf „/customer“. Der Router ändert deshalb die URL im Browser auf „/customer“.\n\nDann sucht er erneut und findet jetzt die Route „customer“ mit der „CustomerListComponent“. Der Router aktiviert die Route, und der „RouterOutlet“ erzeugt die Komponente und fügt sie an seiner Stelle ein. Stünde die Fallback-Route ganz oben in der Liste, würde sie jede URL abfangen. Deshalb gehört sie immer an das Ende."
@@ -185,16 +354,54 @@
           "caption": "Die LocationStrategy übersetzt zwischen Router und Adresszeile. Mit Hash sieht der Server den Pfad nach # nie.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["Browser (Adresszeile, Verlauf)", "LocationStrategy", "Router", "Server (ng serve)"],
+            "actors": [
+              "Browser (Adresszeile, Verlauf)",
+              "LocationStrategy",
+              "Router",
+              "Server (ng serve)"
+            ],
             "steps": [
-              {"from": 2, "to": 1, "text": "neue URL /customer/5 nach Navigation"},
-              {"from": 1, "to": 0, "text": "pushState: /customer/5 (Hash: /#/customer/5)"},
-              {"from": 0, "to": 1, "text": "Zurück-Taste: Ereignis popstate"},
-              {"from": 1, "to": 2, "text": "URL ist jetzt /customer"},
-              {"from": 2, "to": 2, "text": "Route suchen, Komponente tauschen"},
-              {"from": 0, "to": 3, "text": "Neu laden: GET /customer/5 (Path)"},
-              {"from": 3, "to": 0, "text": "index.html, dann liest der Router die URL", "reply": true},
-              {"from": 0, "to": 3, "text": "Neu laden mit Hash: GET / (Rest bleibt im Browser)"}
+              {
+                "from": 2,
+                "to": 1,
+                "text": "neue URL /customer/5"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "pushState('/customer/5')"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Zurück-Taste: Ereignis popstate"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "URL ist jetzt /customer"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "Komponente tauschen"
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "Neu laden: GET /customer/5 (Path)"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "index.html, dann liest der Router die URL",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 3,
+                "text": "Neu laden mit Hash: GET / (Rest bleibt im Browser)"
+              }
             ]
           },
           "notes": "Folie: „Browser-URL und Router über die LocationStrategy“.\n\nDas Diagramm zeigt, wie die Adresszeile des Browsers und der Router zusammenarbeiten. Dazwischen steht die „LocationStrategy“, die Strategie für die Darstellung der URL. Rechts steht zusätzlich der Server, hier der Entwicklungsserver „ng serve“.\n\nNach einer Navigation meldet der Router die neue URL „/customer/5“. Die Strategie schreibt sie mit „pushState“ in die Adresszeile und in den Verlauf des Browsers, ohne die Seite neu zu laden. Bei der Hash-Variante steht in der Adresszeile „/#/customer/5“. Drückt der Benutzer die Zurück-Taste, meldet der Browser das Ereignis „popstate“. Die Strategie gibt die alte URL an den Router weiter, und der Router tauscht die Komponente.\n\nBeim Neuladen der Seite geht die Anfrage an den Server. Mit der normalen Pfad-Strategie fragt der Browser nach „/customer/5“. Der Server muss dann trotzdem die „index.html“ liefern. „ng serve“ macht das automatisch, ein echter Webserver muss dafür eingerichtet werden. Mit der Hash-Strategie fragt der Browser nur nach „/“, weil der Teil nach dem Zeichen „#“ nie zum Server geschickt wird."
@@ -211,18 +418,65 @@
           "caption": "Aus der URL /customer/5 wird der Input id = '5' der CustomerDetailsComponent (withComponentInputBinding).",
           "diagram": {
             "kind": "sequence",
-            "actors": ["Browser-URL", "Router", "ActivatedRoute", "CustomerDetailsComponent", "CustomerService"],
+            "actors": [
+              "Browser-URL",
+              "Router",
+              "ActivatedRoute",
+              "CustomerDetails",
+              "CustomerService"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "URL /customer/5"},
-              {"from": 1, "to": 1, "text": "'customer/:id' passt, id = '5'"},
-              {"from": 1, "to": 2, "text": "paramMap: { id: '5' }"},
-              {"from": 1, "to": 3, "text": "Input setzen: id = '5'"},
-              {"from": 3, "to": 3, "text": "effect liest id()"},
-              {"from": 3, "to": 4, "text": "getById('5')"},
-              {"from": 4, "to": 3, "text": "Kunde 5 (Observable)", "reply": true},
-              {"from": 0, "to": 1, "text": "neue URL /customer/7"},
-              {"from": 1, "to": 3, "text": "gleiche Komponente: id = '7'"},
-              {"from": 3, "to": 4, "text": "effect lädt neu: getById('7')"}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "URL /customer/5"
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "id = '5'"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "paramMap: { id: '5' }"
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Input setzen: id = '5'"
+              },
+              {
+                "from": 3,
+                "to": 3,
+                "text": "effect liest id()"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "getById('5')"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "Kunde 5 (Observable)",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "neue URL /customer/7"
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "gleiche Komponente: id = '7'"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "effect lädt neu: getById('7')"
+              }
             ]
           },
           "notes": "Folie: „Der Weg des Pfadparameters :id“.\n\nDas Sequenzdiagramm verfolgt die Zahl 5 aus der URL bis in die Detailkomponente. Beteiligt sind die URL im Browser, der „Router“, die „ActivatedRoute“, die Detailkomponente „CustomerDetailsComponent“ und der „CustomerService“.\n\nDer Router bekommt die URL „/customer/5“ und vergleicht sie mit den Routen. Die Route „customer/:id“ passt, und der Platzhalter „:id“ bekommt den Wert „5“. Diesen Wert legt der Router in der „ActivatedRoute“ ab. Das ist ein Objekt mit allen Angaben zur aktiven Route. Weil in „main.ts“ „withComponentInputBinding()“ eingeschaltet ist, setzt der Router zusätzlich den Signal-Input „id“ der Komponente. Ohne diese Einstellung müsste die Komponente die „ActivatedRoute“ mit „inject“ holen und dort „paramMap“ lesen.\n\nIn der Komponente liest ein „effect“, also eine automatische Reaktion, den Wert von „id“ und lädt den Kunden mit „getById“ vom Service. Wechselt die URL danach auf „/customer/7“, bleibt dieselbe Komponente stehen. Der Router setzt nur den Input neu, und der „effect“ lädt den Kunden 7. Deshalb darf man die ID nicht nur einmal im Konstruktor lesen."
@@ -249,7 +503,11 @@
                     {
                       "label": "<router-outlet> mit Liste",
                       "children": [
-                        {"label": "CustomerListComponent", "sub": "<a [routerLink]=\"[customer.id]\">", "highlight": true}
+                        {
+                          "label": "CustomerListComponent",
+                          "sub": "<a [routerLink]=\"[customer.id]\">",
+                          "highlight": true
+                        }
                       ]
                     }
                   ]
@@ -261,7 +519,11 @@
                     {
                       "label": "<router-outlet> mit Details",
                       "children": [
-                        {"label": "CustomerDetailsComponent", "sub": "Input id = '5'", "highlight": true}
+                        {
+                          "label": "CustomerDetailsComponent",
+                          "sub": "Input id = '5'",
+                          "highlight": true
+                        }
                       ]
                     }
                   ]
@@ -269,7 +531,12 @@
               ]
             },
             "links": [
-              {"from": "CustomerListComponent", "to": "CustomerDetailsComponent", "text": "Klick auf Kunde 5", "accent": true}
+              {
+                "from": "CustomerListComponent",
+                "to": "CustomerDetailsComponent",
+                "text": "Klick",
+                "accent": true
+              }
             ]
           },
           "notes": "Folie: „routerLink: von der Liste zu den Details“.\n\nDas Diagramm zeigt die Anwendung vor und nach einem Klick in der Kundenliste. Ein Kasten in einem anderen Kasten bedeutet: Er steht in dessen Template. Links ist der Ausgangszustand. Die Adresszeile zeigt „/customer“. Die „AppComponent“ enthält den Platzhalter „router-outlet“, und darin steht die „CustomerListComponent“. Jeder Kunde in der Liste ist ein Link mit „routerLink“ und seiner ID.\n\nDer orange Pfeil ist der Klick auf den Kunden mit der ID 5. Rechts ist der Zielzustand. Die Adresszeile zeigt jetzt „/customer/5“. Die „AppComponent“ und ihr „router-outlet“ sind unverändert geblieben. Nur der Inhalt des Platzhalters hat gewechselt: Die Liste ist entfernt, und dort steht jetzt die „CustomerDetailsComponent“ mit dem Input „id“ gleich 5.\n\nDer Link ist relativ geschrieben, nur mit der ID. Weil die Liste unter „/customer“ steht, ergibt sich daraus „/customer/5“. Die nächste Folie zeigt Schritt für Schritt, wer bei diesem Klick wen aufruft."
@@ -280,18 +547,67 @@
           "caption": "Von /customer nach /customer/5: Der Router sucht die Route, prüft Guards, setzt die URL und tauscht den Inhalt des Outlets.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerList (Template)", "RouterLink", "Router", "Routes und Guards", "RouterOutlet", "CustomerDetails"],
+            "actors": [
+              "CustomerList (Template)",
+              "RouterLink",
+              "Router",
+              "Routes und Guards",
+              "RouterOutlet",
+              "CustomerDetails"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "Klick auf Link von Kunde 5"},
-              {"from": 1, "to": 2, "text": "navigateByUrl('/customer/5')"},
-              {"from": 2, "to": 3, "text": "Route suchen"},
-              {"from": 3, "to": 2, "text": "customer/:id, id = '5'", "reply": true},
-              {"from": 2, "to": 3, "text": "Guards prüfen (falls da)"},
-              {"from": 3, "to": 2, "text": "true: weiter", "reply": true},
-              {"from": 2, "to": 2, "text": "URL /customer/5 in Verlauf"},
-              {"from": 2, "to": 4, "text": "neue Route aktivieren"},
-              {"from": 4, "to": 0, "text": "Liste zerstören"},
-              {"from": 4, "to": 5, "text": "erzeugen, Input id = '5'"}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "Klick auf Link von Kunde 5"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "navigateByUrl('/customer/5')"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Route suchen"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "customer/:id, id = '5'",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "Guards prüfen (falls da)"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "true: weiter",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "URL setzen"
+              },
+              {
+                "from": 2,
+                "to": 4,
+                "text": "neue Route aktivieren"
+              },
+              {
+                "from": 4,
+                "to": 0,
+                "text": "Liste zerstören"
+              },
+              {
+                "from": 4,
+                "to": 5,
+                "text": "erzeugen, Input id = '5'"
+              }
             ]
           },
           "notes": "Folie: „Ablauf eines Klicks auf routerLink“.\n\nDas Sequenzdiagramm zeigt denselben Wechsel wie die vorige Folie, aber als Reihenfolge der Aufrufe. Beteiligt sind das Template der Kundenliste, die Direktive „RouterLink“, der „Router“, die Routen mit ihren Wächtern, der Platzhalter „RouterOutlet“ und die Detailkomponente.\n\nDer Benutzer klickt in der Liste auf den Link von Kunde 5. Die Direktive „RouterLink“ verhindert das normale Neuladen der Seite und ruft beim Router „navigateByUrl“ mit der Ziel-URL „/customer/5“ auf. Der Router sucht die passende Route und findet „customer/:id“ mit der ID 5. Falls an der Route „Guards“ hängen, also Wächter, die den Zugang prüfen, fragt er sie jetzt. Nur wenn sie zustimmen, geht es weiter.\n\nDann schreibt der Router die neue URL in die Adresszeile und in den Verlauf des Browsers. Deshalb funktioniert später auch die Zurück-Taste. Zum Schluss aktiviert er die neue Route im „RouterOutlet“. Der Outlet zerstört die Liste und erzeugt die Detailkomponente mit dem Input „id“ gleich 5."
@@ -308,18 +624,66 @@
           "caption": "Start: /customer/5 mit CustomerDetailsComponent. Ziel: /customer mit CustomerListComponent, ausgelöst im Code der Klasse.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerDetailsComponent", "CustomerService", "Router", "RouterOutlet", "CustomerListComponent"],
+            "actors": [
+              "CustomerDetails",
+              "CustomerService",
+              "Router",
+              "RouterOutlet",
+              "CustomerList"
+            ],
             "steps": [
-              {"from": 0, "to": 0, "text": "onSubmit(): Speichern geklickt"},
-              {"from": 0, "to": 1, "text": "update(draft) und subscribe"},
-              {"from": 1, "to": 0, "text": "gespeichert (Observable)", "reply": true},
-              {"from": 0, "to": 2, "text": "navigate(['/customer'])"},
-              {"from": 2, "to": 2, "text": "Route 'customer', URL /customer"},
-              {"from": 2, "to": 3, "text": "neue Route aktivieren"},
-              {"from": 3, "to": 0, "text": "Details zerstören"},
-              {"from": 3, "to": 4, "text": "Liste erzeugen"},
-              {"from": 4, "to": 1, "text": "getAll() über toSignal"},
-              {"from": 1, "to": 4, "text": "aktuelle Kundenliste", "reply": true}
+              {
+                "from": 0,
+                "to": 0,
+                "text": "onSubmit()"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "update(draft) und subscribe"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "gespeichert (Observable)",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 2,
+                "text": "navigate(['/customer'])"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "Route finden"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "neue Route aktivieren"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "Details zerstören"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "Liste erzeugen"
+              },
+              {
+                "from": 4,
+                "to": 1,
+                "text": "getAll() über toSignal"
+              },
+              {
+                "from": 1,
+                "to": 4,
+                "text": "aktuelle Kundenliste",
+                "reply": true
+              }
             ]
           },
           "notes": "Folie: „router.navigate nach dem Speichern“.\n\nDas Diagramm zeigt die Navigation aus dem Code der Komponentenklasse, so wie in Übung 21 und später beim Speichern des Formulars. Der Ausgangspunkt ist die URL „/customer/5“. Im „router-outlet“ steht die „CustomerDetailsComponent“. Das Ziel ist die URL „/customer“ mit der Kundenliste.\n\nDer Benutzer klickt auf „Speichern“. Die Methode „onSubmit“ ruft beim „CustomerService“ die Methode „update“ mit der bearbeiteten Kopie auf. Erst wenn die Antwort da ist, ruft die Komponente beim Router „navigate“ mit dem Ziel „/customer“ auf. Den Router hat sie vorher mit „inject(Router)“ bekommen.\n\nDer Router findet die Route „customer“ und setzt die URL im Browser. Der „RouterOutlet“ zerstört die Detailkomponente und erzeugt die Listenkomponente. Die Liste holt sich mit „getAll“ die aktuellen Kunden vom Service und zeigt damit schon die gespeicherte Änderung. Ein Link im Template wäre hier nicht passend, weil die Navigation erst nach dem erfolgreichen Speichern passieren soll."
@@ -336,17 +700,59 @@
           "caption": "[(ngModel)] verbindet die Kopie draft in der Klasse mit dem Eingabefeld, in beide Richtungen. NgForm sammelt die Felder.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerDetailsComponent", "NgModel (Feld firstname)", "<input> im Browser", "NgForm #customerForm"],
+            "actors": [
+              "CustomerDetails",
+              "NgModel (firstname)",
+              "<input> im Browser",
+              "NgForm #customerForm"
+            ],
             "steps": [
-              {"from": 0, "to": 0, "text": "Kunde geladen: draft = Kopie (linkedSignal)"},
-              {"from": 0, "to": 1, "text": "[ngModel]: c.firstname = 'Anna'"},
-              {"from": 1, "to": 2, "text": "Wert 'Anna' ins Feld schreiben"},
-              {"from": 1, "to": 3, "text": "Feld beim Formular anmelden (name)"},
-              {"from": 2, "to": 1, "text": "Benutzer tippt 'Annette'"},
-              {"from": 1, "to": 0, "text": "(ngModelChange): c.firstname = 'Annette'", "reply": true},
-              {"from": 1, "to": 3, "text": "Feld ist jetzt dirty, Zustand neu"},
-              {"from": 3, "to": 0, "text": "(ngSubmit): onSubmit(customerForm)"},
-              {"from": 0, "to": 0, "text": "draft() speichern, Original bleibt unberührt"}
+              {
+                "from": 0,
+                "to": 0,
+                "text": "draft = Kopie"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "[ngModel]: c.firstname = 'Anna'"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Wert 'Anna' ins Feld schreiben"
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Feld beim Formular anmelden (name)"
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Benutzer tippt 'Annette'"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "(ngModelChange): 'Annette'",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 3,
+                "text": "Feld ist jetzt dirty, Zustand neu"
+              },
+              {
+                "from": 3,
+                "to": 0,
+                "text": "(ngSubmit): onSubmit(customerForm)"
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "draft() speichern"
+              }
             ]
           },
           "notes": "Folie: „Datenfluss mit ngModel: Modell und Feld“.\n\nDas Sequenzdiagramm zeigt, wie Daten in einem Template-Driven Form fließen. Beteiligt sind die Komponente „CustomerDetailsComponent“, die Direktive „NgModel“ an einem Feld, das echte Eingabefeld im Browser und das Formular „NgForm“, das Angular automatisch am „form“-Tag anlegt.\n\nZuerst wird der Kunde geladen, und „linkedSignal“ erzeugt die bearbeitbare Kopie „draft“. Über die Bindung „[ngModel]“ liest die Direktive den Vornamen „Anna“ aus der Kopie und schreibt ihn in das Feld. Gleichzeitig meldet sie das Feld unter seinem „name“-Attribut beim Formular an. Deshalb ist das „name“-Attribut Pflicht.\n\nTippt der Benutzer „Annette“, meldet das Feld die Änderung an „NgModel“. Die Direktive schreibt den neuen Wert über „ngModelChange“ zurück in die Kopie. Das ist die zweite Richtung der Bindung. Außerdem gilt das Feld jetzt als „dirty“, also verändert, und das Formular berechnet seinen Zustand neu. Beim Absenden ruft das Formular „onSubmit“ auf. Gespeichert wird die Kopie. Das geladene Original wurde beim Tippen nie verändert."
@@ -367,14 +773,33 @@
               "label": "MasterDetailComponent",
               "sub": "providers: [Communication], Template: <list /> <detail />",
               "children": [
-                {"label": "ListComponent", "sub": "inject(Communication)"},
-                {"label": "Communication", "sub": "eine Instanz für diesen Teilbaum", "highlight": true},
-                {"label": "DetailComponent", "sub": "inject(Communication)"}
-              ]
+                {
+                  "label": "ListComponent",
+                  "sub": "inject(Communication)"
+                },
+                {
+                  "label": "Communication",
+                  "sub": "eine Instanz für diesen Teilbaum",
+                  "highlight": true
+                },
+                {
+                  "label": "DetailComponent",
+                  "sub": "inject(Communication)"
+                }
+              ],
+              "vertical": true
             },
             "links": [
-              {"from": "ListComponent", "to": "Communication", "text": "listToDetail.next()"},
-              {"from": "Communication", "to": "DetailComponent", "text": "subscribe: Update"}
+              {
+                "from": "ListComponent",
+                "to": "Communication",
+                "text": "listToDetail.next(...)"
+              },
+              {
+                "from": "Communication",
+                "to": "DetailComponent",
+                "text": "Handler über subscribe"
+              }
             ]
           },
           "notes": "Folie: „Zwei Geschwister teilen einen Service“.\n\nDas Diagramm zeigt, wie zwei Geschwister-Komponenten ohne ihre Eltern-Komponente miteinander sprechen. Der äußere Kasten ist die Eltern-Komponente „MasterDetailComponent“. In ihrem Template stehen die Liste „ListComponent“ und die Detailansicht „DetailComponent“. Außerdem trägt sie in „providers“ den Service „Communication“ ein.\n\nDadurch erzeugt Angular für diese Eltern-Komponente genau eine Instanz des Service. Beide Kinder holen sich mit „inject“ dieselbe Instanz. Eine zweite „MasterDetailComponent“ an anderer Stelle hätte ihre eigene Instanz. Das nennt man einen Service mit begrenztem Gültigkeitsbereich.\n\nDie Pfeile zeigen den Weg einer Nachricht. Die Liste ruft „next“ am Kanal „listToDetail“ auf. Der Service gibt die Nachricht an alle weiter, die sich mit „subscribe“ angemeldet haben, hier an die Detailansicht. Für die Gegenrichtung gibt es den zweiten Kanal „detailToList“."
@@ -391,16 +816,54 @@
           "caption": "Beide Komponenten melden sich zuerst an. Danach erreicht jedes next() die andere Seite. takeUntilDestroyed räumt auf.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["ListComponent", "Communication (zwei Subjects)", "DetailComponent"],
+            "actors": [
+              "ListComponent",
+              "Communication",
+              "DetailComponent"
+            ],
             "steps": [
-              {"from": 2, "to": 1, "text": "listToDetail.subscribe(...)"},
-              {"from": 0, "to": 1, "text": "detailToList.subscribe(...)"},
-              {"from": 0, "to": 0, "text": "doSomething()"},
-              {"from": 0, "to": 1, "text": "listToDetail.next(new ListUpdate())"},
-              {"from": 1, "to": 2, "text": "Handler bekommt ListUpdate", "reply": true},
-              {"from": 2, "to": 1, "text": "detailToList.next(new DetailUpdate())"},
-              {"from": 1, "to": 0, "text": "Handler: 'update received'", "reply": true},
-              {"from": 0, "to": 1, "text": "zerstört: takeUntilDestroyed meldet ab"}
+              {
+                "from": 2,
+                "to": 1,
+                "text": "listToDetail.subscribe(...)"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "detailToList.subscribe(...)"
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "doSomething()"
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "listToDetail.next(new ListUpdate())"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "Handler bekommt ListUpdate",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "detailToList.next(new DetailUpdate())"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Handler: 'update received'",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 1,
+                "text": "zerstört: takeUntilDestroyed meldet ab"
+              }
             ]
           },
           "notes": "Folie: „Ablauf: Nachrichten über den Kommunikations-Service“.\n\nDas Sequenzdiagramm zeigt den Code der vorigen Folie als zeitliche Reihenfolge. Links steht die Liste, in der Mitte der Service „Communication“ mit seinen zwei „Subjects“, rechts die Detailansicht. Ein „Subject“ ist ein Observable, an dem man selbst mit „next“ neue Werte senden kann.\n\nZuerst melden sich beide Komponenten in ihrem Konstruktor an: die Detailansicht am Kanal „listToDetail“, die Liste am Kanal „detailToList“. Danach ruft die Liste „doSomething“ auf und sendet mit „next“ ein „ListUpdate“. Der Service reicht es sofort an den Handler der Detailansicht weiter. Umgekehrt sendet die Detailansicht ein „DetailUpdate“, und die Liste gibt „update received“ aus.\n\nWird die Liste zerstört, meldet „takeUntilDestroyed“ ihr Abonnement automatisch ab. So läuft kein Handler einer Komponente weiter, die es nicht mehr gibt. Wichtig ist die Reihenfolge: Ein normales „Subject“ gibt nur Werte weiter, die nach dem „subscribe“ gesendet werden."
@@ -417,17 +880,63 @@
           "caption": "Übung 24: CustomerService fragt per HttpClient an, der Proxy von ng serve leitet /api an server.js auf Port 3000 weiter.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerListComponent", "CustomerService", "HttpClient", "Proxy (ng serve :4200)", "server.js (:3000)"],
+            "actors": [
+              "CustomerList",
+              "CustomerService",
+              "HttpClient",
+              "Proxy :4200",
+              "server.js (:3000)"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "getAll(), toSignal abonniert"},
-              {"from": 1, "to": 2, "text": "get('api/customer')"},
-              {"from": 2, "to": 3, "text": "GET /api/customer"},
-              {"from": 3, "to": 4, "text": "weiter an localhost:3000"},
-              {"from": 4, "to": 3, "text": "200 { data: [...] } JSON", "reply": true},
-              {"from": 3, "to": 2, "text": "Antwort durchreichen", "reply": true},
-              {"from": 2, "to": 1, "text": "Observable: JSON geparst", "reply": true},
-              {"from": 1, "to": 1, "text": "map: data, String zu Date"},
-              {"from": 1, "to": 0, "text": "Customer[] (ReplaySubject)", "reply": true}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "getAll(), toSignal abonniert"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "get('api/customer')"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "GET /api/customer"
+              },
+              {
+                "from": 3,
+                "to": 4,
+                "text": "weiter an :3000"
+              },
+              {
+                "from": 4,
+                "to": 3,
+                "text": "200 { data: [...] } JSON",
+                "reply": true
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "Antwort durchreichen",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "Observable: JSON geparst",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "map, mapDates"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "Customer[] (ReplaySubject)",
+                "reply": true
+              }
             ]
           },
           "notes": "Folie: „Der Weg einer HTTP-Anfrage bis zum Backend“.\n\nDas Sequenzdiagramm zeigt alle Stationen, die in Übung 24 zusammenspielen. Links steht die Komponente „CustomerListComponent“, dann der „CustomerService“, der „HttpClient“ von Angular, der Proxy des Entwicklungsservers „ng serve“ und rechts das Backend „server.js“ auf Port 3000.\n\nDie Liste ruft „getAll“ auf, und „toSignal“ meldet sich an. Der Service schickt mit dem „HttpClient“ eine GET-Anfrage, also eine Leseanfrage, an „api/customer“. Die Anfrage geht zuerst an „ng serve“ auf Port 4200. Der Proxy, ein Vermittler, leitet alle Pfade mit „/api“ an „localhost:3000“ weiter. So liegt für den Browser alles auf demselben Server, und es gibt kein Problem mit „CORS“, der Sicherheitsregel für fremde Server.\n\nDas Backend antwortet mit dem Status 200 und einem JSON-Objekt mit dem Feld „data“. Der „HttpClient“ wandelt das JSON automatisch in ein JavaScript-Objekt um und liefert es als Observable. Im Service holt der Operator „map“ das Feld „data“ heraus und wandelt das Datum um, weil Datumswerte im JSON nur als Text ankommen. Über das „ReplaySubject“ bekommt die Liste dann die fertigen Kunden."
@@ -444,16 +953,56 @@
           "caption": "Bei einem Fehler kommt kein next: HttpClient meldet error, catchError baut eine Meldung, die Komponente zeigt sie an.",
           "diagram": {
             "kind": "sequence",
-            "actors": ["CustomerDetailsComponent", "CustomerService", "HttpClient", "server.js (über Proxy)"],
+            "actors": [
+              "CustomerDetails",
+              "CustomerService",
+              "HttpClient",
+              "server.js (über Proxy)"
+            ],
             "steps": [
-              {"from": 0, "to": 1, "text": "getById('99') und subscribe"},
-              {"from": 1, "to": 2, "text": "get('api/customer/99')"},
-              {"from": 2, "to": 3, "text": "GET /api/customer/99"},
-              {"from": 3, "to": 2, "text": "404 Not Found", "reply": true},
-              {"from": 2, "to": 1, "text": "error: HttpErrorResponse (status 404)", "reply": true},
-              {"from": 1, "to": 1, "text": "catchError(handleError): Meldung bauen"},
-              {"from": 1, "to": 0, "text": "throwError: error-Handler läuft", "reply": true},
-              {"from": 0, "to": 0, "text": "Fehlermeldung anzeigen statt Kunde"}
+              {
+                "from": 0,
+                "to": 1,
+                "text": "getById('99') und subscribe"
+              },
+              {
+                "from": 1,
+                "to": 2,
+                "text": "get('api/customer/99')"
+              },
+              {
+                "from": 2,
+                "to": 3,
+                "text": "GET /api/customer/99"
+              },
+              {
+                "from": 3,
+                "to": 2,
+                "text": "404 Not Found",
+                "reply": true
+              },
+              {
+                "from": 2,
+                "to": 1,
+                "text": "error: HttpErrorResponse 404",
+                "reply": true
+              },
+              {
+                "from": 1,
+                "to": 1,
+                "text": "catchError"
+              },
+              {
+                "from": 1,
+                "to": 0,
+                "text": "throwError: error-Handler läuft",
+                "reply": true
+              },
+              {
+                "from": 0,
+                "to": 0,
+                "text": "Meldung zeigen"
+              }
             ]
           },
           "notes": "Folie: „Fehlerfall: catchError und handleError“.\n\nDas Sequenzdiagramm zeigt, was passiert, wenn das Backend einen Fehler meldet. Die Detailkomponente fragt beim „CustomerService“ den Kunden mit der ID 99 an. Diesen Kunden gibt es nicht. Der Service schickt die Anfrage über den „HttpClient“ an das Backend.\n\nDas Backend antwortet mit dem Status 404, also „nicht gefunden“. Der „HttpClient“ liefert deshalb keinen Wert über „next“, sondern meldet über „error“ ein Objekt vom Typ „HttpErrorResponse“. Darin stehen zum Beispiel der Status und eine Meldung.\n\nIm Service fängt der Operator „catchError“ den Fehler ab und ruft „handleError“ auf. Diese Methode baut eine verständliche Fehlermeldung und gibt sie mit „throwError“ weiter. In der Komponente läuft dann der Fehler-Handler von „subscribe“. Die Komponente zeigt eine Fehlermeldung an, statt endlos auf den Kunden zu warten."

@@ -102,10 +102,6 @@
          "sub": "<app-root></app-root>"
         },
         {
-         "label": "main.ts",
-         "sub": "bootstrapApplication(...)"
-        },
-        {
          "label": "app/",
          "vertical": true,
          "children": [
@@ -122,6 +118,10 @@
            "sub": "Styles"
           }
          ]
+        },
+        {
+         "label": "main.ts",
+         "sub": "bootstrapApplication(...)"
         }
        ]
       },
@@ -132,9 +132,9 @@
         "text": "startet"
        },
        {
-        "from": "main.ts",
+        "from": "app.component.ts",
         "to": "index.html",
-        "text": "füllt <app-root>",
+        "text": "selector",
         "accent": true
        },
        {
@@ -144,7 +144,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Wie die Dateien zusammenhängen“.\n\nDas Diagramm zeigt den Ordner „src“ eines neuen Projekts und die Verweise zwischen den Dateien. Die Pfeile zeigen, welche Datei welche andere benutzt. Die Datei „main.ts“ ist der Startpunkt. Sie ruft „bootstrapApplication“ mit der Klasse „AppComponent“ auf. Diese Klasse steht in „app.component.ts“.\n\nIn der Klasse steht im „selector“ der Name „app-root“. Angular sucht genau dieses Element in der Seite „index.html“ und setzt dort die Komponente ein. Das zeigt der orange Pfeil. Über „templateUrl“ verweist die Klasse auf ihr HTML-Template in „app.component.html“. Die CSS-Datei enthält das Aussehen nur für diese Komponente."
+     "notes": "Diagrammfolie „Wie die Dateien zusammenhängen“.\n\nDas Diagramm zeigt den Ordner „src“ eines neuen Projekts und die Verweise zwischen den Dateien. Die Pfeile zeigen, welche Datei welche andere benutzt. Die Datei „main.ts“ ist der Startpunkt. Sie ruft „bootstrapApplication“ mit der Klasse „AppComponent“ auf. Diese Klasse steht in „app.component.ts“.\n\nIn der Klasse steht im „selector“ der Name „app-root“. Angular sucht genau dieses Element in der Seite „index.html“ und setzt dort die Komponente ein. Das zeigt der orange Pfeil von der Klasse zur Seite. Über „templateUrl“ verweist die Klasse auf ihr HTML-Template in „app.component.html“. Die CSS-Datei enthält das Aussehen nur für diese Komponente."
     }
    ]
   },
@@ -179,7 +179,7 @@
        {
         "from": 1,
         "to": 2,
-        "text": "bootstrapApplication(AppComponent)"
+        "text": "bootstrapApplication()"
        },
        {
         "from": 2,
@@ -209,7 +209,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Ablauf beim Start der Anwendung“.\n\nDas ist ein Sequenzdiagramm. Oben stehen die Beteiligten. Die Pfeile darunter sind Aufrufe in zeitlicher Reihenfolge von oben nach unten. Zuerst lädt der Browser die Seite „index.html“. Darin steht noch nichts außer dem leeren Element „<app-root>“. Dann führt der Browser das Skript aus, das aus „main.ts“ gebaut wurde.\n\n„main.ts“ ruft „bootstrapApplication“ mit der „AppComponent“ auf. Angular registriert zuerst die „providers“, also die Dienste aus dem zweiten Parameter. Dann sucht Angular in der Seite das Element, das zum „selector“ „app-root“ passt. Angular erzeugt ein Objekt der Klasse „AppComponent“ und zeigt das Template der Komponente in diesem Element an.\n\nZum Schluss ist das Versprechen, englisch „Promise“, erfüllt. Die gestrichelte Linie ist eine Antwort und kein neuer Aufruf. Wenn beim Start ein Fehler passiert, landet er im „catch“ in „main.ts“."
+     "notes": "Diagrammfolie „Ablauf beim Start der Anwendung“.\n\nDas ist ein Sequenzdiagramm. Oben stehen die Beteiligten. Die Pfeile darunter sind Aufrufe in zeitlicher Reihenfolge von oben nach unten. Zuerst lädt der Browser die Seite „index.html“. Darin steht noch nichts außer dem leeren Element „<app-root>“. Dann führt der Browser das Skript aus, das aus „main.ts“ gebaut wurde.\n\n„main.ts“ ruft „bootstrapApplication“ mit der „AppComponent“ als erstem Parameter auf. Angular registriert zuerst die „providers“, also die Dienste aus dem zweiten Parameter. Dann sucht Angular in der Seite das Element, das zum „selector“ „app-root“ passt. Angular erzeugt ein Objekt der Klasse „AppComponent“ und zeigt das Template der Komponente in diesem Element an.\n\nZum Schluss ist das Versprechen, englisch „Promise“, erfüllt. Die gestrichelte Linie ist eine Antwort und kein neuer Aufruf. Wenn beim Start ein Fehler passiert, landet er im „catch“ in „main.ts“."
     }
    ]
   },
@@ -225,17 +225,13 @@
       "kind": "composition",
       "root": {
        "label": "CustomerDetailsComponent",
-       "sub": "selector: 'customer-details'",
        "children": [
         {
          "label": "Klasse (.ts)",
          "vertical": true,
          "children": [
           {
-           "label": "customer().firstname"
-          },
-          {
-           "label": "customer().imageUrl"
+           "label": "customer() – Vorname, Bild"
           },
           {
            "label": "save()"
@@ -250,10 +246,7 @@
          "vertical": true,
          "children": [
           {
-           "label": "<p>{{ ... }}</p>"
-          },
-          {
-           "label": "<img [src]=\"...\">"
+           "label": "{{ customer().firstname }}  <img [src]=\"...\">"
           },
           {
            "label": "<button (click)=\"save()\">"
@@ -267,14 +260,9 @@
       },
       "links": [
        {
-        "from": "customer().firstname",
-        "to": "<p>{{ ... }}</p>",
-        "text": "{{ }}"
-       },
-       {
-        "from": "customer().imageUrl",
-        "to": "<img [src]=\"...\">",
-        "text": "[src]"
+        "from": "customer() – Vorname, Bild",
+        "to": "{{ customer().firstname }}  <img [src]=\"...\">",
+        "text": "{{ }} [ ]"
        },
        {
         "from": "<button (click)=\"save()\">",
@@ -290,7 +278,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Data Binding: Klasse und Template“.\n\nEine Komponente besteht aus der Klasse links und dem Template rechts. „Data Binding“ heißt Datenbindung: Angular hält beide Seiten automatisch auf demselben Stand. Die grünen Pfeile zeigen die Richtung von der Klasse in das Template. Mit doppelten geschweiften Klammern wird ein Wert als Text angezeigt, hier der Vorname des Kunden. Mit eckigen Klammern wird eine Eigenschaft eines HTML-Elements gesetzt, hier die Bildadresse „src“.\n\nDer orange Pfeil zeigt die Gegenrichtung: Ein Klick im Template ruft mit runden Klammern eine Methode der Klasse auf. Der gestrichelte Pfeil steht für „ngModel“ mit eckigen und runden Klammern zusammen. Das wirkt in beide Richtungen: Der Wert aus der Klasse steht im Eingabefeld, und eine Eingabe ändert sofort das Feld in der Klasse. Dafür muss die Komponente das „FormsModule“ importieren.\n\nDie Methode „save“ ist ein Beispiel und nicht Teil der Übung."
+     "notes": "Diagrammfolie „Data Binding: Klasse und Template“.\n\nEine Komponente besteht aus der Klasse links und dem Template rechts. „Data Binding“ heißt Datenbindung: Angular hält beide Seiten automatisch auf demselben Stand. Der grüne Pfeil oben zeigt die Richtung von der Klasse in das Template. Mit doppelten geschweiften Klammern wird ein Wert als Text angezeigt, hier der Vorname des Kunden. Mit eckigen Klammern wird eine Eigenschaft eines HTML-Elements gesetzt, hier die Bildadresse „src“.\n\nDer orange Pfeil zeigt die Gegenrichtung: Ein Klick im Template ruft mit runden Klammern eine Methode der Klasse auf. Der gestrichelte Pfeil steht für „ngModel“ mit eckigen und runden Klammern zusammen. Das wirkt in beide Richtungen: Der Wert aus der Klasse steht im Eingabefeld, und eine Eingabe ändert sofort das Feld in der Klasse. Dafür muss die Komponente das „FormsModule“ importieren.\n\nDie Methode „save“ ist ein Beispiel und nicht Teil der Übung."
     }
    ]
   },
@@ -348,7 +336,7 @@
    "slides": [
     {
      "type": "diagram",
-     "title": "Input: Daten von der Eltern- zur Kind-Komponente",
+     "title": "Input: Daten von Eltern zu Kind",
      "caption": "[customers] im Template der AppComponent schreibt in das input() der CustomerListComponent.",
      "diagram": {
       "kind": "composition",
@@ -388,7 +376,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Input: Daten von der Eltern- zur Kind-Komponente“.\n\nDie „AppComponent“ ist die Eltern-Komponente. Sie hat das Feld „customerMockList“ mit allen Kunden. Die Kundenliste ist die Kind-Komponente. Sie hat ein „input“, also einen Eingang, mit dem Namen „customers“.\n\nIm Template der Eltern-Komponente steht beim Element „<customer-list>“ der Name „customers“ in eckigen Klammern. Das ist ein „Property Binding“: Angular schreibt den Wert von „customerMockList“ in den Eingang der Kind-Komponente. Das zeigt der waagerechte Pfeil. Die Kind-Komponente liest den Eingang wie eine Funktion, also mit runden Klammern, und zeigt die Liste mit „@for“ an.\n\nDie Daten fließen nur in diese eine Richtung, von oben nach unten. Ändert sich das Feld in der Eltern-Komponente, bekommt die Kind-Komponente automatisch den neuen Wert."
+     "notes": "Diagrammfolie „Input: Daten von Eltern zu Kind“.\n\nDie „AppComponent“ ist die Eltern-Komponente. Sie hat das Feld „customerMockList“ mit allen Kunden. Die Kundenliste ist die Kind-Komponente. Sie hat ein „input“, also einen Eingang, mit dem Namen „customers“.\n\nIm Template der Eltern-Komponente steht beim Element „<customer-list>“ der Name „customers“ in eckigen Klammern. Das ist ein „Property Binding“: Angular schreibt den Wert von „customerMockList“ in den Eingang der Kind-Komponente. Das zeigt der waagerechte Pfeil. Die Kind-Komponente liest den Eingang wie eine Funktion, also mit runden Klammern, und zeigt die Liste mit „@for“ an.\n\nDie Daten fließen nur in diese eine Richtung, von oben nach unten. Ändert sich das Feld in der Eltern-Komponente, bekommt die Kind-Komponente automatisch den neuen Wert."
     }
    ]
   },
@@ -404,20 +392,20 @@
       "kind": "sequence",
       "actors": [
        "Browser (<li>)",
-       "CustomerListComponent",
+       "CustomerList",
        "AppComponent",
-       "CustomerDetailsComponent"
+       "CustomerDetails"
       ],
       "steps": [
        {
         "from": 0,
         "to": 1,
-        "text": "(click) → listItemClicked($event, customer)"
+        "text": "(click): listItemClicked(...)"
        },
        {
         "from": 1,
         "to": 1,
-        "text": "selectedCustomer.set(customer)"
+        "text": "Auswahl merken"
        },
        {
         "from": 1,
@@ -427,17 +415,17 @@
        {
         "from": 2,
         "to": 2,
-        "text": "newCustomerSelected($event)"
+        "text": "newCustomerSelected()"
        },
        {
         "from": 2,
         "to": 2,
-        "text": "selectedCustomer.set(customer)"
+        "text": "Signal setzen"
        },
        {
         "from": 2,
         "to": 3,
-        "text": "[customer]=\"selectedCustomer()\" – neuer Wert"
+        "text": "[customer]: neuer Wert"
        },
        {
         "from": 3,
@@ -457,7 +445,7 @@
    "slides": [
     {
      "type": "diagram",
-     "title": "Theorie: Datenfluss zwischen Container und Darstellung",
+     "title": "Theorie: Datenfluss im Container-Muster",
      "caption": "Nur der Container kennt den Service; Filter und Liste kennen nur input() und output().",
      "diagram": {
       "kind": "composition",
@@ -493,7 +481,7 @@
        }
       ]
      },
-     "notes": "Diagrammfolie „Theorie: Datenfluss zwischen Container und Darstellung“.\n\nDas Diagramm zeigt das Muster aus dem Theorieteil an einem Beispiel. Der große Kasten ist die Container-Komponente „CustomerPageComponent“. Nur sie holt sich den „CustomerService“ mit „inject“. Darin stehen zwei Darstellungskomponenten, der Filter und die Liste.\n\nWenn jemand im Filter tippt, meldet der Filter den neuen Text über sein Output „changed“ nach oben. Das zeigt der orange Pfeil. Der Container speichert den Text im Signal „filterText“. Ein „computed“, also ein berechneter Wert, bildet daraus die gefilterte Kundenliste. Diese gibt der Container über den Input „customers“ an die Liste weiter. Den aktuellen Text gibt der Container außerdem über den Input „value“ an den Filter zurück; dieser Pfeil ist der Übersicht halber nicht gezeichnet.\n\nFilter und Liste wissen nichts voneinander und nichts vom Service. Darum kann man sie leicht wiederverwenden und testen."
+     "notes": "Diagrammfolie „Theorie: Datenfluss im Container-Muster“.\n\nDas Diagramm zeigt das Muster aus dem Theorieteil an einem Beispiel. Der große Kasten ist die Container-Komponente „CustomerPageComponent“. Nur sie holt sich den „CustomerService“ mit „inject“. Darin stehen zwei Darstellungskomponenten, der Filter und die Liste.\n\nWenn jemand im Filter tippt, meldet der Filter den neuen Text über sein Output „changed“ nach oben. Das zeigt der orange Pfeil von der Klasse zur Seite. Der Container speichert den Text im Signal „filterText“. Ein „computed“, also ein berechneter Wert, bildet daraus die gefilterte Kundenliste. Diese gibt der Container über den Input „customers“ an die Liste weiter. Den aktuellen Text gibt der Container außerdem über den Input „value“ an den Filter zurück; dieser Pfeil ist der Übersicht halber nicht gezeichnet.\n\nFilter und Liste wissen nichts voneinander und nichts vom Service. Darum kann man sie leicht wiederverwenden und testen."
     }
    ]
   },
@@ -693,13 +681,13 @@
     {
      "type": "diagram",
      "title": "Ablauf: Lebenszyklus einer Kind-Komponente",
-     "caption": "Am Beispiel CustomerDetailsComponent: erst erzeugen, dann Inputs, dann ngOnInit – am Ende ngOnDestroy.",
+     "caption": "Erst erzeugen, dann Inputs setzen, dann ngOnInit – zum Schluss ngOnDestroy.",
      "diagram": {
       "kind": "sequence",
       "actors": [
        "AppComponent (Eltern)",
        "Angular",
-       "CustomerDetailsComponent",
+       "CustomerDetails",
        "DOM"
       ],
       "steps": [
@@ -784,7 +772,7 @@
        {
         "from": 1,
         "to": 2,
-        "text": "transform(lastOrderDate, 'mediumDate')"
+        "text": "transform(date, 'mediumDate')"
        },
        {
         "from": 2,
@@ -800,12 +788,12 @@
        {
         "from": 0,
         "to": 1,
-        "text": "[class.active]=\"lastOrderDate | currentActiveCustomers:5\""
+        "text": "[class.active] … currentActiveCustomers:5"
        },
        {
         "from": 1,
         "to": 3,
-        "text": "transform(lastOrderDate, 5)"
+        "text": "transform(date, 5)"
        },
        {
         "from": 3,

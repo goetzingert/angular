@@ -273,8 +273,8 @@
         },
         {
           "type": "diagram",
-          "title": "Wer stellt den CustomerStore bereit, wer nutzt ihn?",
-          "caption": "Eine Store-Instanz im Root-Injector; die Liste im <router-outlet> holt sie mit inject(), die Kinder bekommen nur Inputs.",
+          "title": "Wer stellt den CustomerStore bereit?",
+          "caption": "Eine Store-Instanz im Root-Injector; die Liste im <router-outlet> holt sie sich mit inject().",
           "diagram": {
             "kind": "composition",
             "root": {
@@ -338,7 +338,7 @@
               }
             ]
           },
-          "notes": "Folie: „Wer stellt den CustomerStore bereit, wer nutzt ihn?“.\n\nDas Diagramm zeigt links den Komponentenbaum und rechts den „Root-Injector“. Der Root-Injector ist der oberste Behälter für Services in der Anwendung. Weil der Store „providedIn: root“ hat, legt Angular dort genau eine Instanz an, sobald sie zum ersten Mal gebraucht wird.\n\nLinks steht die „AppComponent“ mit dem „router-outlet“, also dem Platzhalter für die aktuelle Seite. Bei der Adresse „/customer“ zeigt der Router dort die „CustomerListComponent“. Sie holt sich mit „inject“ den Store, das zeigt der orange Pfeil.\n\nDer Store holt sich wiederum den „CustomerService“, und der Service benutzt den „HttpClient“, um die Kunden vom Server zu laden. Die Abhängigkeiten zeigen also nur in eine Richtung: von der Komponente zum Store, vom Store zum Service. Die Kind-Komponenten der Liste, also Filter und Listeneinträge, kennen den Store nicht. Sie bekommen ihre Daten über Inputs."
+          "notes": "Folie: „Wer stellt den CustomerStore bereit?“.\n\nDas Diagramm zeigt links den Komponentenbaum und rechts den „Root-Injector“. Der Root-Injector ist der oberste Behälter für Services in der Anwendung. Weil der Store „providedIn: root“ hat, legt Angular dort genau eine Instanz an, sobald sie zum ersten Mal gebraucht wird.\n\nLinks steht die „AppComponent“ mit dem „router-outlet“, also dem Platzhalter für die aktuelle Seite. Bei der Adresse „/customer“ zeigt der Router dort die „CustomerListComponent“. Sie holt sich mit „inject“ den Store, das zeigt der orange Pfeil.\n\nDer Store holt sich wiederum den „CustomerService“, und der Service benutzt den „HttpClient“, um die Kunden vom Server zu laden. Die Abhängigkeiten zeigen also nur in eine Richtung: von der Komponente zum Store, vom Store zum Service. Die Kind-Komponenten der Liste, also Filter und Listeneinträge, kennen den Store nicht. Sie bekommen ihre Daten über Inputs."
         },
         {
           "type": "content",
@@ -473,7 +473,7 @@
               {
                 "from": 3,
                 "to": 3,
-                "text": "computed rechnet jetzt neu"
+                "text": "neu berechnen"
               },
               {
                 "from": 3,
@@ -484,7 +484,7 @@
               {
                 "from": 2,
                 "to": 2,
-                "text": "@for zeigt neue <li>"
+                "text": "@for: neue <li>"
               }
             ]
           },
@@ -513,22 +513,17 @@
               {
                 "from": 0,
                 "to": 1,
-                "text": "URL /customer: Komponente erzeugen"
-              },
-              {
-                "from": 1,
-                "to": 1,
-                "text": "ngOnInit()"
+                "text": "/customer: erzeugen"
               },
               {
                 "from": 1,
                 "to": 2,
-                "text": "store.load()"
+                "text": "ngOnInit: store.load()"
               },
               {
                 "from": 2,
                 "to": 2,
-                "text": "_loading.set(true)"
+                "text": "_loading: true"
               },
               {
                 "from": 2,
@@ -555,7 +550,12 @@
               {
                 "from": 2,
                 "to": 2,
-                "text": "_customers.set(...), _loading.set(false)"
+                "text": "_customers.set()"
+              },
+              {
+                "from": 2,
+                "to": 2,
+                "text": "_loading: false"
               },
               {
                 "from": 2,
@@ -565,7 +565,7 @@
               }
             ]
           },
-          "notes": "Folie: „Sequenz: Kunden laden mit store.load()“.\n\nDieses Sequenzdiagramm zeigt das Laden der Kunden. Erstens: Der Router erkennt die Adresse „/customer“ und erzeugt die „CustomerListComponent“. Zweitens: Angular ruft ihre Methode „ngOnInit“ auf. Drittens: Darin ruft die Komponente „store.load“ auf.\n\nViertens: Der Store setzt den Merker „lädt gerade“ auf „true“. Die Liste zeigt jetzt „Lade Kunden“. Fünftens: Der Store ruft „getAll“ im „CustomerService“ auf. Sechstens: Der Service schickt mit dem „HttpClient“ eine Anfrage an die Adresse „api/customer“.\n\nSiebtens: Die Antwort des Servers kommt zurück. Achtens: Der Service wandelt sie in eine Liste von Kunden um, und der Store bekommt sie über „firstValueFrom“ als Ergebnis seines „await“. Neuntens: Der Store setzt die Kundenliste und schaltet den Merker wieder aus. Zehntens: Das Template der Liste liest die neuen Werte und zeigt die Kunden an. Die gestrichelten Pfeile sind Antworten."
+          "notes": "Folie: „Sequenz: Kunden laden mit store.load()“.\n\nDieses Sequenzdiagramm zeigt das Laden der Kunden. Erstens: Der Router erkennt die Adresse „/customer“ und erzeugt die „CustomerListComponent“. Zweitens: Angular ruft ihre Methode „ngOnInit“ auf, und darin ruft die Komponente „store.load“ auf. Drittens: Der Store setzt den Merker „lädt gerade“ auf „true“. Die Liste zeigt jetzt „Lade Kunden“.\n\nViertens: Der Store ruft „getAll“ im „CustomerService“ auf. Fünftens: Der Service schickt mit dem „HttpClient“ eine Anfrage an die Adresse „api/customer“. Sechstens: Die Antwort des Servers kommt zurück. Siebtens: Der Service wandelt sie in eine Liste von Kunden um, und der Store bekommt sie über „firstValueFrom“ als Ergebnis seines „await“.\n\nAchtens: Der Store setzt die Kundenliste. Neuntens: Er schaltet den Merker „lädt gerade“ wieder aus. Zehntens: Das Template der Liste liest die neuen Werte und zeigt die Kunden an. Die gestrichelten Pfeile sind Antworten."
         },
         {
           "type": "content",
@@ -948,7 +948,7 @@
               {
                 "from": 2,
                 "to": 2,
-                "text": "filter() hat neuen Wert"
+                "text": "neuer Wert"
               },
               {
                 "from": 2,
